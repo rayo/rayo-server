@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+	targetNamespace="urn:xmpp:ozone:ask:1"
+	xmlns:tns="urn:xmpp:ozone:ask:1" 
+	elementFormDefault="qualified">
+
+	<element name="ask" type="tns:askType" />
+
+	<complexType name="askType">
+		<sequence>
+			<element name="prompt" type="tns:promptItemsType" />
+			<element name="choices" type="tns:choicesType" />
+		</sequence>
+		<attribute name="bargein" type="boolean" />
+		<attribute name="min-confidence" type="tns:percentageType" />
+		<attribute name="mode" type="tns:choicesModeType" />
+		<attribute name="recognizer" type="string" />
+		<attribute name="voice" type="string" />
+		<attribute name="terminator" type="string" />		
+		<attribute name="timeout" type="float" />		
+	</complexType>
+
+	<!-- Utility Types -->
+
+	<complexType name="promptItemsType">
+		<choice minOccurs="1" maxOccurs="unbounded">
+			<element name="audio" type="tns:audioReferenceType" />
+			<any namespace="http://www.w3.org/2001/10/synthesis" />
+		</choice>
+	</complexType>
+
+	<complexType name="audioReferenceType">
+		<attribute name="url" type="anyURI" />
+	</complexType>
+
+	<complexType name="choicesType" mixed="true">
+		<attribute name="content-type" type="string" />
+		<attribute name="url" type="anyURI" />
+	</complexType>
+	
+	<simpleType name="percentageType">
+		<restriction base="int">
+			<minInclusive value="0" />
+			<maxInclusive value="100" />
+		</restriction>
+	</simpleType>
+
+	<simpleType name="choicesModeType">
+		<restriction base="NCName">
+			<enumeration value="DTMF" />
+			<enumeration value="SPEECH" />
+			<enumeration value="ANY" />
+		</restriction>
+	</simpleType>
+	
+</schema>

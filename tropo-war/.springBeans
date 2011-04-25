@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beansProjectDescription>
+	<version>1</version>
+	<pluginVersion><![CDATA[2.5.2.201101081000-RELEASE]]></pluginVersion>
+	<configSuffixes>
+		<configSuffix><![CDATA[xml]]></configSuffix>
+	</configSuffixes>
+	<enableImports><![CDATA[false]]></enableImports>
+	<configs>
+		<config>src/main/webapp/WEB-INF/ozone-xmpp.xml</config>
+		<config>src/main/webapp/WEB-INF/tropo-context.xml</config>
+	</configs>
+	<configSets>
+		<configSet>
+			<name><![CDATA[tropo-war]]></name>
+			<allowBeanDefinitionOverriding>true</allowBeanDefinitionOverriding>
+			<incomplete>true</incomplete>
+			<configs>
+				<config>src/main/webapp/WEB-INF/ozone-xmpp.xml</config>
+				<config>src/main/webapp/WEB-INF/tropo-context.xml</config>
+			</configs>
+		</configSet>
+	</configSets>
+</beansProjectDescription>

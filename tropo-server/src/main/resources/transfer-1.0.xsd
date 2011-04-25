@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+	targetNamespace="urn:xmpp:ozone:say:1"
+	xmlns:tns="urn:xmpp:ozone:say:1" 
+	elementFormDefault="qualified">
+
+	<element name="transfer" type="tns:transferType" />
+
+	<complexType name="transferType">
+		<sequence>
+			<choice minOccurs="1" maxOccurs="unbounded">
+				<element name="to" type="anyURI" />
+			</choice>
+			<choice minOccurs="1" maxOccurs="unbounded">
+				<element name="audio" type="tns:audioReferenceType" />
+				<any namespace="http://www.w3.org/2001/10/synthesis" />
+			</choice>
+			<element name="header" type="tns:headerType" minOccurs="0" maxOccurs="unbounded" />
+		</sequence>
+		<attribute name="to" type="anyURI" use="optional" />
+		<attribute name="from" type="anyURI" use="optional" />
+		<attribute name="timeout" type="float" use="optional" />
+		<attribute name="answer-on-media" type="boolean" use="optional" />
+		<attribute name="terminator" type="string" use="optional" />
+	</complexType>
+
+	<complexType name="audioReferenceType">
+		<attribute name="url" type="anyURI" />
+	</complexType>
+
+	<complexType name="headerType" mixed="true">
+		<attribute name="name" type="anyURI" />
+	</complexType>
+	
+</schema>

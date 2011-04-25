@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+	targetNamespace="urn:xmpp:ozone:1" 
+	xmlns:tns="urn:xmpp:ozone:1" 
+	elementFormDefault="qualified">
+
+	<!-- Events -->
+	
+	<element name="offer" type="tns:offerType" />
+	<element name="info" type="tns:infoType" />
+	<element name="end" type="tns:endType" />
+
+	<complexType name="offerType">
+		<sequence>
+			<element name="header" type="tns:headerType" minOccurs="0" maxOccurs="unbounded" />
+		</sequence>
+		<attribute name="callId" type="anyURI" use="required" />
+		<attribute name="timestamp" type="dateTime" use="required" />
+		<attribute name="to" type="anyURI" use="required" />
+		<attribute name="from" type="anyURI" use="optional" />
+	</complexType>
+
+	<complexType name="infoType">
+		<choice>
+			<element name="answer" type="tns:empty" />
+			<element name="ring" type="tns:empty" />
+		</choice>
+	</complexType>
+
+	<complexType name="endType">
+		<sequence>
+			<choice>
+				<element name="hangup" type="tns:empty" />
+				<element name="timeout" type="tns:empty" />
+				<element name="busy" type="tns:empty" />
+				<element name="reject" type="tns:empty" />
+				<element name="error" type="tns:endErrorType" />
+			</choice>
+			<element name="header" type="tns:headerType" minOccurs="0" maxOccurs="unbounded" />
+		</sequence>
+	</complexType>
+
+	<complexType name="endErrorType" mixed="true">
+		<attribute name="code" type="int" />
+	</complexType>
+
+	<!-- Commands -->
+
+	<element name="bind" type="tns:empty" />
+	<element name="unbind" type="tns:empty" />
+	
+	<element name="answer" type="tns:answerType" />
+	<element name="redirect" type="tns:redirectType" />
+	<element name="reject" type="tns:rejectType" />
+	<element name="hangup" type="tns:hangupType" />
+	<element name="call" type="tns:callType" />
+
+	<complexType name="answerType">
+		<sequence>
+			<element name="header" type="tns:headerType" minOccurs="0" maxOccurs="unbounded" />
+		</sequence>
+	</complexType>
+
+	<complexType name="redirectType">
+		<sequence>
+			<element name="header" type="tns:headerType" minOccurs="0" maxOccurs="unbounded" />
+		</sequence>
+		<attribute name="to" type="anyURI" />
+	</complexType>
+
+	<complexType name="rejectType" mixed="true">
+		<sequence>
+			<element name="header" type="tns:headerType" minOccurs="0" maxOccurs="unbounded" />
+			<choice>
+				<element name="declined" type="tns:empty" />
+				<element name="busy" type="tns:empty" />
+				<element name="error" type="tns:empty" />
+			</choice>
+		</sequence>
+	</complexType>
+
+	<complexType name="hangupType">
+		<sequence>
+			<element name="header" type="tns:headerType" minOccurs="0" maxOccurs="unbounded" />
+		</sequence>
+	</complexType>
+
+	<complexType name="callType">
+		<sequence>
+			<element name="header" type="tns:headerType" minOccurs="0" maxOccurs="unbounded" />
+			<element name="recording" type="tns:recordingType" minOccurs="0" maxOccurs="1" />
+		</sequence>		
+		<attribute name="jid" type="string" use="optional">
+			<annotation>
+				<documentation>
+					Required when used as an IQ result
+				</documentation>
+			</annotation>
+		</attribute>
+		<attribute name="to" type="anyURI" use="required" />
+		<attribute name="from" type="anyURI" use="optional" />
+		<attribute name="timeout" type="float" use="optional" />
+	</complexType>
+	
+	<!-- Utility Types -->
+
+	<complexType name="recordingType">
+		<sequence>
+			<element name="credentials" type="tns:credentialsType" minOccurs="0" />
+		</sequence>
+		<attribute name="uri" type="anyURI" use="required" />
+		<attribute name="format" type="string" use="optional" />
+		<attribute name="httpMethod" type="tns:httpMethodType" use="optional" />
+	</complexType>
+
+	<complexType name="credentialsType">
+		<attribute name="username" type="string" use="required" />
+		<attribute name="password" type="string" use="required" />
+	</complexType>
+
+	<simpleType name="httpMethodType">
+		<restriction base="NCName">
+			<enumeration value="PUT" />
+			<enumeration value="POST" />
+		</restriction>
+	</simpleType>
+
+	<complexType name="headerType" mixed="true">
+		<attribute name="name" type="anyURI" />
+	</complexType>
+
+	<simpleType name="empty">
+		<restriction base="string">
+			<enumeration value='' />
+		</restriction>
+	</simpleType>
+
+</schema>

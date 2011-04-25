@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+	targetNamespace="urn:xmpp:ozone:say:1"
+	xmlns:tns="urn:xmpp:ozone:say:1" 
+	elementFormDefault="qualified">
+
+	<element name="say" type="tns:sayType" />
+	<element name="complete" />
+	<element name="stop" />
+	<element name="pause" />
+	<element name="resume" />
+	
+	<complexType name="sayType">
+		<choice minOccurs="1" maxOccurs="unbounded">
+			<element name="audio" type="tns:audioReferenceType" />
+			<any namespace="http://www.w3.org/2001/10/synthesis" />
+		</choice>
+		<attribute name="id" type="string" />
+		<attribute name="voice" type="string" />
+	</complexType>
+
+	<complexType name="audioReferenceType">
+		<attribute name="url" type="anyURI" />
+	</complexType>
+
+</schema>
