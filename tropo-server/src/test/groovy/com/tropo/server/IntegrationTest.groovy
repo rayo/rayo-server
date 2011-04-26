@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
 
 import com.tropo.core.CallCommand;
+import com.tropo.core.CallEvent;
 import com.tropo.core.CallRejectReason
 import com.tropo.core.EndEvent
 import com.tropo.core.Offer
@@ -52,6 +53,7 @@ import com.voxeo.moho.MediaService;
 import com.tropo.server.test.MockApplicationContext;
 import com.tropo.server.test.MockCall
 import com.tropo.server.test.MockMediaService;
+import com.voxeo.moho.event.CallCompleteEvent;
 import com.voxeo.moho.event.OutputCompleteEvent;
 import com.voxeo.moho.event.OutputCompleteEvent.Cause;
 import com.voxeo.moho.media.Output;
@@ -107,6 +109,9 @@ public class IntegrationTest {
     
     @After
     public void after() {
+        
+        // Give the Call Manager time to cleanup
+        sleep(100)
         
         // Make sure the registry is empty
         assertTrue calls.isEmpty()
@@ -319,8 +324,8 @@ public class IntegrationTest {
     * shutdown consisting on {@link VerbCompleteEvent}s followed by the
     * call's {@link EndEvent}
     */
-   @Test
-   public void hangupDuringSay() throws InterruptedException {
+    @Test
+    public void hangupDuringSay() throws InterruptedException {
    
        // Mock MediaService
        mohoCall.mediaService = [
@@ -354,6 +359,87 @@ public class IntegrationTest {
 
    }
 
+   /**
+   * Ensure that the actor stop producing {@link CallEvent}s after 
+   * it's been stopped.
+   */
+   @Test
+   public void noMoreEventsAfterStop() throws InterruptedException {
+  
+      // Mock MediaService
+      mohoCall.mediaService = [
+          output: { OutputCommand command ->
+              mohoCall.dispatch(new OutputCompleteEvent(mohoCall, Cause.END))
+              mohoCall.dispatch(new OutputCompleteEvent(mohoCall, Cause.END))
+              return null
+          }
+      ] as MediaService
+      
+      def say = new Say([
+          promptItems:new PromptItems([new SsmlItem("Hello World")])
+      ])
+
+      // Start Say
+      callActor.command(say, { messageQueue.add it } as ResponseHandler)
+  
+      // We should get a response from the say command
+      Response response = poll()
+      assertTrue response.success
+
+      // We should get a say complete event
+      SayCompleteEvent sayComplete = poll()
+      assertEquals SayCompleteEvent.Reason.SUCCESS, sayComplete.reason
+
+      // Wait to make sure the second event never arrives
+      assertNull messageQueue.poll(1, TimeUnit.SECONDS)
+      
+      mohoCall.disconnect()
+      
+      // We should get an end event
+      EndEvent end = poll()
+      assertEquals Reason.HANGUP, end.reason
+
+    }
+   
+   
+    /**
+    * Ensure that a {@link CallCompleteEvent} with reason ERROR causes verbs to
+    * be stopped but their events ignored.
+    */
+    @Test
+    public void completeWithErrorDuringSay() throws InterruptedException {
+  
+      // Mock MediaService
+      mohoCall.mediaService = [
+          output: { OutputCommand command ->
+              return [
+                  stop:{ mohoCall.dispatch(new OutputCompleteEvent(mohoCall, Cause.CANCEL)) }
+              ] as Output
+          }
+      ] as MediaService
+      
+      def say = new Say([
+          promptItems:new PromptItems([new SsmlItem("Hello World")])
+      ])
+
+      // Start Say
+      callActor.command(say, { messageQueue.add it } as ResponseHandler)
+  
+      // We should get a response from the say command
+      Response response = poll()
+      assertTrue response.success
+
+      mohoCall.dispatch(new CallCompleteEvent(mohoCall, CallCompleteEvent.Cause.ERROR))
+
+      // We should get an end event
+      EndEvent end = poll()
+      assertEquals Reason.ERROR, end.reason
+
+      // Wait to make sure the complete event never arrives
+      assertNull messageQueue.poll(1, TimeUnit.SECONDS)
+
+    }
+   
     def poll = {
         messageQueue.poll(60, TimeUnit.SECONDS);
     }

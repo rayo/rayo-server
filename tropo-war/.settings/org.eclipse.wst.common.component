@@ -7,9 +7,6 @@
         <dependent-module deploy-path="/WEB-INF/lib" handle="module:/resource/tropo-server/tropo-server">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module deploy-path="/WEB-INF/lib" handle="module:/resource/vlib-core-12.2/vlib-core-12.2">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
         <dependent-module deploy-path="/WEB-INF/lib" handle="module:/resource/moho-api/moho-api">
             <dependency-type>uses</dependency-type>
         </dependent-module>

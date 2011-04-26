@@ -320,43 +320,48 @@ public class CallActor extends ReflectiveActor implements Observer {
 
     @com.voxeo.moho.State
     public void onJoinComplete(JoinCompleteEvent event) throws Exception {
-        if (event.getCause() == JoinCompleteEvent.Cause.JOINED && event.getParticipant() == null) {
-            fire(new AnswerEvent(myId()));
+        if(event.getSource().equals(call)) {
+            if (event.getCause() == JoinCompleteEvent.Cause.JOINED && event.getParticipant() == null) {
+                fire(new AnswerEvent(myId()));
+            }
         }
     }
 
     @com.voxeo.moho.State
     public void onRing(com.voxeo.moho.event.RingEvent event) throws Exception {
-        fire(new RingEvent(myId()));
+        if(event.getSource().equals(call)) {
+            fire(new RingEvent(myId()));
+        }
     }
 
     @com.voxeo.moho.State
     public void onCallComplete(CallCompleteEvent event) throws Exception {
-        Reason reason = null;
-        switch (event.getCause()) {
-        case BUSY:
-            reason = Reason.BUSY;
-            break;
-        case CANCEL:
-        case DISCONNECT:
-        case NEAR_END_DISCONNECT:
-            reason = Reason.HANGUP;
-            break;
-        case DECLINE:
-        case FORBIDDEN:
-            reason = Reason.REJECT;
-            break;
-        case ERROR:
-            reason = Reason.ERROR;
-            break;
-        case TIMEOUT:
-            reason = Reason.TIMEOUT;
-            break;
-        default:
-            throw new UnsupportedOperationException("Reason not handled: " + event.getCause());
+        if(event.getSource().equals(call)) {
+            Reason reason = null;
+            switch (event.getCause()) {
+            case BUSY:
+                reason = Reason.BUSY;
+                break;
+            case CANCEL:
+            case DISCONNECT:
+            case NEAR_END_DISCONNECT:
+                reason = Reason.HANGUP;
+                break;
+            case DECLINE:
+            case FORBIDDEN:
+                reason = Reason.REJECT;
+                break;
+            case ERROR:
+                reason = Reason.ERROR;
+                break;
+            case TIMEOUT:
+                reason = Reason.TIMEOUT;
+                break;
+            default:
+                throw new UnsupportedOperationException("Reason not handled: " + event.getCause());
+            }
+            end(reason);
         }
-
-        end(reason);
     }
 
     // Properties
@@ -375,11 +380,15 @@ public class CallActor extends ReflectiveActor implements Observer {
 
     private void end(EndEvent endEvent) {
         
-        // If the call ended in error then don't bother stopping 
-        // verbs as we're probably in a bad state anyways
+        // If the call ended in error then don't bother with a graceful
+        // shutdown. Just send the EndEvent, stop the actor and make a best 
+        // effort to end any active verbs.
         if(endEvent.getReason() == Reason.ERROR || verbs.isEmpty()) {
-            stop();
             fire(endEvent);
+            stop();
+            for(VerbHandler<?> handler : verbs.values()) {
+                handler.stop();
+            }
         }
         else {
             log.info("Call ended with active verbs [%s]", verbs.toString());

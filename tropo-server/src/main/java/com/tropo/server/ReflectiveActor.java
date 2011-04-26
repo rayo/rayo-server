@@ -92,8 +92,8 @@ public abstract class ReflectiveActor implements Actor, Callback<Object> {
         } catch (Exception e) {
             log.error("Uncaught exception processing command", e);
             //end(Reason.ERROR);
-            stop();
             preDeath(e);
+            stop();
         }
     }
 
@@ -154,8 +154,6 @@ public abstract class ReflectiveActor implements Actor, Callback<Object> {
 
     public void link(final ActorLink link) {
         fiber.add(new Disposable() {
-
-            @Override
             public void dispose() {
                 link.postStop();
             }
@@ -164,8 +162,10 @@ public abstract class ReflectiveActor implements Actor, Callback<Object> {
 
     @Override
     public synchronized void stop() {
-        running = false;
-        fiber.dispose();
+        if(running) {
+            running = false;
+            fiber.dispose();
+        }
     }
 
     @Override
@@ -188,15 +188,20 @@ public abstract class ReflectiveActor implements Actor, Callback<Object> {
     
     protected void fire(Object message) {
         
-        log.info("Event [%s]", message);
-        
-        for (EventHandler handler : eventHandlers) {
-            try {
-                handler.handle(message);
-            } catch (Exception e) {
-                log.error("Uncaught exception in event handler [event=%s]", message, e);
+        if(running) {
+            log.info("Event [%s]", message);
+            for (EventHandler handler : eventHandlers) {
+                try {
+                    handler.handle(message);
+                } catch (Exception e) {
+                    log.error("Uncaught exception in event handler [event=%s]", message, e);
+                }
             }
         }
+        else {
+            log.info("Actor is stopped. Ignoring Event [%s]", message);
+        }
+        
     }
     
     public void addEventHandler(EventHandler handler) {
