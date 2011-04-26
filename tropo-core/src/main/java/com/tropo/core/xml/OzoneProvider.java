@@ -82,10 +82,11 @@ public class OzoneProvider implements Provider {
             } else if (element.getName().equals("end")) {
                 return buildCallEnd(element);
             }
-            return null;
+            else {
+              throw new IllegalArgumentException("Element is not supported: " + element);
+            }
         } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            throw new IllegalStateException(e);
         }
     }
 
@@ -360,11 +361,13 @@ public class OzoneProvider implements Provider {
             } else if (object instanceof ConferenceCompleteEvent) {
                 createConferenceCompleteEvent(object, document);
             }
+            else {
+                throw new IllegalArgumentException("Type is not supported: " + object.getClass());
+            }
 
             return document.getRootElement();
         } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            throw new IllegalStateException(e);
         }
     }
 
