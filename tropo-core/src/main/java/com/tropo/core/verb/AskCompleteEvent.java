@@ -14,6 +14,8 @@ public class AskCompleteEvent extends VerbCompleteEvent {
     private String tag;
     private float confidence;
 
+    public AskCompleteEvent() {}
+    
     public AskCompleteEvent(Verb verb) {
         super(verb);
     }

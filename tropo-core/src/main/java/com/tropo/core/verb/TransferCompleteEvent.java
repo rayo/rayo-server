@@ -6,6 +6,8 @@ public class TransferCompleteEvent extends VerbCompleteEvent {
         SUCCESS, TIMEOUT, CANCEL, HANGUP, BUSY, REJECT, ERROR, STOPPED
     }
 
+    public TransferCompleteEvent() {}
+    
     public TransferCompleteEvent(Verb verb) {
         super(verb);
     }

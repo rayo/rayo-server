@@ -5,6 +5,8 @@ public abstract class VerbCompleteEvent extends AbstractVerbEvent {
     private String errorText;
     protected VerbCompleteReason reason;
 
+    public VerbCompleteEvent() {}
+    
     public VerbCompleteEvent(Verb verb) {
         super(verb);
     }

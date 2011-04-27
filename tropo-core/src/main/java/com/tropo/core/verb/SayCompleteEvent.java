@@ -6,6 +6,8 @@ public class SayCompleteEvent extends VerbCompleteEvent {
         SUCCESS, STOP, ERROR, HANGUP, TIMEOUT
     }
 
+    public SayCompleteEvent() {}
+    
     public SayCompleteEvent(Verb verb) {
         super(verb);
     }

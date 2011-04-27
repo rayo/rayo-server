@@ -84,6 +84,8 @@ public class OzoneProvider implements Provider {
                 return buildCallEnd(element);
             } else if (element.getName().equals("kick")) {
 				return buildKick(element);
+			} else if (element.getName().equals("complete")) {
+				return buildCompleteCommand(element);
 			}
             else {
               throw new IllegalArgumentException("Element is not supported: " + element);
@@ -295,6 +297,70 @@ public class OzoneProvider implements Provider {
 		return new KickCommand();		
 	}
 	
+	private Object buildCompleteCommand(Element element) throws URISyntaxException {
+		
+		if (element.getNamespaceURI().equals("urn:xmpp:ozone:say:1")) {
+			SayCompleteEvent sayComplete = new SayCompleteEvent();
+			if (element.attributeValue("reason") != null) {
+				sayComplete.setReason(SayCompleteEvent.Reason.valueOf(element.attributeValue("reason")));			
+			}
+			if (element.element("error") != null) {
+				sayComplete.setErrorText(element.elementText("error"));
+			}
+			return sayComplete;
+		} else if (element.getNamespaceURI().equals("urn:xmpp:ozone:ask:1")) {
+			AskCompleteEvent askComplete = new AskCompleteEvent();
+			if (element.attributeValue("reason") != null) {
+				askComplete.setReason(AskCompleteEvent.Reason.valueOf(element.attributeValue("reason")));			
+			}
+			if (element.element("error") != null) {
+				askComplete.setErrorText(element.elementText("error"));
+			}
+			if (element.attributeValue("concept") != null) {
+				askComplete.setConcept(element.attributeValue("concept"));			
+			}
+			if (element.attributeValue("interpretation") != null) {
+				askComplete.setInterpretation(element.attributeValue("interpretation"));			
+			}
+			if (element.attributeValue("nlsml") != null) {
+				askComplete.setNlsml(element.attributeValue("nlsml"));			
+			}
+			if (element.attributeValue("confidence") != null) {
+				askComplete.setConfidence(new Float(element.attributeValue("confidence")));			
+			}
+			if (element.attributeValue("tag") != null) {
+				askComplete.setTag(element.attributeValue("tag"));			
+			}
+			if (element.attributeValue("utterance") != null) {
+				askComplete.setUtterance(element.attributeValue("utterance"));			
+			}
+			
+			return askComplete;
+		} else if (element.getNamespaceURI().equals("urn:xmpp:ozone:transfer:1")) {
+			TransferCompleteEvent transferComplete = new TransferCompleteEvent();
+			if (element.attributeValue("reason") != null) {
+				transferComplete.setReason(TransferCompleteEvent.Reason.valueOf(element.attributeValue("reason")));			
+			}		
+			if (element.element("error") != null) {
+				transferComplete.setErrorText(element.elementText("error"));
+			}
+			
+			return transferComplete;
+		} else if (element.getNamespaceURI().equals("urn:xmpp:ozone:conference:1")) {
+			ConferenceCompleteEvent conferenceComplete = new ConferenceCompleteEvent();
+			if (element.attributeValue("reason") != null) {
+				conferenceComplete.setReason(ConferenceCompleteEvent.Reason.valueOf(element.attributeValue("reason")));			
+			}		
+			if (element.element("error") != null) {
+				conferenceComplete.setErrorText(element.elementText("error"));
+			}
+			
+			return conferenceComplete;
+		}
+		
+		return null;
+	}	
+
 	private PromptItems extractPromptItems(Element node) throws URISyntaxException {
 
 		PromptItems items = new PromptItems();
@@ -563,17 +629,31 @@ public class OzoneProvider implements Provider {
 
     private Document createAskCompleteEvent(Object object, Document document) throws Exception {
 
-        AskCompleteEvent askComplete = (AskCompleteEvent) object;
-        Element root = document.addElement(new QName("complete", new Namespace("", "urn:xmpp:ozone:ask:1")));
-        root.addAttribute("reason", askComplete.getReason().toString().toLowerCase());
-        root.addAttribute("confidence", Float.toString(askComplete.getConfidence()));
-        root.addElement("concept").setText(askComplete.getConcept());
-        root.addElement("interpretation").setText(askComplete.getInterpretation());
-        root.addElement("utterance").setText(askComplete.getUtterance());
-        root.addElement("nlsml").setText(askComplete.getNlsml());
-        root.addElement("tag").setText(askComplete.getTag());
-        
-        return document;
+		AskCompleteEvent askComplete = (AskCompleteEvent)object;
+		Element root = document.addElement(new QName("complete", new Namespace("","urn:xmpp:ozone:ask:1")));
+		if (askComplete.getReason() != null) {
+			root.addAttribute("reason", askComplete.getReason().toString());
+		}
+		if (askComplete.getConcept() != null) {
+			root.addAttribute("concept", askComplete.getConcept());
+		}
+		if (askComplete.getInterpretation() != null) {
+			root.addAttribute("interpretation", askComplete.getInterpretation());
+		}
+		if (askComplete.getNlsml() != null) {
+			root.addAttribute("nlsml",askComplete.getNlsml());
+		}
+		root.addAttribute("confidence", String.valueOf(askComplete.getConfidence()));
+		if (askComplete.getTag() != null) {
+			root.addAttribute("tag", askComplete.getTag());
+		}
+		if (askComplete.getUtterance() != null) {
+			root.addAttribute("utterance", askComplete.getUtterance());
+		}
+		if (askComplete.getErrorText() != null) {
+			root.addElement("error").setText(askComplete.getErrorText());
+		}
+		return document;
     }
 
     private Document createTransfer(Object object, Document document) throws Exception {
