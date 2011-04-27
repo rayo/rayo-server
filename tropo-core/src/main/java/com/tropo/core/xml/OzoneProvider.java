@@ -575,12 +575,21 @@ public class OzoneProvider implements Provider {
         return document;
     }
 
-    private Document createSayCompleteEvent(Object object, Document document) throws Exception {
-        SayCompleteEvent sayComplete = (SayCompleteEvent) object;
-        Element root = document.addElement(new QName("complete", new Namespace("", "urn:xmpp:ozone:say:1")));
-        root.addAttribute("reason", sayComplete.getReason().toString());
-        return document;
-    }
+	private Document createSayCompleteEvent(Object object, Document document) throws Exception {
+		
+		SayCompleteEvent sayComplete = (SayCompleteEvent)object;
+		Element root = document.addElement(new QName("complete", new Namespace("","urn:xmpp:ozone:say:1")));
+		
+		if (sayComplete.getReason() != null) {
+			root.addAttribute("reason", sayComplete.getReason().toString());
+		}
+		
+		if (sayComplete.getErrorText() != null) {
+			root.addElement("error").setText(sayComplete.getErrorText());
+		}		
+		
+		return document;
+	}
 
     private Document createAsk(Object object, Document document) throws Exception {
 
@@ -685,12 +694,20 @@ public class OzoneProvider implements Provider {
 		return document;
 	}
     
-    private Document createTransferCompleteEvent(Object object, Document document) {
-        TransferCompleteEvent tranferComplete = (TransferCompleteEvent) object;
-        Element root = document.addElement(new QName("complete", new Namespace("", "urn:xmpp:ozone:transfer:1")));
-        root.addAttribute("reason", tranferComplete.getReason().toString());
-        return document;
-    }
+	private Document createTransferCompleteEvent(Object object, Document document) throws Exception {
+		
+		TransferCompleteEvent transferComplete = (TransferCompleteEvent)object;
+		Element root = document.addElement(new QName("complete", new Namespace("","urn:xmpp:ozone:transfer:1")));
+		
+		if (transferComplete.getReason() != null) {
+			root.addAttribute("reason", transferComplete.getReason().toString());
+		}
+		
+		if (transferComplete.getErrorText() != null) {
+			root.addElement("error").setText(transferComplete.getErrorText());
+		}		
+		return document;
+	}
 
     private Document createConference(Object object, Document document) throws Exception {
 
@@ -710,12 +727,20 @@ public class OzoneProvider implements Provider {
         return document;
     }
     
-    private Document createConferenceCompleteEvent(Object object, Document document) {
-        ConferenceCompleteEvent conferenceComplete = (ConferenceCompleteEvent) object;
-        Element root = document.addElement(new QName("complete", new Namespace("", "urn:xmpp:ozone:conference:1")));
-        root.addAttribute("reason", conferenceComplete.getReason().toString());
-        return document;
-    }
+	private Document createConferenceCompleteEvent(Object object, Document document) throws Exception {
+		
+		ConferenceCompleteEvent conferenceComplete = (ConferenceCompleteEvent)object;
+		Element root = document.addElement(new QName("complete", new Namespace("","urn:xmpp:ozone:conference:1")));
+		
+		if (conferenceComplete.getReason() != null) {
+			root.addAttribute("reason", conferenceComplete.getReason().toString());
+		}
+		
+		if (conferenceComplete.getErrorText() != null) {
+			root.addElement("error").setText(conferenceComplete.getErrorText());
+		}		
+		return document;
+	}
     
 	private Document createKick(Object object, Document document) throws Exception {
 		
