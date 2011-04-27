@@ -33,6 +33,7 @@ import com.tropo.core.verb.ChoicesList;
 import com.tropo.core.verb.Conference;
 import com.tropo.core.verb.ConferenceCompleteEvent;
 import com.tropo.core.verb.InputMode;
+import com.tropo.core.verb.KickCommand;
 import com.tropo.core.verb.PauseCommand;
 import com.tropo.core.verb.PromptItem;
 import com.tropo.core.verb.PromptItems;
@@ -81,7 +82,9 @@ public class OzoneProvider implements Provider {
                 return buildCallInfo(element);
             } else if (element.getName().equals("end")) {
                 return buildCallEnd(element);
-            }
+            } else if (element.getName().equals("kick")) {
+				return buildKick(element);
+			}
             else {
               throw new IllegalArgumentException("Element is not supported: " + element);
             }
@@ -294,6 +297,11 @@ public class OzoneProvider implements Provider {
         return conference;
     }
 
+	private Object buildKick(Element element) throws URISyntaxException {
+		
+		return new KickCommand();		
+	}
+	
     private PromptItems extractPromptItems(Element node) throws URISyntaxException {
 
         PromptItems items = new PromptItems();
@@ -360,6 +368,8 @@ public class OzoneProvider implements Provider {
                 createConference(object, document);
             } else if (object instanceof ConferenceCompleteEvent) {
                 createConferenceCompleteEvent(object, document);
+            } else if (object instanceof KickCommand) {
+                createKick(object, document);
             }
             else {
                 throw new IllegalArgumentException("Type is not supported: " + object.getClass());
@@ -632,5 +642,10 @@ public class OzoneProvider implements Provider {
         root.addAttribute("reason", conferenceComplete.getReason().toString());
         return document;
     }
-
+    
+	private Document createKick(Object object, Document document) throws Exception {
+		
+		document.addElement(new QName("kick", new Namespace("","urn:xmpp:ozone:conference:1")));
+		return document;
+	}
 }
