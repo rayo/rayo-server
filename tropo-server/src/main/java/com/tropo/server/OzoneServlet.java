@@ -166,6 +166,8 @@ public class OzoneServlet extends XmppServlet {
             // Create empty result element
             final Element result = DocumentHelper.createElement("iq");
             result.addAttribute("type", "result");
+            result.addAttribute("to", request.getFrom().toString());
+            result.addAttribute("from", request.getTo().toString());
 
             // Resource Binding
             if (qname.equals(BIND_QNAME)) {
@@ -182,8 +184,11 @@ public class OzoneServlet extends XmppServlet {
             // Ozone Command
             } else if (qname.getNamespaceURI().startsWith("urn:xmpp:ozone")) {
                 
+                
                 final CallCommand command = provider.fromXML(payload);
-                command.setCallId(request.getTo().getNode());
+                
+                String callId = request.getTo().getNode();
+                command.setCallId(callId);
 
                 if (command instanceof VerbCommand) {
                     VerbCommand verbCommand = (VerbCommand) command;
@@ -198,7 +203,7 @@ public class OzoneServlet extends XmppServlet {
                 CallActor actor = null;
                 try {
                     actor = findCallActor(command.getCallId());
-                } catch (NotFoundException e1) {
+                } catch (NotFoundException e) {
                     request.createIQErrorResponse("cancel", "item-not-found", null, null, null).send();
                     return;
                 }
@@ -227,9 +232,8 @@ public class OzoneServlet extends XmppServlet {
                 request.createIQErrorResponse(XmppStanzaError.Type_CANCEL, XmppStanzaError.FEATURE_NOT_IMPLEMENTED_CONDITION, null, null, null).send();
             }
         }
-
     }
-
+    
     @Override
     protected void doIQResponse(XmppServletIQResponse request) throws ServletException, IOException {
 
