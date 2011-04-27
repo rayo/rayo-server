@@ -33,6 +33,7 @@ import com.tropo.core.verb.ChoicesList;
 import com.tropo.core.verb.Conference;
 import com.tropo.core.verb.ConferenceCompleteEvent;
 import com.tropo.core.verb.InputMode;
+import com.tropo.core.verb.KickCommand;
 import com.tropo.core.verb.PauseCommand;
 import com.tropo.core.verb.PromptItem;
 import com.tropo.core.verb.PromptItems;
@@ -81,7 +82,11 @@ public class OzoneProvider implements Provider {
                 return buildCallInfo(element);
             } else if (element.getName().equals("end")) {
                 return buildCallEnd(element);
-            }
+            } else if (element.getName().equals("kick")) {
+				return buildKick(element);
+			} else if (element.getName().equals("complete")) {
+				return buildCompleteCommand(element);
+			}
             else {
               throw new IllegalArgumentException("Element is not supported: " + element);
             }
@@ -225,40 +230,33 @@ public class OzoneProvider implements Provider {
     @SuppressWarnings("unchecked")
     private Object buildTransfer(Element element) throws URISyntaxException {
 
-        Element root = element;
-        Transfer transfer = new Transfer();
-        if (root.attributeValue("terminator") != null) {
-            transfer.setTerminator(root.attributeValue("terminator").charAt(0));
-        }
-        if (root.attributeValue("timeout") != null) {
-            transfer.setTimeout(new Duration(root.attributeValue("timeout")));
-        }
-        transfer.setVoice(root.attributeValue("voice"));
+		Element root = element;
+		Transfer transfer = new Transfer();
+		if (root.attributeValue("terminator") != null) {
+			transfer.setTerminator(root.attributeValue("terminator").charAt(0));
+		}		
+		if (root.attributeValue("timeout") !=  null) {
+			transfer.setTimeout(new Duration(root.attributeValue("timeout")));
+		}
+		transfer.setVoice(root.attributeValue("voice"));
+		transfer.setPromptItems(extractPromptItems(root));
 
-        if (root.attributeValue("from") != null) {
-            transfer.setFrom(new URI(root.attributeValue("from")));
-        }
-        
-        List<URI> uriList = new ArrayList<URI>();
-        if (root.attributeValue("to") != null) {
-            uriList.add(new URI(root.attributeValue("to")));
-        }
-        if (root.element("to") != null) {
-            List<Element> destinations = root.elements("to");
-            for (Element destination : destinations) {
-                uriList.add(new URI(destination.getText()));
-            }
-        }
-        transfer.setTo(uriList);
+		if (root.attributeValue("from") != null) {
+			transfer.setFrom(new URI(root.attributeValue("prompt")));
+		}
+		if (root.element("to") != null) {
+			List<URI> uriList = new ArrayList<URI>();
+			List<Element> elements = root.elements("to");
+			for(Element e: elements) {
+				uriList.add(new URI(e.getText()));
+			}
+			transfer.setTo(uriList);
+		}
+		
+		transfer.setHeaders(grabHeaders(root));
+		
+		return transfer;
 
-        Element promptElement = element.element("prompt");
-        if(promptElement != null) {
-            transfer.setPromptItems(extractPromptItems(promptElement));
-        }
-        
-        transfer.setHeaders(grabHeaders(element));
-
-        return transfer;
     }
 
     private Map<String, String> grabHeaders(Element node) {
@@ -280,13 +278,13 @@ public class OzoneProvider implements Provider {
             conference.setTerminator(root.attributeValue("terminator").charAt(0));
         }
         if (root.attributeValue("beep") != null) {
-            conference.setBeep(Boolean.valueOf(root.attributeValue("timeout")));
+            conference.setBeep(Boolean.valueOf(root.attributeValue("beep")));
         }
         if (root.attributeValue("mute") != null) {
             conference.setMute(Boolean.valueOf(root.attributeValue("mute")));
         }
         if (root.attributeValue("tone-passthrough") != null) {
-            conference.setMute(Boolean.valueOf(root.attributeValue("tone-passthrough")));
+            conference.setTonePassthrough(Boolean.valueOf(root.attributeValue("tone-passthrough")));
         }
         if (root.attributeValue("id") != null) {
             conference.setVerbId(root.attributeValue("id"));
@@ -294,26 +292,94 @@ public class OzoneProvider implements Provider {
         return conference;
     }
 
-    private PromptItems extractPromptItems(Element node) throws URISyntaxException {
+	private Object buildKick(Element element) throws URISyntaxException {
+		
+		return new KickCommand();		
+	}
+	
+	private Object buildCompleteCommand(Element element) throws URISyntaxException {
+		
+		if (element.getNamespaceURI().equals("urn:xmpp:ozone:say:1")) {
+			SayCompleteEvent sayComplete = new SayCompleteEvent();
+			if (element.attributeValue("reason") != null) {
+				sayComplete.setReason(SayCompleteEvent.Reason.valueOf(element.attributeValue("reason")));			
+			}
+			if (element.element("error") != null) {
+				sayComplete.setErrorText(element.elementText("error"));
+			}
+			return sayComplete;
+		} else if (element.getNamespaceURI().equals("urn:xmpp:ozone:ask:1")) {
+			AskCompleteEvent askComplete = new AskCompleteEvent();
+			if (element.attributeValue("reason") != null) {
+				askComplete.setReason(AskCompleteEvent.Reason.valueOf(element.attributeValue("reason")));			
+			}
+			if (element.element("error") != null) {
+				askComplete.setErrorText(element.elementText("error"));
+			}
+			if (element.attributeValue("concept") != null) {
+				askComplete.setConcept(element.attributeValue("concept"));			
+			}
+			if (element.attributeValue("interpretation") != null) {
+				askComplete.setInterpretation(element.attributeValue("interpretation"));			
+			}
+			if (element.attributeValue("nlsml") != null) {
+				askComplete.setNlsml(element.attributeValue("nlsml"));			
+			}
+			if (element.attributeValue("confidence") != null) {
+				askComplete.setConfidence(new Float(element.attributeValue("confidence")));			
+			}
+			if (element.attributeValue("tag") != null) {
+				askComplete.setTag(element.attributeValue("tag"));			
+			}
+			if (element.attributeValue("utterance") != null) {
+				askComplete.setUtterance(element.attributeValue("utterance"));			
+			}
+			
+			return askComplete;
+		} else if (element.getNamespaceURI().equals("urn:xmpp:ozone:transfer:1")) {
+			TransferCompleteEvent transferComplete = new TransferCompleteEvent();
+			if (element.attributeValue("reason") != null) {
+				transferComplete.setReason(TransferCompleteEvent.Reason.valueOf(element.attributeValue("reason")));			
+			}		
+			if (element.element("error") != null) {
+				transferComplete.setErrorText(element.elementText("error"));
+			}
+			
+			return transferComplete;
+		} else if (element.getNamespaceURI().equals("urn:xmpp:ozone:conference:1")) {
+			ConferenceCompleteEvent conferenceComplete = new ConferenceCompleteEvent();
+			if (element.attributeValue("reason") != null) {
+				conferenceComplete.setReason(ConferenceCompleteEvent.Reason.valueOf(element.attributeValue("reason")));			
+			}		
+			if (element.element("error") != null) {
+				conferenceComplete.setErrorText(element.elementText("error"));
+			}
+			
+			return conferenceComplete;
+		}
+		
+		return null;
+	}	
 
-        PromptItems items = new PromptItems();
-        @SuppressWarnings("unchecked")
-        List<Element> elements = node.elements();
-        for (Element element : elements) {
-            if (element.getName().equals("audio")) {
-                AudioItem item = new AudioItem();
-                item.setUri(new URI(element.attributeValue("url")));
-                items.add(item);
-            } else {
-                String xml = element.asXML();
-                //TODO: Better namespaces cleanup
-                xml = xml.replaceAll(" xmlns=\"[^\"]*\"", "");
-                SsmlItem ssml = new SsmlItem(xml);
-                items.add(ssml);
-            }
-        }
-        return items;
-    }
+	private PromptItems extractPromptItems(Element node) throws URISyntaxException {
+
+		PromptItems items = new PromptItems();
+		List<Element> elements = node.elements();
+		for(Element element: elements) {
+			if (element.getName().equals("audio")) {
+				AudioItem item = new AudioItem();
+				item.setUri(new URI(element.attributeValue("url")));
+				items.add(item);				
+			} else if (element.getName().equals("speak")) {
+				String xml = element.asXML();
+				//TODO: Better namespaces cleanup
+				xml = xml.replaceAll(" xmlns=\"[^\"]*\"","");
+				SsmlItem ssml = new SsmlItem(xml);
+				items.add(ssml);
+			}
+		}
+		return items;
+	}
 
     @Override
     public Element toXML(Object object) {
@@ -360,6 +426,8 @@ public class OzoneProvider implements Provider {
                 createConference(object, document);
             } else if (object instanceof ConferenceCompleteEvent) {
                 createConferenceCompleteEvent(object, document);
+            } else if (object instanceof KickCommand) {
+                createKick(object, document);
             }
             else {
                 throw new IllegalArgumentException("Type is not supported: " + object.getClass());
@@ -477,18 +545,20 @@ public class OzoneProvider implements Provider {
         return document;
     }
 
-    private void addPromptItems(PromptItems items, Element root) throws DocumentException {
-
-        for (PromptItem item : items) {
-            if (item instanceof AudioItem) {
-                Element audio = root.addElement("audio");
-                audio.addAttribute("url", ((AudioItem) item).getUri().toString());
-            } else if (item instanceof SsmlItem) {
-                Document ssmlDoc = DocumentHelper.parseText(((SsmlItem) item).getText());
-                root.add(ssmlDoc.getRootElement());
-            }
-        }
-    }
+	private void addPromptItems(PromptItems items, Element root) throws DocumentException {
+		
+		if (items != null) {
+			for (PromptItem item: items) {
+				if (item instanceof AudioItem) {
+					Element audio = root.addElement("audio");
+					audio.addAttribute("url", ((AudioItem) item).getUri().toString());
+				} else if (item instanceof SsmlItem) {
+					Document ssmlDoc = DocumentHelper.parseText(((SsmlItem) item).getText());
+					root.add(ssmlDoc.getRootElement());
+				}
+			}
+		}
+	}
 
     private Document createPauseCommand(Object object, Document document) throws Exception {
         document.addElement(new QName("pause", new Namespace("", "urn:xmpp:ozone:say:1")));
@@ -505,12 +575,21 @@ public class OzoneProvider implements Provider {
         return document;
     }
 
-    private Document createSayCompleteEvent(Object object, Document document) throws Exception {
-        SayCompleteEvent sayComplete = (SayCompleteEvent) object;
-        Element root = document.addElement(new QName("complete", new Namespace("", "urn:xmpp:ozone:say:1")));
-        root.addAttribute("reason", sayComplete.getReason().toString());
-        return document;
-    }
+	private Document createSayCompleteEvent(Object object, Document document) throws Exception {
+		
+		SayCompleteEvent sayComplete = (SayCompleteEvent)object;
+		Element root = document.addElement(new QName("complete", new Namespace("","urn:xmpp:ozone:say:1")));
+		
+		if (sayComplete.getReason() != null) {
+			root.addAttribute("reason", sayComplete.getReason().toString());
+		}
+		
+		if (sayComplete.getErrorText() != null) {
+			root.addElement("error").setText(sayComplete.getErrorText());
+		}		
+		
+		return document;
+	}
 
     private Document createAsk(Object object, Document document) throws Exception {
 
@@ -559,54 +638,76 @@ public class OzoneProvider implements Provider {
 
     private Document createAskCompleteEvent(Object object, Document document) throws Exception {
 
-        AskCompleteEvent askComplete = (AskCompleteEvent) object;
-        Element root = document.addElement(new QName("complete", new Namespace("", "urn:xmpp:ozone:ask:1")));
-        root.addAttribute("reason", askComplete.getReason().toString().toLowerCase());
-        root.addAttribute("confidence", Float.toString(askComplete.getConfidence()));
-        root.addElement("concept").setText(askComplete.getConcept());
-        root.addElement("interpretation").setText(askComplete.getInterpretation());
-        root.addElement("utterance").setText(askComplete.getUtterance());
-        root.addElement("nlsml").setText(askComplete.getNlsml());
-        root.addElement("tag").setText(askComplete.getTag());
-        
-        return document;
+		AskCompleteEvent askComplete = (AskCompleteEvent)object;
+		Element root = document.addElement(new QName("complete", new Namespace("","urn:xmpp:ozone:ask:1")));
+		if (askComplete.getReason() != null) {
+			root.addAttribute("reason", askComplete.getReason().toString());
+		}
+		if (askComplete.getConcept() != null) {
+			root.addAttribute("concept", askComplete.getConcept());
+		}
+		if (askComplete.getInterpretation() != null) {
+			root.addAttribute("interpretation", askComplete.getInterpretation());
+		}
+		if (askComplete.getNlsml() != null) {
+			root.addAttribute("nlsml",askComplete.getNlsml());
+		}
+		root.addAttribute("confidence", String.valueOf(askComplete.getConfidence()));
+		if (askComplete.getTag() != null) {
+			root.addAttribute("tag", askComplete.getTag());
+		}
+		if (askComplete.getUtterance() != null) {
+			root.addAttribute("utterance", askComplete.getUtterance());
+		}
+		if (askComplete.getErrorText() != null) {
+			root.addElement("error").setText(askComplete.getErrorText());
+		}
+		return document;
     }
 
     private Document createTransfer(Object object, Document document) throws Exception {
 
-        Transfer transfer = (Transfer) object;
-        Element root = document.addElement(new QName("transfer", new Namespace("", "urn:xmpp:ozone:transfer:1")));
-        if (transfer.getVoice() != null) {
-            root.addAttribute("voice", transfer.getVoice());
-        }
+		Transfer transfer = (Transfer)object;
+		Element root = document.addElement(new QName("transfer", new Namespace("","urn:xmpp:ozone:transfer:1")));
+		if (transfer.getVoice() != null) {
+			root.addAttribute("voice", transfer.getVoice());
+		}
 
-        addHeaders(transfer.getHeaders(), root);
-        addPromptItems(transfer.getPromptItems(), root);
-
-        if (transfer.getTerminator() != null) {
-            root.addAttribute("terminator", transfer.getTerminator().toString());
-        }
-        if (transfer.getTimeout() != null) {
-            root.addAttribute("timeout", transfer.getTimeout().toString());
-        }
-        if (transfer.getFrom() != null) {
-            root.addAttribute("from", transfer.getFrom().toString());
-        }
-        if (transfer.getTo() != null) {
-            for (URI uri : transfer.getTo()) {
-                root.addElement("to").setText(uri.toString());
-            }
-        }
-
-        return document;
-    }
+		addHeaders(transfer.getHeaders(), document.getRootElement());
+		addPromptItems(transfer.getPromptItems(), document.getRootElement());
+		
+		if (transfer.getTerminator() != null) {
+			root.addAttribute("terminator", transfer.getTerminator().toString());
+		}
+		if (transfer.getTimeout() != null) {
+			root.addAttribute("timeout", transfer.getTimeout().toString());
+		}
+		if (transfer.getFrom() != null) {
+			root.addAttribute("from", transfer.getFrom().toString());
+		}
+		if (transfer.getTo() != null) {
+			for (URI uri: transfer.getTo()) {
+				root.addElement("to").setText(uri.toString());
+			}
+		}
+		
+		return document;
+	}
     
-    private Document createTransferCompleteEvent(Object object, Document document) {
-        TransferCompleteEvent tranferComplete = (TransferCompleteEvent) object;
-        Element root = document.addElement(new QName("complete", new Namespace("", "urn:xmpp:ozone:transfer:1")));
-        root.addAttribute("reason", tranferComplete.getReason().toString());
-        return document;
-    }
+	private Document createTransferCompleteEvent(Object object, Document document) throws Exception {
+		
+		TransferCompleteEvent transferComplete = (TransferCompleteEvent)object;
+		Element root = document.addElement(new QName("complete", new Namespace("","urn:xmpp:ozone:transfer:1")));
+		
+		if (transferComplete.getReason() != null) {
+			root.addAttribute("reason", transferComplete.getReason().toString());
+		}
+		
+		if (transferComplete.getErrorText() != null) {
+			root.addElement("error").setText(transferComplete.getErrorText());
+		}		
+		return document;
+	}
 
     private Document createConference(Object object, Document document) throws Exception {
 
@@ -626,11 +727,24 @@ public class OzoneProvider implements Provider {
         return document;
     }
     
-    private Document createConferenceCompleteEvent(Object object, Document document) {
-        ConferenceCompleteEvent conferenceComplete = (ConferenceCompleteEvent) object;
-        Element root = document.addElement(new QName("complete", new Namespace("", "urn:xmpp:ozone:conference:1")));
-        root.addAttribute("reason", conferenceComplete.getReason().toString());
-        return document;
-    }
-
+	private Document createConferenceCompleteEvent(Object object, Document document) throws Exception {
+		
+		ConferenceCompleteEvent conferenceComplete = (ConferenceCompleteEvent)object;
+		Element root = document.addElement(new QName("complete", new Namespace("","urn:xmpp:ozone:conference:1")));
+		
+		if (conferenceComplete.getReason() != null) {
+			root.addAttribute("reason", conferenceComplete.getReason().toString());
+		}
+		
+		if (conferenceComplete.getErrorText() != null) {
+			root.addElement("error").setText(conferenceComplete.getErrorText());
+		}		
+		return document;
+	}
+    
+	private Document createKick(Object object, Document document) throws Exception {
+		
+		document.addElement(new QName("kick", new Namespace("","urn:xmpp:ozone:conference:1")));
+		return document;
+	}
 }

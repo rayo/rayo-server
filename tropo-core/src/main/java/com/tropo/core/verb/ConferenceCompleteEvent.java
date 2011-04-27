@@ -7,6 +7,8 @@ public class ConferenceCompleteEvent extends VerbCompleteEvent {
         KICK, LEAVE, HANGUP, ERROR
     }
 
+    public ConferenceCompleteEvent() {}
+    
     public ConferenceCompleteEvent(Verb verb) {
         super(verb);
     }
