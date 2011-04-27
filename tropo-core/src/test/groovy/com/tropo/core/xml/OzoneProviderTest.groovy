@@ -25,6 +25,7 @@ import com.tropo.core.RedirectCommand
 import com.tropo.core.RejectCommand
 import com.tropo.core.verb.Ask;
 import com.tropo.core.verb.AudioItem;
+import com.tropo.core.verb.Conference;
 import com.tropo.core.verb.InputMode;
 import com.tropo.core.verb.KickCommand;
 import com.tropo.core.verb.PauseCommand;
@@ -448,6 +449,47 @@ public class OzoneProviderTest {
 		assertEquals("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" voice=\"allison\" min-confidence=\"0.8\" mode=\"dtmf\" recognizer=\"test\" terminator=\"#\" timeout=\"PT3S\" bargein=\"true\"><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""", provider.toXML(ask).asXML());
 	}
 	
+	// Conference
+	// ====================================================================================
+	@Test
+	public void emptyConferenceFromXml() {
+		
+		def conference = fromXml("""<conference xmlns=\"urn:xmpp:ozone:conference:1\"></conference>""")
+		assertNotNull conference
+	}
+
+	@Test
+	public void conferenceFromXml() {
+		
+		def conference = fromXml("""<conference xmlns=\"urn:xmpp:ozone:conference:1\" terminator=\"#\" id=\"123456\" beep=\"true\" mute=\"true\" tone-passthrough=\"true\"></conference>""")
+		assertNotNull conference
+		assertEquals conference.terminator, '#' as char
+		assertTrue conference.beep
+		assertTrue conference.tonePassthrough
+		assertTrue conference.mute
+		assertEquals conference.id,"123456"
+	}
+	
+	@Test
+	public void emptyConferenceToXml() {
+		
+		def conference = new Conference()
+		assertEquals("""<conference xmlns=\"urn:xmpp:ozone:conference:1\" beep=\"false\" mute=\"false\" tone-passthrough=\"false\"/>""", provider.toXML(conference).asXML());
+	}
+	
+	@Test
+	public void conferenceToXml() {
+		
+		def conference = new Conference()
+		conference.terminator = '#' as char
+		conference.beep = true
+		conference.mute = true
+		conference.tonePassthrough = true
+		conference.verbId = "123456"
+		
+		assertEquals("""<conference xmlns=\"urn:xmpp:ozone:conference:1\" terminator=\"#\" id=\"123456\" beep=\"true\" mute=\"true\" tone-passthrough=\"true\"/>""", provider.toXML(conference).asXML());
+	}
+
     // Utility
     // ====================================================================================
     

@@ -283,13 +283,13 @@ public class OzoneProvider implements Provider {
             conference.setTerminator(root.attributeValue("terminator").charAt(0));
         }
         if (root.attributeValue("beep") != null) {
-            conference.setBeep(Boolean.valueOf(root.attributeValue("timeout")));
+            conference.setBeep(Boolean.valueOf(root.attributeValue("beep")));
         }
         if (root.attributeValue("mute") != null) {
             conference.setMute(Boolean.valueOf(root.attributeValue("mute")));
         }
         if (root.attributeValue("tone-passthrough") != null) {
-            conference.setMute(Boolean.valueOf(root.attributeValue("tone-passthrough")));
+            conference.setTonePassthrough(Boolean.valueOf(root.attributeValue("tone-passthrough")));
         }
         if (root.attributeValue("id") != null) {
             conference.setVerbId(root.attributeValue("id"));
