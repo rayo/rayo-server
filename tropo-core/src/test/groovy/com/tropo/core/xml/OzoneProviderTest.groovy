@@ -21,6 +21,10 @@ import com.tropo.core.HangupCommand
 import com.tropo.core.Offer
 import com.tropo.core.RedirectCommand
 import com.tropo.core.RejectCommand
+import com.tropo.core.verb.KickCommand;
+import com.tropo.core.verb.PauseCommand;
+import com.tropo.core.verb.ResumeCommand;
+import com.tropo.core.verb.StopCommand;
 
 public class OzoneProviderTest {
 
@@ -210,7 +214,62 @@ public class OzoneProviderTest {
             headers: [test:"atest"]
         ])
     }
-    
+
+	// Kick
+	// ====================================================================================
+    @Test
+    public void kickFromXml() {
+        assertNotNull fromXml("""<kick xmlns=\"urn:xmpp:ozone:conference:1\" />""")
+    }
+	
+	@Test
+	public void kickToXml() {
+		KickCommand kick = new KickCommand();
+		assertEquals("""<kick xmlns=\"urn:xmpp:ozone:conference:1\"/>""", provider.toXML(kick).asXML());
+	}
+	
+	// Pause
+	// ====================================================================================
+	@Test
+	public void pauseFromXml() {
+		assertNotNull fromXml("""<pause xmlns=\"urn:xmpp:ozone:say:1\" />""")
+	}
+	
+	@Test
+	public void pauseToXml() {
+		
+		PauseCommand pause = new PauseCommand();
+		assertEquals("""<pause xmlns=\"urn:xmpp:ozone:say:1\"/>""", provider.toXML(pause).asXML());
+	}
+	
+	// Resume
+	// ====================================================================================
+	@Test
+	public void resumeFromXml() {
+		assertNotNull fromXml("""<resume xmlns=\"urn:xmpp:ozone:say:1\" />""")
+	}
+	
+	@Test
+	public void resumeToXml() {
+		
+		ResumeCommand resume = new ResumeCommand();
+		assertEquals("""<resume xmlns=\"urn:xmpp:ozone:say:1\"/>""", provider.toXML(resume).asXML());
+	}
+	
+	// Stop
+	// ====================================================================================
+	@Test
+	public void stopFromXml() {
+		assertNotNull fromXml("""<stop xmlns=\"urn:xmpp:ozone:1\" />""")
+	}
+	
+	@Test
+	public void stopToXml() {
+		
+		StopCommand stop = new StopCommand();
+		assertEquals("""<stop xmlns=\"urn:xmpp:ozone:1\"/>""", provider.toXML(stop).asXML());
+	}
+		    
     // Utility
     // ====================================================================================
     
