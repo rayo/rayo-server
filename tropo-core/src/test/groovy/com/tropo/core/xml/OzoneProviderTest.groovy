@@ -26,17 +26,22 @@ import com.tropo.core.Offer
 import com.tropo.core.RedirectCommand
 import com.tropo.core.RejectCommand
 import com.tropo.core.verb.Ask;
+import com.tropo.core.verb.AskCompleteEvent;
 import com.tropo.core.verb.AudioItem;
 import com.tropo.core.verb.Conference;
+import com.tropo.core.verb.ConferenceCompleteEvent;
 import com.tropo.core.verb.InputMode;
 import com.tropo.core.verb.KickCommand;
 import com.tropo.core.verb.PauseCommand;
 import com.tropo.core.verb.PromptItems;
 import com.tropo.core.verb.ResumeCommand;
 import com.tropo.core.verb.Say;
+import com.tropo.core.verb.SayCompleteEvent;
 import com.tropo.core.verb.SsmlItem;
 import com.tropo.core.verb.StopCommand;
 import com.tropo.core.verb.Transfer;
+import com.tropo.core.verb.AskCompleteEvent.Reason;
+import com.tropo.core.verb.TransferCompleteEvent;
 
 public class OzoneProviderTest {
 
@@ -597,6 +602,176 @@ public class OzoneProviderTest {
 		transfer.promptItems.add new SsmlItem("<speak>We are going to transfer your call. Wait a couple of seconds.</speak>")
 
 		assertEquals("""<transfer xmlns=\"urn:xmpp:ozone:transfer:1\" terminator=\"#\" timeout=\"PT20S\"><speak xmlns=\"\">We are going to transfer your call. Wait a couple of seconds.</speak><to>sip:martin@127.0.0.1:6089</to><to>sip:jose@127.0.0.1:6088</to></transfer>""", provider.toXML(transfer).asXML());
+	}
+	
+	// Ask Complete
+	// ====================================================================================
+	@Test
+	public void emptyAskCompleteFromXml() {
+		
+		def complete = fromXml("""<complete xmlns=\"urn:xmpp:ozone:ask:1\"></complete>""")
+		assertNotNull complete
+	}
+	
+	@Test
+	public void askCompleteFromXml() {
+		
+		def complete = fromXml("""<complete xmlns=\"urn:xmpp:ozone:ask:1\" reason=\"HANGUP\" concept=\"aconcept\" interpretation=\"aninterpretation\" nlsml=\"anlsml\" confidence=\"0.7\" tag=\"atag\" utterance=\"anutterance\"></complete>""")
+		assertNotNull complete
+		assertEquals complete.reason, AskCompleteEvent.Reason.HANGUP
+		assertEquals complete.concept, "aconcept"
+		assertTrue complete.confidence == 0.7f
+		assertEquals complete.interpretation, "aninterpretation"
+		assertEquals complete.nlsml, "anlsml"
+		assertEquals complete.tag, "atag"
+		assertEquals complete.utterance, "anutterance"
+	}
+	
+	@Test
+	public void askCompleteWithErrorsFromXml() {
+		
+		def complete = fromXml("""<complete xmlns=\"urn:xmpp:ozone:ask:1\" reason=\"ERROR\" confidence=\"0.0\"><error>this is an error</error></complete>""")
+		assertNotNull complete
+		assertEquals complete.reason, AskCompleteEvent.Reason.ERROR
+		assertEquals complete.errorText, "this is an error"
+	}
+	
+	@Test
+	public void emptyAskCompleteToXml() {
+		
+		def complete = new AskCompleteEvent(new Ask(), AskCompleteEvent.Reason.HANGUP)
+		assertEquals("""<complete xmlns=\"urn:xmpp:ozone:ask:1\" reason=\"HANGUP\" confidence=\"0.0\"/>""", provider.toXML(complete).asXML());
+	}
+
+	@Test
+	public void askCompleteToXml() {
+		
+		def complete = new AskCompleteEvent(new Ask(), AskCompleteEvent.Reason.HANGUP)
+		complete.concept = "aconcept"
+		complete.tag = "atag"
+		complete.confidence = 0.7f
+		complete.interpretation = "aninterpretation"
+		complete.nlsml = "anlsml"
+		complete.utterance = "anutterance"
+		
+		assertEquals("""<complete xmlns=\"urn:xmpp:ozone:ask:1\" reason=\"HANGUP\" concept=\"aconcept\" interpretation=\"aninterpretation\" nlsml=\"anlsml\" confidence=\"0.7\" tag=\"atag\" utterance=\"anutterance\"/>""", provider.toXML(complete).asXML());
+	}
+	
+	@Test
+	public void askCompleteWithErrorsToXml() {
+		
+		def complete = new AskCompleteEvent(new Ask(), AskCompleteEvent.Reason.ERROR)
+		complete.errorText = "This is an error"
+		
+		assertEquals("""<complete xmlns=\"urn:xmpp:ozone:ask:1\" reason=\"ERROR\" confidence=\"0.0\"><error>This is an error</error></complete>""", provider.toXML(complete).asXML());
+	}
+	
+	// Say Complete
+	// ====================================================================================
+	@Test
+	public void sayCompleteFromXml() {
+		
+		def complete = fromXml("""<complete xmlns=\"urn:xmpp:ozone:say:1\" reason=\"HANGUP\"></complete>""")
+		assertNotNull complete
+		assertEquals complete.reason, SayCompleteEvent.Reason.HANGUP
+	}
+	
+	@Test
+	public void sayCompleteWithErrorsFromXml() {
+		
+		def complete = fromXml("""<complete xmlns=\"urn:xmpp:ozone:say:1\" reason=\"ERROR\"><error>this is an error</error></complete>""")
+		assertNotNull complete
+		assertEquals complete.reason, SayCompleteEvent.Reason.ERROR
+		assertEquals complete.errorText, "this is an error"
+	}
+	
+	@Test
+	public void sayCompleteToXml() {
+		
+		def complete = new SayCompleteEvent(new Say(), SayCompleteEvent.Reason.HANGUP)
+		
+		assertEquals("""<complete xmlns=\"urn:xmpp:ozone:say:1\" reason=\"HANGUP\"/>""", provider.toXML(complete).asXML());
+	}
+	
+	@Test
+	public void sayCompleteWithErrorsToXml() {
+		
+		def complete = new SayCompleteEvent(new Say(), SayCompleteEvent.Reason.ERROR)
+		complete.errorText = "This is an error"
+		
+		assertEquals("""<complete xmlns=\"urn:xmpp:ozone:say:1\" reason=\"ERROR\"><error>This is an error</error></complete>""", provider.toXML(complete).asXML());
+	}
+	
+	// Transfer Complete
+	// ====================================================================================
+	@Test
+	public void transferCompleteFromXml() {
+		
+		def complete = fromXml("""<complete xmlns=\"urn:xmpp:ozone:transfer:1\" reason=\"HANGUP\"></complete>""")
+		assertNotNull complete
+		assertEquals complete.reason, TransferCompleteEvent.Reason.HANGUP
+	}
+	
+	@Test
+	public void transferCompleteWithErrorsFromXml() {
+		
+		def complete = fromXml("""<complete xmlns=\"urn:xmpp:ozone:transfer:1\" reason=\"ERROR\"><error>this is an error</error></complete>""")
+		assertNotNull complete
+		assertEquals complete.reason, TransferCompleteEvent.Reason.ERROR
+		assertEquals complete.errorText, "this is an error"
+	}
+	
+	@Test
+	public void transferCompleteToXml() {
+		
+		def complete = new TransferCompleteEvent(new Transfer(), TransferCompleteEvent.Reason.HANGUP)
+		
+		assertEquals("""<complete xmlns=\"urn:xmpp:ozone:transfer:1\" reason=\"HANGUP\"/>""", provider.toXML(complete).asXML());
+	}
+	
+	@Test
+	public void transferCompleteWithErrorsToXml() {
+		
+		def complete = new TransferCompleteEvent(new Transfer(), TransferCompleteEvent.Reason.ERROR)
+		complete.errorText = "This is an error"
+		
+		assertEquals("""<complete xmlns=\"urn:xmpp:ozone:transfer:1\" reason=\"ERROR\"><error>This is an error</error></complete>""", provider.toXML(complete).asXML());
+	}
+	
+	// Conference Complete
+	// ====================================================================================
+	@Test
+	public void conferenceCompleteFromXml() {
+		
+		def complete = fromXml("""<complete xmlns=\"urn:xmpp:ozone:conference:1\" reason=\"HANGUP\"></complete>""")
+		assertNotNull complete
+		assertEquals complete.reason, ConferenceCompleteEvent.Reason.HANGUP
+	}
+	
+	@Test
+	public void conferenceCompleteWithErrorsFromXml() {
+		
+		def complete = fromXml("""<complete xmlns=\"urn:xmpp:ozone:conference:1\" reason=\"ERROR\"><error>this is an error</error></complete>""")
+		assertNotNull complete
+		assertEquals complete.reason, ConferenceCompleteEvent.Reason.ERROR
+		assertEquals complete.errorText, "this is an error"
+	}
+	
+	@Test
+	public void conferenceCompleteToXml() {
+		
+		def complete = new ConferenceCompleteEvent(new Conference(), ConferenceCompleteEvent.Reason.HANGUP)
+		
+		assertEquals("""<complete xmlns=\"urn:xmpp:ozone:conference:1\" reason=\"HANGUP\"/>""", provider.toXML(complete).asXML());
+	}
+	
+	@Test
+	public void conferenceCompleteWithErrorsToXml() {
+		
+		def complete = new ConferenceCompleteEvent(new Conference(), ConferenceCompleteEvent.Reason.ERROR)
+		complete.errorText = "This is an error"
+		
+		assertEquals("""<complete xmlns=\"urn:xmpp:ozone:conference:1\" reason=\"ERROR\"><error>This is an error</error></complete>""", provider.toXML(complete).asXML());
 	}
 	
     // Utility
