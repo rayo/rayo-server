@@ -201,6 +201,8 @@ public class IntegrationTest {
         poll() // Command Result
         poll() // EndEvent
         
+        sleep 200
+        
         // Publishing should be disabled since the call is over
         assertFalse callActor.publish(new Object())
 
