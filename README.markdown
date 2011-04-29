@@ -6,5 +6,5 @@ First, you may want first [building the project from the sources](https://github
 
 There is nice [installation instructions on Prism](https://github.com/tropo/tropo2/wiki/Installation-with-Prism). 
 
-Do not forget also to check out our [Ozone Interactive Shell](https://github.com/tropo/tropo2/wiki/Using-the-Ozone-Interactive-Shell) screencast
+Do not forget also to check out our [Ozone Interactive Shell](https://github.com/tropo/tropo2/wiki/Using-the-Ozone-Interactive-Shell) screencast.
 
