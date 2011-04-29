@@ -1,0 +1,91 @@
+<<<=====From Ozone Server<<<=====
+<iq type="set" id="d599f5e5-fcc3-4649-a17a-9c09cb1cc477" from="845ca689-b332-4806-9d2f-786cceb0ac99@10.0.1.11" to="usera@10.0.1.11/voxeo">
+  <offer xmlns="urn:xmpp:ozone:1" to="sip:usera@10.0.1.11" from="sip:foobar@localhost">
+    <header name="Max-Forwards" value="70"/>
+    <header name="Content-Length" value="367"/>
+    <header name="Contact" value="&lt;sip:lxrvpasc@10.0.1.11:6065&gt;"/>
+    <header name="Supported" value="100rel"/>
+    <header name="Allow" value="SUBSCRIBE"/>
+    <header name="To" value="&lt;sip:usera@10.0.1.11&gt;"/>
+    <header name="CSeq" value="2202 INVITE"/>
+    <header name="User-Agent" value="Blink 0.24.0 (MacOSX)"/>
+    <header name="Via" value="SIP/2.0/UDP 10.211.55.2:6065;rport=6065;branch=z9hG4bKPju6XhdzJ0GBG9Yt5cqlDl2O3ICOAAsHV5;received=10.0.1.11"/>
+    <header name="Call-ID" value="VWxrmnlQ3uvv.6RTmIJ5R9ZGwmJpW3uj"/>
+    <header name="Content-Type" value="application/sdp"/>
+    <header name="From" value="LocalTesting &lt;sip:foobar@localhost&gt;;tag=2plz.KCBoq2VjAiWkgY1Q4iP6VKoA3dC"/>
+  </offer>
+</iq>
+<<<=====From Ozone Server<<<=====
+
+=====>>>To Ozone Server=====>>>
+<iq type="result" to="845ca689-b332-4806-9d2f-786cceb0ac99@10.0.1.11" id="blather0009" from="usera@10.0.1.11/voxeo"/>
+=====>>>To Ozone Server=====>>>
+
+=====>>>To Ozone Server=====>>>
+<iq type="set" to="845ca689-b332-4806-9d2f-786cceb0ac99@10.0.1.11" id="blather000a" from="usera@10.0.1.11/voxeo">
+  <answer xmlns="urn:xmpp:ozone:1"/>
+</iq>
+=====>>>To Ozone Server=====>>>
+
+<<<=====From Ozone Server<<<=====
+<iq type="result" id="blather000a" to="usera@10.0.1.11/voxeo" from="10.0.1.11"/>
+<<<=====From Ozone Server<<<=====
+
+<<<=====From Ozone Server<<<=====
+<iq type="set" id="3832404e-8f05-4dce-af8e-c1c0283d4a31" from="845ca689-b332-4806-9d2f-786cceb0ac99@10.0.1.11" to="usera@10.0.1.11/voxeo">
+  <info xmlns="urn:xmpp:ozone:1">
+    <answer/>
+  </info>
+</iq>
+<<<=====From Ozone Server<<<=====
+
+=====>>>To Ozone Server=====>>>
+<iq type="result" to="845ca689-b332-4806-9d2f-786cceb0ac99@10.0.1.11" id="blather000d" from="usera@10.0.1.11/voxeo"/>
+=====>>>To Ozone Server=====>>>
+
+=====>>>To Ozone Server=====>>>
+<iq type="set" to="845ca689-b332-4806-9d2f-786cceb0ac99@10.0.1.11" id="blather000e" from="usera@10.0.1.11/voxeo">
+  <say xmlns="urn:xmpp:ozone:say:1">
+    <audio url="http://dl.dropbox.com/u/25511/Voxeo/troporocks.mp3"/>
+  </say>
+</iq>
+=====>>>To Ozone Server=====>>>
+
+<<<=====From Ozone Server<<<=====
+<iq type="result" id="blather000e" to="usera@10.0.1.11/voxeo" from="10.0.1.11">
+  <ref jid="845ca689-b332-4806-9d2f-786cceb0ac99@10.0.1.11/e5bfdbe5-67d1-4f83-9cdc-8f9bc7a57bc3"/>
+</iq>
+<<<=====From Ozone Server<<<=====
+
+<<<=====From Ozone Server<<<=====
+<iq type="set" id="dc5b60bc-069a-4a6e-b859-f0f2cfcf3cb2" from="845ca689-b332-4806-9d2f-786cceb0ac99@10.0.1.11/e5bfdbe5-67d1-4f83-9cdc-8f9bc7a57bc3" to="usera@10.0.1.11/voxeo">
+  <complete xmlns="urn:xmpp:ozone:say:1" reason="SUCCESS"/>
+</iq>
+<<<=====From Ozone Server<<<=====
+
+=====>>>To Ozone Server=====>>>
+<iq type="result" to="845ca689-b332-4806-9d2f-786cceb0ac99@10.0.1.11/e5bfdbe5-67d1-4f83-9cdc-8f9bc7a57bc3" id="blather0011" from="usera@10.0.1.11/voxeo"/>
+=====>>>To Ozone Server=====>>>
+
+=====>>>To Ozone Server=====>>>
+<iq type="set" to="845ca689-b332-4806-9d2f-786cceb0ac99@10.0.1.11/e5bfdbe5-67d1-4f83-9cdc-8f9bc7a57bc3" id="blather0012" from="usera@10.0.1.11/voxeo">
+  <hangup xmlns="urn:xmpp:ozone:1"/>
+</iq>
+=====>>>To Ozone Server=====>>>
+
+<<<=====From Ozone Server<<<=====
+<iq type="result" id="blather0012" to="usera@10.0.1.11/voxeo" from="10.0.1.11"/>
+<<<=====From Ozone Server<<<=====
+
+<<<=====From Ozone Server<<<=====
+<iq type="set" id="8ac4430a-ffe1-4496-ad9c-a47e33ebeeaf" from="845ca689-b332-4806-9d2f-786cceb0ac99@10.0.1.11" to="usera@10.0.1.11/voxeo">
+  <end xmlns="urn:xmpp:ozone:1">
+    <hangup/>
+  </end>
+</iq>
+<<<=====From Ozone Server<<<=====
+
+=====>>>To Ozone Server=====>>>
+<iq type="result" to="845ca689-b332-4806-9d2f-786cceb0ac99@10.0.1.11" id="blather0015" from="usera@10.0.1.11/voxeo"/>
+=====>>>To Ozone Server=====>>>
+
