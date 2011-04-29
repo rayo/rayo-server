@@ -25,6 +25,7 @@ import com.tropo.core.Offer;
 import com.tropo.core.RedirectCommand;
 import com.tropo.core.RejectCommand;
 import com.tropo.core.RingEvent;
+import com.tropo.core.validation.Validator;
 import com.tropo.core.verb.Ask;
 import com.tropo.core.verb.AskCompleteEvent;
 import com.tropo.core.verb.AudioItem;
@@ -47,52 +48,57 @@ import com.tropo.core.verb.TransferCompleteEvent;
 
 public class OzoneProvider implements Provider {
 
+	private Validator validator;
+	
     @Override
     @SuppressWarnings("unchecked")
     public Object fromXML(Element element) {
 
+    	Object returnValue = null;
         try {
             if (element.getName().equals("offer")) {
-                return buildOffer(element);
+            	returnValue = buildOffer(element);
             } else if (element.getName().equals("accept")) {
-                return buildAcceptCommand(element);
+                returnValue = buildAcceptCommand(element);
             } else if (element.getName().equals("answer")) {
-                return buildAnswerCommand(element);
+                returnValue = buildAnswerCommand(element);
             } else if (element.getName().equals("hangup")) {
-                return buildHangupCommand(element);
+                returnValue = buildHangupCommand(element);
             } else if (element.getName().equals("reject")) {
-                return buildRejectCommand(element);
+                returnValue = buildRejectCommand(element);
             } else if (element.getName().equals("redirect")) {
-                return buildRedirectCommand(element);
+                returnValue = buildRedirectCommand(element);
             } else if (element.getName().equals("say")) {
-                return buildSay(element);
+                returnValue = buildSay(element);
             } else if (element.getName().equals("pause")) {
-                return buildPauseCommand(element);
+                returnValue = buildPauseCommand(element);
             } else if (element.getName().equals("resume")) {
-                return buildResumeCommand(element);
+                returnValue = buildResumeCommand(element);
             } else if (element.getName().equals("stop")) {
-                return buildStopCommand(element);
+                returnValue = buildStopCommand(element);
             } else if (element.getName().equals("ask")) {
-                return buildAsk(element);
+                returnValue = buildAsk(element);
             } else if (element.getName().equals("transfer")) {
-                return buildTransfer(element);
+                returnValue = buildTransfer(element);
             } else if (element.getName().equals("conference")) {
-                return buildConference(element);
+                returnValue = buildConference(element);
             } else if (element.getName().equals("info")) {
-                return buildCallInfo(element);
+                returnValue = buildCallInfo(element);
             } else if (element.getName().equals("end")) {
-                return buildCallEnd(element);
+                returnValue = buildCallEnd(element);
             } else if (element.getName().equals("kick")) {
-				return buildKick(element);
+				returnValue = buildKick(element);
 			} else if (element.getName().equals("complete")) {
-				return buildCompleteCommand(element);
+				returnValue = buildCompleteCommand(element);
 			}
             else {
               throw new IllegalArgumentException("Element is not supported: " + element);
-            }
+            }            
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
+        validator.validate(returnValue);
+        return returnValue;
     }
 
     private Object buildCallEnd(Element element) {
@@ -524,6 +530,7 @@ public class OzoneProvider implements Provider {
         Element root = document.addElement(new QName("offer", new Namespace("", "urn:xmpp:ozone:1")));
         root.addAttribute("to", offer.getTo().toString());
         root.addAttribute("from", offer.getFrom().toString());
+        root.addAttribute("callId", offer.getCallId());
 
         addHeaders(offer.getHeaders(), root);
 
@@ -746,5 +753,9 @@ public class OzoneProvider implements Provider {
 		
 		document.addElement(new QName("kick", new Namespace("","urn:xmpp:ozone:conference:1")));
 		return document;
+	}
+
+	public void setValidator(Validator validator) {
+		this.validator = validator;
 	}
 }
