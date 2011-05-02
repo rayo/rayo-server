@@ -8,7 +8,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 
@@ -24,21 +23,15 @@ import com.tropo.core.Offer;
 import com.tropo.core.RedirectCommand;
 import com.tropo.core.RejectCommand;
 import com.tropo.core.RingEvent;
-import com.tropo.core.verb.Ask;
-import com.tropo.core.verb.Conference;
-import com.tropo.core.verb.Say;
 import com.tropo.core.verb.StopCommand;
-import com.tropo.core.verb.Transfer;
 import com.tropo.core.verb.Verb;
 import com.tropo.core.verb.VerbCommand;
 import com.tropo.core.verb.VerbCompleteEvent;
 import com.tropo.core.verb.VerbEvent;
 import com.tropo.server.verb.EventDispatcher;
-import com.tropo.server.verb.LocalAskHandler;
-import com.tropo.server.verb.LocalConferenceHandler;
-import com.tropo.server.verb.LocalSayHandler;
-import com.tropo.server.verb.LocalTransferHandler;
+import com.tropo.server.verb.VerbFactory;
 import com.tropo.server.verb.VerbHandler;
+import com.tropo.server.verb.VerbManager;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.ApplicationContext;
 import com.voxeo.moho.Call;
@@ -57,25 +50,9 @@ public class CallActor extends ReflectiveActor implements Observer {
 
     private static final Loggerf log = Loggerf.getLogger(CallActor.class);
 
-    // Verb Handlers
-    // ================================================================================
-
-    // FIXME: this should be abstracted out into a 'VerbManager' class and be injected as a dependency
-    private static Map<Class<? extends Verb>, Class<? extends VerbHandler<? extends Verb>>> verbHandlers;
+    private Call call;
+    private VerbManager verbManager;
     
-    {
-        verbHandlers = new ConcurrentHashMap<Class<? extends Verb>, Class<? extends VerbHandler<? extends Verb>>>();
-        verbHandlers.put(Say.class, LocalSayHandler.class);
-        verbHandlers.put(Ask.class, LocalAskHandler.class);
-        verbHandlers.put(Transfer.class, LocalTransferHandler.class);
-        verbHandlers.put(Conference.class, LocalConferenceHandler.class);
-    }
-
-    // Configuration
-    // ================================================================================
-
-    private com.voxeo.moho.Call call;
-
     public CallActor(Call call) {
         this.call = call;
     }
@@ -246,15 +223,14 @@ public class CallActor extends ReflectiveActor implements Observer {
     @Message
     public String verb(Verb verb) throws Exception {
 
-        Class<? extends VerbHandler<? extends Verb>> handlerClass = verbHandlers.get(verb.getClass());
-        assertion(handlerClass != null, "Could not find handler class for " + verb.getClass());
+        VerbFactory verbFactory = verbManager.getVerbFactory(verb.getClass());
+        
+        assertion(verbFactory != null, "Could not find handler class for " + verb.getClass());
 
         // Generate Verb ID
         verb.setVerbId(UUID.randomUUID().toString());
 
-        log.info("Creating new Verb Handler [class=%s]", handlerClass);
-
-        VerbHandler<? extends Verb> verbHandler = handlerClass.newInstance();
+        VerbHandler<? extends Verb> verbHandler = verbFactory.createVerbHandler();
         verbHandler.setModel(verb);
         verbHandler.setCall(call);
         verbHandler.setEventDispatcher(verbDispatcher);
@@ -364,13 +340,6 @@ public class CallActor extends ReflectiveActor implements Observer {
         }
     }
 
-    // Properties
-    // ================================================================================
-
-    public Call getCall() {
-        return call;
-    }
-
     // Util
     // ================================================================================
 
@@ -407,6 +376,21 @@ public class CallActor extends ReflectiveActor implements Observer {
         command.setCallId(myId());
         Request request = new Request(command, callback);
         return publish(request);
+    }
+
+    // Properties
+    // ================================================================================
+
+    public Call getCall() {
+        return call;
+    }
+
+    public void setVerbManager(VerbManager verbManager) {
+        this.verbManager = verbManager;
+    }
+
+    public VerbManager getVerbManager() {
+        return verbManager;
     }
 
 }

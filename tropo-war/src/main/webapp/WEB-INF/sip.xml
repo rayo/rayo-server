@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE sip-app PUBLIC "-//Java Community Process//DTD SIP Application 1.0//EN" "http://www.jcp.org/dtd/sip-app_1_0.dtd">
-<sip-app>
+<sip-app id="tropo2">
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
 		<param-value>/WEB-INF/tropo-context.xml</param-value>

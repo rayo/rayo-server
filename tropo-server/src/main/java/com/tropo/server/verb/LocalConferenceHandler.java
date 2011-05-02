@@ -22,7 +22,7 @@ public class LocalConferenceHandler extends AbstractLocalVerbHandler<Conference>
 
     @Override
     public void start() {
-        conferenceRoom = conferenceManager.getConferenceRoom(model.getId(), true, call.getApplicationContext());
+        conferenceRoom = conferenceManager.getConferenceRoom(model.getRoomName(), true, call.getApplicationContext());
         conferenceRoom.enter(call, model);
         joined = true;
     }

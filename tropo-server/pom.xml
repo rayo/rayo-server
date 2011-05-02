@@ -83,6 +83,12 @@
 		    <artifactId>slf4j-api</artifactId>
 		    <version>1.6.1</version>
 		</dependency>    
+		<!-- For Spring AOP -->
+		<dependency>
+			<groupId>cglib</groupId>
+			<artifactId>cglib-nodep</artifactId>
+			<version>2.1_3</version>
+		</dependency>
 	</dependencies>
 	
 </project>

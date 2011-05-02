@@ -13,6 +13,7 @@ public class CallManager extends ReflectiveActor {
     private static final Loggerf log = Loggerf.getLogger(CallManager.class);
 
     private CallRegistry callRegistry;
+    private CallActorFactory callActorFactory;
     private ApplicationContext applicationContext;
     
     // Calls
@@ -41,8 +42,7 @@ public class CallManager extends ReflectiveActor {
         }
         
         // Construct Actor
-        CallActor callActor = new CallActor(call);
-        callActor.setFiberFactory(getFiberFactory());
+        CallActor callActor = callActorFactory.create(call);
         callActor.start();
 
         // Wire up default call handlers
@@ -84,6 +84,14 @@ public class CallManager extends ReflectiveActor {
 
     public void setCallRegistry(CallRegistry registry) {
         this.callRegistry = registry;
+    }
+
+    public void setCallActorFactory(CallActorFactory callActorFactory) {
+        this.callActorFactory = callActorFactory;
+    }
+
+    public CallActorFactory getCallActorFactory() {
+        return callActorFactory;
     }
 
 }

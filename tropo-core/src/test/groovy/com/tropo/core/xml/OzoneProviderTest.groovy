@@ -455,7 +455,7 @@ public class OzoneProviderTest {
 		assertTrue conference.beep
 		assertTrue conference.tonePassthrough
 		assertTrue conference.mute
-		assertEquals conference.id,"123456"
+		assertEquals conference.roomName,"123456"
 	}
 	
 	@Test

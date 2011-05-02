@@ -12,17 +12,13 @@
     default-autowire="byName">
 	
 	<bean id="ozone" class="com.tropo.server.OzoneServlet" init-method="init">
-		<property name="provider" ref="provider" />
 		<!-- These dependencies come from the parent: tropo-context.xml -->
+		<property name="provider" ref="xmlProviderManager" />
 		<property name="callManager" ref="callManager" />
 		<property name="callRegistry" ref="callRegistry" />
 		<property name="exceptionMapper" ref="exceptionMapper" />
 	</bean>
 		
 	<bean id="exceptionMapper" class="com.tropo.server.exception.ExceptionMapper"/>
-	<bean id="validator" class="com.tropo.core.validation.Validator"/>
-	<bean id="provider" class="com.tropo.core.xml.OzoneProvider">
-		<property name="validator" ref="validator"/>
-	</bean>
 	
 </beans>

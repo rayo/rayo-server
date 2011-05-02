@@ -48,7 +48,7 @@ import com.tropo.core.verb.StopCommand;
 import com.tropo.core.verb.Transfer;
 import com.tropo.core.verb.TransferCompleteEvent;
 
-public class OzoneProvider implements Provider {
+public class OzoneProvider implements XmlProvider {
 
 	private Validator validator;
 	
@@ -299,7 +299,7 @@ public class OzoneProvider implements Provider {
             conference.setTonePassthrough(Boolean.valueOf(root.attributeValue("tone-passthrough")));
         }
         if (root.attributeValue("id") != null) {
-            conference.setVerbId(root.attributeValue("id"));
+            conference.setRoomName(root.attributeValue("id"));
         }
         return conference;
     }
@@ -377,7 +377,7 @@ public class OzoneProvider implements Provider {
 	private PromptItems extractPromptItems(Element node) throws URISyntaxException {
 
 		PromptItems items = new PromptItems();
-		List<Element> elements = node.elements();
+        List<Element> elements = node.elements();
 		for(Element element: elements) {
 			if (element.getName().equals("audio")) {
 				AudioItem item = new AudioItem();
@@ -774,4 +774,23 @@ public class OzoneProvider implements Provider {
 	public void setValidator(Validator validator) {
 		this.validator = validator;
 	}
+
+	@Override
+    public boolean handles(Element element) {
+        // This should technically only return true is this provider can handle
+        // this mesasge type but since we only have one for now and this class will 
+        // eventually be broken up into verb-specific classes we just trruen true for 
+        // now
+        return true;
+    }
+
+    @Override
+    public boolean handles(Class<?> clazz) {
+        // This should technically only return true is this provider can handle
+        // this class but since we only have one for now and this class will 
+        // eventually be broken up into verb-specific classes we just trruen true for 
+        // now
+        return true;
+    }
+
 }
