@@ -116,8 +116,8 @@ public class OzoneProvider implements Provider {
     private Object buildOffer(Element element) throws URISyntaxException {
 
         Offer offer = new Offer(element.attributeValue("callId"));
-        offer.setFrom(new URI(element.attributeValue("from")));
-        offer.setTo(new URI(element.attributeValue("to")));
+        offer.setFrom(toURI(element.attributeValue("from")));
+        offer.setTo(toURI(element.attributeValue("to")));
         offer.setHeaders(grabHeaders(element));
 
         return offer;
@@ -160,7 +160,7 @@ public class OzoneProvider implements Provider {
     private Object buildRedirectCommand(Element element) throws URISyntaxException {
 
         RedirectCommand reject = new RedirectCommand(null);
-        reject.setTo(new URI(element.attributeValue("to")));
+        reject.setTo(toURI(element.attributeValue("to")));
         reject.setHeaders(grabHeaders(element));
 
         return reject;
@@ -229,7 +229,7 @@ public class OzoneProvider implements Provider {
             Choices choice = new Choices();
             choice.setContentType(choiceElement.attributeValue("content-type"));
             if (choiceElement.attributeValue("url") != null) {
-                choice.setUri(new URI(choiceElement.attributeValue("url")));
+                choice.setUri(toURI(choiceElement.attributeValue("url")));
             }
             choice.setContent(content);
             choices.add(choice);
@@ -250,17 +250,24 @@ public class OzoneProvider implements Provider {
 		if (root.attributeValue("timeout") !=  null) {
 			transfer.setTimeout(new Duration(root.attributeValue("timeout")));
 		}
-		transfer.setVoice(root.attributeValue("voice"));
+		if (root.attributeValue("answer-on-media") != null) {
+			transfer.setAnswerOnMedia(Boolean.valueOf(root.attributeValue("answer-on-media")));
+		}
+		if (root.attributeValue("voice") != null) {
+			transfer.setVoice(root.attributeValue("voice"));
+		}
 		transfer.setPromptItems(extractPromptItems(root));
 
 		if (root.attributeValue("from") != null) {
-			transfer.setFrom(new URI(root.attributeValue("prompt")));
+			transfer.setFrom(toURI(root.attributeValue("from")));
 		}
 		if (root.element("to") != null) {
 			List<URI> uriList = new ArrayList<URI>();
 			List<Element> elements = root.elements("to");
 			for(Element e: elements) {
-				uriList.add(new URI(e.getText()));
+				if (!e.getText().equals("")) {
+					uriList.add(toURI(e.getText()));
+				}
 			}
 			transfer.setTo(uriList);
 		}
@@ -381,7 +388,7 @@ public class OzoneProvider implements Provider {
 		for(Element element: elements) {
 			if (element.getName().equals("audio")) {
 				AudioItem item = new AudioItem();
-				item.setUri(new URI(element.attributeValue("url")));
+				item.setUri(toURI(element.attributeValue("url")));
 				items.add(item);				
 			} else if (element.getName().equals("speak")) {
 				String xml = element.asXML();
@@ -704,7 +711,7 @@ public class OzoneProvider implements Provider {
 				root.addElement("to").setText(uri.toString());
 			}
 		}
-		
+		root.addAttribute("answer-on-media", String.valueOf(transfer.isAnswerOnMedia()));
 		return document;
 	}
     
@@ -768,6 +775,15 @@ public class OzoneProvider implements Provider {
 			return InputMode.valueOf(element.attributeValue("mode"));
 		} catch (Exception e) {
 			throw new ValidationException(Messages.INVALID_INPUT_MODE);
+		}
+	}
+
+	private URI toURI(String string) {
+	
+		try {
+			return new URI(string);
+		} catch (URISyntaxException e) {
+			throw new ValidationException(Messages.INVALID_URI);
 		}
 	}
 	
