@@ -1,4 +1,4 @@
-# Tropo2 - A high performance real-time communications server ![Build status](http://travis-ci.org/sprsquish/blather.png))
+# Tropo2 - A high performance real-time communications server ![Build status](http://hudson.voxeolabs.com/hudson/job/Tropo%202/lastSuccessfulBuild/buildStatus))
 
 Tropo2 is the next generation server used to power http://tropo.com. The codebase is a ground up rewrite based on [Jetlang](http://code.google.com/p/jetlang/) and Voxeo's [Moho](http://labs.voxeo.com/moho) Communications Framework.
 
