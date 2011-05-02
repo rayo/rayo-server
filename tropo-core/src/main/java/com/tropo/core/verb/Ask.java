@@ -1,7 +1,9 @@
 package com.tropo.core.verb;
 
+import org.hibernate.validator.constraints.Range;
 import org.joda.time.Duration;
 
+import com.tropo.core.validation.Messages;
 import com.tropo.core.validation.ValidChoicesList;
 import com.tropo.core.validation.ValidPromptItems;
 import com.tropo.core.validation.ValidRecognizer;
@@ -22,6 +24,7 @@ public class Ask extends BaseVerb {
     
     @ValidRecognizer
     private String recognizer;
+    @Range(min=0,max=1,message=Messages.INVALID_CONFIDENCE_RANGE)
     private float minConfidence = 0.3f;
     private Character terminator;
     private Duration timeout = new Duration(30000);

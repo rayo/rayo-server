@@ -109,7 +109,7 @@ class ValidationTest {
 	@Test
 	public void validateAskInvalidInputMode() {
 				
-		def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" mode="aaaa" recognizer="ar-oo" voice=\"allison\"><choices>sales,support</choices><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
+		def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" mode="aaaa" voice=\"allison\"><choices>sales,support</choices><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
 		
 		def errorMapping = assertValidationException(ask)
 		assertNotNull errorMapping
@@ -119,10 +119,159 @@ class ValidationTest {
 	}
 	
 	@Test
+	public void validateAskInvalidTimeout() {
+				
+		def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" mode="both" timeout="aaaa" voice=\"allison\"><choices>sales,support</choices><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
+		
+		def errorMapping = assertValidationException(ask)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.INVALID_TIMEOUT
+	}
+	
+	@Test
+	public void validateAskInvalidConfidence() {
+				
+		def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" min-confidence="aaa" voice=\"allison\"><choices>sales,support</choices><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
+		
+		def errorMapping = assertValidationException(ask)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.INVALID_CONFIDENCE
+	}
+	
+	@Test
+	public void validateAskInvalidConfidenceRange() {
+				
+		def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" min-confidence="1.2" voice=\"allison\"><choices>sales,support</choices><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
+		
+		def errorMapping = assertValidationException(ask)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.INVALID_CONFIDENCE_RANGE
+	}
+	
+	@Test
+	public void validateAskInvalidConfidenceNegative() {
+				
+		def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" min-confidence="-1.0" voice=\"allison\"><choices>sales,support</choices><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
+		
+		def errorMapping = assertValidationException(ask)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.INVALID_CONFIDENCE_RANGE
+	}
+	
+	@Test
 	public void validateAskValid() {
 				
 		def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" recognizer="en-us" voice=\"allison\"><choices>sales,support</choices><prompt><speak xmlns=\"\">Choose your department.</speak></prompt></ask>""")		
 		assertNotNull provider.fromXML(ask)
+	}
+	
+	// Transfer
+	// ====================================================================================
+	
+	@Test
+	public void validateTransferNullTo() {
+				
+		def transfer = parseXml("""<transfer xmlns=\"urn:xmpp:ozone:transfer:1\"></transfer>""")
+		
+		def errorMapping = assertValidationException(transfer)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.MISSING_TO
+	}
+	
+	@Test
+	public void validateTransferEmptyTo() {
+				
+		def transfer = parseXml("""<transfer xmlns=\"urn:xmpp:ozone:transfer:1\"><to/></transfer>""")
+		
+		def errorMapping = assertValidationException(transfer)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.MISSING_TO
+	}
+	
+	@Test
+	public void validateTransferEmptyToAttribute() {
+				
+		def transfer = parseXml("""<transfer xmlns=\"urn:xmpp:ozone:transfer:1\" to=""></transfer>""")
+		
+		def errorMapping = assertValidationException(transfer)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.MISSING_TO
+	}
+	
+	@Test
+	public void validateTransferEmptyElementButNotEmptyToAttribute() {
+				
+		def transfer = parseXml("""<transfer xmlns=\"urn:xmpp:ozone:transfer:1\" to="tel:123456"><to/></transfer>""")
+		assertNotNull provider.fromXML(transfer)
+	}
+	
+	@Test
+	public void validateTransferInvalidToURI() {
+				
+		def transfer = parseXml("""<transfer xmlns=\"urn:xmpp:ozone:transfer:1\"><to>\$?\\.com</to></transfer>""")
+		
+		def errorMapping = assertValidationException(transfer)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.INVALID_URI
+	}
+	
+	@Test
+	public void validateTransferInvalidFromURI() {
+				
+		def transfer = parseXml("""<transfer xmlns=\"urn:xmpp:ozone:transfer:1\" from="\$?\\.com"><to>tel:123456789</to></transfer>""")
+		
+		def errorMapping = assertValidationException(transfer)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.INVALID_URI
+	}
+	
+	@Test
+	public void validateTransferInvalidAnswerOnMedia() {
+				
+		def transfer = parseXml("""<transfer xmlns=\"urn:xmpp:ozone:transfer:1\" from="tel:12345666" answer-on-media="111"><to>tel:123456789</to></transfer>""")
+		
+		def errorMapping = assertValidationException(transfer)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.INVALID_BOOLEAN
+	}
+	
+	@Test
+	public void validateTransferInvalidTimeout() {
+				
+		def transfer = parseXml("""<transfer xmlns=\"urn:xmpp:ozone:transfer:1\" from="tel:12345666" timeout="abc"><to>tel:123456789</to></transfer>""")
+		
+		def errorMapping = assertValidationException(transfer)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.INVALID_TIMEOUT
+	}
+	
+	@Test
+	public void validateTransferValid() {
+				
+		def transfer = parseXml("""<transfer xmlns=\"urn:xmpp:ozone:transfer:1\" from="tel:12345666"><to>tel:123456789</to></transfer>""")
+		assertNotNull provider.fromXML(transfer)
 	}
 	
 	def assertValidationException(def object) {

@@ -4,14 +4,19 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
+import org.hibernate.validator.constraints.NotEmpty;
 import org.joda.time.Duration;
+
+import com.tropo.core.validation.Messages;
 
 public class Transfer extends BaseVerb {
 
     private String voice;
     private PromptItems promptItems;
 
+    @NotEmpty(message=Messages.MISSING_TO)
     private List<URI> to;
+    
     private URI from;
     private Duration timeout = new Duration(30000);
     private boolean answerOnMedia;
