@@ -7,18 +7,7 @@
 	</configSuffixes>
 	<enableImports><![CDATA[false]]></enableImports>
 	<configs>
-		<config>src/main/webapp/WEB-INF/ozone-xmpp.xml</config>
-		<config>src/main/webapp/WEB-INF/tropo-context.xml</config>
 	</configs>
 	<configSets>
-		<configSet>
-			<name><![CDATA[tropo-war]]></name>
-			<allowBeanDefinitionOverriding>true</allowBeanDefinitionOverriding>
-			<incomplete>true</incomplete>
-			<configs>
-				<config>src/main/webapp/WEB-INF/ozone-xmpp.xml</config>
-				<config>src/main/webapp/WEB-INF/tropo-context.xml</config>
-			</configs>
-		</configSet>
 	</configSets>
 </beansProjectDescription>

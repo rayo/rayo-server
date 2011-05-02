@@ -4,8 +4,7 @@ package com.tropo.server
 import static org.junit.Assert.*
 
 import java.util.concurrent.BlockingQueue
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CountDownLatch
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.LinkedBlockingQueue
@@ -18,76 +17,55 @@ import org.jetlang.fibers.PoolFiberFactory
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationContext
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 
-import com.tropo.core.CallCommand;
-import com.tropo.core.CallEvent;
 import com.tropo.core.CallRejectReason
 import com.tropo.core.EndEvent
 import com.tropo.core.Offer
 import com.tropo.core.RejectCommand
 import com.tropo.core.EndEvent.Reason
-import com.tropo.core.verb.PauseCommand;
+import com.tropo.core.verb.PauseCommand
 import com.tropo.core.verb.PromptItems
-import com.tropo.core.verb.ResumeCommand;
+import com.tropo.core.verb.ResumeCommand
 import com.tropo.core.verb.Say
 import com.tropo.core.verb.SayCompleteEvent
 import com.tropo.core.verb.SsmlItem
-import com.tropo.core.verb.StopCommand;
-import com.tropo.core.verb.Verb;
-import com.tropo.core.verb.VerbCompleteEvent;
-import com.tropo.server.Actor
-import com.tropo.server.CallActor
-import com.tropo.server.CallManager
-import com.tropo.server.CallRegistry;
-import com.tropo.server.DefaultCallRegistry;
-import com.tropo.server.EventHandler
-import com.tropo.server.Request;
-import com.tropo.server.Response
-import com.tropo.server.ResponseHandler
-import com.tropo.server.verb.VerbHandler;
-import com.voxeo.exceptions.NotFoundException;
-import com.voxeo.moho.Call
-import com.voxeo.moho.MediaService;
-import com.tropo.server.test.MockApplicationContext;
+import com.tropo.core.verb.StopCommand
+import com.tropo.server.test.MockApplicationContext
 import com.tropo.server.test.MockCall
-import com.tropo.server.test.MockMediaService;
-import com.voxeo.moho.event.CallCompleteEvent;
-import com.voxeo.moho.event.OutputCompleteEvent;
-import com.voxeo.moho.event.OutputCompleteEvent.Cause;
-import com.voxeo.moho.media.Output;
-import com.voxeo.moho.media.output.OutputCommand;
+import com.tropo.server.test.MockMediaService
+import com.tropo.server.verb.DefaultVerbManager
+import com.voxeo.exceptions.NotFoundException
+import com.voxeo.moho.Call
+import com.voxeo.moho.MediaService
+import com.voxeo.moho.event.CallCompleteEvent
+import com.voxeo.moho.event.OutputCompleteEvent
+import com.voxeo.moho.event.OutputCompleteEvent.Cause
+import com.voxeo.moho.media.Output
+import com.voxeo.moho.media.output.OutputCommand
 
-
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations=["/tropo-context.xml"])
 public class IntegrationTest {
 
     @Autowired
-    private ApplicationContext springContext
+    private CallManager callManager
+    
+    @Autowired
+    private CallRegistry callRegistry
     
     private Offer offer
     private Call mohoCall
-    private Actor callManager
     private CallActor callActor
-    
-    private CallRegistry calls
     private BlockingQueue<Object> messageQueue = new LinkedBlockingQueue<Object>()
 
     @Before
     public void setup() {
         
-        ExecutorService service = Executors.newCachedThreadPool();
-        PoolFiberFactory fact = new PoolFiberFactory(service);
-        Fiber fiber = fact.create();
-        Channel<String> channel = new MemoryChannel<String>();
-        
-        calls = new DefaultCallRegistry()
-        
-        callManager = new CallManager([
-            fiberFactory: fact,
-            callRegistry: calls,
-            applicationContext: new MockApplicationContext()
-        ])
         callManager.start()
         
         messageQueue.clear();
@@ -104,7 +82,7 @@ public class IntegrationTest {
         // We should get an Offer
         offer = poll()
 
-        callActor = calls.get(mohoCall.id)
+        callActor = callRegistry.get(mohoCall.id)
     }
     
     @After
@@ -114,7 +92,7 @@ public class IntegrationTest {
         sleep(100)
         
         // Make sure the registry is empty
-        assertTrue calls.isEmpty()
+        assertTrue callRegistry.isEmpty()
 
         // Make sure we didn't miss any events
         assertTrue messageQueue.isEmpty()
@@ -131,7 +109,7 @@ public class IntegrationTest {
         assertEquals mohoCall.id, offer.callId
 
         // Make sure we have a call in the registry
-        assertEquals 1, calls.size()
+        assertEquals 1, callRegistry.size()
         
         // Check that our headers made it into the offer
         assertEquals 2, offer.headers.size()
@@ -443,7 +421,7 @@ public class IntegrationTest {
     }
    
     def poll = {
-        messageQueue.poll(60, TimeUnit.SECONDS);
+        messageQueue.poll(10, TimeUnit.SECONDS);
     }
     
     def makeMohoCall = {
