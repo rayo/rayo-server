@@ -196,10 +196,10 @@ public class OzoneProvider implements Provider {
         Element root = element;
         Ask ask = new Ask();
         if (root.attributeValue("bargein") != null) {
-            ask.setBargein(Boolean.valueOf(root.attributeValue("bargein")));
+            ask.setBargein(toBoolean(root.attributeValue("bargein")));
         }
         if (root.attributeValue("min-confidence") != null) {
-            ask.setMinConfidence(Float.valueOf(root.attributeValue("min-confidence")));
+            ask.setMinConfidence(toFloatConfidence(root.attributeValue("min-confidence")));
         }
         if (root.attributeValue("mode") != null) {
             ask.setMode(loadInputMode(root));
@@ -209,11 +209,11 @@ public class OzoneProvider implements Provider {
             ask.setTerminator(root.attributeValue("terminator").charAt(0));
         }
         if (root.attributeValue("timeout") != null) {
-            ask.setTimeout(new Duration(root.attributeValue("timeout")));
+            ask.setTimeout(toTimeout(root.attributeValue("timeout")));
         }
         ask.setVoice(root.attributeValue("voice"));
         if (root.attributeValue("bargein") != null) {
-            ask.setBargein(Boolean.valueOf(root.attributeValue("bargein")));
+            ask.setBargein(toBoolean(root.attributeValue("bargein")));
         }
         
         Element promptElement = element.element("prompt");
@@ -248,10 +248,10 @@ public class OzoneProvider implements Provider {
 			transfer.setTerminator(root.attributeValue("terminator").charAt(0));
 		}		
 		if (root.attributeValue("timeout") !=  null) {
-			transfer.setTimeout(new Duration(root.attributeValue("timeout")));
+			transfer.setTimeout(toTimeout(root.attributeValue("timeout")));
 		}
 		if (root.attributeValue("answer-on-media") != null) {
-			transfer.setAnswerOnMedia(Boolean.valueOf(root.attributeValue("answer-on-media")));
+			transfer.setAnswerOnMedia(toBoolean(root.attributeValue("answer-on-media")));
 		}
 		if (root.attributeValue("voice") != null) {
 			transfer.setVoice(root.attributeValue("voice"));
@@ -261,8 +261,12 @@ public class OzoneProvider implements Provider {
 		if (root.attributeValue("from") != null) {
 			transfer.setFrom(toURI(root.attributeValue("from")));
 		}
-		if (root.element("to") != null) {
+		if (root.element("to") != null || root.attributeValue("to") != null) {
 			List<URI> uriList = new ArrayList<URI>();
+			String to = root.attributeValue("to");
+			if (to != null && !to.trim().equals("")) {
+				uriList.add(toURI(to));
+			}
 			List<Element> elements = root.elements("to");
 			for(Element e: elements) {
 				if (!e.getText().equals("")) {
@@ -297,13 +301,13 @@ public class OzoneProvider implements Provider {
             conference.setTerminator(root.attributeValue("terminator").charAt(0));
         }
         if (root.attributeValue("beep") != null) {
-            conference.setBeep(Boolean.valueOf(root.attributeValue("beep")));
+            conference.setBeep(toBoolean(root.attributeValue("beep")));
         }
         if (root.attributeValue("mute") != null) {
-            conference.setMute(Boolean.valueOf(root.attributeValue("mute")));
+            conference.setMute(toBoolean(root.attributeValue("mute")));
         }
         if (root.attributeValue("tone-passthrough") != null) {
-            conference.setTonePassthrough(Boolean.valueOf(root.attributeValue("tone-passthrough")));
+            conference.setTonePassthrough(toBoolean(root.attributeValue("tone-passthrough")));
         }
         if (root.attributeValue("id") != null) {
             conference.setVerbId(root.attributeValue("id"));
@@ -345,7 +349,7 @@ public class OzoneProvider implements Provider {
 				askComplete.setNlsml(element.attributeValue("nlsml"));			
 			}
 			if (element.attributeValue("confidence") != null) {
-				askComplete.setConfidence(new Float(element.attributeValue("confidence")));			
+				askComplete.setConfidence(toFloatConfidence(element.attributeValue("confidence")));			
 			}
 			if (element.attributeValue("tag") != null) {
 				askComplete.setTag(element.attributeValue("tag"));			
@@ -707,8 +711,12 @@ public class OzoneProvider implements Provider {
 			root.addAttribute("from", transfer.getFrom().toString());
 		}
 		if (transfer.getTo() != null) {
-			for (URI uri: transfer.getTo()) {
-				root.addElement("to").setText(uri.toString());
+			if (transfer.getTo().size() == 1) {
+				root.addAttribute("to", transfer.getTo().get(0).toString());
+			} else {
+				for (URI uri: transfer.getTo()) {
+					root.addElement("to").setText(uri.toString());
+				}
 			}
 		}
 		root.addAttribute("answer-on-media", String.valueOf(transfer.isAnswerOnMedia()));
@@ -786,6 +794,37 @@ public class OzoneProvider implements Provider {
 			throw new ValidationException(Messages.INVALID_URI);
 		}
 	}
+
+	private Boolean toBoolean(String string) {
+	
+		if (string == null) {
+			throw new ValidationException(Messages.INVALID_BOOLEAN);
+		}
+		string = string.toLowerCase();
+		if (string.equals("false") || string.equals("true")) {
+			return Boolean.valueOf(string);
+		}
+		throw new ValidationException(Messages.INVALID_BOOLEAN);
+	}
+
+	private Duration toTimeout(String value) {
+	
+		try {
+			return new Duration(value);
+		} catch (IllegalArgumentException iae) {
+			throw new ValidationException(Messages.INVALID_TIMEOUT);
+		}
+	}
+
+	private Float toFloatConfidence(String value) {
+		
+		try {
+			return Float.valueOf(value);
+		} catch (NumberFormatException nfe) {
+			throw new ValidationException(Messages.INVALID_CONFIDENCE);
+		}
+	}
+
 	
 	public void setValidator(Validator validator) {
 		this.validator = validator;
