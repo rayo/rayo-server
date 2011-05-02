@@ -1,6 +1,7 @@
 package com.tropo.server.exception;
 
 import javax.validation.ConstraintViolation;
+import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.NotNull;
 
 import org.hibernate.validator.constraints.NotEmpty;
@@ -31,6 +32,7 @@ public class ExceptionMapper {
 					violation.getConstraintDescriptor().getAnnotation() instanceof NotEmpty ||
 					violation.getConstraintDescriptor().getAnnotation() instanceof ValidPromptItems ||
 					violation.getConstraintDescriptor().getAnnotation() instanceof Range ||
+                    violation.getConstraintDescriptor().getAnnotation() instanceof AssertTrue ||
 					violation.getConstraintDescriptor().getAnnotation() instanceof ValidChoicesList ||
 					violation.getConstraintDescriptor().getAnnotation() instanceof ValidRecognizer) {
 					errorCondition = XmppStanzaError.BAD_REQUEST_CONDITION;

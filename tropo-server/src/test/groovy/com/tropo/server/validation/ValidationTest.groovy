@@ -149,9 +149,9 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(ask)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
-		assertEquals errorMapping.text, Messages.INVALID_CONFIDENCE_RANGE
+		assertEquals XmppStanzaError.Type_MODIFY, errorMapping.type
+		assertEquals XmppStanzaError.BAD_REQUEST_CONDITION, errorMapping.condition
+		assertEquals Messages.INVALID_CONFIDENCE_RANGE, errorMapping.text
 	}
 	
 	@Test
@@ -161,9 +161,9 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(ask)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
-		assertEquals errorMapping.text, Messages.INVALID_CONFIDENCE_RANGE
+        assertEquals XmppStanzaError.Type_MODIFY, errorMapping.type
+        assertEquals XmppStanzaError.BAD_REQUEST_CONDITION, errorMapping.condition
+        assertEquals Messages.INVALID_CONFIDENCE_RANGE, errorMapping.text
 	}
 	
 	@Test
