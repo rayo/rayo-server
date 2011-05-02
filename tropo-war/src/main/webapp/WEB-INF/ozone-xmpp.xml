@@ -16,8 +16,13 @@
 		<!-- These dependencies come from the parent: tropo-context.xml -->
 		<property name="callManager" ref="callManager" />
 		<property name="callRegistry" ref="callRegistry" />
+		<property name="exceptionMapper" ref="exceptionMapper" />
 	</bean>
 		
-	<bean id="provider" class="com.tropo.core.xml.OzoneProvider" />
+	<bean id="exceptionMapper" class="com.tropo.server.exception.ExceptionMapper"/>
+	<bean id="validator" class="com.tropo.core.validation.Validator"/>
+	<bean id="provider" class="com.tropo.core.xml.OzoneProvider">
+		<property name="validator" ref="validator"/>
+	</bean>
 	
 </beans>

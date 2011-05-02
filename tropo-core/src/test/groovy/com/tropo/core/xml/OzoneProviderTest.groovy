@@ -25,6 +25,7 @@ import com.tropo.core.HangupCommand
 import com.tropo.core.Offer
 import com.tropo.core.RedirectCommand
 import com.tropo.core.RejectCommand
+import com.tropo.core.validation.Validator;
 import com.tropo.core.verb.Ask;
 import com.tropo.core.verb.AskCompleteEvent;
 import com.tropo.core.verb.AudioItem;
@@ -51,7 +52,7 @@ public class OzoneProviderTest {
 	
 	@Before
 	public void setup() {
-		provider = new OzoneProvider()
+		provider = new OzoneProvider(validator:new Validator())
 	}
 
 	// Offer
@@ -289,20 +290,6 @@ public class OzoneProviderTest {
 
 	// Say
 	// ====================================================================================
-	@Test
-	public void emptySayFromXml() {
-		
-		def say = fromXml("""<say xmlns=\"urn:xmpp:ozone:say:1\"/>""")
-		assertNotNull say
-	}
-
-	@Test
-	public void sayFromXml() {
-		
-		def say = fromXml("""<say xmlns=\"urn:xmpp:ozone:say:1\" voice=\"allison\"/>""")
-		assertNotNull say
-		assertEquals say.voice, "allison"
-	}
 
 	@Test
 	public void audioSayFromXml() {
@@ -365,21 +352,14 @@ public class OzoneProviderTest {
 	// Ask
 	// ====================================================================================
 	@Test
-	public void emptyAskFromXml() {
-		
-		def ask = fromXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\"/>""")
-		assertNotNull ask
-	}
-
-	@Test
 	public void askFromXml() {
 		
-		def ask = fromXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" voice=\"allison\" min-confidence=\"0.8\" mode=\"dtmf\" recognizer=\"test\" terminator=\"#\" timeout=\"PT3S\" bargein=\"true\"></ask>""")
+		def ask = fromXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" voice=\"allison\" min-confidence=\"0.8\" mode=\"dtmf\" recognizer=\"en-us\" terminator=\"#\" timeout=\"PT3S\" bargein=\"true\"><choices>a,b</choices><prompt><speak>hello world</speak></prompt></ask>""")
 		assertNotNull ask
 		assertEquals ask.voice, "allison"
 		assertTrue ask.minConfidence == 0.8f
 		assertEquals ask.mode, InputMode.dtmf
-		assertEquals ask.recognizer,"test"
+		assertEquals ask.recognizer,"en-us"
 		assertEquals ask.terminator,'#' as char
 		assertEquals ask.timeout, new Duration(3000)
 	}
@@ -387,7 +367,7 @@ public class OzoneProviderTest {
 	@Test
 	public void audioAskFromXml() {
 		
-		def ask = fromXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" voice=\"allison\" min-confidence=\"0.8\" mode=\"dtmf\" recognizer=\"test\" terminator=\"#\" timeout=\"PT3S\" bargein=\"true\"><prompt><audio url=\"http://ccmixter.org/content/DoKashiteru/DoKashiteru_-_you_(na-na-na-na).mp3\"/></prompt></ask>""")
+		def ask = fromXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" voice=\"allison\" min-confidence=\"0.8\" mode=\"dtmf\" recognizer=\"en-us\" terminator=\"#\" timeout=\"PT3S\" bargein=\"true\"><prompt><audio url=\"http://ccmixter.org/content/DoKashiteru/DoKashiteru_-_you_(na-na-na-na).mp3\"/></prompt><choices>a,b</choices></ask>""")
 		assertNotNull ask
 		assertNotNull ask.promptItems
 		assertEquals ask.promptItems.size(),1
@@ -397,7 +377,7 @@ public class OzoneProviderTest {
 	@Test
 	public void ssmlAskFromXml() {
 		
-		def ask = fromXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" voice=\"allison\" min-confidence=\"0.8\" mode=\"dtmf\" recognizer=\"test\" terminator=\"#\" timeout=\"PT3S\" bargein=\"true\"><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
+		def ask = fromXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" voice=\"allison\" min-confidence=\"0.8\" mode=\"dtmf\" recognizer=\"en-us\" terminator=\"#\" timeout=\"PT3S\" bargein=\"true\"><prompt><speak xmlns=\"\">Hello World.</speak></prompt><choices>a,b</choices></ask>""")
 		assertNotNull ask
 		assertNotNull ask.promptItems
 		assertEquals ask.promptItems.size(),1

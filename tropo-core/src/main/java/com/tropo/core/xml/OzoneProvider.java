@@ -25,6 +25,8 @@ import com.tropo.core.Offer;
 import com.tropo.core.RedirectCommand;
 import com.tropo.core.RejectCommand;
 import com.tropo.core.RingEvent;
+import com.tropo.core.validation.Messages;
+import com.tropo.core.validation.ValidationException;
 import com.tropo.core.validation.Validator;
 import com.tropo.core.verb.Ask;
 import com.tropo.core.verb.AskCompleteEvent;
@@ -93,7 +95,9 @@ public class OzoneProvider implements Provider {
 			}
             else {
               throw new IllegalArgumentException("Element is not supported: " + element);
-            }            
+            }      
+        } catch (ValidationException ve) {
+        	throw ve;
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }
@@ -198,7 +202,7 @@ public class OzoneProvider implements Provider {
             ask.setMinConfidence(Float.valueOf(root.attributeValue("min-confidence")));
         }
         if (root.attributeValue("mode") != null) {
-            ask.setMode(InputMode.valueOf(root.attributeValue("mode")));
+            ask.setMode(loadInputMode(root));
         }
         ask.setRecognizer(root.attributeValue("recognizer"));
         if (root.attributeValue("terminator") != null) {
@@ -220,12 +224,14 @@ public class OzoneProvider implements Provider {
         ChoicesList choices = new ChoicesList();
         List<Element> choicesElements = root.elements("choices");
         for (Element choiceElement : choicesElements) {
+        	String content = choiceElement.getText();
+        	if (content.equals("")) continue; // skip empty choices tag
             Choices choice = new Choices();
             choice.setContentType(choiceElement.attributeValue("content-type"));
             if (choiceElement.attributeValue("url") != null) {
                 choice.setUri(new URI(choiceElement.attributeValue("url")));
             }
-            choice.setContent(choiceElement.getText());
+            choice.setContent(content);
             choices.add(choice);
         }
         ask.setChoices(choices);
@@ -367,6 +373,7 @@ public class OzoneProvider implements Provider {
 		return null;
 	}	
 
+	@SuppressWarnings("unchecked")
 	private PromptItems extractPromptItems(Element node) throws URISyntaxException {
 
 		PromptItems items = new PromptItems();
@@ -755,6 +762,15 @@ public class OzoneProvider implements Provider {
 		return document;
 	}
 
+	private InputMode loadInputMode(Element element) {
+	
+		try {
+			return InputMode.valueOf(element.attributeValue("mode"));
+		} catch (Exception e) {
+			throw new ValidationException(Messages.INVALID_INPUT_MODE);
+		}
+	}
+	
 	public void setValidator(Validator validator) {
 		this.validator = validator;
 	}

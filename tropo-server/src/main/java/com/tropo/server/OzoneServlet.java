@@ -23,6 +23,8 @@ import com.tropo.core.verb.Verb;
 import com.tropo.core.verb.VerbCommand;
 import com.tropo.core.verb.VerbEvent;
 import com.tropo.core.xml.Provider;
+import com.tropo.server.exception.ErrorMapping;
+import com.tropo.server.exception.ExceptionMapper;
 import com.voxeo.exceptions.NotFoundException;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.servlet.xmpp.JID;
@@ -36,6 +38,7 @@ import com.voxeo.servlet.xmpp.XmppSession;
 import com.voxeo.servlet.xmpp.XmppSession.SessionType;
 import com.voxeo.servlet.xmpp.XmppStanzaError;
 
+@SuppressWarnings("serial")
 public class OzoneServlet extends XmppServlet {
 
     private static final Loggerf log = Loggerf.getLogger(OzoneServlet.class);
@@ -48,6 +51,7 @@ public class OzoneServlet extends XmppServlet {
     private XmppFactory xmppFactory;
     private CallManager callManager;
     private CallRegistry callRegistry;
+    private ExceptionMapper exceptionMapper;
 
     private Map<String, XmppSession> clientSessions = new ConcurrentHashMap<String, XmppSession>();
 
@@ -157,83 +161,90 @@ public class OzoneServlet extends XmppServlet {
     @Override
     protected void doIQRequest(final XmppServletIQRequest request) throws ServletException, IOException {
 
-        WIRE.debug("%s :: %s", request.getElement().asXML(), request.getSession().getId());
-
-        if (request.getSession().getSessionType() == XmppSession.SessionType.CLIENT) {
-
-            // Extract Request
-            Element payload = (Element) request.getElement().elementIterator().next();
-            QName qname = payload.getQName();
-
-            // Create empty result element
-            final Element result = DocumentHelper.createElement("iq");
-            result.addAttribute("type", "result");
-            result.addAttribute("to", request.getFrom().toString());
-            result.addAttribute("from", request.getTo().toString());
-
-            // Resource Binding
-            if (qname.equals(BIND_QNAME)) {
-                String boundJid = request.getFrom().getNode() + "@" + request.getFrom().getDomain() + "/voxeo";
-                result.addElement(BIND_QNAME).addElement("jid").setText(boundJid);
-                request.createIQResultResponse(result).send();
-                log.info("Bound client resource [jid=%s]", boundJid);
-
-            // Session Binding
-            } else if (qname.equals(SESSION_QNAME)) {
-                result.addElement(SESSION_QNAME);
-                request.createIQResultResponse(result).send();
-
-            // Ozone Command
-            } else if (qname.getNamespaceURI().startsWith("urn:xmpp:ozone")) {
-                
-                
-                final CallCommand command = provider.fromXML(payload);
-                
-                String callId = request.getTo().getNode();
-                command.setCallId(callId);
-
-                if (command instanceof VerbCommand) {
-                    VerbCommand verbCommand = (VerbCommand) command;
-                    verbCommand.setCallId(callId(request.getTo()));
-                    if (command instanceof Verb) {
-                        verbCommand.setVerbId(UUID.randomUUID().toString());
-                    } else {
-                        verbCommand.setVerbId(request.getTo().getResource());
-                    }
-                }
-                
-                CallActor actor = null;
-                try {
-                    actor = findCallActor(command.getCallId());
-                } catch (NotFoundException e) {
-                    request.createIQErrorResponse("cancel", "item-not-found", null, null, null).send();
-                    return;
-                }
-
-                actor.command(command, new ResponseHandler() {
-                    @Override
-                    public void handle(Response commandResponse) throws Exception {
-                        Object value = commandResponse.getValue();
-                        if(value instanceof Exception) {
-                            Exception e = (Exception) value;
-                            XmppServletIQResponse xmppResponse = request.createIQErrorResponse("cancel", "internal-server-error", null, null, null);
-                            xmppResponse.getElement().addElement("detail").setText(e.getMessage());
-                            xmppResponse.send();
-                            return;
-                        }
-                        else if (command instanceof Verb) {
-                            // Generate Verb Reference
-                            result.addElement("ref").addAttribute("jid", request.getTo().getBareJID() + "/" + ((Verb) command).getId());
-                        }
-                        request.createIQResultResponse(result).send();
-                    }
-                });
-            }
-            // We don't handle this type of request...
-            else {
-                request.createIQErrorResponse(XmppStanzaError.Type_CANCEL, XmppStanzaError.FEATURE_NOT_IMPLEMENTED_CONDITION, null, null, null).send();
-            }
-        }
+    	try {
+	        WIRE.debug("%s :: %s", request.getElement().asXML(), request.getSession().getId());
+	
+	        if (request.getSession().getSessionType() == XmppSession.SessionType.CLIENT) {
+	
+	            // Extract Request
+	            Element payload = (Element) request.getElement().elementIterator().next();
+	            QName qname = payload.getQName();
+	
+	            // Create empty result element
+	            final Element result = DocumentHelper.createElement("iq");
+	            result.addAttribute("type", "result");
+	            result.addAttribute("to", request.getFrom().toString());
+	            result.addAttribute("from", request.getTo().toString());
+	
+	            // Resource Binding
+	            if (qname.equals(BIND_QNAME)) {
+	                String boundJid = request.getFrom().getNode() + "@" + request.getFrom().getDomain() + "/voxeo";
+	                result.addElement(BIND_QNAME).addElement("jid").setText(boundJid);
+	                request.createIQResultResponse(result).send();
+	                log.info("Bound client resource [jid=%s]", boundJid);
+	
+	            // Session Binding
+	            } else if (qname.equals(SESSION_QNAME)) {
+	                result.addElement(SESSION_QNAME);
+	                request.createIQResultResponse(result).send();
+	
+	            // Ozone Command
+	            } else if (qname.getNamespaceURI().startsWith("urn:xmpp:ozone")) {
+	                
+	                
+	                final CallCommand command = provider.fromXML(payload);
+	                
+	                String callId = request.getTo().getNode();
+	                command.setCallId(callId);
+	
+	                if (command instanceof VerbCommand) {
+	                    VerbCommand verbCommand = (VerbCommand) command;
+	                    verbCommand.setCallId(callId(request.getTo()));
+	                    if (command instanceof Verb) {
+	                        verbCommand.setVerbId(UUID.randomUUID().toString());
+	                    } else {
+	                        verbCommand.setVerbId(request.getTo().getResource());
+	                    }
+	                }
+	                
+	                CallActor actor = null;
+	                try {
+	                    actor = findCallActor(command.getCallId());
+	                } catch (NotFoundException e) {
+	                    request.createIQErrorResponse("cancel", "item-not-found", null, null, null).send();
+	                    return;
+	                }
+	
+	                actor.command(command, new ResponseHandler() {
+	                    @Override
+	                    public void handle(Response commandResponse) throws Exception {
+	                        Object value = commandResponse.getValue();
+	                        if(value instanceof Exception) {
+	                            Exception e = (Exception) value;
+	                            XmppServletIQResponse xmppResponse = request.createIQErrorResponse("cancel", "internal-server-error", null, null, null);
+	                            xmppResponse.getElement().addElement("detail").setText(e.getMessage());
+	                            xmppResponse.send();
+	                            return;
+	                        }
+	                        else if (command instanceof Verb) {
+	                            // Generate Verb Reference
+	                            result.addElement("ref").addAttribute("jid", request.getTo().getBareJID() + "/" + ((Verb) command).getId());
+	                        }
+	                        request.createIQResultResponse(result).send();
+	                    }
+	                });
+	            }
+	            // We don't handle this type of request...
+	            else {
+	                request.createIQErrorResponse(XmppStanzaError.Type_CANCEL, XmppStanzaError.FEATURE_NOT_IMPLEMENTED_CONDITION, null, null, null).send();
+	            }
+	        }
+    	} catch (Exception e) {
+    		log.error(String.format("Error found while processing IQ message: %s.", e.getMessage()));
+    		ErrorMapping error = exceptionMapper.toXmppError(e);
+    		log.debug(String.format("Generating error response: %s.", e));
+    		request.createIQErrorResponse(error.getType(), error.getCondition(), error.getText(), null, null).send();
+    	}
     }
     
     @Override
@@ -295,5 +306,9 @@ public class OzoneServlet extends XmppServlet {
     public void setCallRegistry(CallRegistry callRegistry) {
         this.callRegistry = callRegistry;
     }
+
+	public void setExceptionMapper(ExceptionMapper exceptionMapper) {
+		this.exceptionMapper = exceptionMapper;
+	}
 
 }

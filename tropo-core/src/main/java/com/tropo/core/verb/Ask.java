@@ -2,14 +2,25 @@ package com.tropo.core.verb;
 
 import org.joda.time.Duration;
 
+import com.tropo.core.validation.ValidChoicesList;
+import com.tropo.core.validation.ValidPromptItems;
+import com.tropo.core.validation.ValidRecognizer;
+
 public class Ask extends BaseVerb {
 
     private String voice;
+    
+    @ValidPromptItems 
     private PromptItems promptItems;
+    
     private boolean bargein = true;
 
+    @ValidChoicesList
     private ChoicesList choices;
+    
     private InputMode mode = InputMode.both;
+    
+    @ValidRecognizer
     private String recognizer;
     private float minConfidence = 0.3f;
     private Character terminator;
