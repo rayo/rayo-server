@@ -3,7 +3,7 @@
 <sip-app id="tropo2">
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
-		<param-value>/WEB-INF/tropo-context.xml</param-value>
+		<param-value>classpath:tropo-context.xml</param-value>
 	</context-param>
 	<listener>
 		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>

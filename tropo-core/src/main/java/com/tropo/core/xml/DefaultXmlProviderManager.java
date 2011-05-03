@@ -12,31 +12,29 @@ public class DefaultXmlProviderManager implements XmlProviderManager {
 
     @Override
     public Element toXML(Object object) {
-
+        
         assertion(object != null, "Cannot serialize null reference");
-
+        
         for (XmlProvider provider : providers) {
             if (provider.handles(object.getClass())) {
                 return provider.toXML(object);
             }
         }
-
         return null;
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <T> T fromXML(Element element) {
 
         assertion(element != null, "Cannot deserialize null reference");
 
         for (XmlProvider provider : providers) {
             if (provider.handles(element)) {
-                return provider.fromXML(element);
+                return (T)provider.fromXML(element);
             }
         }
-
         return null;
-
     }
 
     @Override
