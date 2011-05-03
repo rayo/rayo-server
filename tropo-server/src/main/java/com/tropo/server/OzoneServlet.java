@@ -63,13 +63,17 @@ public class OzoneServlet extends XmppServlet {
 
     @Override
     public void init(ServletConfig config) throws ServletException {
-
         super.init(config);
         xmppFactory = (XmppFactory) config.getServletContext().getAttribute(XMPP_FACTORY);
     }
 
-    @PostConstruct
-    public void init() {
+    /**
+     * Called by Spring on component initialization
+     * 
+     * Cannot be called 'init' since it would override super.init() and ultimately be 
+     * called twice: once by Spring and once by super.init(context)
+     */
+    public void start() {
 
         log.info("Registering Ozone Event Handler");
 
