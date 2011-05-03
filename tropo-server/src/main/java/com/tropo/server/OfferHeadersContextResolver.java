@@ -5,10 +5,10 @@ import java.util.Map.Entry;
 
 import com.tropo.core.CallContextResolver;
 import com.tropo.core.ExecutionContext;
-import com.tropo.core.Offer;
+import com.tropo.core.OfferEvent;
 
 /**
- * Copies all Offer Headers into the Call Context
+ * Copies all OfferEvent Headers into the Call Context
  * 
  * @author jdecastro
  *
@@ -16,7 +16,7 @@ import com.tropo.core.Offer;
 public class OfferHeadersContextResolver implements CallContextResolver {
 
     @Override
-    public void resolve(ExecutionContext context, Offer offer) {
+    public void resolve(ExecutionContext context, OfferEvent offer) {
         Map<String, String> offerHeaders = offer.getHeaders();
         for (Entry<String, String> offEntry : offerHeaders.entrySet()) {
             context.set(offEntry.getKey(), offEntry.getValue());

@@ -3,15 +3,11 @@ package com.tropo.core;
 import java.net.URI;
 import java.util.Map;
 
-public class Offer extends AbstractCallEvent {
+public class DialCommand implements ServerCommand {
 
     private URI to;
     private URI from;
     private Map<String, String> headers;
-
-    public Offer(String callId) {
-        super(callId);
-    }
 
     public URI getTo() {
         return to;

@@ -25,7 +25,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 
 import com.tropo.core.CallRejectReason
 import com.tropo.core.EndEvent
-import com.tropo.core.Offer
+import com.tropo.core.OfferEvent
 import com.tropo.core.RejectCommand
 import com.tropo.core.EndEvent.Reason
 import com.tropo.core.verb.PauseCommand
@@ -58,7 +58,7 @@ public class IntegrationTest {
     @Autowired
     private CallRegistry callRegistry
     
-    private Offer offer
+    private OfferEvent offer
     private Call mohoCall
     private CallActor callActor
     private BlockingQueue<Object> messageQueue = new LinkedBlockingQueue<Object>()
@@ -79,7 +79,7 @@ public class IntegrationTest {
         // Register new call with Call Manager
         callManager.publish(mohoCall)
         
-        // We should get an Offer
+        // We should get an OfferEvent
         offer = poll()
 
         callActor = callRegistry.get(mohoCall.id)

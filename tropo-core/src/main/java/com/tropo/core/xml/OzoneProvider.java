@@ -21,7 +21,7 @@ import com.tropo.core.AnswerEvent;
 import com.tropo.core.CallRejectReason;
 import com.tropo.core.EndEvent;
 import com.tropo.core.HangupCommand;
-import com.tropo.core.Offer;
+import com.tropo.core.OfferEvent;
 import com.tropo.core.RedirectCommand;
 import com.tropo.core.RejectCommand;
 import com.tropo.core.RingEvent;
@@ -115,7 +115,7 @@ public class OzoneProvider implements XmlProvider {
 
     private Object buildOffer(Element element) throws URISyntaxException {
 
-        Offer offer = new Offer(element.attributeValue("callId"));
+        OfferEvent offer = new OfferEvent(element.attributeValue("callId"));
         offer.setFrom(toURI(element.attributeValue("from")));
         offer.setTo(toURI(element.attributeValue("to")));
         offer.setHeaders(grabHeaders(element));
@@ -410,7 +410,7 @@ public class OzoneProvider implements XmlProvider {
 
         try {
             Document document = DocumentHelper.createDocument();
-            if (object instanceof Offer) {
+            if (object instanceof OfferEvent) {
                 createOffer(object, document);
             } else if (object instanceof EndEvent) {
                 createEndEvent(object, document);
@@ -543,7 +543,7 @@ public class OzoneProvider implements XmlProvider {
 
     private Document createOffer(Object object, Document document) {
 
-        Offer offer = (Offer) object;
+        OfferEvent offer = (OfferEvent) object;
 
         Element root = document.addElement(new QName("offer", new Namespace("", "urn:xmpp:ozone:1")));
         root.addAttribute("to", offer.getTo().toString());

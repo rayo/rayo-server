@@ -5,7 +5,7 @@ import java.net.URISyntaxException;
 
 import com.tropo.core.CallContextResolver;
 import com.tropo.core.ExecutionContext;
-import com.tropo.core.Offer;
+import com.tropo.core.OfferEvent;
 import com.tropo.core.sip.SipURI;
 import com.voxeo.exceptions.AssertionException;
 import com.voxeo.exceptions.InputException;
@@ -20,7 +20,7 @@ public class SipUriContextResolver implements CallContextResolver {
     private URI baseUri;
     
     @Override
-    public void resolve(ExecutionContext context, Offer offer) {
+    public void resolve(ExecutionContext context, OfferEvent offer) {
 
         if(context.contains(START_URL)) {
             log.info("Context already contains a startUrl");

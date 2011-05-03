@@ -22,7 +22,7 @@ import com.tropo.core.AcceptCommand
 import com.tropo.core.AnswerCommand
 import com.tropo.core.CallRejectReason
 import com.tropo.core.HangupCommand
-import com.tropo.core.Offer
+import com.tropo.core.OfferEvent
 import com.tropo.core.RedirectCommand
 import com.tropo.core.RejectCommand
 import com.tropo.core.validation.Validator;
@@ -56,13 +56,13 @@ public class OzoneProviderTest {
 		provider = new OzoneProvider(validator:new Validator())
 	}
 
-	// Offer
+	// OfferEvent
 	// ====================================================================================
 
 	@Test
 	public void offerToXml() {
 		Map<String, String> headers = new HashMap<String, String>();
-		Offer offer = new Offer();
+		OfferEvent offer = new OfferEvent();
 		offer.setTo(new URI("tel:44477773333333"));
 		offer.setFrom(new URI("tel:34637710708"));
 		headers.put("test","atest");
