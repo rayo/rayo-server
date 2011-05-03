@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context" 
+    xmlns:lang="http://www.springframework.org/schema/lang"
+    xmlns:p="http://www.springframework.org/schema/p" 
+    xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+		http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-3.0.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd"
+    default-autowire="byName">
+
+	<!-- Actor Thread Pool -->
+	<bean id="executor" class="java.util.concurrent.Executors" factory-method="newCachedThreadPool" />
+	
+	<!-- Jetlang Fiber Factory -->
+	<bean id="fiberFactory" class="org.jetlang.fibers.PoolFiberFactory">
+		<constructor-arg ref="executor" />
+	</bean>
+	
+	<!-- Global Call Registry -->
+	<bean id="callRegistry" class="com.tropo.server.DefaultCallRegistry" />
+
+	<!-- Call Actor Factory -->
+	<bean id="callActorFactory" class="com.tropo.server.DefaultCallActorFactory">
+		<property name="fiberFactory" ref="fiberFactory" />
+		<property name="verbManager" ref="verbManager" />
+	</bean>	
+
+	<!-- Call Manager: Responsible for maintaining the Call Registry and creating new CallActors -->
+	<bean id="callManager" class="com.tropo.server.CallManager">
+		<property name="callRegistry" ref="callRegistry" />
+		<property name="callActorFactory" ref="callActorFactory" />
+	</bean>
+
+	<!-- Conference Manager -->	
+	<bean id="conferenceManager" class="com.tropo.server.verb.DefaultConferenceManager" />
+
+	<!-- Model / Request Validation -->
+	<bean id="validator" class="com.tropo.core.validation.Validator"/>
+
+	<!-- Create a global XML Provider -->
+	<bean id="xmlProviderManager" class="com.tropo.core.xml.DefaultXmlProviderManagerFactoryBean">
+		<property name="providers">
+			<list>
+				<!-- Register the core Ozone provider
+					   TODO: This provider handles more than just the core urn:xmpp:ozone:1 namespace.
+					   That's why the XML Provider references are commented out below. At some point
+					   we should break out each Verb's provider into a separate class and reference them
+					   in the Verb Manager configuration below. -->
+				<bean class="com.tropo.core.xml.OzoneProvider">
+					<property name="validator" ref="validator" />
+				</bean>
+			</list>
+		</property>		
+	</bean>
+
+	<!-- Verb Manager: Used to create VerbHandler instances and read/write XML -->
+	<bean id="verbManager" class="com.tropo.server.verb.DefaultVerbManagerFactoryBean">
+		<property name="verbManager">
+			<bean class="com.tropo.server.verb.DefaultVerbManager">
+				<property name="xmlProviderManager" ref="xmlProviderManager" />
+			</bean>
+		</property>
+		<property name="verbFactoryList">
+			<list>
+				<!-- Say -->
+				<bean class="com.tropo.server.verb.AbstractVerbFactory">
+					<!-- <property name="xmlProvider" ref="" />  -->
+					<property name="modelClass" value="com.tropo.core.verb.Say" />
+					<lookup-method name="createVerbHandler" bean="sayHandler" />
+				</bean>
+				<!-- Ask -->
+				<bean class="com.tropo.server.verb.AbstractVerbFactory">
+					<!-- <property name="xmlProvider" ref="" />  -->
+					<property name="modelClass" value="com.tropo.core.verb.Ask" />
+					<lookup-method name="createVerbHandler" bean="askHandler" />
+				</bean>
+				<!-- Transfer -->
+				<bean class="com.tropo.server.verb.AbstractVerbFactory">
+					<!-- <property name="xmlProvider" ref="" />  -->
+					<property name="modelClass" value="com.tropo.core.verb.Transfer" />
+					<lookup-method name="createVerbHandler" bean="transferHandler" />
+				</bean>
+				<!-- Conference -->
+				<bean class="com.tropo.server.verb.AbstractVerbFactory">
+					<!-- <property name="xmlProvider" ref="" />  -->
+					<property name="modelClass" value="com.tropo.core.verb.Conference" />
+					<lookup-method name="createVerbHandler" bean="conferenceHandler" />
+				</bean>
+			</list>
+		</property>
+	</bean>
+
+	<!-- Verb Handlers -->	
+	<bean id="sayHandler" class="com.tropo.server.verb.LocalSayHandler" scope="prototype" />
+	<bean id="askHandler" class="com.tropo.server.verb.LocalAskHandler" scope="prototype" />
+	<bean id="transferHandler" class="com.tropo.server.verb.LocalTransferHandler" scope="prototype" />
+	<bean id="conferenceHandler" class="com.tropo.server.verb.LocalConferenceHandler" scope="prototype">
+		<property name="conferenceManager" ref="conferenceManager" />
+	</bean>
+
+</beans>
