@@ -46,9 +46,9 @@
 			<list>
 				<!-- Register the core Ozone provider
 					   TODO: This provider handles more than just the core urn:xmpp:ozone:1 namespace.
-					   That's why the XML Provider references are commented out bellow. At some point
+					   That's why the XML Provider references are commented out below. At some point
 					   we should break out each Verb's provider into a separate class and reference them
-					   in the Verb Manager configuration bellow. -->
+					   in the Verb Manager configuration below. -->
 				<bean class="com.tropo.core.xml.OzoneProvider">
 					<property name="validator" ref="validator" />
 				</bean>

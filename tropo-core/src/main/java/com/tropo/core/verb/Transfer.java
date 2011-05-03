@@ -4,6 +4,8 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 
+import javax.validation.Valid;
+
 import org.hibernate.validator.constraints.NotEmpty;
 import org.joda.time.Duration;
 
@@ -12,6 +14,8 @@ import com.tropo.core.validation.Messages;
 public class Transfer extends BaseVerb {
 
     private String voice;
+
+    @Valid
     private PromptItems promptItems;
 
     @NotEmpty(message=Messages.MISSING_TO)

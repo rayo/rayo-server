@@ -29,6 +29,7 @@ import com.tropo.core.validation.Validator;
 import com.tropo.core.verb.Ask;
 import com.tropo.core.verb.AskCompleteEvent;
 import com.tropo.core.verb.AudioItem;
+import com.tropo.core.verb.Choices;
 import com.tropo.core.verb.Conference;
 import com.tropo.core.verb.ConferenceCompleteEvent;
 import com.tropo.core.verb.InputMode;
@@ -385,6 +386,19 @@ public class OzoneProviderTest {
 	}
 	
 	@Test
+	public void choicesAskFromXml() {
+		
+		def ask = fromXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" voice=\"allison\" min-confidence=\"0.8\" mode=\"dtmf\" recognizer=\"en-us\" terminator=\"#\" timeout=\"PT3S\" bargein=\"true\"><prompt><speak xmlns=\"\">Hello World.</speak></prompt><choices url="http://test" content-type="vxml">sales,support</choices></ask>""")
+		assertNotNull ask
+		assertNotNull ask.choices
+		assertEquals ask.choices.size(),1
+		assertEquals ask.choices[0].content,"sales,support"
+		assertEquals ask.choices[0].uri,new URI("http://test")
+		assertEquals ask.choices[0].contentType,"vxml"
+		assertNotNull ask.choices
+	}
+	
+	@Test
 	public void emptyAskToXml() {
 		
 		def ask = new Ask()
@@ -437,14 +451,26 @@ public class OzoneProviderTest {
 		assertEquals("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" voice=\"allison\" min-confidence=\"0.8\" mode=\"dtmf\" recognizer=\"test\" terminator=\"#\" timeout=\"PT3S\" bargein=\"true\"><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""", provider.toXML(ask).asXML());
 	}
 	
+	@Test
+	public void choicesAskToXml() {
+		
+		def ask = new Ask()
+		ask.voice = "allison"
+		ask.minConfidence = 0.8f
+		ask.mode = InputMode.dtmf
+		ask.recognizer = 'en-us'
+		ask.terminator = '#' as char
+		ask.timeout = new Duration(3000)
+		ask.promptItems = []
+		ask.promptItems.add new SsmlItem("<speak>Hello World.</speak>")
+		ask.choices = []
+		ask.choices.add new Choices(uri:new URI("http://test"), contentType:"vxml", content:"sales,support")
+
+		assertEquals("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" voice=\"allison\" min-confidence=\"0.8\" mode=\"dtmf\" recognizer=\"en-us\" terminator=\"#\" timeout=\"PT3S\" bargein=\"true\"><prompt><speak xmlns=\"\">Hello World.</speak></prompt><choices content-type="vxml" url="http://test">sales,support</choices></ask>""", provider.toXML(ask).asXML());
+	}
+	
 	// Conference
 	// ====================================================================================
-	@Test
-	public void emptyConferenceFromXml() {
-		
-		def conference = fromXml("""<conference xmlns=\"urn:xmpp:ozone:conference:1\"></conference>""")
-		assertNotNull conference
-	}
 
 	@Test
 	public void conferenceFromXml() {

@@ -1,9 +1,11 @@
 package com.tropo.core.verb;
 
+import javax.validation.Valid;
 import javax.validation.constraints.AssertTrue;
 
 import org.joda.time.Duration;
 
+import com.tropo.core.validation.Messages;
 import com.tropo.core.validation.ValidChoicesList;
 import com.tropo.core.validation.ValidPromptItems;
 import com.tropo.core.validation.ValidRecognizer;
@@ -12,6 +14,7 @@ public class Ask extends BaseVerb {
 
     private String voice;
     
+    @Valid
     @ValidPromptItems 
     private PromptItems promptItems;
     
@@ -101,7 +104,7 @@ public class Ask extends BaseVerb {
         this.timeout = timeout;
     }
 
-    @AssertTrue(message="Confidence must be a value between 0 and 1.")
+    @AssertTrue(message=Messages.INVALID_CONFIDENCE_RANGE)
     public boolean isMinConfidenceWithinRange() {
         return (minConfidence >= 0f && minConfidence <= 1f);
     }

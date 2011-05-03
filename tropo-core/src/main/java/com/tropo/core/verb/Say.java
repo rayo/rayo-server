@@ -1,11 +1,14 @@
 package com.tropo.core.verb;
 
+import javax.validation.Valid;
+
 import com.tropo.core.validation.ValidPromptItems;
 
 public class Say extends BaseVerb {
 	
     private String voice; 
     
+    @Valid
     @ValidPromptItems
     private PromptItems promptItems;
 

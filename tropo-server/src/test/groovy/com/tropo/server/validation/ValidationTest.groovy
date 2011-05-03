@@ -48,6 +48,42 @@ class ValidationTest {
 	}
 	
 	@Test
+	public void validateSayInvalidPromptItemsURI() {
+				
+		def say = parseXml("""<say xmlns=\"urn:xmpp:ozone:say:1\" voice=\"allison\"><audio url="\$?\\.com"/></say>""")
+		
+		def errorMapping = assertValidationException(say)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.INVALID_URI
+	}
+	
+	@Test
+	public void validateSayInvalidPromptEmptyURI() {
+				
+		def say = parseXml("""<say xmlns=\"urn:xmpp:ozone:say:1\" voice=\"allison\"><audio url=""/></say>""")
+		
+		def errorMapping = assertValidationException(say)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.MISSING_URI
+	}
+
+	@Test
+	public void validateSayInvalidMissingURI() {
+				
+		def say = parseXml("""<say xmlns=\"urn:xmpp:ozone:say:1\" voice=\"allison\"><audio/></say>""")
+		
+		def errorMapping = assertValidationException(say)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.MISSING_URI
+	}
+	
+	@Test
 	public void validateSayValid() {
 				
 		def say = parseXml("""<say xmlns=\"urn:xmpp:ozone:say:1\" voice=\"allison\"><speak>Hello World</speak></say>""")
@@ -68,6 +104,30 @@ class ValidationTest {
 		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
 		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
 		assertEquals errorMapping.text, Messages.MISSING_PROMPT_ITEMS
+	}
+	
+	@Test
+	public void validateAskInvalidPromptItemsInvalidURI() {
+				
+		def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" voice=\"allison\"><prompt><audio url="\$?\\.com"/></prompt><choices>sales,support</choices></ask>""")
+		
+		def errorMapping = assertValidationException(ask)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.INVALID_URI
+	}
+		
+	@Test
+	public void validateAskInvalidPromptItemsEmptyURI() {
+				
+		def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" voice=\"allison\"><prompt><audio url=""/></prompt><choices>sales,support</choices></ask>""")
+		
+		def errorMapping = assertValidationException(ask)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.MISSING_URI
 	}
 	
 	@Test
@@ -95,15 +155,27 @@ class ValidationTest {
 	}
 	
 	@Test
-	public void validateAskInvalidRecognizer() {
+	public void validateAskChoicesInvalidUri() {
 				
-		def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" recognizer="ar-oo" voice=\"allison\"><choices>sales,support</choices><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
+		def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" voice=\"allison\"><choices/><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
 		
 		def errorMapping = assertValidationException(ask)
 		assertNotNull errorMapping
 		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
 		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
-		assertEquals errorMapping.text, Messages.INVALID_RECOGNIZER
+		assertEquals errorMapping.text, Messages.MISSING_CHOICES
+	}
+	
+	@Test
+	public void validateAskInvalidChoicesURI() {
+				
+		def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" recognizer="ar-oo" voice=\"allison\"><choices url="\$?\\.com">sales,support</choices><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
+		
+		def errorMapping = assertValidationException(ask)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.INVALID_URI
 	}
 
 	@Test
@@ -164,6 +236,18 @@ class ValidationTest {
         assertEquals XmppStanzaError.Type_MODIFY, errorMapping.type
         assertEquals XmppStanzaError.BAD_REQUEST_CONDITION, errorMapping.condition
         assertEquals Messages.INVALID_CONFIDENCE_RANGE, errorMapping.text
+	}
+	
+	@Test
+	public void validateAskInvalidTerminator() {
+				
+		def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" terminator="abcd" voice=\"allison\"><choices>sales,support</choices><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
+		
+		def errorMapping = assertValidationException(ask)
+		assertNotNull errorMapping
+		assertEquals XmppStanzaError.Type_MODIFY, errorMapping.type
+		assertEquals XmppStanzaError.BAD_REQUEST_CONDITION, errorMapping.condition
+		assertEquals Messages.INVALID_TERMINATOR, errorMapping.text
 	}
 	
 	@Test
@@ -268,10 +352,92 @@ class ValidationTest {
 	}
 	
 	@Test
+	public void validateTransferInvalidTerminator() {
+				
+		def transfer = parseXml("""<transfer xmlns=\"urn:xmpp:ozone:transfer:1\" from="tel:12345666" terminator="abc"><to>tel:123456789</to></transfer>""")
+		
+		def errorMapping = assertValidationException(transfer)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.INVALID_TERMINATOR
+	}
+	
+	@Test
 	public void validateTransferValid() {
 				
 		def transfer = parseXml("""<transfer xmlns=\"urn:xmpp:ozone:transfer:1\" from="tel:12345666"><to>tel:123456789</to></transfer>""")
 		assertNotNull provider.fromXML(transfer)
+	}
+	
+	// Conference
+	// ====================================================================================
+	
+	@Test
+	public void validateConferenceNullRoomName() {
+				
+		def conference = parseXml("""<conference xmlns=\"urn:xmpp:ozone:conference:1\"></conference>""")
+		
+		def errorMapping = assertValidationException(conference)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.MISSING_ROOM_NAME
+	}
+	
+	@Test
+	public void validateConferenceInvalidBeep() {
+				
+		def conference = parseXml("""<conference xmlns=\"urn:xmpp:ozone:conference:1\" id="1" beep="123"></conference>""")
+		
+		def errorMapping = assertValidationException(conference)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.INVALID_BOOLEAN
+	}
+	
+	@Test
+	public void validateConferenceInvalidMute() {
+				
+		def conference = parseXml("""<conference xmlns=\"urn:xmpp:ozone:conference:1\" id="1" mute="123"></conference>""")
+		
+		def errorMapping = assertValidationException(conference)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.INVALID_BOOLEAN
+	}
+	
+	@Test
+	public void validateConferenceInvalidTonePassThrough() {
+				
+		def conference = parseXml("""<conference xmlns=\"urn:xmpp:ozone:conference:1\" id="1" tone-passthrough="123"></conference>""")
+		
+		def errorMapping = assertValidationException(conference)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.INVALID_BOOLEAN
+	}
+	
+	@Test
+	public void validateConferenceInvalidTerminator() {
+				
+		def conference = parseXml("""<conference xmlns=\"urn:xmpp:ozone:conference:1\" id="1" terminator="123"></conference>""")
+		
+		def errorMapping = assertValidationException(conference)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.INVALID_TERMINATOR
+	}
+	
+	@Test
+	public void validateConferenceValid() {
+				
+		def conference = parseXml("""<conference xmlns=\"urn:xmpp:ozone:conference:1\" mute="false" beep="false" tone-passthrough="true" id="123456"/>""")
+		assertNotNull provider.fromXML(conference)
 	}
 	
 	def assertValidationException(def object) {

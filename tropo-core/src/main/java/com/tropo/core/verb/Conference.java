@@ -1,7 +1,12 @@
 package com.tropo.core.verb;
 
+import javax.validation.constraints.NotNull;
+
+import com.tropo.core.validation.Messages;
+
 public class Conference extends BaseVerb {
 
+	@NotNull(message=Messages.MISSING_ROOM_NAME)
     private String roomName;
     private boolean mute;
     private boolean beep;

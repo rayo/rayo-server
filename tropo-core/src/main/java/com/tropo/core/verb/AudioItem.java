@@ -2,8 +2,13 @@ package com.tropo.core.verb;
 
 import java.net.URI;
 
+import javax.validation.constraints.NotNull;
+
+import com.tropo.core.validation.Messages;
+
 public class AudioItem implements PromptItem {
 
+	@NotNull(message=Messages.MISSING_URI)
     private URI uri;
 
     public AudioItem() {}

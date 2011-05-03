@@ -50,6 +50,7 @@ public class ExceptionMapper {
 						e.getMessage().equals(Messages.INVALID_URI) ||
 						e.getMessage().equals(Messages.INVALID_TIMEOUT) ||
 						e.getMessage().equals(Messages.INVALID_CONFIDENCE) ||
+						e.getMessage().equals(Messages.INVALID_TERMINATOR) ||
 						e.getMessage().equals(Messages.INVALID_BOOLEAN)) {
 						errorCondition = XmppStanzaError.BAD_REQUEST_CONDITION;
 						errorType = XmppStanzaError.Type_MODIFY;					

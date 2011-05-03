@@ -206,7 +206,7 @@ public class OzoneProvider implements XmlProvider {
         }
         ask.setRecognizer(root.attributeValue("recognizer"));
         if (root.attributeValue("terminator") != null) {
-            ask.setTerminator(root.attributeValue("terminator").charAt(0));
+            ask.setTerminator(toTerminator(root.attributeValue("terminator")));
         }
         if (root.attributeValue("timeout") != null) {
             ask.setTimeout(toTimeout(root.attributeValue("timeout")));
@@ -245,7 +245,7 @@ public class OzoneProvider implements XmlProvider {
 		Element root = element;
 		Transfer transfer = new Transfer();
 		if (root.attributeValue("terminator") != null) {
-			transfer.setTerminator(root.attributeValue("terminator").charAt(0));
+			transfer.setTerminator(toTerminator(root.attributeValue("terminator")));
 		}		
 		if (root.attributeValue("timeout") !=  null) {
 			transfer.setTimeout(toTimeout(root.attributeValue("timeout")));
@@ -298,7 +298,7 @@ public class OzoneProvider implements XmlProvider {
         Element root = element;
         Conference conference = new Conference();
         if (root.attributeValue("terminator") != null) {
-            conference.setTerminator(root.attributeValue("terminator").charAt(0));
+            conference.setTerminator(toTerminator(root.attributeValue("terminator")));
         }
         if (root.attributeValue("beep") != null) {
             conference.setBeep(toBoolean(root.attributeValue("beep")));
@@ -788,7 +788,11 @@ public class OzoneProvider implements XmlProvider {
 
 	private URI toURI(String string) {
 	
-		try {
+		if (string == null || string.trim().equals("")) {
+			return null;
+		}
+		
+		try {			
 			return new URI(string);
 		} catch (URISyntaxException e) {
 			throw new ValidationException(Messages.INVALID_URI);
@@ -824,7 +828,14 @@ public class OzoneProvider implements XmlProvider {
 			throw new ValidationException(Messages.INVALID_CONFIDENCE);
 		}
 	}
-
+	
+	private Character toTerminator(String value) {
+		
+		if (value == null || value.length() != 1) {
+			throw new ValidationException(Messages.INVALID_TERMINATOR);
+		}
+		return new Character(value.charAt(0));
+	}
 	
 	public void setValidator(Validator validator) {
 		this.validator = validator;
@@ -834,7 +845,7 @@ public class OzoneProvider implements XmlProvider {
     public boolean handles(Element element) {
         // This should technically only return true is this provider can handle
         // this mesasge type but since we only have one for now and this class will 
-        // eventually be broken up into verb-specific classes we just trruen true for 
+        // eventually be broken up into verb-specific classes we just return true for 
         // now
         return true;
     }
@@ -843,7 +854,7 @@ public class OzoneProvider implements XmlProvider {
     public boolean handles(Class<?> clazz) {
         // This should technically only return true is this provider can handle
         // this class but since we only have one for now and this class will 
-        // eventually be broken up into verb-specific classes we just trruen true for 
+        // eventually be broken up into verb-specific classes we just return true for 
         // now
         return true;
     }
