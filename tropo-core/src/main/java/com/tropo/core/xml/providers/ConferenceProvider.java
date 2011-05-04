@@ -10,12 +10,6 @@ import org.dom4j.QName;
 import com.tropo.core.verb.Conference;
 import com.tropo.core.verb.ConferenceCompleteEvent;
 import com.tropo.core.verb.KickCommand;
-import com.tropo.core.verb.PauseCommand;
-import com.tropo.core.verb.ResumeCommand;
-import com.tropo.core.verb.Say;
-import com.tropo.core.verb.SayCompleteEvent;
-import com.tropo.core.verb.StopCommand;
-import com.tropo.core.xml.Namespaces;
 
 public class ConferenceProvider extends BaseProvider {
 
@@ -124,14 +118,6 @@ public class ConferenceProvider extends BaseProvider {
 	}
 
 	@Override
-    public boolean handles(Element element) {
-
-		//TODO: Refactor out to spring configuration and put everything in the base provider class
-		return element.getNamespace().getURI().equals(Namespaces.CONFERENCE);
-    }
-
-
-	@Override
 	public boolean handles(Class<?> clazz) {
 
 		//TODO: Refactor out to spring configuration and put everything in the base provider class
@@ -139,6 +125,4 @@ public class ConferenceProvider extends BaseProvider {
 			   clazz == KickCommand.class ||
 			   clazz == ConferenceCompleteEvent.class;
 	}
-
-
 }

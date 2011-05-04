@@ -10,14 +10,8 @@ import org.dom4j.Element;
 import org.dom4j.Namespace;
 import org.dom4j.QName;
 
-import com.tropo.core.verb.PauseCommand;
-import com.tropo.core.verb.ResumeCommand;
-import com.tropo.core.verb.Say;
-import com.tropo.core.verb.SayCompleteEvent;
-import com.tropo.core.verb.StopCommand;
 import com.tropo.core.verb.Transfer;
 import com.tropo.core.verb.TransferCompleteEvent;
-import com.tropo.core.xml.Namespaces;
 
 public class TransferProvider extends BaseProvider {
 
@@ -148,20 +142,10 @@ public class TransferProvider extends BaseProvider {
 	}
 
 	@Override
-    public boolean handles(Element element) {
-
-		//TODO: Refactor out to spring configuration and put everything in the base provider class
-		return element.getNamespace().getURI().equals(Namespaces.TRANSFER);
-    }
-
-
-	@Override
 	public boolean handles(Class<?> clazz) {
 
 		//TODO: Refactor out to spring configuration and put everything in the base provider class
 		return clazz == Transfer.class ||
 			   clazz == TransferCompleteEvent.class;
 	}
-
-
 }

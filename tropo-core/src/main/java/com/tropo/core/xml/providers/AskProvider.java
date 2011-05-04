@@ -12,9 +12,6 @@ import com.tropo.core.verb.Ask;
 import com.tropo.core.verb.AskCompleteEvent;
 import com.tropo.core.verb.Choices;
 import com.tropo.core.verb.ChoicesList;
-import com.tropo.core.verb.Transfer;
-import com.tropo.core.verb.TransferCompleteEvent;
-import com.tropo.core.xml.Namespaces;
 
 public class AskProvider extends BaseProvider {
 
@@ -191,13 +188,6 @@ public class AskProvider extends BaseProvider {
 			root.addElement("error").setText(askComplete.getErrorText());
 		}
 		return document;
-    }
-
-	@Override
-    public boolean handles(Element element) {
-
-		//TODO: Refactor out to spring configuration and put everything in the base provider class
-		return element.getNamespace().getURI().equals(Namespaces.ASK);
     }
 
 	@Override

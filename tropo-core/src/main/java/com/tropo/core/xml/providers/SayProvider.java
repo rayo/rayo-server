@@ -12,7 +12,6 @@ import com.tropo.core.verb.ResumeCommand;
 import com.tropo.core.verb.Say;
 import com.tropo.core.verb.SayCompleteEvent;
 import com.tropo.core.verb.StopCommand;
-import com.tropo.core.xml.Namespaces;
 
 public class SayProvider extends BaseProvider {
 
@@ -143,13 +142,6 @@ public class SayProvider extends BaseProvider {
 
 		return document;
 	}
-
-	@Override
-    public boolean handles(Element element) {
-
-		//TODO: Refactor out to spring configuration and put everything in the base provider class
-		return element.getNamespace().getURI().equals(Namespaces.SAY);
-    }
 
 	@Override
 	public boolean handles(Class<?> clazz) {

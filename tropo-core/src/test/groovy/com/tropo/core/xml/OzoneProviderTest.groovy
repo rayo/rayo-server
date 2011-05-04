@@ -43,6 +43,7 @@ import com.tropo.core.verb.TransferCompleteEvent
 import com.tropo.core.verb.AskCompleteEvent.Reason
 import com.tropo.core.xml.providers.AskProvider
 import com.tropo.core.xml.providers.ConferenceProvider
+import com.tropo.core.xml.providers.OzoneProvider;
 import com.tropo.core.xml.providers.SayProvider
 import com.tropo.core.xml.providers.TransferProvider
 
@@ -56,11 +57,11 @@ public class OzoneProviderTest {
 	public void setup() {
 		
 		def validator = new Validator()
-		providers = [new OzoneProvider(validator:validator),
-					 new SayProvider(validator:validator),
-					 new AskProvider(validator:validator),
-					 new TransferProvider(validator:validator),
-					 new ConferenceProvider(validator:validator)]
+		providers = [new OzoneProvider(validator:validator,namespaces:['urn:xmpp:ozone:1']),
+					 new SayProvider(validator:validator,namespaces:['urn:xmpp:ozone:say:1']),
+					 new AskProvider(validator:validator,namespaces:['urn:xmpp:ozone:ask:1']),
+					 new TransferProvider(validator:validator,namespaces:['urn:xmpp:ozone:transfer:1']),
+					 new ConferenceProvider(validator:validator,namespaces:['urn:xmpp:ozone:conference:1'])]
 	}
 
 	// OfferEvent

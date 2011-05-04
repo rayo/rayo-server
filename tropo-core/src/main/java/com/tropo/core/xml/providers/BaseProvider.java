@@ -26,6 +26,8 @@ public abstract class BaseProvider implements XmlProvider {
 
 	private Validator validator;
 	
+	private List<String> namespaces;
+	
     @Override
     @SuppressWarnings("unchecked")
     public Object fromXML(Element element) {
@@ -186,5 +188,24 @@ public abstract class BaseProvider implements XmlProvider {
 	protected Validator getValidator() {
 		
 		return validator;
+	}
+
+	@Override
+    public boolean handles(Element element) {
+
+		for(String namespace: namespaces) {
+			if (namespace.equals(element.getNamespace().getURI())) {
+				return true;
+			}
+		}
+		return false;
+    }
+	
+	public List<String> getNamespaces() {
+		return namespaces;
+	}
+
+	public void setNamespaces(List<String> namespaces) {
+		this.namespaces = namespaces;
 	}
 }

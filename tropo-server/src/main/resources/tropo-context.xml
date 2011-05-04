@@ -41,20 +41,45 @@
 	<bean id="validator" class="com.tropo.core.validation.Validator"/>
 
 	<!-- Ozone providers -->
-	<bean id="ozoneProvider" class="com.tropo.core.xml.OzoneProvider">
+	<bean id="ozoneProvider" class="com.tropo.core.xml.providers.OzoneProvider">
 		<property name="validator" ref="validator" />
+		<property name="namespaces">
+			<list>
+				<value>urn:xmpp:ozone:1</value>
+			</list>
+		</property>		
 	</bean>
 	<bean id="sayProvider" class="com.tropo.core.xml.providers.SayProvider">
 		<property name="validator" ref="validator" />
+		<property name="namespaces">
+			<list>
+				<value>urn:xmpp:ozone:say:1</value>
+			</list>
+		</property>		
 	</bean>
 	<bean id="askProvider" class="com.tropo.core.xml.providers.AskProvider">
 		<property name="validator" ref="validator" />
+		<property name="namespaces">
+			<list>
+				<value>urn:xmpp:ozone:ask:1</value>
+			</list>
+		</property>		
 	</bean>
 	<bean id="transferProvider" class="com.tropo.core.xml.providers.TransferProvider">
 		<property name="validator" ref="validator" />
+		<property name="namespaces">
+			<list>
+				<value>urn:xmpp:ozone:transfer:1</value>
+			</list>
+		</property>		
 	</bean>
 	<bean id="conferenceProvider" class="com.tropo.core.xml.providers.ConferenceProvider">
 		<property name="validator" ref="validator" />
+		<property name="namespaces">
+			<list>
+				<value>urn:xmpp:ozone:conference:1</value>
+			</list>
+		</property>		
 	</bean>				
 
 

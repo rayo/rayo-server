@@ -1,4 +1,4 @@
-package com.tropo.core.xml;
+package com.tropo.core.xml.providers;
 
 import java.net.URISyntaxException;
 
@@ -19,7 +19,6 @@ import com.tropo.core.RejectCommand;
 import com.tropo.core.RingEvent;
 import com.tropo.core.validation.Messages;
 import com.tropo.core.validation.ValidationException;
-import com.tropo.core.xml.providers.BaseProvider;
 
 public class OzoneProvider extends BaseProvider {
 	
@@ -215,14 +214,6 @@ public class OzoneProvider extends BaseProvider {
 
         return document;
     }
-
-	@Override
-    public boolean handles(Element element) {
-
-		//TODO: Refactor out to spring configuration and put everything in the base provider class
-		return element.getNamespace().getURI().equals(Namespaces.OZONE);
-    }
-
 
 	@Override
 	public boolean handles(Class<?> clazz) {
