@@ -11,7 +11,7 @@ public class DefaultCallContextService implements CallContextService {
     private List<CallContextResolver> contextResolvers;
 
     @Override
-    public ExecutionContext resolve(Offer offer) {
+    public ExecutionContext resolve(OfferEvent offer) {
         ExecutionContext context = new ExecutionContext();
         for (CallContextResolver resolver : contextResolvers) {
             resolver.resolve(context, offer);

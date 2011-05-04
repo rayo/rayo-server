@@ -2,6 +2,6 @@ package com.tropo.core;
 
 public interface CallContextService {
 
-    public ExecutionContext resolve(Offer offer);
+    public ExecutionContext resolve(OfferEvent offer);
 
 }

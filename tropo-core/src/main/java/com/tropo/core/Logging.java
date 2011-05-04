@@ -4,7 +4,7 @@ import com.voxeo.logging.LoggingContext;
 
 public class Logging {
 
-    public static void context(ExecutionContext executionContext, Offer offer) {
+    public static void context(ExecutionContext executionContext, OfferEvent offer) {
         LoggingContext loggingContext = LoggingContext.get();
         loggingContext.clear();
         loggingContext.setAccountID(executionContext.getAccountId());

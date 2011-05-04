@@ -13,7 +13,7 @@ import com.tropo.core.AnswerEvent;
 import com.tropo.core.CallRejectReason;
 import com.tropo.core.EndEvent;
 import com.tropo.core.HangupCommand;
-import com.tropo.core.Offer;
+import com.tropo.core.OfferEvent;
 import com.tropo.core.RedirectCommand;
 import com.tropo.core.RejectCommand;
 import com.tropo.core.RingEvent;
@@ -27,7 +27,7 @@ public class OzoneProvider extends BaseProvider {
 	protected Object processElement(Element element) throws Exception {
 
         if (element.getName().equals("offer")) {
-        	return buildOffer(element);
+        	return buildOfferEvent(element);
         } else if (element.getName().equals("accept")) {
             return buildAcceptCommand(element);
         } else if (element.getName().equals("answer")) {
@@ -55,9 +55,9 @@ public class OzoneProvider extends BaseProvider {
         throw new UnsupportedOperationException();
     }
 
-    private Object buildOffer(Element element) throws URISyntaxException {
+    private Object buildOfferEvent(Element element) throws URISyntaxException {
 
-        Offer offer = new Offer(element.attributeValue("callId"));
+        OfferEvent offer = new OfferEvent(element.attributeValue("callId"));
         offer.setFrom(toURI(element.attributeValue("from")));
         offer.setTo(toURI(element.attributeValue("to")));
         offer.setHeaders(grabHeaders(element));
@@ -115,8 +115,8 @@ public class OzoneProvider extends BaseProvider {
     @Override
     protected void generateDocument(Object object, Document document) throws Exception {
 
-        if (object instanceof Offer) {
-            createOffer(object, document);
+        if (object instanceof OfferEvent) {
+            createOfferEvent(object, document);
         } else if (object instanceof EndEvent) {
             createEndEvent(object, document);
         } else if (object instanceof RingEvent) {
@@ -202,9 +202,9 @@ public class OzoneProvider extends BaseProvider {
         return document;
     }
 
-    private Document createOffer(Object object, Document document) {
+    private Document createOfferEvent(Object object, Document document) {
 
-        Offer offer = (Offer) object;
+        OfferEvent offer = (OfferEvent) object;
 
         Element root = document.addElement(new QName("offer", new Namespace("", "urn:xmpp:ozone:1")));
         root.addAttribute("to", offer.getTo().toString());
@@ -228,7 +228,7 @@ public class OzoneProvider extends BaseProvider {
 	public boolean handles(Class<?> clazz) {
 
 		//TODO: Refactor out to spring configuration and put everything in the base provider class
-		return clazz == Offer.class ||
+		return clazz == OfferEvent.class ||
 			   clazz == EndEvent.class ||
 			   clazz == RingEvent.class ||
 			   clazz == AnswerEvent.class ||

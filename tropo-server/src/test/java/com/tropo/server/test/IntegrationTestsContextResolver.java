@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 
 import com.tropo.core.CallContextResolver;
 import com.tropo.core.ExecutionContext;
-import com.tropo.core.Offer;
+import com.tropo.core.OfferEvent;
 import com.voxeo.exceptions.AssertionException;
 import com.voxeo.logging.Loggerf;
 
@@ -29,7 +29,7 @@ public class IntegrationTestsContextResolver implements CallContextResolver {
     private static Pattern pattern = Pattern.compile(patternStr);
     
     @Override
-    public void resolve(ExecutionContext context, Offer offer) {
+    public void resolve(ExecutionContext context, OfferEvent offer) {
 
         URI to = offer.getTo();
         

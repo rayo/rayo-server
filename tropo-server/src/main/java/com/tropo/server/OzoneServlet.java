@@ -236,22 +236,25 @@ public class OzoneServlet extends XmppServlet {
                             // needed to construct a proper reply. We should consider factoring out am XMPP-aware 
                             // serialization provider for this purpose.
                             if (value instanceof Exception) {
-                                Element contents = DocumentHelper.createElement("detail");
-                                contents.setText(((Exception) value).getMessage());
+                                Element contents = null;
+                                String message = ((Exception) value).getMessage();
+                                if(message != null) {
+                                    contents = DocumentHelper.createElement("detail");
+                                    contents.setText(message);
+                                }
                                 sendIqError(request, XmppStanzaError.INTERNAL_SERVER_ERROR_CONDITION, contents);
                                 return;
-                            }
-                            else if (command instanceof CallRef) {
-                                // Generate Call Reference
-                                String callJid = ((CallRef) command).getCallId() + "@" + request.getTo().getBareJID();
-                                result.addElement("ref").addAttribute("jid", callJid);
                             }
                             else if (command instanceof VerbRef) {
                                 // Generate Verb Reference
                                 String verbJid = request.getTo().getBareJID() + "/" + ((VerbRef) command).getVerbId();
                                 result.addElement("ref").addAttribute("jid", verbJid);
                             }
-
+                            else if (command instanceof CallRef) {
+                                // Generate Call Reference
+                                String callJid = ((CallRef) command).getCallId() + "@" + request.getTo().getBareJID();
+                                result.addElement("ref").addAttribute("jid", callJid);
+                            }
                             sendIqResult(request, result);
                         }
                     });

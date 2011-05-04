@@ -19,7 +19,7 @@ import com.tropo.core.CallException;
 import com.tropo.core.EndEvent;
 import com.tropo.core.EndEvent.Reason;
 import com.tropo.core.HangupCommand;
-import com.tropo.core.Offer;
+import com.tropo.core.OfferEvent;
 import com.tropo.core.RedirectCommand;
 import com.tropo.core.RejectCommand;
 import com.tropo.core.RingEvent;
@@ -114,7 +114,7 @@ public class CallActor extends ReflectiveActor implements Observer {
 
         this.call = mohoCall;
 
-        Offer offer = new Offer(myId());
+        OfferEvent offer = new OfferEvent(myId());
         offer.setFrom(mohoCall.getInvitor().getURI());
         offer.setTo(mohoCall.getInvitee().getURI());
 
@@ -126,7 +126,7 @@ public class CallActor extends ReflectiveActor implements Observer {
 
         offer.setHeaders(headers);
 
-        // Send the Offer
+        // Send the OfferEvent
         fire(offer);
 
         // Now we setup the moho handlers
