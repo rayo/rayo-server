@@ -40,30 +40,33 @@
 	<!-- Model / Request Validation -->
 	<bean id="validator" class="com.tropo.core.validation.Validator"/>
 
+	<!-- Ozone providers -->
+	<bean id="ozoneProvider" class="com.tropo.core.xml.OzoneProvider">
+		<property name="validator" ref="validator" />
+	</bean>
+	<bean id="sayProvider" class="com.tropo.core.xml.providers.SayProvider">
+		<property name="validator" ref="validator" />
+	</bean>
+	<bean id="askProvider" class="com.tropo.core.xml.providers.AskProvider">
+		<property name="validator" ref="validator" />
+	</bean>
+	<bean id="transferProvider" class="com.tropo.core.xml.providers.TransferProvider">
+		<property name="validator" ref="validator" />
+	</bean>
+	<bean id="conferenceProvider" class="com.tropo.core.xml.providers.ConferenceProvider">
+		<property name="validator" ref="validator" />
+	</bean>				
+
+
 	<!-- Create a global XML Provider -->
 	<bean id="xmlProviderManager" class="com.tropo.core.xml.DefaultXmlProviderManagerFactoryBean">
 		<property name="providers">
 			<list>
-				<!-- Register the core Ozone provider
-					   TODO: This provider handles more than just the core urn:xmpp:ozone:1 namespace.
-					   That's why the XML Provider references are commented out below. At some point
-					   we should break out each Verb's provider into a separate class and reference them
-					   in the Verb Manager configuration below. -->
-				<bean class="com.tropo.core.xml.OzoneProvider">
-					<property name="validator" ref="validator" />
-				</bean>
-				<bean id="sayProvider" class="com.tropo.core.xml.providers.SayProvider">
-					<property name="validator" ref="validator" />
-				</bean>
-				<bean id="askProvider" class="com.tropo.core.xml.providers.AskProvider">
-					<property name="validator" ref="validator" />
-				</bean>
-				<bean id="transferProvider" class="com.tropo.core.xml.providers.TransferProvider">
-					<property name="validator" ref="validator" />
-				</bean>
-				<bean id="conferenceProvider" class="com.tropo.core.xml.providers.ConferenceProvider">
-					<property name="validator" ref="validator" />
-				</bean>				
+				<ref bean="ozoneProvider"/>
+				<ref bean="sayProvider"/>
+				<ref bean="askProvider"/>
+				<ref bean="transferProvider"/>
+				<ref bean="conferenceProvider"/>
 			</list>
 		</property>		
 	</bean>
