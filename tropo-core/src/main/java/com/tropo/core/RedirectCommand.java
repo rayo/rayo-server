@@ -3,8 +3,13 @@ package com.tropo.core;
 import java.net.URI;
 import java.util.Map;
 
+import javax.validation.constraints.NotNull;
+
+import com.tropo.core.validation.Messages;
+
 public class RedirectCommand extends AbstractCallCommand {
 
+	@NotNull(message=Messages.MISSING_DESTINATION)
     private URI to;
     private Map<String, String> headers;
 

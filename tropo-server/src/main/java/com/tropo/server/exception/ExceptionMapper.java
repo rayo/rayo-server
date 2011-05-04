@@ -27,17 +27,9 @@ public class ExceptionMapper {
 		
 		if (e instanceof ValidationException) {
 			ConstraintViolation<?> violation = ((ValidationException)e).getFirstViolation();
+			errorCondition = XmppStanzaError.BAD_REQUEST_CONDITION;
+			errorType = XmppStanzaError.Type_MODIFY;
 			if (violation != null) {				
-				if (violation.getConstraintDescriptor().getAnnotation() instanceof NotNull || 
-					violation.getConstraintDescriptor().getAnnotation() instanceof NotEmpty ||
-					violation.getConstraintDescriptor().getAnnotation() instanceof ValidPromptItems ||
-					violation.getConstraintDescriptor().getAnnotation() instanceof Range ||
-                    violation.getConstraintDescriptor().getAnnotation() instanceof AssertTrue ||
-					violation.getConstraintDescriptor().getAnnotation() instanceof ValidChoicesList ||
-					violation.getConstraintDescriptor().getAnnotation() instanceof ValidRecognizer) {
-					errorCondition = XmppStanzaError.BAD_REQUEST_CONDITION;
-					errorType = XmppStanzaError.Type_MODIFY;
-				}
 				if (violation.getMessageTemplate() != null) {
 					errorMessage = violation.getMessageTemplate();				
 				} else {
@@ -45,16 +37,6 @@ public class ExceptionMapper {
 				}
 			} else {
 				if (e.getMessage() != null) {
-					// Also, check out non-annotated validation exceptions
-					if (e.getMessage().equals(Messages.INVALID_INPUT_MODE) || 
-						e.getMessage().equals(Messages.INVALID_URI) ||
-						e.getMessage().equals(Messages.INVALID_TIMEOUT) ||
-						e.getMessage().equals(Messages.INVALID_CONFIDENCE) ||
-						e.getMessage().equals(Messages.INVALID_TERMINATOR) ||
-						e.getMessage().equals(Messages.INVALID_BOOLEAN)) {
-						errorCondition = XmppStanzaError.BAD_REQUEST_CONDITION;
-						errorType = XmppStanzaError.Type_MODIFY;					
-					}
 					errorMessage = e.getMessage();
 				}
 			}

@@ -10,6 +10,7 @@ public class Messages {
 	public static final String MISSING_CHOICES_CONTENT = "Missing choices content.";
 	public static final String MISSING_URI = "Missing URI value.";
 	public static final String MISSING_SSML = "Missing SSML content.";
+	public static final String MISSING_DESTINATION = "Missing destination.";
 	public static final String INVALID_INPUT_MODE = "Invalid input mode.";
 	public static final String INVALID_URI = "You have submitted an invalid URI.";
 	public static final String INVALID_BOOLEAN = "You have submitted an invalid boolean value.";
@@ -17,5 +18,7 @@ public class Messages {
 	public static final String INVALID_CONFIDENCE = "Invalid confidence specified.";
 	public static final String INVALID_TERMINATOR = "Invalid terminator character.";
 	public static final String INVALID_CONFIDENCE_RANGE = "Confidence must be a value between 0 and 1.";
+	public static final String INVALID_REASON = "Invalid reason";
+	public static final String UNKNOWN_NAMESPACE_ELEMENT = "Could not find the element on namespace.";
 
 }

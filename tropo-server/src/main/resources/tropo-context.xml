@@ -52,6 +52,18 @@
 				<bean class="com.tropo.core.xml.OzoneProvider">
 					<property name="validator" ref="validator" />
 				</bean>
+				<bean id="sayProvider" class="com.tropo.core.xml.providers.SayProvider">
+					<property name="validator" ref="validator" />
+				</bean>
+				<bean id="askProvider" class="com.tropo.core.xml.providers.AskProvider">
+					<property name="validator" ref="validator" />
+				</bean>
+				<bean id="transferProvider" class="com.tropo.core.xml.providers.TransferProvider">
+					<property name="validator" ref="validator" />
+				</bean>
+				<bean id="conferenceProvider" class="com.tropo.core.xml.providers.ConferenceProvider">
+					<property name="validator" ref="validator" />
+				</bean>				
 			</list>
 		</property>		
 	</bean>
@@ -67,25 +79,25 @@
 			<list>
 				<!-- Say -->
 				<bean class="com.tropo.server.verb.AbstractVerbFactory">
-					<!-- <property name="xmlProvider" ref="" />  -->
+					<property name="xmlProvider" ref="sayProvider" />
 					<property name="modelClass" value="com.tropo.core.verb.Say" />
 					<lookup-method name="createVerbHandler" bean="sayHandler" />
 				</bean>
 				<!-- Ask -->
 				<bean class="com.tropo.server.verb.AbstractVerbFactory">
-					<!-- <property name="xmlProvider" ref="" />  -->
+					<property name="xmlProvider" ref="askProvider" />
 					<property name="modelClass" value="com.tropo.core.verb.Ask" />
 					<lookup-method name="createVerbHandler" bean="askHandler" />
 				</bean>
 				<!-- Transfer -->
 				<bean class="com.tropo.server.verb.AbstractVerbFactory">
-					<!-- <property name="xmlProvider" ref="" />  -->
+					<property name="xmlProvider" ref="transferProvider" />
 					<property name="modelClass" value="com.tropo.core.verb.Transfer" />
 					<lookup-method name="createVerbHandler" bean="transferHandler" />
 				</bean>
 				<!-- Conference -->
 				<bean class="com.tropo.server.verb.AbstractVerbFactory">
-					<!-- <property name="xmlProvider" ref="" />  -->
+					<property name="xmlProvider" ref="conferenceProvider" />
 					<property name="modelClass" value="com.tropo.core.verb.Conference" />
 					<lookup-method name="createVerbHandler" bean="conferenceHandler" />
 				</bean>

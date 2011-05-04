@@ -2,33 +2,40 @@ package com.tropo.server.validation;
 
 import static org.junit.Assert.*
 
-import java.io.StringReader;
+import java.io.StringReader
 
-import org.dom4j.Document;
-import org.dom4j.Element;
-import org.dom4j.io.SAXReader;
-import org.hibernate.validator.constraints.NotEmpty;
-import org.junit.Before;
+import org.dom4j.Element
+import org.dom4j.io.SAXReader
+import org.junit.Before
 import org.junit.Test
 
-import com.tropo.core.validation.Messages;
+import com.tropo.core.validation.Messages
 import com.tropo.core.validation.ValidationException
 import com.tropo.core.validation.Validator
-import com.tropo.core.verb.Say
-import com.tropo.core.xml.OzoneProvider;
+import com.tropo.core.xml.OzoneProvider
+import com.tropo.core.xml.providers.AskProvider
+import com.tropo.core.xml.providers.ConferenceProvider
+import com.tropo.core.xml.providers.SayProvider
+import com.tropo.core.xml.providers.TransferProvider
 import com.tropo.server.exception.ExceptionMapper
-import com.voxeo.servlet.xmpp.XmppStanzaError;
+import com.voxeo.servlet.xmpp.XmppStanzaError
 
 
 class ValidationTest {
 
-	def provider
+	def providers
 	def mapper
 	
 	@Before
 	public void init() {
 		
-		provider = new OzoneProvider(validator: new Validator())
+		def validator = new Validator()
+		providers = [new OzoneProvider(validator:validator),
+					 new SayProvider(validator:validator),
+					 new AskProvider(validator:validator),
+					 new TransferProvider(validator:validator),
+					 new ConferenceProvider(validator:validator)]
+
 		mapper = new ExceptionMapper()
 	}
 	
@@ -87,7 +94,7 @@ class ValidationTest {
 	public void validateSayValid() {
 				
 		def say = parseXml("""<say xmlns=\"urn:xmpp:ozone:say:1\" voice=\"allison\"><speak>Hello World</speak></say>""")
-		assertNotNull provider.fromXML(say)
+		assertNotNull fromXML(say)
 	}
 	
 	
@@ -254,7 +261,7 @@ class ValidationTest {
 	public void validateAskValid() {
 				
 		def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" recognizer="en-us" voice=\"allison\"><choices>sales,support</choices><prompt><speak xmlns=\"\">Choose your department.</speak></prompt></ask>""")		
-		assertNotNull provider.fromXML(ask)
+		assertNotNull fromXML(ask)
 	}
 	
 	// Transfer
@@ -300,7 +307,7 @@ class ValidationTest {
 	public void validateTransferEmptyElementButNotEmptyToAttribute() {
 				
 		def transfer = parseXml("""<transfer xmlns=\"urn:xmpp:ozone:transfer:1\" to="tel:123456"><to/></transfer>""")
-		assertNotNull provider.fromXML(transfer)
+		assertNotNull fromXML(transfer)
 	}
 	
 	@Test
@@ -367,7 +374,7 @@ class ValidationTest {
 	public void validateTransferValid() {
 				
 		def transfer = parseXml("""<transfer xmlns=\"urn:xmpp:ozone:transfer:1\" from="tel:12345666"><to>tel:123456789</to></transfer>""")
-		assertNotNull provider.fromXML(transfer)
+		assertNotNull fromXML(transfer)
 	}
 	
 	// Conference
@@ -437,20 +444,73 @@ class ValidationTest {
 	public void validateConferenceValid() {
 				
 		def conference = parseXml("""<conference xmlns=\"urn:xmpp:ozone:conference:1\" mute="false" beep="false" tone-passthrough="true" id="123456"/>""")
-		assertNotNull provider.fromXML(conference)
+		assertNotNull fromXML(conference)
+	}
+
+	// Redirect
+	// ====================================================================================
+	
+	@Test
+	public void validateRedirectMissingDestination() {
+				
+		def conference = parseXml("""<redirect xmlns="urn:xmpp:ozone:1"/>""")
+		
+		def errorMapping = assertValidationException(conference)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.MISSING_DESTINATION
 	}
 	
-	def assertValidationException(def object) {
+	@Test
+	public void validateRedirectInvalidURI() {
+				
+		def conference = parseXml("""<redirect xmlns="urn:xmpp:ozone:1" to="\$?\\.com"/>""")
+		
+		def errorMapping = assertValidationException(conference)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.INVALID_URI
+	}
+	
+	// Mixed tests
+	// ====================================================================================
+	
+	@Test
+	public void validateInvalidNamespace() {
+				
+		def say = parseXml("""<say xmlns=\"urn:xmpp:ozone:conference:1\" voice=\"allison\"><speak>Hello World</speak></say>""")
+		
+		def errorMapping = assertValidationException(say)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.UNKNOWN_NAMESPACE_ELEMENT
+	}
+	
+	// Invalid jids
+	// ====================================================================================
+	
+	def assertValidationException(def element) {
 		
 		try {
-			provider.fromXML(object)
+			fromXML(element)
 		} catch (Exception e) {
-			e.printStackTrace()
 			assertTrue e instanceof ValidationException
 			def errorMapping = mapper.toXmppError(e)
 			return errorMapping
 		}
 		fail "Expected validation exception"
+	}
+	
+	def fromXML(def element) {
+
+		for(def provider: providers) {
+			if (provider.handles(element)) {
+				return provider.fromXML(element)
+			}
+		}
 	}
 	
 	private Element parseXml(String string) {
