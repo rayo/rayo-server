@@ -1,6 +1,7 @@
 package com.tropo.core.verb;
 
 
+
 public class ConferenceCompleteEvent extends VerbCompleteEvent {
 
     public enum Reason implements VerbCompleteReason {
@@ -33,5 +34,4 @@ public class ConferenceCompleteEvent extends VerbCompleteEvent {
     public boolean isSuccess() {
         return reason != Reason.ERROR;
     }
-
 }

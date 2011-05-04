@@ -1,5 +1,8 @@
 package com.tropo.core.verb;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
+
 public abstract class AbstractVerbCommand implements VerbCommand {
 
     private String callId;
@@ -20,5 +23,13 @@ public abstract class AbstractVerbCommand implements VerbCommand {
     public void setVerbId(String verbId) {
         this.verbId = verbId;
     }
+    
+    @Override
+    public String toString() {
 
+    	return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)    		
+    		.append("callId", getCallId())
+    		.append("verbId", getVerbId())
+    		.toString();
+    }
 }

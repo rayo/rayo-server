@@ -5,6 +5,9 @@ import java.util.Map;
 
 import javax.validation.constraints.NotNull;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
+
 import com.tropo.core.validation.Messages;
 
 public class RedirectCommand extends AbstractCallCommand {
@@ -45,4 +48,13 @@ public class RedirectCommand extends AbstractCallCommand {
         return headers;
     }
 
+    @Override
+    public String toString() {
+
+    	return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)    		
+    		.append("callId", getCallId())
+    		.append("to",to)
+    		.append("headers",headers)
+    		.toString();
+    }
 }

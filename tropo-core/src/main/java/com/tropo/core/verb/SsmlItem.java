@@ -2,6 +2,8 @@ package com.tropo.core.verb;
 
 import java.net.URI;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import com.tropo.core.validation.Messages;
@@ -29,4 +31,13 @@ public class SsmlItem implements PromptItem {
         return URI.create("data:" + Networks.urlEncode("application/ssml+xml," + getText()));
     }
 
+
+    @Override
+    public String toString() {
+
+    	return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)    		
+			.append("ssml",ssml)
+    		.append("uri",toUri())
+    		.toString();
+    }    
 }

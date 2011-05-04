@@ -2,6 +2,9 @@ package com.tropo.core.verb;
 
 import javax.validation.Valid;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
+
 import com.tropo.core.validation.ValidPromptItems;
 
 public class Say extends BaseVerb {
@@ -28,4 +31,14 @@ public class Say extends BaseVerb {
         this.promptItems = items;
     }
 
+    @Override
+    public String toString() {
+
+    	return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)    		
+    		.append("callId", getCallId())
+    		.append("verbId", getVerbId())
+    		.append("promptItems",promptItems)
+    		.append("voice",voice)
+    		.toString();
+    }
 }

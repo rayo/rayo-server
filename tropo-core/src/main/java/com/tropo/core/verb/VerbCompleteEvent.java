@@ -1,5 +1,8 @@
 package com.tropo.core.verb;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
+
 public abstract class VerbCompleteEvent extends AbstractVerbEvent {
 
     private String errorText;
@@ -39,4 +42,15 @@ public abstract class VerbCompleteEvent extends AbstractVerbEvent {
 
     public abstract boolean isSuccess();
 
+
+    @Override
+    public String toString() {
+
+    	return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)    		
+    		.append("callId", getCallId())
+    		.append("verbId", getVerbId())
+    		.append("reason",reason)
+    		.append("errorText",getErrorText())
+    		.toString();
+    }  
 }

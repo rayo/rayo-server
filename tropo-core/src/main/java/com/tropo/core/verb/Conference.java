@@ -2,6 +2,9 @@ package com.tropo.core.verb;
 
 import javax.validation.constraints.NotNull;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
+
 import com.tropo.core.validation.Messages;
 
 public class Conference extends BaseVerb {
@@ -53,4 +56,17 @@ public class Conference extends BaseVerb {
         this.beep = beep;
     }
 
+    @Override
+    public String toString() {
+
+    	return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)    		
+    		.append("callId", getCallId())
+    		.append("verbId", getVerbId())
+    		.append("roomName",roomName)
+    		.append("mute",mute)
+    		.append("beep",beep)
+    		.append("tonePassthrough",tonePassthrough)
+    		.append("terminator",terminator)
+    		.toString();
+    }
 }

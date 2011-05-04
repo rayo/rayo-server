@@ -3,6 +3,9 @@ package com.tropo.core;
 import java.net.URI;
 import java.util.Map;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
+
 public class OfferEvent extends AbstractCallEvent {
 
     private URI to;
@@ -37,4 +40,14 @@ public class OfferEvent extends AbstractCallEvent {
         this.headers = headers;
     }
 
+    @Override
+    public String toString() {
+
+    	return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)    		
+    		.append("callId", getCallId())
+    		.append("from",from)
+    		.append("to",to)
+    		.append("headers",headers)
+    		.toString();
+    }
 }

@@ -6,6 +6,8 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.joda.time.Duration;
 
@@ -91,4 +93,19 @@ public class Transfer extends BaseVerb {
         this.headers = headers;
     }
 
+    @Override
+    public String toString() {
+
+    	return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)    		
+    		.append("callId", getCallId())
+    		.append("verbId", getVerbId())
+    		.append("to", to)
+    		.append("from", from)
+    		.append("timeout", timeout)
+    		.append("answerOnMedia", answerOnMedia)
+    		.append("terminator", terminator)
+    		.append("promptItems",promptItems)
+    		.append("voice",voice)
+    		.toString();
+    }
 }

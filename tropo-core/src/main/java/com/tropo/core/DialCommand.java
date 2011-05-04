@@ -3,6 +3,9 @@ package com.tropo.core;
 import java.net.URI;
 import java.util.Map;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
+
 public class DialCommand implements ServerCommand {
 
     private URI to;
@@ -31,6 +34,16 @@ public class DialCommand implements ServerCommand {
 
     public void setHeaders(Map<String, String> headers) {
         this.headers = headers;
+    }
+    
+    @Override
+    public String toString() {
+
+    	return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)    		
+    		.append("from",from)
+    		.append("to",to)
+    		.append("headers",headers)
+    		.toString();
     }
 
 }

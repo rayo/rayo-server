@@ -3,6 +3,8 @@ package com.tropo.core.verb;
 import javax.validation.Valid;
 import javax.validation.constraints.AssertTrue;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
 import org.joda.time.Duration;
 
 import com.tropo.core.validation.Messages;
@@ -109,4 +111,21 @@ public class Ask extends BaseVerb {
         return (minConfidence >= 0f && minConfidence <= 1f);
     }
 
+    @Override
+    public String toString() {
+
+    	return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)    		
+    		.append("callId", getCallId())
+    		.append("verbId", getVerbId())
+    		.append("promptItems",promptItems)
+    		.append("bargein",bargein)
+    		.append("choices",choices)
+    		.append("mode",mode)
+    		.append("recognizer",recognizer)
+    		.append("minConfidence",minConfidence)
+    		.append("terminator",terminator)
+    		.append("timeout",timeout)
+    		.append("voice",voice)
+    		.toString();
+    }
 }

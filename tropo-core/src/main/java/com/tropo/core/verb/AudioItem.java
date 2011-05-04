@@ -4,6 +4,9 @@ import java.net.URI;
 
 import javax.validation.constraints.NotNull;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
+
 import com.tropo.core.validation.Messages;
 
 public class AudioItem implements PromptItem {
@@ -30,4 +33,11 @@ public class AudioItem implements PromptItem {
         return uri;
     }
 
+    @Override
+    public String toString() {
+
+    	return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)    		
+    		.append("uri",uri)
+    		.toString();
+    }     
 }

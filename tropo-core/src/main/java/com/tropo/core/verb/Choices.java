@@ -2,9 +2,8 @@ package com.tropo.core.verb;
 
 import java.net.URI;
 
-import javax.validation.constraints.NotNull;
-
-import com.tropo.core.validation.Messages;
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
 
 public class Choices {
 
@@ -47,4 +46,14 @@ public class Choices {
         this.content = text;
     }
 
+
+    @Override
+    public String toString() {
+
+    	return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)    		
+    		.append("uri",uri)
+    		.append("contentType",contentType)
+    		.append("content",content)
+    		.toString();
+    }    
 }

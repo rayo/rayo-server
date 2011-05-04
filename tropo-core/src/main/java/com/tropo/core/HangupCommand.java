@@ -2,6 +2,9 @@ package com.tropo.core;
 
 import java.util.Map;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
+
 public class HangupCommand extends AbstractCallCommand {
 
     private Map<String, String> headers;
@@ -25,4 +28,12 @@ public class HangupCommand extends AbstractCallCommand {
         return headers;
     }
 
+    @Override
+    public String toString() {
+
+    	return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)    		
+    		.append("callId", getCallId())
+    		.append("headers",headers)
+    		.toString();
+    }
 }
