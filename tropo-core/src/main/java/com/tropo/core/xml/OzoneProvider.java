@@ -133,6 +133,58 @@ public class OzoneProvider extends BaseProvider {
             createRejectCommand(object, document);
         } else if (object instanceof RedirectCommand) {
             createRedirectCommand(object, document);
+        try {
+            Document document = DocumentHelper.createDocument();
+            if (object instanceof OfferEvent) {
+                createOffer(object, document);
+            } else if (object instanceof EndEvent) {
+                createEndEvent(object, document);
+            } else if (object instanceof RingEvent) {
+                createRingEvent(object, document);
+            } else if (object instanceof AnswerEvent) {
+                createAnswerEvent(object, document);
+            } else if (object instanceof AcceptCommand) {
+                createAcceptCommand(object, document);
+            } else if (object instanceof AnswerCommand) {
+                createAnswerCommand(object, document);
+            } else if (object instanceof HangupCommand) {
+                createHangupCommand(object, document);
+            } else if (object instanceof RejectCommand) {
+                createRejectCommand(object, document);
+            } else if (object instanceof RedirectCommand) {
+                createRedirectCommand(object, document);
+            } else if (object instanceof Say) {
+                createSay(object, document);
+            } else if (object instanceof PauseCommand) {
+                createPauseCommand(object, document);
+            } else if (object instanceof ResumeCommand) {
+                createResumeCommand(object, document);
+            } else if (object instanceof StopCommand) {
+                createStopCommand(object, document);
+            } else if (object instanceof SayCompleteEvent) {
+                createSayCompleteEvent(object, document);
+            } else if (object instanceof Ask) {
+                createAsk(object, document);
+            } else if (object instanceof AskCompleteEvent) {
+                createAskCompleteEvent(object, document);
+            } else if (object instanceof Transfer) {
+                createTransfer(object, document);
+            } else if (object instanceof TransferCompleteEvent) {
+                createTransferCompleteEvent(object, document);
+            } else if (object instanceof Conference) {
+                createConference(object, document);
+            } else if (object instanceof ConferenceCompleteEvent) {
+                createConferenceCompleteEvent(object, document);
+            } else if (object instanceof KickCommand) {
+                createKick(object, document);
+            }
+            else {
+                throw new IllegalArgumentException("Type is not supported: " + object.getClass());
+            }
+
+            return document.getRootElement();
+        } catch (Exception e) {
+            throw new IllegalStateException(e);
         }
     }
 
