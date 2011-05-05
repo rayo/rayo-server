@@ -69,11 +69,7 @@
 	                    <property>
 	                        <name>war.location</name>
 	                        <value>${war.location}</value>
-	                    </property>
-	                    <property>
-	                        <name>enable.functional.tests</name>
-	                        <value>${enable.functional.tests}</value>
-	                    </property>	                
+	                    </property>               
 	                </systemProperties>
 	            </configuration>
 	        </plugin>		

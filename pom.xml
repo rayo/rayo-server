@@ -249,9 +249,17 @@
     <module>tropo-server</module>
     <module>tropo-core</module>
     <module>tropo-war</module>
-    <module>tropo-functional-test</module>
   </modules>
   <profiles>
+    <profile>
+      <id>functional</id>
+      <modules>
+        <module>tropo-server</module>
+        <module>tropo-core</module>
+        <module>tropo-war</module>
+        <module>tropo-functional-test</module>
+      </modules>
+    </profile>
     <profile>
       <id>uml</id>
       <activation>
