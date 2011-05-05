@@ -53,8 +53,7 @@ class DeployTest {
 		
 		def tf
 		def server
-		
-		
+				
 		try {
 			tf = TestFramework.create(Integer.valueOf(prismPort))
 			server = tf.createPrismServer(prismLocation)
@@ -65,9 +64,13 @@ class DeployTest {
 			
 			assertEquals new URL("http://${serverName}:${serverPort}/" + appName).openConnection().responseCode, 200
 		} catch (Exception e) {
-			e.printStacktrace()
-		} finally {		
-			TestFramework.release(tf.report(server.stop()))
+			e.printStackTrace()
+			throw e;
+		} finally {
+			if (server.isRunning()) {
+				server.stop()
+			}		
+			TestFramework.release(tf.report(server))
 		}
 		
 	}
