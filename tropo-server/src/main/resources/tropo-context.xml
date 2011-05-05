@@ -35,7 +35,7 @@
 	</bean>
 
 	<!-- Conference Manager -->	
-	<bean id="conferenceManager" class="com.tropo.server.verb.DefaultConferenceManager" />
+	<bean id="conferenceManager" class="com.tropo.server.conference.DefaultConferenceManager" />
 
 	<!-- Model / Request Validation -->
 	<bean id="validator" class="com.tropo.core.validation.Validator"/>

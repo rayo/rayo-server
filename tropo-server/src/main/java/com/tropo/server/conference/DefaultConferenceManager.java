@@ -1,4 +1,4 @@
-package com.tropo.server.verb;
+package com.tropo.server.conference;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -7,23 +7,19 @@ import com.voxeo.moho.ApplicationContext;
 
 public class DefaultConferenceManager implements ConferenceManager {
 
-    private Map<String, ConferenceRoom> conferenceRooms;
+    private Map<String, ConferenceRoom> rooms = new HashMap<String, ConferenceRoom>();
 
     public synchronized ConferenceRoom getConferenceRoom(String name, boolean create, ApplicationContext applicationContext) {
-        if (conferenceRooms == null) {
-            conferenceRooms = new HashMap<String, ConferenceRoom>();
-        }
-        ConferenceRoom room = conferenceRooms.get(name);
+        ConferenceRoom room = rooms.get(name);
         if (room == null && create) {
             room = new ConferenceRoom(name, this, applicationContext);
-            conferenceRooms.put(name, room);
+            rooms.put(name, room);
         }
-
         return room;
     }
 
     public void conferenceRoomClosed(String name) {
-        conferenceRooms.remove(name);
+        rooms.remove(name);
     }
 
 }

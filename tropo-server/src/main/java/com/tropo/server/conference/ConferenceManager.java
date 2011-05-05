@@ -1,4 +1,4 @@
-package com.tropo.server.verb;
+package com.tropo.server.conference;
 
 import com.voxeo.moho.ApplicationContext;
 

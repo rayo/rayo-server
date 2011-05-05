@@ -9,12 +9,15 @@ import com.tropo.core.validation.Messages;
 
 public class Conference extends BaseVerb {
 
+    private PromptItems holdMusic;
+    
 	@NotNull(message=Messages.MISSING_ROOM_NAME)
     private String roomName;
+	
     private boolean mute;
-    private boolean beep;
+    private boolean beep = true;
     private boolean tonePassthrough;
-    private Character terminator;
+    private Character terminator = '#';
 
     public String getRoomName() {
         return roomName;
@@ -56,6 +59,14 @@ public class Conference extends BaseVerb {
         this.beep = beep;
     }
 
+    public void setHoldMusic(PromptItems holdMusic) {
+        this.holdMusic = holdMusic;
+    }
+
+    public PromptItems getHoldMusic() {
+        return holdMusic;
+    }
+    
     @Override
     public String toString() {
 
@@ -69,4 +80,5 @@ public class Conference extends BaseVerb {
     		.append("terminator",terminator)
     		.toString();
     }
+
 }

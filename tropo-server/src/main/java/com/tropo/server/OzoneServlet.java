@@ -245,6 +245,7 @@ public class OzoneServlet extends XmppServlet {
                                 sendIqError(request, XmppStanzaError.INTERNAL_SERVER_ERROR_CONDITION, contents);
                                 return;
                             }
+                            // Must go before CallRef bellow!
                             else if (command instanceof VerbRef) {
                                 // Generate Verb Reference
                                 String verbJid = request.getTo().getBareJID() + "/" + ((VerbRef) command).getVerbId();

@@ -7,6 +7,9 @@ import com.tropo.core.verb.VerbCommand;
 import com.tropo.core.verb.ConferenceCompleteEvent.Reason;
 import com.tropo.core.verb.KickCommand;
 import com.tropo.core.verb.UnmuteCommand;
+import com.tropo.server.conference.ConferenceManager;
+import com.tropo.server.conference.ConferenceRoom;
+import com.tropo.server.conference.Participant;
 import com.voxeo.moho.State;
 import com.voxeo.moho.event.DisconnectEvent;
 import com.voxeo.moho.event.InputCompleteEvent;
@@ -19,11 +22,12 @@ public class LocalConferenceHandler extends AbstractLocalVerbHandler<Conference>
 
     private boolean joined;
     private ConferenceRoom conferenceRoom;
+    private Participant participant;
 
     @Override
     public void start() {
         conferenceRoom = conferenceManager.getConferenceRoom(model.getRoomName(), true, call.getApplicationContext());
-        conferenceRoom.enter(call, model);
+        participant = conferenceRoom.enter(call, model);
         joined = true;
     }
 
@@ -52,17 +56,11 @@ public class LocalConferenceHandler extends AbstractLocalVerbHandler<Conference>
     }
 
     public void mute() {
-        if (model.isMute() == false) {
-            model.setMute(true);
-            conferenceRoom.enter(call, model);
-        }
+        participant.setMuted(true);
     }
 
     public void unmute() {
-        if (model.isMute() == true) {
-            model.setMute(false);
-            conferenceRoom.enter(call, model);
-        }
+        participant.setMuted(false);
     }
 
     // Moho Events
