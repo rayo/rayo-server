@@ -496,7 +496,7 @@ public class OzoneProviderTest {
 	public void emptyConferenceToXml() {
 		
 		def conference = new Conference()
-		assertEquals("""<conference xmlns=\"urn:xmpp:ozone:conference:1\" beep=\"false\" mute=\"false\" tone-passthrough=\"false\"/>""", toXml(conference));
+		assertEquals("""<conference xmlns=\"urn:xmpp:ozone:conference:1\" terminator="#" beep="true" mute=\"false\" tone-passthrough=\"false\"/>""", toXml(conference));
 	}
 	
 	@Test
