@@ -51,6 +51,10 @@ class DeployTest {
 	@Test
 	public void testDeploy() {
 		
+		if (!"true".equals(System.getProperty('enable.functional.tests'))) {
+			// Skip test unless explicitly enabled. 
+			return
+		}
 		def tf
 		def server
 				
