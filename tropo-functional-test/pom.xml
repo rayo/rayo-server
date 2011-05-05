@@ -1,0 +1,53 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>tropo-functional-test</artifactId>
+	<packaging>jar</packaging>
+	
+	<name>Tropo2/Ozone Functional Test</name>
+  
+	<parent>
+		<groupId>com.tropo</groupId>
+		<artifactId>tropo-parent</artifactId>
+		<version>2.0-SNAPSHOT</version>
+	</parent>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.voxeo.xmpp</groupId>
+			<artifactId>vsm-lib</artifactId>
+			<version>1.0.0</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/vsm-lib.jar</systemPath>		
+		</dependency>
+		<dependency>
+			<groupId>com.voxeo.xmpp</groupId>
+			<artifactId>vsm-tools</artifactId>
+			<version>1.0.0</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/vsm-tools.jar</systemPath>		
+		</dependency>
+		<dependency>
+			<groupId>com.voxeo.xmpp</groupId>
+			<artifactId>vsm-ptf</artifactId>
+			<version>1.0.0</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/vsm-ptf.jar</systemPath>		
+		</dependency>
+		<dependency>
+		    <groupId>org.antlr</groupId>
+		    <artifactId>stringtemplate</artifactId>
+		    <version>3.2.1</version>
+		</dependency>
+		<dependency>
+		    <groupId>antlr</groupId>
+		    <artifactId>antlr</artifactId>
+		    <version>2.7.7</version>
+		</dependency>	
+		<dependency>
+		    <groupId>log4j</groupId>
+		    <artifactId>log4j</artifactId>
+		    <version>1.2.16</version>
+		</dependency>					
+	</dependencies>
+	
+</project>

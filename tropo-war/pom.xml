@@ -22,6 +22,10 @@
 			<artifactId>tropo-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+		</dependency>
 		<!-- Needed to prevent log4j from making it's way into the WAR in Eclipse -->
 		<dependency>
 			<groupId>log4j</groupId>

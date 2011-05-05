@@ -1,3 +1,10 @@
+<%@ page import="com.tropo.web.*" %>
+		
+<%
+	if (getServletConfig().getServletContext().getAttribute(ContextLoaderListener.TROPO_STATUS) == TropoStatus.FAILED) {
+	    response.sendError(500);
+    }
+%>
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"> 
 <html> 
 <head> 

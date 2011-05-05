@@ -6,7 +6,7 @@
 		<param-value>classpath:tropo-context.xml</param-value>
 	</context-param>
 	<listener>
-		<listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+		<listener-class>com.tropo.web.ContextLoaderListener</listener-class>
 	</listener>
 	<servlet>
 		<servlet-name>Controller</servlet-name>
