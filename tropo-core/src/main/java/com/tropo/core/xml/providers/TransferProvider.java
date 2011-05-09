@@ -44,7 +44,10 @@ public class TransferProvider extends BaseProvider {
 		if (root.attributeValue("voice") != null) {
 			transfer.setVoice(root.attributeValue("voice"));
 		}
-		transfer.setPromptItems(extractPromptItems(root));
+		
+		if(root.element("ring") != null) {
+		    transfer.setPromptItems(extractPromptItems(root.element("ring")));
+		}
 
 		if (root.attributeValue("from") != null) {
 			transfer.setFrom(toURI(root.attributeValue("from")));

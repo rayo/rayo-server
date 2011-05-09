@@ -3,6 +3,7 @@ package com.tropo.core.xml
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertFalse
 import static org.junit.Assert.assertNotNull
+import static org.junit.Assert.assertNull
 import static org.junit.Assert.assertTrue
 
 import java.io.StringReader
@@ -532,6 +533,7 @@ public class OzoneProviderTest {
 		assertEquals transfer.to.size(),2
 		assertEquals transfer.to[0].toString(),"sip:martin@127.0.0.1:6089"
 		assertEquals transfer.to[1].toString(),"sip:jose@127.0.0.1:6088"
+        assertNull transfer.promptItems
 	}
 	
 	@Test
@@ -556,7 +558,7 @@ public class OzoneProviderTest {
 	@Test
 	public void audioTransferFromXml() {
 		
-		def transfer = fromXml("""<transfer xmlns=\"urn:xmpp:ozone:transfer:1\" terminator=\"#\" timeout=\"PT20S\"><audio url=\"http://ccmixter.org/content/DoKashiteru/DoKashiteru_-_you_(na-na-na-na).mp3\"/><to>sip:martin@127.0.0.1:6089</to></transfer>""")
+		def transfer = fromXml("""<transfer xmlns=\"urn:xmpp:ozone:transfer:1\" terminator=\"#\" timeout=\"PT20S\"><ring><audio url=\"http://ccmixter.org/content/DoKashiteru/DoKashiteru_-_you_(na-na-na-na).mp3\"/></ring><to>sip:martin@127.0.0.1:6089</to></transfer>""")
 		assertNotNull transfer
 		assertNotNull transfer.promptItems
 		assertEquals transfer.promptItems.size(),1
@@ -566,7 +568,7 @@ public class OzoneProviderTest {
 	@Test
 	public void ssmlTransferFromXml() {
 		
-		def transfer = fromXml("""<transfer xmlns=\"urn:xmpp:ozone:transfer:1\" voice=\"allison\" terminator=\"#\" timeout=\"PT20S\"><speak xmlns=\"\">We are going to transfer your call. Wait a couple of seconds.</speak><to>sip:martin@127.0.0.1:6089</to></transfer>""")
+		def transfer = fromXml("""<transfer xmlns=\"urn:xmpp:ozone:transfer:1\" voice=\"allison\" terminator=\"#\" timeout=\"PT20S\"><ring><speak xmlns=\"\">We are going to transfer your call. Wait a couple of seconds.</speak></ring><to>sip:martin@127.0.0.1:6089</to></transfer>""")
 		assertNotNull transfer
 		assertNotNull transfer.promptItems
 		assertEquals transfer.promptItems.size(),1
