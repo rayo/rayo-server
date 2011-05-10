@@ -8,9 +8,11 @@ import javax.validation.constraints.NotNull;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
+import com.tropo.core.validation.Messages;
+
 public class DialCommand implements ServerCommand {
 
-    @NotNull
+    @NotNull(message=Messages.MISSING_TO)
     private URI to;
     
     private URI from;

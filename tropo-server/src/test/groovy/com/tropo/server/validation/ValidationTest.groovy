@@ -474,6 +474,59 @@ class ValidationTest {
 		assertEquals errorMapping.text, Messages.INVALID_URI
 	}
 	
+	// Dial
+	// ====================================================================================
+	
+	@Test
+	public void validateDialMissingTo() {
+				
+		def dial = parseXml("""<dial xmlns=\"urn:xmpp:ozone:1\" from=\"tel:34637710708\"><header name=\"test\" value=\"atest\"/></dial>""")
+		
+		def errorMapping = assertValidationException(dial)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.MISSING_TO
+	}
+	
+	@Test
+	public void validateEmptyDialIsOk() {
+				
+		def dial = parseXml("""<dial xmlns=\"urn:xmpp:ozone:1\" to=\"tel:34637710701\" from=\"tel:34637710708\"></dial>""")
+		assertNotNull fromXML(dial)
+	}
+	
+	@Test
+	public void validateEmptyDialEmptyHeaderIsOk() {
+				
+		def dial = parseXml("""<dial xmlns=\"urn:xmpp:ozone:1\" to=\"tel:34637710701\" from=\"tel:34637710708\"><header/></dial>""")
+		assertNotNull fromXML(dial)
+	}
+	
+	@Test
+	public void validateDialInvalidToURI() {
+				
+		def ask = parseXml("""<dial xmlns=\"urn:xmpp:ozone:1\" to=\"tel:\$?\\.com\" from=\"tel:34637710708\"><header/></dial>""")
+		
+		def errorMapping = assertValidationException(ask)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.INVALID_URI
+	}
+	
+	@Test
+	public void validateDialInvalidFromURI() {
+				
+		def ask = parseXml("""<dial xmlns=\"urn:xmpp:ozone:1\" to=\"tel:34637710708\" from=\"tel:\$?\\.com\"><header/></dial>""")
+		
+		def errorMapping = assertValidationException(ask)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.INVALID_URI
+	}
+	
 	// Mixed tests
 	// ====================================================================================
 	
