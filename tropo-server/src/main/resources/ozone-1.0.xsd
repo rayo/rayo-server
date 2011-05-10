@@ -14,7 +14,6 @@
 		<sequence>
 			<element name="header" type="tns:headerType" minOccurs="0" maxOccurs="unbounded" />
 		</sequence>
-		<attribute name="callId" type="anyURI" use="required" />
 		<attribute name="timestamp" type="dateTime" use="required" />
 		<attribute name="to" type="anyURI" use="required" />
 		<attribute name="from" type="anyURI" use="optional" />
