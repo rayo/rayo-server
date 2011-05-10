@@ -20,6 +20,7 @@ import org.junit.Test
 import com.tropo.core.AcceptCommand
 import com.tropo.core.AnswerCommand
 import com.tropo.core.CallRejectReason
+import com.tropo.core.DialCommand;
 import com.tropo.core.HangupCommand
 import com.tropo.core.OfferEvent
 import com.tropo.core.RedirectCommand
@@ -93,6 +94,35 @@ public class OzoneProviderTest {
 
 	}
 	
+    // DialCommand
+    // ====================================================================================
+
+    @Test
+    public void dialToXml() {
+        Map<String, String> headers = new HashMap<String, String>();
+        DialCommand command = new DialCommand();
+        command.setTo(new URI("tel:44477773333333"));
+        command.setFrom(new URI("tel:34637710708"));
+        headers.put("test","atest");
+        command.setHeaders(headers);
+
+        assertEquals("<dial xmlns=\"urn:xmpp:ozone:1\" to=\"tel:44477773333333\" from=\"tel:34637710708\"><header name=\"test\" value=\"atest\"/></dial>", toXml(command));
+    }
+    
+    @Test
+    public void dialFromXml() {
+
+        assertProperties(fromXml("<dial xmlns=\"urn:xmpp:ozone:1\" to=\"tel:44477773333333\" from=\"tel:34637710708\"><header name=\"test\" value=\"atest\"/></dial>"), [
+            to: new URI("tel:44477773333333"),
+            from: new URI("tel:34637710708"),
+            headers: [
+                test: "atest"
+            ]
+        ])
+
+    }
+    
+    
 	// Accept
 	// ====================================================================================
 

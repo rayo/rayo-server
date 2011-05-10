@@ -91,9 +91,9 @@ public abstract class ReflectiveActor implements Actor, Callback<Object> {
 
         } catch (Exception e) {
             log.error("Uncaught exception processing command", e);
-            //end(Reason.ERROR);
-            preDeath(e);
-            stop();
+            if(!handleException(e)) {
+                stop();
+            }
         }
     }
 
@@ -119,7 +119,15 @@ public abstract class ReflectiveActor implements Actor, Callback<Object> {
         return method;
     }
 
-    protected void preDeath(Throwable throwable) {}
+    /**
+     * Continue after an exception by default
+     * 
+     * @param throwable
+     * @return
+     */
+    protected boolean handleException(Throwable throwable) {
+        return true;
+    }
 
     @Override
     public synchronized boolean isRunning() {
@@ -173,7 +181,7 @@ public abstract class ReflectiveActor implements Actor, Callback<Object> {
         if (running) {
             channel.publish(message);
         } else {
-            log.info("CallActor is disposed. Ignoring message. [%s]", message);
+            log.info("Actor % is disposed. Ignoring message. [%s]", this.getClass().getSimpleName(), message);
         }
         return running;
     }
@@ -199,7 +207,7 @@ public abstract class ReflectiveActor implements Actor, Callback<Object> {
             }
         }
         else {
-            log.info("Actor is stopped. Ignoring Event [%s]", message);
+            log.info("Actor % is disposed. Ignoring event. [%s]", this.getClass().getSimpleName(), message);
         }
         
     }

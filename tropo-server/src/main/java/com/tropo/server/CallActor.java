@@ -28,6 +28,7 @@ import com.tropo.core.verb.Verb;
 import com.tropo.core.verb.VerbCommand;
 import com.tropo.core.verb.VerbCompleteEvent;
 import com.tropo.core.verb.VerbEvent;
+import com.tropo.core.verb.VerbRef;
 import com.tropo.server.verb.EventDispatcher;
 import com.tropo.server.verb.VerbFactory;
 import com.tropo.server.verb.VerbHandler;
@@ -71,8 +72,9 @@ public class CallActor extends ReflectiveActor implements Observer {
     // ================================================================================
 
     @Override
-    protected void preDeath(Throwable throwable) {
+    protected boolean handleException(Throwable throwable) {
         end(Reason.ERROR);
+        return true;
     }
     
     // Outgoing Calls
@@ -221,7 +223,7 @@ public class CallActor extends ReflectiveActor implements Observer {
     }
 
     @Message
-    public String verb(Verb verb) throws Exception {
+    public VerbRef verb(final Verb verb) throws Exception {
 
         VerbFactory verbFactory = verbManager.getVerbFactory(verb.getClass());
         
@@ -247,7 +249,14 @@ public class CallActor extends ReflectiveActor implements Observer {
             throw e;
         }
 
-        return verb.getId();
+        return new VerbRef() {
+            public String getCallId() {
+                return call.getId();
+            }
+            public String getVerbId() {
+                return verb.getId();
+            }
+        };
 
     }
 

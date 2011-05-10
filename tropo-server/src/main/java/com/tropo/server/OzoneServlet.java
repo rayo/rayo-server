@@ -18,6 +18,7 @@ import org.dom4j.QName;
 import com.tropo.core.CallCommand;
 import com.tropo.core.CallEvent;
 import com.tropo.core.CallRef;
+import com.tropo.core.DialCommand;
 import com.tropo.core.HangupCommand;
 import com.tropo.core.verb.Verb;
 import com.tropo.core.verb.VerbCommand;
@@ -201,15 +202,42 @@ public class OzoneServlet extends XmppServlet {
                 }
                 else if (qname.getNamespaceURI().startsWith("urn:xmpp:ozone")) {
 
-                    final CallCommand command = provider.fromXML(payload);
+                    Object command = provider.fromXML(payload);
 
+                    // Handle outbound 'dial' command
+                    if (command instanceof DialCommand) {
+                        callManager.publish(new Request(command, new ResponseHandler() {
+                            public void handle(Response response) throws Exception {
+                                if (response.isSuccess()) {
+                                    CallRef callRef = (CallRef) response.getValue();
+                                    String callJid = callRef.getCallId() + "@" + request.getTo().getBareJID();
+                                    result.addElement("ref").addAttribute("jid", callJid);
+                                    sendIqResult(request, result);
+                                }
+                                else {
+                                    sendIqError(request, (Exception) response.getValue());
+                                }
+                            }
+                        }));
+                        return;
+                    }
+
+                    // If it's not dial then it must be a CallCommand
+                    assertion(command instanceof CallCommand, "Is this a valid call command?");
+                    
+                    final CallCommand callCommand = (CallCommand) command;
+
+                    // Extract Call ID
                     String callId = request.getTo().getNode();
-                    command.setCallId(callId);
+                    callCommand.setCallId(callId);
+                    
+                    // Find the call actor
+                    CallActor actor = findCallActor(callCommand.getCallId());
 
-                    if (command instanceof VerbCommand) {
-                        VerbCommand verbCommand = (VerbCommand) command;
+                    if (callCommand instanceof VerbCommand) {
+                        VerbCommand verbCommand = (VerbCommand) callCommand;
                         verbCommand.setCallId(callId(request.getTo()));
-                        if (command instanceof Verb) {
+                        if (callCommand instanceof Verb) {
                             verbCommand.setVerbId(UUID.randomUUID().toString());
                         }
                         else {
@@ -217,46 +245,19 @@ public class OzoneServlet extends XmppServlet {
                         }
                     }
 
-                    CallActor actor = null;
-                    try {
-                        actor = findCallActor(command.getCallId());
-                    }
-                    catch (NotFoundException e) {
-                        sendIqError(request, XmppStanzaError.ITEM_NOT_FOUND_CONDITION);
-                        return;
-                    }
-
-                    actor.command(command, new ResponseHandler() {
-
+                    actor.command(callCommand, new ResponseHandler() {
                         public void handle(Response commandResponse) throws Exception {
 
                             Object value = commandResponse.getValue();
 
-                            // We are currently not using the XmlProvider for this because it lacks the XMPP context 
-                            // needed to construct a proper reply. We should consider factoring out am XMPP-aware 
-                            // serialization provider for this purpose.
                             if (value instanceof Exception) {
-                                Element contents = null;
-                                String message = ((Exception) value).getMessage();
-                                if(message != null) {
-                                    contents = DocumentHelper.createElement("detail");
-                                    contents.setText(message);
-                                }
-                                sendIqError(request, XmppStanzaError.INTERNAL_SERVER_ERROR_CONDITION, contents);
-                                return;
+                                sendIqError(request, (Exception)value);
                             }
-                            // Must go before CallRef bellow!
-                            else if (command instanceof VerbRef) {
-                                // Generate Verb Reference
-                                String verbJid = request.getTo().getBareJID() + "/" + ((VerbRef) command).getVerbId();
+                            else if (value instanceof VerbRef) {
+                                String verbJid = request.getTo().getBareJID() + "/" + ((VerbRef) value).getVerbId();
                                 result.addElement("ref").addAttribute("jid", verbJid);
+                                sendIqResult(request, result);
                             }
-                            else if (command instanceof CallRef) {
-                                // Generate Call Reference
-                                String callJid = ((CallRef) command).getCallId() + "@" + request.getTo().getBareJID();
-                                result.addElement("ref").addAttribute("jid", callJid);
-                            }
-                            sendIqResult(request, result);
                         }
                     });
 
@@ -270,10 +271,8 @@ public class OzoneServlet extends XmppServlet {
 
         }
         catch (Exception e) {
-            log.error("Error found while processing IQ message: %s.", e);
-            ErrorMapping error = exceptionMapper.toXmppError(e);
-            XmppServletIQResponse response = request.createIQErrorResponse(error.getType(), error.getCondition(), error.getText(), null, null);
-            sendIqError(request, response);
+            log.error("Uncaught exception while processing IQ request", e);
+            sendIqError(request, e);
         }
 
     }
@@ -293,6 +292,21 @@ public class OzoneServlet extends XmppServlet {
 
     // Util
     // ================================================================================
+
+    /**
+     * We are currently not using the XmlProvider for this because it lacks the XMPP context 
+     * needed to construct a proper reply. We should consider factoring out am XMPP-aware 
+     * serialization provider for this purpose.
+     * 
+     * @param request
+     * @param e
+     * @throws IOException
+     */
+    private void sendIqError(XmppServletIQRequest request, Exception e) throws IOException {
+        ErrorMapping error = exceptionMapper.toXmppError(e);
+        XmppServletIQResponse response = request.createIQErrorResponse(error.getType(), error.getCondition(), error.getText(), null, null);
+        sendIqError(request, response);
+    }
 
     private void sendIqError(XmppServletIQRequest request, String error) throws IOException {
         sendIqError(request, error, null);

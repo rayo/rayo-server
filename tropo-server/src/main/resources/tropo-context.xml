@@ -82,7 +82,6 @@
 		</property>		
 	</bean>				
 
-
 	<!-- Create a global XML Provider -->
 	<bean id="xmlProviderManager" class="com.tropo.core.xml.DefaultXmlProviderManagerFactoryBean">
 		<property name="providers">

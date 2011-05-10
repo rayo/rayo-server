@@ -1,6 +1,9 @@
 package com.tropo.server;
 
-import com.tropo.core.OutboundCallCommand;
+import java.net.URI;
+
+import com.tropo.core.CallRef;
+import com.tropo.core.DialCommand;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.ApplicationContext;
 import com.voxeo.moho.Call;
@@ -20,12 +23,24 @@ public class CallManager extends ReflectiveActor {
     // ================================================================================
 
     @Message
-    public String onOutgoingCall(OutboundCallCommand command) throws Exception {
+    public CallRef onDial(DialCommand command) throws Exception {
+        
         CallableEndpoint toEndpoint = (CallableEndpoint) applicationContext.createEndpoint(command.getTo().toString());
-        Endpoint fromEndpoint = applicationContext.createEndpoint(command.getFrom().toString());
-        Call mohoCall = toEndpoint.call(fromEndpoint, command.getHeaders(), (Observer[]) null);
+        
+        URI from = command.getFrom();
+        Endpoint fromEndpoint = null;
+        if(from != null) {
+            fromEndpoint = applicationContext.createEndpoint(from.toString());
+        }
+        final Call mohoCall = toEndpoint.call(fromEndpoint, command.getHeaders(), (Observer[]) null);
+        mohoCall.setSupervised(true);
         startCallActor(mohoCall);
-        return mohoCall.getId();
+        
+        return new CallRef() {
+            public String getCallId() {
+                return mohoCall.getId();
+            }
+        };
     }
 
     @Message

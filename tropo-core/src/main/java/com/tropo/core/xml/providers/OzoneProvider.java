@@ -11,6 +11,7 @@ import com.tropo.core.AcceptCommand;
 import com.tropo.core.AnswerCommand;
 import com.tropo.core.AnswerEvent;
 import com.tropo.core.CallRejectReason;
+import com.tropo.core.DialCommand;
 import com.tropo.core.EndEvent;
 import com.tropo.core.HangupCommand;
 import com.tropo.core.OfferEvent;
@@ -25,27 +26,39 @@ public class OzoneProvider extends BaseProvider {
 	@Override
 	protected Object processElement(Element element) throws Exception {
 
-        if (element.getName().equals("offer")) {
+        String elementName = element.getName();
+        
+        if (elementName.equals("offer")) {
         	return buildOfferEvent(element);
-        } else if (element.getName().equals("accept")) {
+        } else if (elementName.equals("accept")) {
             return buildAcceptCommand(element);
-        } else if (element.getName().equals("answer")) {
+        } else if (elementName.equals("answer")) {
             return buildAnswerCommand(element);
-        } else if (element.getName().equals("hangup")) {
+        } else if (elementName.equals("hangup")) {
             return buildHangupCommand(element);
-        } else if (element.getName().equals("reject")) {
+        } else if (elementName.equals("reject")) {
             return buildRejectCommand(element);
-        } else if (element.getName().equals("redirect")) {
+        } else if (elementName.equals("redirect")) {
             return buildRedirectCommand(element);
-        } else if (element.getName().equals("info")) {
+        } else if (elementName.equals("info")) {
             return buildCallInfo(element);
-        } else if (element.getName().equals("end")) {
+        } else if (elementName.equals("end")) {
             return buildCallEnd(element);
+        } else if (elementName.equals("dial")) {
+            return buildDialCommand(element);
         }
         
         return null;
 	}
 	
+    private Object buildDialCommand(Element element) {
+        DialCommand command = new DialCommand();
+        command.setFrom(toURI(element.attributeValue("from")));
+        command.setTo(toURI(element.attributeValue("to")));
+        command.setHeaders(grabHeaders(element));
+        return command;
+    }
+
     private Object buildCallEnd(Element element) {
         throw new UnsupportedOperationException();
     }
@@ -132,7 +145,18 @@ public class OzoneProvider extends BaseProvider {
             createRejectCommand(object, document);
         } else if (object instanceof RedirectCommand) {
             createRedirectCommand(object, document);
+        } else if (object instanceof DialCommand) {
+            createDialCommand(object, document);
         }
+    }
+
+    private Document createDialCommand(Object object, Document document) {
+        DialCommand command = (DialCommand) object;
+        Element root = document.addElement(new QName("dial", new Namespace("", "urn:xmpp:ozone:1")));
+        root.addAttribute("to", command.getTo().toString());
+        root.addAttribute("from", command.getFrom().toString());
+        addHeaders(command.getHeaders(), root);
+        return document;
     }
 
     private void createAnswerEvent(Object object, Document document) {
@@ -208,7 +232,6 @@ public class OzoneProvider extends BaseProvider {
         Element root = document.addElement(new QName("offer", new Namespace("", "urn:xmpp:ozone:1")));
         root.addAttribute("to", offer.getTo().toString());
         root.addAttribute("from", offer.getFrom().toString());
-        root.addAttribute("callId", offer.getCallId());
 
         addHeaders(offer.getHeaders(), root);
 
@@ -227,6 +250,7 @@ public class OzoneProvider extends BaseProvider {
 			   clazz == AnswerCommand.class ||
 			   clazz == HangupCommand.class ||
 			   clazz == RejectCommand.class ||
-			   clazz == RedirectCommand.class;
+			   clazz == RedirectCommand.class ||
+			   clazz == DialCommand.class;
 	}
 }

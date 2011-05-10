@@ -1,17 +1,9 @@
 package com.tropo.server.exception;
 
 import javax.validation.ConstraintViolation;
-import javax.validation.constraints.AssertTrue;
-import javax.validation.constraints.NotNull;
 
-import org.hibernate.validator.constraints.NotEmpty;
-import org.hibernate.validator.constraints.Range;
-
-import com.tropo.core.validation.Messages;
-import com.tropo.core.validation.ValidChoicesList;
-import com.tropo.core.validation.ValidPromptItems;
-import com.tropo.core.validation.ValidRecognizer;
 import com.tropo.core.validation.ValidationException;
+import com.voxeo.exceptions.NotFoundException;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.servlet.xmpp.XmppStanzaError;
 
@@ -43,8 +35,11 @@ public class ExceptionMapper {
 			
 			return new ErrorMapping(errorType, errorCondition, errorMessage);
 		}
+		else if(e instanceof NotFoundException) {
+		    errorCondition = XmppStanzaError.ITEM_NOT_FOUND_CONDITION;
+		}
 		
-		log.debug(String.format("Mapping unknown exception %s",e));
+		log.debug("Mapping unknown exception [type=%s, message=%s]",e.getClass(), e.getMessage());
 		return new ErrorMapping(errorType, errorCondition);
 	}
 }
