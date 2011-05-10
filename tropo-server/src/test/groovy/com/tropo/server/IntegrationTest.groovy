@@ -271,7 +271,7 @@ public class IntegrationTest {
         assertNotNull response.value
         
         // Get the Verb ID
-        def verbId = response.value
+        def verbId = response.value.verbId
 
         // Pause the audio        
         callActor.command(new PauseCommand([verbId:verbId]), { messageQueue.add it } as ResponseHandler)

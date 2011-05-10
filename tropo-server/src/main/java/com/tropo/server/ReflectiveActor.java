@@ -181,7 +181,7 @@ public abstract class ReflectiveActor implements Actor, Callback<Object> {
         if (running) {
             channel.publish(message);
         } else {
-            log.info("Actor % is disposed. Ignoring message. [%s]", this.getClass().getSimpleName(), message);
+            log.info("Actor %s is disposed. Ignoring message. [%s]", this.getClass().getSimpleName(), message);
         }
         return running;
     }
