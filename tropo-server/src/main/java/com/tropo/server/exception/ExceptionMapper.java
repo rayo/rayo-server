@@ -15,7 +15,7 @@ public class ExceptionMapper {
 		
 		String errorType = XmppStanzaError.Type_CANCEL;
 		String errorCondition = XmppStanzaError.INTERNAL_SERVER_ERROR_CONDITION;
-		String errorMessage = null;
+		String errorMessage = e.getMessage();
 		
 		if (e instanceof ValidationException) {
 			ConstraintViolation<?> violation = ((ValidationException)e).getFirstViolation();
@@ -37,9 +37,11 @@ public class ExceptionMapper {
 		}
 		else if(e instanceof NotFoundException) {
 		    errorCondition = XmppStanzaError.ITEM_NOT_FOUND_CONDITION;
+		} else if (e instanceof IllegalArgumentException) {
+			errorCondition = XmppStanzaError.BAD_REQUEST_CONDITION;
 		}
 		
 		log.debug("Mapping unknown exception [type=%s, message=%s]",e.getClass(), e.getMessage());
-		return new ErrorMapping(errorType, errorCondition);
+		return new ErrorMapping(errorType, errorCondition, errorMessage);
 	}
 }

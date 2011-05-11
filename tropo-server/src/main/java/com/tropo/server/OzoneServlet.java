@@ -229,6 +229,9 @@ public class OzoneServlet extends XmppServlet {
 
                     // Extract Call ID
                     String callId = request.getTo().getNode();
+                    if (callId == null) {
+                    	throw new IllegalArgumentException("Call id cannot be null");
+                    }
                     callCommand.setCallId(callId);
                     
                     // Find the call actor
