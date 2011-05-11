@@ -211,7 +211,7 @@ public class OzoneServlet extends XmppServlet {
                                 if (response.isSuccess()) {
                                     CallRef callRef = (CallRef) response.getValue();
                                     String callJid = callRef.getCallId() + "@" + request.getTo().getBareJID();
-                                    result.addElement("ref").addAttribute("jid", callJid);
+                                    result.addElement("ref","urn:xmpp:ozone:1").addAttribute("jid", callJid);
                                     sendIqResult(request, result);
                                 }
                                 else {
@@ -258,7 +258,7 @@ public class OzoneServlet extends XmppServlet {
                             }
                             else if (value instanceof VerbRef) {
                                 String verbJid = request.getTo().getBareJID() + "/" + ((VerbRef) value).getVerbId();
-                                result.addElement("ref").addAttribute("jid", verbJid);
+                                result.addElement("ref","urn:xmpp:ozone:1").addAttribute("jid", verbJid);
                                 sendIqResult(request, result);
                             }
                         }
