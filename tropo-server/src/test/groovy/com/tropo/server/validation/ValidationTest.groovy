@@ -12,6 +12,7 @@ import org.junit.Test
 import com.tropo.core.validation.Messages
 import com.tropo.core.validation.ValidationException
 import com.tropo.core.validation.Validator
+import com.tropo.core.xml.DefaultXmlProviderManager;
 import com.tropo.core.xml.providers.AskProvider
 import com.tropo.core.xml.providers.ConferenceProvider
 import com.tropo.core.xml.providers.OzoneProvider;
@@ -25,6 +26,7 @@ class ValidationTest {
 
 	def providers
 	def mapper
+	def manager
 	
 	@Before
 	public void init() {
@@ -35,7 +37,11 @@ class ValidationTest {
 					 new AskProvider(validator:validator,namespaces:['urn:xmpp:ozone:ask:1']),
 					 new TransferProvider(validator:validator,namespaces:['urn:xmpp:ozone:transfer:1']),
 					 new ConferenceProvider(validator:validator,namespaces:['urn:xmpp:ozone:conference:1'])]
-
+		
+		manager = new DefaultXmlProviderManager();
+		providers.each {
+			manager.register(it)
+		}
 		mapper = new ExceptionMapper()
 	}
 	
@@ -559,15 +565,11 @@ class ValidationTest {
 	
 	def fromXML(def element) {
 
-		for(def provider: providers) {
-			if (provider.handles(element)) {
-				return provider.fromXML(element)
-			}
-		}
+		manager.fromXML(element)
 	}
 	
 	private Element parseXml(String string) {
 		
-		return new SAXReader().read(new StringReader(string)).rootElement;
+		new SAXReader().read(new StringReader(string)).rootElement;
 	}
 }
