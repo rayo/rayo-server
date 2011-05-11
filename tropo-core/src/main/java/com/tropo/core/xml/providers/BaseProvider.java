@@ -36,7 +36,7 @@ public abstract class BaseProvider implements XmlProvider {
         try {
         	returnValue = processElement(element);
         	if (returnValue == null) {
-        		throw new ValidationException(Messages.UNKNOWN_NAMESPACE_ELEMENT);
+        		return null;
             }      
         } catch (ValidationException ve) {
         	throw ve;

@@ -4,6 +4,10 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.dom4j.Element;
+
+import com.tropo.core.validation.Messages;
+import com.tropo.core.validation.ValidationException;
+
 import static com.voxeo.utils.Objects.assertion;
 
 public class DefaultXmlProviderManager implements XmlProviderManager {
@@ -17,7 +21,10 @@ public class DefaultXmlProviderManager implements XmlProviderManager {
         
         for (XmlProvider provider : providers) {
             if (provider.handles(object.getClass())) {
-                return provider.toXML(object);
+                Element element = provider.toXML(object);
+                if (element != null) {
+                	return element;
+                }
             }
         }
         return null;
@@ -31,10 +38,13 @@ public class DefaultXmlProviderManager implements XmlProviderManager {
 
         for (XmlProvider provider : providers) {
             if (provider.handles(element)) {
-                return (T)provider.fromXML(element);
+                T object = (T)provider.fromXML(element);
+                if (object != null) {
+                	return object;
+                }
             }
         }
-        return null;
+        throw new ValidationException(Messages.UNKNOWN_NAMESPACE_ELEMENT);
     }
 
     @Override
