@@ -11,6 +11,9 @@ import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
+
 import com.tropo.core.AcceptCommand;
 import com.tropo.core.AnswerCommand;
 import com.tropo.core.AnswerEvent;
@@ -402,4 +405,11 @@ public class CallActor extends ReflectiveActor implements Observer {
         return verbManager;
     }
 
+    @Override
+    public String toString() {
+
+    	return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)    		
+    		.append("callId", call.getId())
+    		.toString();
+    }
 }

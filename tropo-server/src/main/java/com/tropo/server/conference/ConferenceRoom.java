@@ -7,6 +7,9 @@ import java.util.Properties;
 import javax.media.mscontrol.Parameters;
 import javax.media.mscontrol.join.Joinable.Direction;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
+
 import com.tropo.core.verb.PromptItems;
 import com.tropo.server.MohoUtil;
 import com.voxeo.moho.ApplicationContext;
@@ -191,5 +194,13 @@ public class ConferenceRoom {
     public String getName() {
         return name;
     }
-    
+
+    @Override
+    public String toString() {
+
+    	return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)    		
+    		.append("name", name)
+    		.append("conferenceId", conference.getId())
+    	.toString();
+    }
 }
