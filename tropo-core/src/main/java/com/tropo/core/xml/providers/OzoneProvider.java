@@ -151,10 +151,13 @@ public class OzoneProvider extends BaseProvider {
     }
 
     private Document createDialCommand(Object object, Document document) {
-        DialCommand command = (DialCommand) object;
+        
+    	DialCommand command = (DialCommand) object;
         Element root = document.addElement(new QName("dial", new Namespace("", "urn:xmpp:ozone:1")));
         root.addAttribute("to", command.getTo().toString());
-        root.addAttribute("from", command.getFrom().toString());
+        if (command.getFrom() != null) {
+        	root.addAttribute("from", command.getFrom().toString());
+        }
         addHeaders(command.getHeaders(), root);
         return document;
     }
