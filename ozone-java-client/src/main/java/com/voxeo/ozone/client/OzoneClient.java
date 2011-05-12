@@ -51,9 +51,21 @@ public class OzoneClient {
 	 */
 	public OzoneClient(String server) {
 
-		connection = new SimpleXmppConnection(server);
+		this(server, null);
 	}
 
+	/**
+	 * Creates a new client object that will use the specified port number. 
+	 * This object will be used to interact with an Ozone server.
+	 * 
+	 * @param server Server that this client will be connecting to
+	 * @param port Port number that the server is listening at
+	 */
+	public OzoneClient(String server, Integer port) {
+
+		connection = new SimpleXmppConnection(server, port);
+	}
+	
 	/**
 	 * Connects and authenticates into the Ozone Server. By default it will use the resource 'voxeo'.
 	 * 
@@ -72,7 +84,7 @@ public class OzoneClient {
 	 * 
 	 * @param username Ozone username
 	 * @param password Ozone password
-	 * @param resource Resource that will be used in this communcation
+	 * @param resource Resource that will be used in this communication
 	 * 
 	 * @throws XmppException If the client is not able to connect or authenticate into the Ozone Server
 	 */
@@ -597,6 +609,11 @@ public class OzoneClient {
 			.setTo(buildTo(callId))
 			.setChild(Extension.create(hangup));
 		connection.send(iq);
+	}
+	
+	public String getLastCallId() {
+		
+		return lastCallId;
 	}
 	
 	private String buildFrom() {

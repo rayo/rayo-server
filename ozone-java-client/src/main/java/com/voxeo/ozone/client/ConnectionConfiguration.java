@@ -9,10 +9,19 @@ public class ConnectionConfiguration {
 
 	public ConnectionConfiguration(String serviceName) {
 
+		this(serviceName, null);
+	}
+	
+	public ConnectionConfiguration(String serviceName, Integer port) {
+
 		DNSUtil.HostAddress address = DNSUtil.resolveXMPPDomain(serviceName);
 		
 		this.hostname = address.getHost();
-		this.port = address.getPort();
+		if (port == null) {
+			this.port = address.getPort();
+		} else {
+			this.port = port;
+		}
 	}
 	
 	public Integer getPort() {

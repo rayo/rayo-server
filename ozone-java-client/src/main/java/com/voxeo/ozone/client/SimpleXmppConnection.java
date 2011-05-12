@@ -45,10 +45,15 @@ public class SimpleXmppConnection implements XmppConnection {
 	
 	public SimpleXmppConnection(String serviceName) {
 		
+		this(serviceName, null);
+	}
+	
+	public SimpleXmppConnection(String serviceName, Integer port) {
+		
 		this.serviceName = serviceName;
 		
 		//TODO: Lots of things to be handled. Security, compression, proxies. All already done in Smack. Reuse!!
-		this.config = new ConnectionConfiguration(serviceName);
+		this.config = new ConnectionConfiguration(serviceName, port);
 		
 		authenticationHandler = new SimpleAuthenticationHandler(this);
 	}
