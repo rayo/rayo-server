@@ -1,7 +1,5 @@
 package samples;
 
-import static org.junit.Assert.assertTrue;
-
 import com.tropo.core.verb.AskCompleteEvent;
 
 public class AskSample extends BaseSample {
@@ -13,7 +11,7 @@ public class AskSample extends BaseSample {
 		client.ask("Welcome to Orlando Bank. Please enter your five digits number.","[4-5 DIGITS]");
 		
 		AskCompleteEvent complete = (AskCompleteEvent)client.waitFor("complete");
-		assertTrue(complete.isSuccess());
+		System.out.println("Success: " + complete.isSuccess());
 
 		client.hangup();
 	}
