@@ -294,6 +294,15 @@ public class XmppReaderWorker implements Runnable {
     	}
     }
     
+    private void connectionFinished() {
+    	
+    	if (connectionId != null) {
+	    	for (XmppConnectionListener listener: listeners) {
+	    		listener.connectionFinished(connectionId);
+	    	}
+    	}
+    }
+    
     void handleError(Exception e) {
     	
         done = true;
@@ -312,6 +321,7 @@ public class XmppReaderWorker implements Runnable {
 	public void setDone(boolean done) {
 		
 		this.done = done;
+		connectionFinished();
 	}
 	
 	public void reset() {

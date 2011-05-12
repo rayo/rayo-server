@@ -56,6 +56,8 @@ public class SimpleXmppConnection implements XmppConnection {
 		this.config = new ConnectionConfiguration(serviceName, port);
 		
 		authenticationHandler = new SimpleAuthenticationHandler(this);
+		
+		reader = new SimpleXmppReader();
 	}
 	
 	@Override
@@ -261,7 +263,7 @@ public class SimpleXmppConnection implements XmppConnection {
 	private void initIO() throws XmppException {
 
 		try {
-	        reader = new SimpleXmppReader(new BufferedReader(
+	        reader.init(new BufferedReader(
 	        		new InputStreamReader(socket.getInputStream(), "UTF-8")));
 	        writer = new SimpleXmppWriter(new BufferedWriter(
 	        		new OutputStreamWriter(socket.getOutputStream(), "UTF-8")));
@@ -365,6 +367,18 @@ public class SimpleXmppConnection implements XmppConnection {
     	if (reader != null) {
     		reader.removeAuthenticationListener(authListener);
     	}
+    }
+    
+    @Override
+    public void addXmppConnectionListener(XmppConnectionListener connectionListener) {
+
+    	reader.addXmppConnectionListener(connectionListener);
+    }
+    
+    @Override
+    public void removeXmppConnectionListener(XmppConnectionListener connectionListener) {
+
+    	reader.removeXmppConnectionListener(connectionListener);
     }
     
     @Override

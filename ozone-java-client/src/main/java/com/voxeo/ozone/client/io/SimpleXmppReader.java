@@ -16,10 +16,14 @@ public class SimpleXmppReader implements XmppReader {
 	private Thread thread;
 	private XmppReaderWorker readingTask;
 	
-	public SimpleXmppReader(Reader reader) {
+	public SimpleXmppReader() {
+		
+		this.readingTask = new XmppReaderWorker();
+	}
+	
+	public void init(Reader reader) throws XmppException {
 		
 		this.reader = reader;
-		this.readingTask = new XmppReaderWorker();
 		thread = new Thread(readingTask);
 		thread.setDaemon(true);
 	}

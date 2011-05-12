@@ -25,6 +25,9 @@ public interface XmppConnection extends XmppObjectFilterSupport, AuthenticationS
 	
 	public void addStanzaListener(StanzaListener stanzaListener);
 	public void removeStanzaListener(StanzaListener stanzaListener);
+
+	public void addXmppConnectionListener(XmppConnectionListener connectionListener);
+	public void removeXmppConnectionListener(XmppConnectionListener connectionListener);
 	
 	XmppObject waitFor(String node) throws XmppException;
 	XmppObject waitFor(String node, int timeout) throws XmppException;
