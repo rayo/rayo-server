@@ -21,6 +21,7 @@ import com.voxeo.servlet.xmpp.ozone.stanza.IQ;
 import com.voxeo.servlet.xmpp.ozone.stanza.Message;
 import com.voxeo.servlet.xmpp.ozone.stanza.Presence;
 import com.voxeo.servlet.xmpp.ozone.stanza.XmppObject;
+import com.voxeo.servlet.xmpp.ozone.stanza.sasl.Challenge;
 import com.voxeo.servlet.xmpp.ozone.stanza.sasl.Success;
 
 public class XmppReaderWorker implements Runnable {
@@ -169,7 +170,10 @@ public class XmppReaderWorker implements Runnable {
 
                     }
                     else if (parser.getName().equals("challenge")) {
-
+                    	Challenge challenge = new Challenge().setText(parser.nextText());
+                    	for (AuthenticationListener listener: authListeners) {
+                    		listener.authChallenge(challenge);
+                    	}
                     }
                     else if (parser.getName().equals("success")) {
                     	Success success = new Success().setText(parser.nextText());
