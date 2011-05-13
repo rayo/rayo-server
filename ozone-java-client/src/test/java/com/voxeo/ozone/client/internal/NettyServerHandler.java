@@ -12,7 +12,9 @@ import org.jboss.netty.channel.ExceptionEvent;
 import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 
+import com.tropo.core.verb.RefEvent;
 import com.tropo.core.xml.XmlProviderManager;
+import com.voxeo.servlet.xmpp.ozone.extensions.Extension;
 import com.voxeo.servlet.xmpp.ozone.extensions.XmlProviderManagerFactory;
 import com.voxeo.servlet.xmpp.ozone.stanza.IQ;
 import com.voxeo.servlet.xmpp.ozone.util.Dom4jParser;
@@ -81,6 +83,17 @@ public class NettyServerHandler extends SimpleChannelHandler {
 			Element element = Dom4jParser.parseXml(message);
 			IQ iq = new IQ(element);
 			storeIQ(iq);
+			
+			if (iq.getChildName().equals("say")) {
+				// send ref back
+				RefEvent ref = new RefEvent();
+				ref.setCallId(callId);
+				String sayId = UUID.randomUUID().toString();
+				ref.setJid(callId+"@localhost/" + sayId);
+				
+				IQ response = iq.result(Extension.create(ref)); 
+				sendResponse(channel, response.toString());
+			}
 		}
     }
 
