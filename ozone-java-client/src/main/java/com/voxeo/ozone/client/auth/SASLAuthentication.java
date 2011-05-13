@@ -434,7 +434,7 @@ public class SASLAuthentication implements UserAuthentication {
     private String bindResourceAndEstablishSession(String resource) throws XmppException {
 
     	try {
-			bindingLatch.await(5000, TimeUnit.SECONDS);
+			bindingLatch.await(5, TimeUnit.SECONDS);
 		} catch (InterruptedException e1) {
 			e1.printStackTrace();
 		}

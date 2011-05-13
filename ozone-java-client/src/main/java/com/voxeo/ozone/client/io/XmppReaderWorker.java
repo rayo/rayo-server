@@ -240,8 +240,9 @@ public class XmppReaderWorker implements Runnable {
                     // The server is reporting available SASL mechanisms. Store this information
                     // which will be used later while logging (i.e. authenticating) into
                     // the server
+                	Collection<String> mechanisms = XmppObjectParser.parseMechanisms(parser);
         	    	for (AuthenticationListener listener: authListeners) {
-        	    		listener.authSettingsReceived(XmppObjectParser.parseMechanisms(parser));
+        	    		listener.authSettingsReceived(mechanisms);
         	    	}
                 }
                 else if (parser.getName().equals("bind")) {

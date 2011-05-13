@@ -2,7 +2,6 @@ package com.voxeo.ozone.client.test;
 
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 
 import org.junit.After;
 import org.junit.Before;
@@ -13,9 +12,6 @@ import com.voxeo.ozone.client.XmppConnection;
 import com.voxeo.ozone.client.internal.NettyServer;
 import com.voxeo.ozone.client.test.config.TestConfig;
 import com.voxeo.ozone.client.test.util.MockConnectionListener;
-import com.voxeo.ozone.client.test.util.MockStanzaListener;
-import com.voxeo.servlet.xmpp.ozone.stanza.Bind;
-import com.voxeo.servlet.xmpp.ozone.stanza.IQ;
 
 public class ConnectionListenerTest {
 	

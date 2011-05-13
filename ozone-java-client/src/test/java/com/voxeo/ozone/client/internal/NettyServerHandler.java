@@ -86,7 +86,7 @@ public class NettyServerHandler extends SimpleChannelHandler {
 
     private void sendResponse(Channel channel, String response) {
     	
-    	System.out.println(String.format("Sending response back %s",response));
+    	System.out.println(String.format("Sending to client: %s",response));
     	channel.write(response);
     }
 
