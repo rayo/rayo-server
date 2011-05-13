@@ -79,23 +79,39 @@ public class NettyServerHandler extends SimpleChannelHandler {
 			String id = element.attributeValue("id");
 			sendResponse(channel,"<iq id='"+id+"' type='result' from='localhost' to='userc@localhost'><session/></iq>");
 		} else if (message.startsWith("<iq")) {
-			
-			Element element = Dom4jParser.parseXml(message);
-			IQ iq = new IQ(element);
-			storeIQ(iq);
-			
-			if (iq.getChildName().equals("say")) {
-				// send ref back
-				RefEvent ref = new RefEvent();
-				ref.setCallId(callId);
-				String sayId = UUID.randomUUID().toString();
-				ref.setJid(callId+"@localhost/" + sayId);
-				
-				IQ response = iq.result(Extension.create(ref)); 
-				sendResponse(channel, response.toString());
-			}
+			// We may receive a buffer with several IQ messages. 
+			// This should be managed much better with the Netty framework.
+			// But do not have enough time right now
+			message = message.trim();
+			do {
+				int iqEnd = message.indexOf("</iq>");
+				String iq = message.substring(0,iqEnd+5);				
+				processIQMessage(iq);
+				if (iqEnd+5 == message.length()) {
+					break;
+				} else {
+					message = message.substring(iqEnd+5);
+				}				
+			} while(true);
 		}
     }
+
+	private void processIQMessage(String message) {
+		Element element = Dom4jParser.parseXml(message);
+		IQ iq = new IQ(element);
+		storeIQ(iq);
+		
+		if (iq.getChildName().equals("say")) {
+			// send ref back
+			RefEvent ref = new RefEvent();
+			ref.setCallId(callId);
+			String sayId = UUID.randomUUID().toString();
+			ref.setJid(callId+"@localhost/" + sayId);
+			
+			IQ response = iq.result(Extension.create(ref)); 
+			sendResponse(channel, response.toString());
+		}
+	}
 
     private void sendResponse(Channel channel, String response) {
     	

@@ -271,6 +271,20 @@ public class OzoneClient {
 	/**
 	 * Sends a 'Say' command to Ozone that will play the specified audio file
 	 * 
+	 * @param audio URI to the audio file
+	 * @return SayRef SayRef instance that allows to handle the say stream
+	 * 
+	 * @throws XmppException If there is any issues while sending the say command
+	 * @throws URISyntaxException If the specified audio file is not a valid URI
+	 */
+	public SayRef sayAudio(String audio) throws XmppException, URISyntaxException {
+	
+		return say(new URI(audio));
+	}
+	
+	/**
+	 * Sends a 'Say' command to Ozone that will play the specified audio file
+	 * 
 	 * @param uri URI to an audio resource that will be played
 	 * @return SayRef SayRef instance that allows to handle the say stream
 	 * 
@@ -402,6 +416,21 @@ public class OzoneClient {
 
 	/**
 	 * Calls a specific destination
+	 * 
+	 * @param text URI to call in text format
+	 * 
+	 * @throws XmppException If there is any issue while dialing
+	 * @throws URISyntaxException If the specified text is not a valid URI
+	 */
+	public void dial(String text) throws XmppException, URISyntaxException {
+
+		dial(new URI(text));
+	}
+	
+	/**
+	 * Calls a specific destination
+	 * 
+	 * @param to URI to dial
 	 * 
 	 * @throws XmppException If there is any issue while dialing
 	 */
