@@ -31,6 +31,7 @@ public class XmppException extends Exception {
 	
 	public XmppException(Error error) {
 		
+		super(error.getText());
 		this.error = error;
 	}
 	
