@@ -13,16 +13,13 @@ import org.jboss.netty.channel.MessageEvent;
 import org.jboss.netty.channel.SimpleChannelHandler;
 
 import com.tropo.core.verb.RefEvent;
-import com.tropo.core.xml.XmlProviderManager;
 import com.voxeo.servlet.xmpp.ozone.extensions.Extension;
-import com.voxeo.servlet.xmpp.ozone.extensions.XmlProviderManagerFactory;
 import com.voxeo.servlet.xmpp.ozone.stanza.IQ;
 import com.voxeo.servlet.xmpp.ozone.util.Dom4jParser;
 
 public class NettyServerHandler extends SimpleChannelHandler {
 
 	private boolean receivedFirstStream = false;
-	private XmlProviderManager manager = XmlProviderManagerFactory.buildXmlProvider();
 	private Channel channel;
 	
 	private List<String> messages = new ArrayList<String>();
@@ -152,5 +149,13 @@ public class NettyServerHandler extends SimpleChannelHandler {
 			System.out.println(errorMessage);
 			throw new IllegalStateException(errorMessage);
 		}
+	}
+
+	public void resetState() {
+
+		receivedFirstStream = false;
+		offerId = null;
+		callId = null;
+		messages.clear();
 	}
 }

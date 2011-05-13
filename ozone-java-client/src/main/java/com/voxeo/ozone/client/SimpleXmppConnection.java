@@ -26,6 +26,8 @@ import com.voxeo.ozone.client.response.FilterCleaningResponseHandler;
 import com.voxeo.ozone.client.response.ResponseHandler;
 import com.voxeo.servlet.xmpp.ozone.extensions.Extension;
 import com.voxeo.servlet.xmpp.ozone.stanza.Error;
+import com.voxeo.servlet.xmpp.ozone.stanza.Error.Condition;
+import com.voxeo.servlet.xmpp.ozone.stanza.Error.Type;
 import com.voxeo.servlet.xmpp.ozone.stanza.XmppObject;
 
 public class SimpleXmppConnection implements XmppConnection {
@@ -33,7 +35,6 @@ public class SimpleXmppConnection implements XmppConnection {
 	private XmppReader reader;
 	private XmppWriter writer;
 	private ConnectionConfiguration config;
-	private boolean connected = false;
 	private Socket socket;
 	private String serviceName;
 	private String connectionId;
@@ -42,6 +43,10 @@ public class SimpleXmppConnection implements XmppConnection {
 	private String resource;
 	
 	private AuthenticationHandler authenticationHandler;
+	private boolean loggingIn;
+	private boolean connected;
+	
+	private int DEFAULT_TIMEOUT = XmppObjectFilter.DEFAULT_TIMEOUT;
 	
 	public SimpleXmppConnection(String serviceName) {
 		
@@ -88,7 +93,7 @@ public class SimpleXmppConnection implements XmppConnection {
         } catch (UnknownHostException uhe) {
             throw new XmppException(String.format("Could not connect to %s:%s",host,port), Error.Condition.remote_server_timeout);            
         } catch (IOException ioe) {
-            throw new XmppException(String.format("Error while connecting to %s:%s",host,port), Error.Condition.remote_server_error, ioe);
+            throw new XmppException(String.format("Error while connecting to %s:%s",host,port), Error.Condition.service_unavailable, ioe);
         }
         initConnection();		
 	}
@@ -122,7 +127,7 @@ public class SimpleXmppConnection implements XmppConnection {
 			reader.removeXmppConnectionListener(connectionListener);
 			
 			if (!connected) {
-				throw new XmppException("Could not connect to server");
+				throw new XmppException(new Error(Condition.service_unavailable, Type.cancel, "Could not connect to server."));
 			}
 			//TODO: Keep alive
 
@@ -181,7 +186,10 @@ public class SimpleXmppConnection implements XmppConnection {
 			return;
 		}
 		if (!connected) {
-			return;
+			throw new XmppException(new Error(Condition.service_unavailable, Type.cancel, "Not connected to the server. You need to connect first."));
+		}
+		if (!loggingIn && !authenticationHandler.isAuthenticated()) {
+			throw new XmppException(new Error(Condition.not_authorized, Type.cancel, "Not authenticated. You need to authenticate first."));			
 		}
 		System.out.println(String.format("Message to server: [%s]", object));
 		writer.write(object);
@@ -202,7 +210,7 @@ public class SimpleXmppConnection implements XmppConnection {
 	@Override
 	public XmppObject sendAndWait(XmppObject object) throws XmppException {
 
-		return sendAndWait(object, XmppObjectFilter.DEFAULT_TIMEOUT);
+		return sendAndWait(object, DEFAULT_TIMEOUT);
 	}
 	
 	@Override
@@ -275,8 +283,10 @@ public class SimpleXmppConnection implements XmppConnection {
 	@Override
 	public void login(String username, String password, String resourceName) throws XmppException {
 
+		loggingIn = true;
 		authenticationHandler.login(username, password, resourceName);
 		
+		loggingIn = false;
 		this.username = username;
 		this.resource = resourceName;
 	}
@@ -284,7 +294,7 @@ public class SimpleXmppConnection implements XmppConnection {
 	@Override
 	public XmppObject waitFor(String node) throws XmppException {
 
-		return waitFor(node, XmppObjectFilter.DEFAULT_TIMEOUT);
+		return waitFor(node, DEFAULT_TIMEOUT);
 	}
 	
 	@Override
@@ -306,7 +316,7 @@ public class SimpleXmppConnection implements XmppConnection {
 	@Override
 	public Extension waitForExtension(String extensionName) throws XmppException {
 
-		return waitForExtension(extensionName, XmppObjectFilter.DEFAULT_TIMEOUT);
+		return waitForExtension(extensionName, DEFAULT_TIMEOUT);
 	}
 	
 	@Override
@@ -335,6 +345,8 @@ public class SimpleXmppConnection implements XmppConnection {
     	serviceName = null;
     	username = null;
     	resource = null;
+    	connected = false;
+    	loggingIn = false;
     }
     
     @Override
@@ -424,5 +436,10 @@ public class SimpleXmppConnection implements XmppConnection {
     public String getUsername() {
 
     	return username;
+    }
+    
+    public void setDefaultTimeout(int timeout) {
+    	
+    	this.DEFAULT_TIMEOUT = timeout;
     }
 }

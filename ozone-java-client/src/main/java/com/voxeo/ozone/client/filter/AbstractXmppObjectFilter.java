@@ -9,7 +9,7 @@ import com.voxeo.servlet.xmpp.ozone.stanza.XmppObject;
 
 public abstract class AbstractXmppObjectFilter implements XmppObjectFilter {
 
-	private static final int DEFAULT_TIMEOUT = 20 * 1000; // 20 seconds default timeout
+	private int DEFAULT_TIMEOUT = 20 * 1000; // 20 seconds default timeout
 	
 	private LinkedBlockingQueue<AbstractXmppObject> queue = new LinkedBlockingQueue<AbstractXmppObject>(1000);
 
@@ -59,5 +59,10 @@ public abstract class AbstractXmppObjectFilter implements XmppObjectFilter {
 
 		reader.removeFilter(this);
 		reader = null;
+	}
+	
+	public void setDefaultTimeout(int timeout) {
+		
+		DEFAULT_TIMEOUT = timeout;
 	}
 }

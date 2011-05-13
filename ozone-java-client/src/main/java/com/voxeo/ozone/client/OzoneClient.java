@@ -672,4 +672,9 @@ public class OzoneClient {
 		
 		return callid + "@" + connection.getServiceName();
 	}
+	
+	public XmppConnection getXmppConnection() {
+		
+		return connection;
+	}
 }

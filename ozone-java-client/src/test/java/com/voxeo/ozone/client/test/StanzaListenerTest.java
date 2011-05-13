@@ -18,18 +18,18 @@ import com.voxeo.servlet.xmpp.ozone.stanza.IQ;
 
 public class StanzaListenerTest {
 	
-	private NettyServer server;
+	private XmppConnection connection;
 
 	@Before
 	public void setUp() throws Exception {
 		
-		 server = new NettyServer(TestConfig.port);
+		 NettyServer.newInstance(TestConfig.port);
 	}
 
 	@Test
-	public void doRegisterStanzaListener() throws Exception {
+	public void testRegisterStanzaListener() throws Exception {
 
-		XmppConnection connection = new SimpleXmppConnection(TestConfig.serverEndpoint, TestConfig.port);
+		connection = new SimpleXmppConnection(TestConfig.serverEndpoint, TestConfig.port);
 		connection.connect();
 		connection.login("userc", "1", "voxeo");
 		
@@ -50,10 +50,34 @@ public class StanzaListenerTest {
 		
 		connection.disconnect();
 	}
+
+
+	@Test
+	public void testUnregisterStanzaListener() throws Exception {
+
+		connection = new SimpleXmppConnection(TestConfig.serverEndpoint, TestConfig.port);
+		connection.connect();
+		connection.login("userc", "1", "voxeo");
+		
+		MockStanzaListener stanzaListener = new MockStanzaListener();
+		connection.addStanzaListener(stanzaListener);
+		connection.removeStanzaListener(stanzaListener);
+		
+		IQ iq = new IQ(IQ.Type.set)
+			.setFrom("userc@127.0.0.1")
+			.setChild(new Bind().setResource("clienttest"));
+		connection.send(iq);
+
+		// Wait for a response
+		Thread.sleep(150);
+		
+		assertEquals(stanzaListener.getEventsCount(),0);		
+		connection.disconnect();
+	}
 	
 	@After
-	public void shutdown() {
-		
-		server.shutdown();
+	public void shutdown() throws Exception {
+
+		connection.disconnect();
 	}
 }

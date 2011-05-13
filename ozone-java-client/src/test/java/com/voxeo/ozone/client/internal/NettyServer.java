@@ -1,6 +1,8 @@
 package com.voxeo.ozone.client.internal;
 
 import java.net.InetSocketAddress;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 
 import org.jboss.netty.bootstrap.ServerBootstrap;
@@ -22,6 +24,8 @@ public class NettyServer {
 	private ChannelGroup group;
 	private ChannelFactory factory;
 	
+	private static Map<Integer, NettyServer> servers = new ConcurrentHashMap<Integer, NettyServer>();
+	
 	public void assertReceived(String message) {
 		
 		nettyServerHandler.assertReceived(message);
@@ -32,7 +36,18 @@ public class NettyServer {
 		nettyServerHandler.sendOzoneOffer();
 	}
 	
-	public NettyServer(int port) throws Exception {
+	public static NettyServer newInstance(int port) throws Exception {
+		
+		NettyServer server = servers.get(port);
+		if (server == null) {
+			server = new NettyServer(port);
+			servers.put(port, server);
+		}
+		server.resetState();
+		return server;
+	}
+	
+	private NettyServer(int port) throws Exception {
 		
 		nettyServerHandler = new NettyServerHandler();
 	    
@@ -73,5 +88,17 @@ public class NettyServer {
 		if (factory != null) {
 			factory.releaseExternalResources();
 		}
+	}
+	
+	public static void shutdownAllInstances() {
+		
+		for (NettyServer server: servers.values()) {
+			server.shutdown();
+		}
+	}
+
+	public void resetState() {
+
+		nettyServerHandler.resetState();
 	}
 }
