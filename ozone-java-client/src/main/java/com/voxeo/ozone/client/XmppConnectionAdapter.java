@@ -1,5 +1,7 @@
 package com.voxeo.ozone.client;
 
+import com.voxeo.servlet.xmpp.ozone.stanza.XmppObject;
+
 public abstract class XmppConnectionAdapter implements XmppConnectionListener {
 
 	@Override
@@ -18,5 +20,8 @@ public abstract class XmppConnectionAdapter implements XmppConnectionListener {
 	public void connectionReset(String connectionId) {
 		
 	}
-	
+	@Override
+	public void messageSent(XmppObject message) {
+		
+	}
 }

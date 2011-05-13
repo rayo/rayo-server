@@ -11,6 +11,8 @@ import com.voxeo.ozone.client.XmppConnection;
 import com.voxeo.ozone.client.internal.NettyServer;
 import com.voxeo.ozone.client.test.config.TestConfig;
 import com.voxeo.ozone.client.test.util.MockConnectionListener;
+import com.voxeo.servlet.xmpp.ozone.stanza.Bind;
+import com.voxeo.servlet.xmpp.ozone.stanza.IQ;
 
 public class ConnectionListenerTest {
 	
@@ -56,5 +58,26 @@ public class ConnectionListenerTest {
 		connection.disconnect();
 
 		assertEquals(mockConnectionListener.getFinishedCount(),0);
+	}
+
+	@Test
+	public void testMessageSent() throws Exception {
+
+		XmppConnection connection = new SimpleXmppConnection(TestConfig.serverEndpoint, TestConfig.port);
+		MockConnectionListener mockConnectionListener = new MockConnectionListener();
+		connection.addXmppConnectionListener(mockConnectionListener);
+		connection.connect();
+		connection.login("userc","1","voxeo");
+		
+		int count = mockConnectionListener.getSent();
+		IQ iq = new IQ(IQ.Type.set)
+			.setChild(new Bind().setResource("clienttest"));
+		connection.send(iq);
+		
+		// Wait a little bit
+		Thread.sleep(150);
+		
+		assertEquals(mockConnectionListener.getSent(),count+1);		
+		connection.disconnect();
 	}
 }

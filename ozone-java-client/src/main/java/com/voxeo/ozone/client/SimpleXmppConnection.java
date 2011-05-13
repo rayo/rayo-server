@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -47,6 +49,8 @@ public class SimpleXmppConnection implements XmppConnection {
 	private boolean connected;
 	
 	private int DEFAULT_TIMEOUT = XmppObjectFilter.DEFAULT_TIMEOUT;
+	
+	private List<XmppConnectionListener> listeners = new ArrayList<XmppConnectionListener>();
 	
 	public SimpleXmppConnection(String serviceName) {
 		
@@ -193,6 +197,10 @@ public class SimpleXmppConnection implements XmppConnection {
 		}
 		System.out.println(String.format("Message to server: [%s]", object));
 		writer.write(object);
+		
+		for (XmppConnectionListener listener: listeners) {
+			listener.messageSent(object);
+		}
 	}
 
 	@Override
@@ -231,13 +239,8 @@ public class SimpleXmppConnection implements XmppConnection {
 
 	private void startReader() throws XmppException {
 		
-		reader.addXmppConnectionListener(new XmppConnectionListener() {
+		reader.addXmppConnectionListener(new XmppConnectionAdapter() {
 			
-			@Override
-			public void connectionFinished(String connectionId) {
-				// TODO Auto-generated method stub
-				
-			}
 			@Override
 			public void connectionReset(String connectionId) {
 
@@ -384,12 +387,16 @@ public class SimpleXmppConnection implements XmppConnection {
     @Override
     public void addXmppConnectionListener(XmppConnectionListener connectionListener) {
 
+    	// Bad smell. Two lists with almost the same listeners. This needs refactoring
+    	listeners.add(connectionListener);
     	reader.addXmppConnectionListener(connectionListener);
     }
     
     @Override
     public void removeXmppConnectionListener(XmppConnectionListener connectionListener) {
 
+    	// Bad smell. Two lists with almost the same listeners. This needs refactoring
+    	listeners.remove(connectionListener);
     	reader.removeXmppConnectionListener(connectionListener);
     }
     

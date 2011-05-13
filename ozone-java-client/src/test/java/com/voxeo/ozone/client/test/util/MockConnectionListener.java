@@ -1,6 +1,7 @@
 package com.voxeo.ozone.client.test.util;
 
 import com.voxeo.ozone.client.XmppConnectionAdapter;
+import com.voxeo.servlet.xmpp.ozone.stanza.XmppObject;
 
 public class MockConnectionListener extends XmppConnectionAdapter {
 
@@ -8,6 +9,7 @@ public class MockConnectionListener extends XmppConnectionAdapter {
 	int establishedCount = 0;
 	int finishedCount = 0;
 	int resettedCount = 0;
+	int sent = 0;
 	
 	@Override
 	public void connectionError(String connectionId, Exception e) {
@@ -31,6 +33,12 @@ public class MockConnectionListener extends XmppConnectionAdapter {
 	public void connectionReset(String connectionId) {
 
 		resettedCount++;
+	}
+	
+	@Override
+	public void messageSent(XmppObject message) {
+
+		sent++;
 	}
 
 	public int getErrorsCount() {
@@ -64,6 +72,12 @@ public class MockConnectionListener extends XmppConnectionAdapter {
 	public void setResettedCount(int resettedCount) {
 		this.resettedCount = resettedCount;
 	}
-	
-	
+
+	public int getSent() {
+		return sent;
+	}
+
+	public void setSent(int sent) {
+		this.sent = sent;
+	}
 }

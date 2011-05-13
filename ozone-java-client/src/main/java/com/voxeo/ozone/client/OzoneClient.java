@@ -112,6 +112,16 @@ public class OzoneClient {
 		
 		connection.addStanzaListener(listener);
 	}
+
+	/**
+	 * Removes a stanza listener
+	 * 
+	 * @param listener Stanza Callback to be removed
+	 */
+	public void removeStanzaListener(StanzaListener listener) {
+		
+		connection.removeStanzaListener(listener);
+	}
 	
 	/**
 	 * Adds a callback class to listen for authentication events.
