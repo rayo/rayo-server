@@ -534,9 +534,14 @@ public class OzoneClient {
 			.setFrom(buildFrom())
 			.setTo(buildTo(callId))
 			.setChild(Extension.create(say));
-		RefEvent reference = (RefEvent)((IQ)connection.sendAndWait(iq)).getExtension().getObject();
-		ref.setId(reference.getJid());
-		return ref;
+		IQ result = ((IQ)connection.sendAndWait(iq));
+		if (result != null) {
+			RefEvent reference = (RefEvent)result.getExtension().getObject();
+			ref.setId(reference.getJid());
+			return ref;
+		} else {
+			return null;
+		}
 	}
 	
 	/**
