@@ -361,6 +361,19 @@ public class OzoneClient {
 	/**
 	 * Transfers the last received call to another destination
 	 * 
+	 * @param text URI of the call destination
+	 * 
+	 * @throws XmppException If there is any issue while transfering the call
+	 * @throws URISyntaxException If the provided destination is not a valid URI
+	 */
+	public void transfer(String text) throws XmppException, URISyntaxException {
+
+		transfer(new URI(text));
+	}
+	
+	/**
+	 * Transfers the last received call to another destination
+	 * 
 	 * @param to URI of the call destination
 	 * 
 	 * @throws XmppException If there is any issue while transfering the call
