@@ -46,6 +46,7 @@ public class XmlProviderManagerFactory {
 		OzoneClientProvider ozoneClientProvider = new OzoneClientProvider();
 		ozoneClientProvider.setNamespaces(new ArrayList<String>());
 		ozoneClientProvider.getNamespaces().add("urn:xmpp:ozone:1");
+		ozoneClientProvider.getNamespaces().add("jabber:client");
 		ozoneClientProvider.setValidator(validator);
 		manager.register(ozoneClientProvider);		
 		return manager;		
