@@ -6,8 +6,8 @@ This client library lets you build Ozone applications in Java. It is a very ligh
 
 Feel free to check out the samples available [here](https://github.com/tropo/tropo2/tree/master/ozone-java-client/src/main/java/samples). You can run any of these samples from the command line with Maven. Here is an example:
 
-	mvn exec:java -Dexec.mainClass="samples.TextSaySample" 
- 
+	mvn exec:java -Dexec.mainClass="samples.TextSaySample" -Dexec.classpathScope=compile -Ddetail=true
+
 All the samples try to connect with and username "userc" and a password "1" to a Prism instance in localhost:5222. You can change the source code if you need it. All the samples will wait for an incoming offer, so after running the command line from above you should open your favorite sip phone and call your Prism instance. After doing this the rest of the sample will process the incoming offer and execute the code.   
  
 ## Using the Ozone client library 
