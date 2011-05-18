@@ -44,7 +44,6 @@ public class OfferEvent extends AbstractCallEvent {
     public String toString() {
 
     	return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)    		
-    		.append("callId", getCallId())
     		.append("from",from)
     		.append("to",to)
     		.append("headers",headers)

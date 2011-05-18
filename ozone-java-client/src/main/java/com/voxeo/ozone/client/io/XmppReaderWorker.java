@@ -17,6 +17,8 @@ import com.voxeo.ozone.client.listener.StanzaListener;
 import com.voxeo.ozone.client.util.XmppObjectParser;
 import com.voxeo.servlet.xmpp.ozone.stanza.AbstractXmppObject;
 import com.voxeo.servlet.xmpp.ozone.stanza.Error;
+import com.voxeo.servlet.xmpp.ozone.stanza.Error.Condition;
+import com.voxeo.servlet.xmpp.ozone.stanza.Error.Type;
 import com.voxeo.servlet.xmpp.ozone.stanza.IQ;
 import com.voxeo.servlet.xmpp.ozone.stanza.Message;
 import com.voxeo.servlet.xmpp.ozone.stanza.Presence;
@@ -117,6 +119,9 @@ public class XmppReaderWorker implements Runnable {
                     	filter(message);
                     } else if (parser.getName().equals("iq")) {
                     	IQ iq = XmppObjectParser.parseIQ(parser);
+                    	if (iq.hasChild("error")) {
+                    		handleError(iq.getError());
+                    	}
                     	log(iq);
                     	for (StanzaListener listener: stanzaListeners) {
                     		listener.onIQ(iq);
@@ -158,7 +163,7 @@ public class XmppReaderWorker implements Runnable {
                     	Error error = XmppObjectParser.parseError(parser);
                     	log(error);
                     	filter(error);
-                    	throw new XmppException(error);
+                    	handleError(error);
                     }
                     else if (parser.getName().equals("features")) {
                     	parseFeatures(parser);
@@ -212,11 +217,11 @@ public class XmppReaderWorker implements Runnable {
         } catch (SocketException se) {
         	if (!done) {
             	se.printStackTrace();
-                handleError(se);        		
+                handleError(new Error(Condition.gone, Type.cancel, se.getMessage()));        		
         	}
         } catch (Exception e) {        	
         	e.printStackTrace();    
-        	handleError(e);
+        	handleError(new Error(Condition.undefined_condition, Type.cancel, e.getMessage()));
         }
     }
 
@@ -308,19 +313,11 @@ public class XmppReaderWorker implements Runnable {
     	}
     }
     
-    void handleError(Exception e) {
+    void handleError(Error e) {
     	
-        done = true;
-        
-        if (e instanceof XmppException) {
-        	for (StanzaListener listener: stanzaListeners) {
-        		listener.onError(((XmppException)e).getError());
-        	}
-        }
-        
-        for (XmppConnectionListener listener: listeners) {
-        	listener.connectionError(connectionId,e);
-        }
+    	for (StanzaListener listener: stanzaListeners) {
+    		listener.onError(e);
+    	}
     }
 
 	public void setDone(boolean done) {

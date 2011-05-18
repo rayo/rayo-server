@@ -589,6 +589,9 @@ public class OzoneClient {
 			.setChild(Extension.create(say));
 		IQ result = ((IQ)connection.sendAndWait(iq));
 		if (result != null) {
+			if (result.hasChild("error")) {
+				throw new XmppException(iq.getError());
+			}
 			RefEvent reference = (RefEvent)result.getExtension().getObject();
 			ref.setId(reference.getJid());
 			return ref;
