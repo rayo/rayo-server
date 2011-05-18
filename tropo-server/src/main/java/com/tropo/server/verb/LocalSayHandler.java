@@ -34,7 +34,7 @@ public class LocalSayHandler extends AbstractLocalVerbHandler<Say> {
     // Commands
     // ================================================================================
 
-    public void stop() {
+    public void stop(boolean hangup) {
         output.stop();
     }
 

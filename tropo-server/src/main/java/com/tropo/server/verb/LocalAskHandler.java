@@ -65,7 +65,7 @@ public class LocalAskHandler extends AbstractLocalVerbHandler<Ask> {
     // Commands
     // ================================================================================
 
-    public void stop() {
+    public void stop(boolean hangup) {
         prompt.getOutput().stop();
         prompt.getInput().stop();
     }

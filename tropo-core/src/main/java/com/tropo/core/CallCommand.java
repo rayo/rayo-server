@@ -1,6 +1,8 @@
 package com.tropo.core;
 
-public interface CallCommand extends CallRef {
+public interface CallCommand {
+
+    public String getCallId();
 
     public void setCallId(String callId);    
     

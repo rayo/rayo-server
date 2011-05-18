@@ -36,11 +36,7 @@ public class CallManager extends ReflectiveActor {
         mohoCall.setSupervised(true);
         startCallActor(mohoCall);
         
-        return new CallRef() {
-            public String getCallId() {
-                return mohoCall.getId();
-            }
-        };
+        return new CallRef(mohoCall.getId());
     }
 
     @Message

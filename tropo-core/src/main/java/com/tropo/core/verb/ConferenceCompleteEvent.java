@@ -1,15 +1,15 @@
 package com.tropo.core.verb;
 
-
-
 public class ConferenceCompleteEvent extends VerbCompleteEvent {
 
     public enum Reason implements VerbCompleteReason {
-        KICK, LEAVE, HANGUP, ERROR
+        KICK, TERMINATOR, HANGUP, ERROR, STOP
     }
 
+    private String kickReason;
+
     public ConferenceCompleteEvent() {}
-    
+
     public ConferenceCompleteEvent(Verb verb) {
         super(verb);
     }
@@ -33,5 +33,13 @@ public class ConferenceCompleteEvent extends VerbCompleteEvent {
     @Override
     public boolean isSuccess() {
         return reason != Reason.ERROR;
+    }
+
+    public void setKickReason(String kickReason) {
+        this.kickReason = kickReason;
+    }
+
+    public String getKickReason() {
+        return kickReason;
     }
 }

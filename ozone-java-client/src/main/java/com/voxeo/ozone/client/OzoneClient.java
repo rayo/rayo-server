@@ -8,6 +8,7 @@ import java.util.List;
 import org.joda.time.Duration;
 
 import com.tropo.core.AnswerCommand;
+import com.tropo.core.CallCommand;
 import com.tropo.core.DialCommand;
 import com.tropo.core.HangupCommand;
 import com.tropo.core.verb.Ask;
@@ -540,29 +541,29 @@ public class OzoneClient {
 	/**
 	 * Creates a conference and joins the last active call 
 	 * 
-	 * @param conferenceId Id of the conference
+	 * @param roomName Id of the conference
 	 * 
 	 * @throws XmppException If there is any problem while creating the conference
 	 */
-	public void conference(String conferenceId) throws XmppException {
+	public void conference(String roomName) throws XmppException {
 	
 		if (lastCallId != null) {
-			conference(conferenceId, lastCallId);
+			conference(roomName, lastCallId);
 		}
 	}
 	
 	/**
 	 * Creates a conference and joins the last active call 
 	 * 
-	 * @param conferenceId Id of the conference
+	 * @param roomName Id of the conference
 	 * @param callId Id of the call that will be starting the conference
 	 * 
 	 * @throws XmppException If there is any problem while creating the conference
 	 */
-	public void conference(String conferenceId, String callId) throws XmppException {
+	public void conference(String roomName, String callId) throws XmppException {
 		
 		Conference conference = new Conference();
-		conference.setVerbId(conferenceId);
+		conference.setRoomName(roomName);
 		conference.setTerminator('#');
 		
 		IQ iq = new IQ(IQ.Type.set)
@@ -666,6 +667,14 @@ public class OzoneClient {
 			.setTo(buildTo(callId))
 			.setChild(Extension.create(hangup));
 		connection.send(iq);
+	}
+	
+	public void command(CallCommand command) throws XmppException {
+        IQ iq = new IQ(IQ.Type.set)
+            .setFrom(buildFrom())
+            .setTo(buildTo(lastCallId))
+            .setChild(Extension.create(command));
+        connection.send(iq);
 	}
 	
 	public String getLastCallId() {

@@ -35,7 +35,7 @@
 	</bean>
 
 	<!-- Conference Manager -->	
-	<bean id="conferenceManager" class="com.tropo.server.conference.DefaultConferenceManager" />
+	<bean id="conferenceController" class="com.tropo.server.conference.MohoConferenceController" />
 
 	<!-- Model / Request Validation -->
 	<bean id="validator" class="com.tropo.core.validation.Validator"/>
@@ -137,7 +137,7 @@
 	<bean id="askHandler" class="com.tropo.server.verb.LocalAskHandler" scope="prototype" />
 	<bean id="transferHandler" class="com.tropo.server.verb.LocalTransferHandler" scope="prototype" />
 	<bean id="conferenceHandler" class="com.tropo.server.verb.LocalConferenceHandler" scope="prototype">
-		<property name="conferenceManager" ref="conferenceManager" />
+		<property name="mohoConferenceController" ref="conferenceController" />
 	</bean>
 
 </beans>

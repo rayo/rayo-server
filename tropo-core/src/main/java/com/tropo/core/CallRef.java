@@ -1,7 +1,19 @@
 package com.tropo.core;
 
-public interface CallRef {
+public class CallRef {
 
-    public String getCallId();
+    private String callId;
+
+    public CallRef(String callId) {
+        this.callId = callId;
+    }
+
+    public void setCallId(String callId) {
+        this.callId = callId;
+    }
+
+    public String getCallId() {
+        return callId;
+    }
 
 }

@@ -94,7 +94,7 @@ public class LocalTransferHandler extends AbstractLocalVerbHandler<Transfer> imp
     // ================================================================================
 
     @Override
-    public synchronized void stop() {
+    public synchronized void stop(boolean hangup) {
         complete(Reason.STOPPED);
     }
 

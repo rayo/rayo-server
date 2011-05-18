@@ -6,7 +6,7 @@ import com.voxeo.moho.Call;
 
 public interface VerbHandler<T extends Verb> {
 
-    public void stop();
+    public void stop(boolean hangup);
     
     public void start();
 
