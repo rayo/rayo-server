@@ -261,6 +261,9 @@ public class OzoneServlet extends XmppServlet {
                                 result.addElement("ref","urn:xmpp:ozone:1").addAttribute("jid", verbJid);
                                 sendIqResult(request, result);
                             }
+                            else {
+                                sendIqResult(request, result);
+                            }
                         }
                     });
 
