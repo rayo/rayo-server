@@ -401,7 +401,7 @@ class ValidationTest {
 	@Test
 	public void validateConferenceInvalidBeep() {
 				
-		def conference = parseXml("""<conference xmlns=\"urn:xmpp:ozone:conference:1\" id="1" beep="123"></conference>""")
+		def conference = parseXml("""<conference xmlns=\"urn:xmpp:ozone:conference:1\" name="1" beep="123"></conference>""")
 		
 		def errorMapping = assertValidationException(conference)
 		assertNotNull errorMapping
@@ -413,7 +413,7 @@ class ValidationTest {
 	@Test
 	public void validateConferenceInvalidMute() {
 				
-		def conference = parseXml("""<conference xmlns=\"urn:xmpp:ozone:conference:1\" id="1" mute="123"></conference>""")
+		def conference = parseXml("""<conference xmlns=\"urn:xmpp:ozone:conference:1\" name="1" mute="123"></conference>""")
 		
 		def errorMapping = assertValidationException(conference)
 		assertNotNull errorMapping
@@ -425,7 +425,7 @@ class ValidationTest {
 	@Test
 	public void validateConferenceInvalidTonePassThrough() {
 				
-		def conference = parseXml("""<conference xmlns=\"urn:xmpp:ozone:conference:1\" id="1" tone-passthrough="123"></conference>""")
+		def conference = parseXml("""<conference xmlns=\"urn:xmpp:ozone:conference:1\" name="1" tone-passthrough="123"></conference>""")
 		
 		def errorMapping = assertValidationException(conference)
 		assertNotNull errorMapping
@@ -437,7 +437,7 @@ class ValidationTest {
 	@Test
 	public void validateConferenceInvalidTerminator() {
 				
-		def conference = parseXml("""<conference xmlns=\"urn:xmpp:ozone:conference:1\" id="1" terminator="123"></conference>""")
+		def conference = parseXml("""<conference xmlns=\"urn:xmpp:ozone:conference:1\" name="1" terminator="123"></conference>""")
 		
 		def errorMapping = assertValidationException(conference)
 		assertNotNull errorMapping
@@ -449,7 +449,7 @@ class ValidationTest {
 	@Test
 	public void validateConferenceValid() {
 				
-		def conference = parseXml("""<conference xmlns=\"urn:xmpp:ozone:conference:1\" mute="false" beep="false" tone-passthrough="true" id="123456"/>""")
+		def conference = parseXml("""<conference xmlns=\"urn:xmpp:ozone:conference:1\" mute="false" beep="false" tone-passthrough="true" name="123456"/>""")
 		assertNotNull fromXML(conference)
 	}
 
