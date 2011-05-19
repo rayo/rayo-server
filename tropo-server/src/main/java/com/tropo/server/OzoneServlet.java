@@ -264,6 +264,9 @@ public class OzoneServlet extends XmppServlet {
                             	// All good
                             	sendIqResult(request, result);
                             }
+                            else {
+                                sendIqResult(request, result);
+                            }
                         }
                     });
 

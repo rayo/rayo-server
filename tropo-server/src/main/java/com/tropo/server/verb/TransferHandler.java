@@ -34,9 +34,9 @@ import com.voxeo.moho.media.input.InputCommand;
 import com.voxeo.moho.media.output.AudibleResource;
 import com.voxeo.moho.media.output.OutputCommand;
 
-public class LocalTransferHandler extends AbstractLocalVerbHandler<Transfer> implements Observer {
+public class TransferHandler extends AbstractLocalVerbHandler<Transfer> implements Observer {
 
-    private static final Loggerf log = Loggerf.getLogger(LocalTransferHandler.class);
+    private static final Loggerf log = Loggerf.getLogger(TransferHandler.class);
 
     private boolean running;
 
@@ -94,7 +94,7 @@ public class LocalTransferHandler extends AbstractLocalVerbHandler<Transfer> imp
     // ================================================================================
 
     @Override
-    public synchronized void stop() {
+    public synchronized void stop(boolean hangup) {
         complete(Reason.STOPPED);
     }
 

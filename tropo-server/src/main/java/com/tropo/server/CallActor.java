@@ -217,7 +217,7 @@ public class CallActor extends ReflectiveActor implements Observer {
         assertion(handler.isComplete() == false, "Verb is no longer running [id=%s]", command.getVerbId());
 
         if(command instanceof StopCommand) {
-            handler.stop();
+            handler.stop(false);
         }
         else {
             handler.onCommand(command);
@@ -252,14 +252,7 @@ public class CallActor extends ReflectiveActor implements Observer {
             throw e;
         }
 
-        return new VerbRef() {
-            public String getCallId() {
-                return call.getId();
-            }
-            public String getVerbId() {
-                return verb.getId();
-            }
-        };
+        return new VerbRef(call.getId(), verb.getId());
 
     }
 
@@ -367,14 +360,15 @@ public class CallActor extends ReflectiveActor implements Observer {
         if(endEvent.getReason() == Reason.ERROR || verbs.isEmpty()) {
             fire(endEvent);
             stop();
+            call.disconnect();
             for(VerbHandler<?> handler : verbs.values()) {
-                handler.stop();
+                handler.stop(false);
             }
         }
         else {
             log.info("Call ended with active verbs [%s]", verbs.toString());
             for(VerbHandler<?> handler : verbs.values()) {
-                handler.stop();
+                handler.stop(true);
             }
             pendingEndEvent = endEvent;
         }
@@ -384,6 +378,14 @@ public class CallActor extends ReflectiveActor implements Observer {
         return call.getId();
     }
 
+    /**
+     * Publishes a Request/Reply command to the actor. Must be synchronized to ensure that
+     * the command is not sent while the actor is shutting down.
+     * 
+     * @param command
+     * @param callback
+     * @return <code>true</code> is the command was published successfuly; <code>false</code> otherwise.
+     */
     public synchronized boolean command(CallCommand command, ResponseHandler callback) {
         command.setCallId(myId());
         Request request = new Request(command, callback);

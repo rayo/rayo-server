@@ -7,6 +7,7 @@ import com.tropo.core.verb.PromptItem;
 import com.tropo.core.verb.Verb;
 import com.tropo.core.verb.VerbCommand;
 import com.tropo.core.verb.VerbCompleteEvent;
+import com.tropo.core.verb.VerbEvent;
 import com.voxeo.moho.Call;
 import com.voxeo.moho.MediaService;
 import com.voxeo.moho.media.output.AudibleResource;
@@ -67,6 +68,10 @@ public abstract class AbstractLocalVerbHandler<T extends Verb> implements VerbHa
             complete = true;
             eventDispatcher.fire(event);
         }
+    }
+    
+    protected void fire(VerbEvent event) {
+        eventDispatcher.fire(event);
     }
 
     public EventDispatcher getEventDispatcher() {

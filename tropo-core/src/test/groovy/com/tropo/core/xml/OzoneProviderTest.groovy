@@ -35,6 +35,7 @@ import com.tropo.core.verb.ConferenceCompleteEvent
 import com.tropo.core.verb.InputMode
 import com.tropo.core.verb.KickCommand
 import com.tropo.core.verb.PauseCommand
+import com.tropo.core.verb.PromptItems;
 import com.tropo.core.verb.ResumeCommand
 import com.tropo.core.verb.Say
 import com.tropo.core.verb.SayCompleteEvent
@@ -514,33 +515,41 @@ public class OzoneProviderTest {
 	@Test
 	public void conferenceFromXml() {
 		
-		def conference = fromXml("""<conference xmlns=\"urn:xmpp:ozone:conference:1\" terminator=\"#\" id=\"123456\" beep=\"true\" mute=\"true\" tone-passthrough=\"true\"></conference>""")
+		def conference = fromXml("""<conference xmlns=\"urn:xmpp:ozone:conference:1\" terminator=\"#\" name=\"123456\" beep=\"true\" mute=\"true\" tone-passthrough=\"true\" moderator="false"><announcement><speak>hello</speak></announcement><music><speak>music</speak></music></conference>""")
 		assertNotNull conference
 		assertEquals conference.terminator, '#' as char
 		assertTrue conference.beep
 		assertTrue conference.tonePassthrough
 		assertTrue conference.mute
 		assertEquals conference.roomName,"123456"
+        assertFalse conference.moderator
+        assertEquals conference.holdMusic[0].text , "<speak>music</speak>"
+        assertEquals conference.announcement[0].text , "<speak>hello</speak>"
 	}
 	
 	@Test
 	public void emptyConferenceToXml() {
 		
-		def conference = new Conference()
-		assertEquals("""<conference xmlns=\"urn:xmpp:ozone:conference:1\" terminator="#" beep="true" mute=\"false\" tone-passthrough=\"false\"/>""", toXml(conference));
+		def conference = new Conference([
+            roomName: "1234"
+        ])
+		assertEquals("""<conference xmlns=\"urn:xmpp:ozone:conference:1\" name="1234" mute="false" terminator="#" tone-passthrough="true" beep="true" moderator="true"/>""", toXml(conference));
 	}
 	
 	@Test
 	public void conferenceToXml() {
 		
 		def conference = new Conference()
+        conference.roomName = "1234"
 		conference.terminator = '#' as char
 		conference.beep = true
 		conference.mute = true
 		conference.tonePassthrough = true
-		conference.verbId = "123456"
-		
-		assertEquals("""<conference xmlns=\"urn:xmpp:ozone:conference:1\" terminator=\"#\" id=\"123456\" beep=\"true\" mute=\"true\" tone-passthrough=\"true\"/>""", toXml(conference));
+        conference.moderator = false
+        conference.announcement = new PromptItems([new SsmlItem("<speak>hello</speak>")])
+        conference.holdMusic = new PromptItems([new SsmlItem("<speak>music</speak>")])
+        
+		assertEquals("""<conference xmlns=\"urn:xmpp:ozone:conference:1\" name="1234" mute=\"true\" terminator=\"#\" tone-passthrough=\"true\" beep=\"true\" moderator="false"><announcement><speak xmlns="">hello</speak></announcement><music><speak xmlns="">music</speak></music></conference>""", toXml(conference));
 	}
 
 	// Transfer

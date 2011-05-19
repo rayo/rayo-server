@@ -1,5 +1,7 @@
 package com.tropo.core;
 
-public interface CallEvent extends CallRef {
+public interface CallEvent {
+
+    public String getCallId();
 
 }
