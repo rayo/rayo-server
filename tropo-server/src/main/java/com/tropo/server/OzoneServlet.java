@@ -260,6 +260,9 @@ public class OzoneServlet extends XmppServlet {
                                 String verbJid = request.getTo().getBareJID() + "/" + ((VerbRef) value).getVerbId();
                                 result.addElement("ref","urn:xmpp:ozone:1").addAttribute("jid", verbJid);
                                 sendIqResult(request, result);
+                            } else {
+                            	// All good
+                            	sendIqResult(request, result);
                             }
                         }
                     });
