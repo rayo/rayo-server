@@ -13,6 +13,6 @@ public class ConferenceTest extends XmppIntegrationTest {
 		ozone.conference("123456");
 		
 		Thread.sleep(400);
-		assertServerReceived("<iq id=\"*\" type=\"set\" from=\"userc@localhost/voxeo\" to=\"#callId@localhost\"><conference xmlns=\"urn:xmpp:ozone:conference:1\" terminator=\"#\" id=\"123456\" beep=\"true\" mute=\"false\" tone-passthrough=\"false\"></conference></iq>");
+		assertServerReceived("<iq id=\"*\" type=\"set\" from=\"userc@localhost/voxeo\" to=\"#callId@localhost\"><conference xmlns=\"urn:xmpp:ozone:conference:1\" name=\"123456\" mute=\"false\" terminator=\"#\" tone-passthrough=\"true\" beep=\"true\" moderator=\"true\"></conference></iq>");
 	}
 }
