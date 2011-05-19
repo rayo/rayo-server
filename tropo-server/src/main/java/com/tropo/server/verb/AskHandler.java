@@ -16,7 +16,7 @@ import com.voxeo.moho.media.input.InputCommand;
 import com.voxeo.moho.media.output.AudibleResource;
 import com.voxeo.moho.media.output.OutputCommand;
 
-public class LocalAskHandler extends AbstractLocalVerbHandler<Ask> {
+public class AskHandler extends AbstractLocalVerbHandler<Ask> {
 
     private Prompt prompt;
     

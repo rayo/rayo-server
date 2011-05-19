@@ -12,7 +12,7 @@ import com.voxeo.moho.media.Output;
 import com.voxeo.moho.media.output.AudibleResource;
 import com.voxeo.moho.media.output.OutputCommand;
 
-public class LocalSayHandler extends AbstractLocalVerbHandler<Say> {
+public class SayHandler extends AbstractLocalVerbHandler<Say> {
 
     private Output output;
 

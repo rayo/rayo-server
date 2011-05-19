@@ -133,10 +133,10 @@
 	</bean>
 
 	<!-- Verb Handlers -->	
-	<bean id="sayHandler" class="com.tropo.server.verb.LocalSayHandler" scope="prototype" />
-	<bean id="askHandler" class="com.tropo.server.verb.LocalAskHandler" scope="prototype" />
-	<bean id="transferHandler" class="com.tropo.server.verb.LocalTransferHandler" scope="prototype" />
-	<bean id="conferenceHandler" class="com.tropo.server.verb.LocalConferenceHandler" scope="prototype">
+	<bean id="sayHandler" class="com.tropo.server.verb.SayHandler" scope="prototype" />
+	<bean id="askHandler" class="com.tropo.server.verb.AskHandler" scope="prototype" />
+	<bean id="transferHandler" class="com.tropo.server.verb.TransferHandler" scope="prototype" />
+	<bean id="conferenceHandler" class="com.tropo.server.verb.ConferenceHandler" scope="prototype">
 		<property name="mohoConferenceController" ref="conferenceController" />
 	</bean>
 

@@ -71,7 +71,9 @@ public class AskProvider extends BaseProvider {
         if (root.attributeValue("mode") != null) {
             ask.setMode(loadInputMode(root));
         }
+        
         ask.setRecognizer(root.attributeValue("recognizer"));
+        
         if (root.attributeValue("terminator") != null) {
             ask.setTerminator(toTerminator(root.attributeValue("terminator")));
         }
@@ -79,9 +81,6 @@ public class AskProvider extends BaseProvider {
             ask.setTimeout(toTimeout(root.attributeValue("timeout")));
         }
         ask.setVoice(root.attributeValue("voice"));
-        if (root.attributeValue("bargein") != null) {
-            ask.setBargein(toBoolean(root.attributeValue("bargein")));
-        }
         
         Element promptElement = element.element("prompt");
         if(promptElement != null) {

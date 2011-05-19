@@ -29,7 +29,7 @@ import com.voxeo.moho.media.input.DigitInputCommand;
 import com.voxeo.moho.media.output.OutputCommand;
 import com.voxeo.moho.media.output.OutputCommand.BehaviorIfBusy;
 
-public class LocalConferenceHandler extends AbstractLocalVerbHandler<Conference> implements ParticipantController {
+public class ConferenceHandler extends AbstractLocalVerbHandler<Conference> implements ParticipantController {
 
     public static final String PARTICIPANT_KEY = "com.tropo.conference.participant.";
     private static final String WAIT_LIST_KEY = "com.tropo.conference.waitList";
