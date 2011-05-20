@@ -41,6 +41,7 @@ import com.voxeo.moho.ApplicationContext;
 import com.voxeo.moho.Call;
 import com.voxeo.moho.Call.State;
 import com.voxeo.moho.Endpoint;
+import com.voxeo.moho.NegotiateException;
 import com.voxeo.moho.event.AutowiredEventListener;
 import com.voxeo.moho.event.CallCompleteEvent;
 import com.voxeo.moho.event.EventSource;
@@ -341,7 +342,11 @@ public class CallActor extends ReflectiveActor implements Observer {
             default:
                 throw new UnsupportedOperationException("Reason not handled: " + event.getCause());
             }
-            end(reason);
+            if (reason == Reason.ERROR) {
+            	end(reason, event.getException());
+            } else {
+            	end(reason);
+            }
         }
     }
 
@@ -351,7 +356,17 @@ public class CallActor extends ReflectiveActor implements Observer {
     private void end(Reason reason) {
         end(new EndEvent(myId(), reason));
     }
-
+    
+    private void end(Reason reason, Exception exception) {
+    	
+    	String errorMessage = null;
+    	if (exception instanceof NegotiateException) {
+    		errorMessage = "Could not negotiate call";
+    	}
+    	
+        end(new EndEvent(myId(), reason, errorMessage));
+    }
+    
     private void end(EndEvent endEvent) {
         
         // If the call ended in error then don't bother with a graceful
