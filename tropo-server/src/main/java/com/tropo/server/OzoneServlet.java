@@ -210,7 +210,7 @@ public class OzoneServlet extends XmppServlet {
                             public void handle(Response response) throws Exception {
                                 if (response.isSuccess()) {
                                     CallRef callRef = (CallRef) response.getValue();
-                                    String callJid = callRef.getCallId() + "@" + request.getTo().getBareJID();
+                                    String callJid = callRef.getCallId() + "@" + request.getTo().getDomain();
                                     result.addElement("ref","urn:xmpp:ozone:1").addAttribute("jid", callJid);
                                     sendIqResult(request, result);
                                 }
