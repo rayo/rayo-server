@@ -94,7 +94,21 @@ public abstract class BaseProvider implements XmlProvider {
 		}
 		return items;
 	}
+    
+	@SuppressWarnings("unchecked")
+	protected SsmlItem extractSsml(Element node) throws URISyntaxException {
 
+		StringBuilder builder = new StringBuilder();
+        List<Element> elements = node.elements();
+		for(Element element: elements) {
+			String xml = element.asXML();
+			//TODO: Better namespaces cleanup
+			xml = xml.replaceAll(" xmlns=\"[^\"]*\"","");
+			builder.append(xml);
+		}
+		return new SsmlItem(builder.toString());
+	}
+	
 	protected void addHeaders(Map<String, String> map, Element node) {
 
         if (map != null) {
@@ -117,6 +131,19 @@ public abstract class BaseProvider implements XmlProvider {
 					Document ssmlDoc = DocumentHelper.parseText(((SsmlItem) item).getText());
 					root.add(ssmlDoc.getRootElement());
 				}
+			}
+		}
+	}
+
+	protected void addSsml(SsmlItem item, Element root) throws DocumentException {
+		
+		if (item != null) {
+			StringBuilder builder = new StringBuilder("<wrapper>");
+			builder.append(item.getText());
+			builder.append("</wrapper>");
+			Document ssmlDoc = DocumentHelper.parseText(builder.toString());
+			for (Object element: ssmlDoc.getRootElement().elements()) {
+				root.add(((Element)element).createCopy());
 			}
 		}
 	}

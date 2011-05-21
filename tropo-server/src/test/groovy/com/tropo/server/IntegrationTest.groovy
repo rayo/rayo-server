@@ -129,7 +129,7 @@ public class IntegrationTest {
     public void incomingCallAndSay() throws InterruptedException {
 
         def say = new Say([
-            promptItems:new PromptItems([new SsmlItem("Hello World")])
+            prompt:new SsmlItem("Hello World")
         ])
         
         callActor.command(say, { messageQueue.add it } as ResponseHandler)
@@ -259,7 +259,7 @@ public class IntegrationTest {
         ] as MediaService
         
         def say = new Say([
-            promptItems:new PromptItems([new SsmlItem("Hello World")])
+            prompt:new SsmlItem("Hello World")
         ])
         
         // Start Say
@@ -317,7 +317,7 @@ public class IntegrationTest {
        ] as MediaService
        
        def say = new Say([
-           promptItems:new PromptItems([new SsmlItem("Hello World")])
+           prompt:new SsmlItem("Hello World")
        ])
 
        // Start Say       
@@ -356,7 +356,7 @@ public class IntegrationTest {
       ] as MediaService
       
       def say = new Say([
-          promptItems:new PromptItems([new SsmlItem("Hello World")])
+          prompt:new SsmlItem("Hello World")
       ])
 
       // Start Say
@@ -399,7 +399,7 @@ public class IntegrationTest {
       ] as MediaService
       
       def say = new Say([
-          promptItems:new PromptItems([new SsmlItem("Hello World")])
+          prompt:new SsmlItem("Hello World")
       ])
 
       // Start Say

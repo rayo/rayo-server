@@ -335,11 +335,10 @@ public class OzoneProviderTest {
 	@Test
 	public void audioSayFromXml() {
 		
-		def say = fromXml("""<say xmlns=\"urn:xmpp:ozone:say:1\" voice=\"allison\"><audio url=\"http://ccmixter.org/content/DoKashiteru/DoKashiteru_-_you_(na-na-na-na).mp3\"/></say>""")
+		def say = fromXml("""<say xmlns=\"urn:xmpp:ozone:say:1\" voice=\"allison\"><audio src=\"http://ccmixter.org/content/DoKashiteru/DoKashiteru_-_you_(na-na-na-na).mp3\"/></say>""")
 		assertNotNull say
-		assertNotNull say.promptItems
-		assertEquals say.promptItems.size(),1
-		assertEquals say.promptItems[0].toUri().toString(),"http://ccmixter.org/content/DoKashiteru/DoKashiteru_-_you_(na-na-na-na).mp3"
+		assertNotNull say.prompt
+		assertEquals say.prompt.text, "<audio src=\"http://ccmixter.org/content/DoKashiteru/DoKashiteru_-_you_(na-na-na-na).mp3\"/>"
 	}
 
 	@Test
@@ -347,12 +346,21 @@ public class OzoneProviderTest {
 		
 		def say = fromXml("""<say xmlns=\"urn:xmpp:ozone:say:1\" voice=\"allison\"><speak>Hello World</speak></say>""")
 		assertNotNull say
-		assertNotNull say.promptItems
-		assertEquals say.promptItems.size(),1
-		assertEquals say.promptItems[0].text,"<speak>Hello World</speak>"
+		assertNotNull say.prompt
+		assertEquals say.prompt.text,"<speak>Hello World</speak>"
 
 	}
-	
+
+	@Test
+	public void ssmlSayWithMultipleElementsFromXml() {
+		
+		def say = fromXml("""<say xmlns=\"urn:xmpp:ozone:say:1\" voice=\"allison\"><audio src=\"a.mp3\"/><audio src=\"a.mp3\"/></say>""")
+		assertNotNull say
+		assertNotNull say.prompt
+		assertEquals say.prompt.text,"<audio src=\"a.mp3\"/><audio src=\"a.mp3\"/>"
+
+	}
+
 	@Test
 	public void emptySayToXml() {
 		
@@ -373,21 +381,29 @@ public class OzoneProviderTest {
 		
 		Say say = new Say();
 		say.voice = "allison"
-		say.promptItems = []
-		say.promptItems.add new AudioItem(new URI("http://ccmixter.org/content/DoKashiteru/DoKashiteru_-_you_(na-na-na-na).mp3"))
+		say.prompt = new SsmlItem("<audio src=\"http://ccmixter.org/content/DoKashiteru/DoKashiteru_-_you_(na-na-na-na).mp3\"/>")
 
-		assertEquals("""<say xmlns=\"urn:xmpp:ozone:say:1\" voice=\"allison\"><audio url=\"http://ccmixter.org/content/DoKashiteru/DoKashiteru_-_you_(na-na-na-na).mp3\"/></say>""", toXml(say));
+		assertEquals("""<say xmlns=\"urn:xmpp:ozone:say:1\" voice=\"allison\"><audio xmlns="" src=\"http://ccmixter.org/content/DoKashiteru/DoKashiteru_-_you_(na-na-na-na).mp3\"/></say>""", toXml(say));
 	}
-
+	
 	@Test
 	public void ssmlSayToXml() {
 		
 		Say say = new Say();
 		say.voice = "allison"
-		say.promptItems = []
-		say.promptItems.add new SsmlItem("<speak>Hello World.</speak>")
+		say.prompt = new SsmlItem("<speak>Hello World.</speak>")
 
 		assertEquals("""<say xmlns=\"urn:xmpp:ozone:say:1\" voice=\"allison\"><speak xmlns=\"\">Hello World.</speak></say>""", toXml(say));
+	}
+
+	@Test
+	public void ssmlSayWithMultipleElementsToXml() {
+		
+		Say say = new Say();
+		say.voice = "allison"
+		say.prompt = new SsmlItem("<audio src=\"a.mp3\"/><audio src=\"b.mp3\"/>")
+
+		assertEquals("""<say xmlns=\"urn:xmpp:ozone:say:1\" voice=\"allison\"><audio xmlns=\"\" src=\"a.mp3\"/><audio xmlns=\"\" src=\"b.mp3\"/></say>""", toXml(say));
 	}
 
 	// Ask

@@ -11,14 +11,15 @@
 	<element name="resume" />
 	
 	<complexType name="sayType">
-		<choice minOccurs="1" maxOccurs="unbounded">
-			<element name="audio" type="tns:audioReferenceType" />
-			<any namespace="http://www.w3.org/2001/10/synthesis" />
-		</choice>
 		<attribute name="id" type="string" />
 		<attribute name="voice" type="string" />
+		<attribute name="prompt" type="ssmlType" />
 	</complexType>
 
+	<complexType name="ssmlType">
+			<any namespace="http://www.w3.org/2001/10/synthesis" />
+	</complexType>
+	
 	<complexType name="audioReferenceType">
 		<attribute name="url" type="anyURI" />
 	</complexType>

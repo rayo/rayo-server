@@ -22,8 +22,8 @@ public class SayHandler extends AbstractLocalVerbHandler<Say> {
     @Override
     public void start() {
 
-        AudibleResource[] audibleResources = resolveAudio(model.getPromptItems());
-        OutputCommand outcommand = new OutputCommand(audibleResources);
+        AudibleResource audibleResource = resolveAudio(model.getPrompt());
+        OutputCommand outcommand = new OutputCommand(audibleResource);
         outcommand.setBargein(false);
         outcommand.setVoiceName(model.getVoice());
         

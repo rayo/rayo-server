@@ -57,45 +57,9 @@ class ValidationTest {
 		assertNotNull errorMapping
 		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
 		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
-		assertEquals errorMapping.text, Messages.MISSING_PROMPT_ITEMS
+		assertEquals errorMapping.text, Messages.MISSING_SSML
 	}
-	
-	@Test
-	public void validateSayInvalidPromptItemsURI() {
-				
-		def say = parseXml("""<say xmlns=\"urn:xmpp:ozone:say:1\" voice=\"allison\"><audio url="\$?\\.com"/></say>""")
 		
-		def errorMapping = assertValidationException(say)
-		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
-		assertEquals errorMapping.text, Messages.INVALID_URI
-	}
-	
-	@Test
-	public void validateSayInvalidPromptEmptyURI() {
-				
-		def say = parseXml("""<say xmlns=\"urn:xmpp:ozone:say:1\" voice=\"allison\"><audio url=""/></say>""")
-		
-		def errorMapping = assertValidationException(say)
-		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
-		assertEquals errorMapping.text, Messages.MISSING_URI
-	}
-
-	@Test
-	public void validateSayInvalidMissingURI() {
-				
-		def say = parseXml("""<say xmlns=\"urn:xmpp:ozone:say:1\" voice=\"allison\"><audio/></say>""")
-		
-		def errorMapping = assertValidationException(say)
-		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
-		assertEquals errorMapping.text, Messages.MISSING_URI
-	}
-	
 	@Test
 	public void validateSayValid() {
 				

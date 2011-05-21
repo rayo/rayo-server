@@ -1,19 +1,18 @@
 package com.tropo.core.verb;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
-
-import com.tropo.core.validation.ValidPromptItems;
 
 public class Say extends BaseVerb {
 	
     private String voice; 
     
     @Valid
-    @ValidPromptItems
-    private PromptItems promptItems;
+    @NotNull
+    private SsmlItem prompt;
 
     public String getVoice() {
         return voice;
@@ -23,21 +22,21 @@ public class Say extends BaseVerb {
         this.voice = voice;
     }
 
-    public PromptItems getPromptItems() {
-        return promptItems;
-    }
+    public SsmlItem getPrompt() {
+		return prompt;
+	}
 
-    public void setPromptItems(PromptItems items) {
-        this.promptItems = items;
-    }
+	public void setPrompt(SsmlItem prompt) {
+		this.prompt = prompt;
+	}
 
-    @Override
+	@Override
     public String toString() {
 
     	return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)    		
     		.append("callId", getCallId())
     		.append("verbId", getVerbId())
-    		.append("promptItems",promptItems)
+    		.append("prompt",prompt)
     		.append("voice",voice)
     		.toString();
     }

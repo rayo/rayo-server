@@ -36,7 +36,7 @@ public class SayProvider extends BaseProvider {
 
 		Say say = new Say();
 		say.setVoice(element.attributeValue("voice"));
-		say.setPromptItems(extractPromptItems(element));
+		say.setPrompt(extractSsml(element));
 
 		return say;
 	}
@@ -96,10 +96,8 @@ public class SayProvider extends BaseProvider {
 		if (say.getVoice() != null) {
 			root.addAttribute("voice", say.getVoice());
 		}
-		if (say.getPromptItems() != null) {
-			if (say.getPromptItems() != null) {
-				addPromptItems(say.getPromptItems(), root);
-			}
+		if (say.getPrompt() != null) {
+			addSsml(say.getPrompt(), root);
 		}
 		return document;
 	}
