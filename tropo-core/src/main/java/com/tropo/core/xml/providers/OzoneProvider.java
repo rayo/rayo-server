@@ -104,7 +104,7 @@ public class OzoneProvider extends BaseProvider {
 
     private Object buildRejectCommand(Element element) throws URISyntaxException {
 
-        RejectCommand reject = new RejectCommand(null);
+        RejectCommand reject = new RejectCommand();
         @SuppressWarnings("unchecked")
         List<Element> children = (List<Element>)element.elements();
         if(!children.isEmpty()) {
