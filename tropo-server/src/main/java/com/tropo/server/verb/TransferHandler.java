@@ -10,7 +10,7 @@ import java.util.TimerTask;
 
 import javax.media.mscontrol.join.Joinable.Direction;
 
-import com.tropo.core.verb.SsmlItem;
+import com.tropo.core.verb.Ssml;
 import com.tropo.core.verb.Transfer;
 import com.tropo.core.verb.TransferCompleteEvent;
 import com.tropo.core.verb.TransferCompleteEvent.Reason;
@@ -53,7 +53,7 @@ public class TransferHandler extends AbstractLocalVerbHandler<Transfer> implemen
     @Override
     public void start() {
 
-        SsmlItem ringbackSsml = model.getRingbackTone();
+        Ssml ringbackSsml = model.getRingbackTone();
         if(ringbackSsml != null) {
             OutputCommand outputCommand = output(ringbackSsml);
             outputCommand.setBargein(false);

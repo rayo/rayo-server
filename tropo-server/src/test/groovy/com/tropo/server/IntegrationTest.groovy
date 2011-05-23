@@ -25,7 +25,7 @@ import com.tropo.core.verb.PauseCommand
 import com.tropo.core.verb.ResumeCommand
 import com.tropo.core.verb.Say
 import com.tropo.core.verb.SayCompleteEvent
-import com.tropo.core.verb.SsmlItem
+import com.tropo.core.verb.Ssml
 import com.tropo.core.verb.StopCommand
 import com.tropo.server.test.MockCall
 import com.tropo.server.test.MockMediaService
@@ -121,7 +121,7 @@ public class IntegrationTest {
     public void incomingCallAndSay() throws InterruptedException {
 
         def say = new Say([
-            prompt:new SsmlItem("Hello World")
+            prompt:new Ssml("Hello World")
         ])
         
         callActor.command(say, { messageQueue.add it } as ResponseHandler)
@@ -251,7 +251,7 @@ public class IntegrationTest {
         ] as MediaService
         
         def say = new Say([
-            prompt:new SsmlItem("Hello World")
+            prompt:new Ssml("Hello World")
         ])
         
         // Start Say
@@ -309,7 +309,7 @@ public class IntegrationTest {
        ] as MediaService
        
        def say = new Say([
-           prompt:new SsmlItem("Hello World")
+           prompt:new Ssml("Hello World")
        ])
 
        // Start Say       
@@ -348,7 +348,7 @@ public class IntegrationTest {
       ] as MediaService
       
       def say = new Say([
-          prompt:new SsmlItem("Hello World")
+          prompt:new Ssml("Hello World")
       ])
 
       // Start Say
@@ -391,7 +391,7 @@ public class IntegrationTest {
       ] as MediaService
       
       def say = new Say([
-          prompt:new SsmlItem("Hello World")
+          prompt:new Ssml("Hello World")
       ])
 
       // Start Say

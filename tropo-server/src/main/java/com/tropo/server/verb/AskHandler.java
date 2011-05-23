@@ -6,7 +6,7 @@ import com.tropo.core.verb.Ask;
 import com.tropo.core.verb.AskCompleteEvent;
 import com.tropo.core.verb.AskCompleteEvent.Reason;
 import com.tropo.core.verb.Choices;
-import com.tropo.core.verb.SsmlItem;
+import com.tropo.core.verb.Ssml;
 import com.voxeo.moho.State;
 import com.voxeo.moho.event.InputCompleteEvent;
 import com.voxeo.moho.media.InputMode;
@@ -23,7 +23,7 @@ public class AskHandler extends AbstractLocalVerbHandler<Ask> {
     public void start() {
 
         OutputCommand outCommand = null;
-        SsmlItem ssml = model.getPrompt();
+        Ssml ssml = model.getPrompt();
         
         if (ssml != null) {
             outCommand = new OutputCommand(resolveAudio(ssml));

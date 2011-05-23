@@ -21,8 +21,8 @@ public class Conference extends BaseVerb {
     private Duration maxTime; // Unlimited
     private boolean beep = true;
     private boolean moderator = true;
-    private SsmlItem holdMusic;
-    private SsmlItem announcement;
+    private Ssml holdMusic;
+    private Ssml announcement;
     private Map<String, String> metaData;
 
     public String getRoomName() {
@@ -65,11 +65,11 @@ public class Conference extends BaseVerb {
         this.beep = beep;
     }
 
-    public void setHoldMusic(SsmlItem holdMusic) {
+    public void setHoldMusic(Ssml holdMusic) {
         this.holdMusic = holdMusic;
     }
 
-    public SsmlItem getHoldMusic() {
+    public Ssml getHoldMusic() {
         return holdMusic;
     }
 
@@ -110,11 +110,11 @@ public class Conference extends BaseVerb {
         return metaData;
     }
 
-    public void setAnnouncement(SsmlItem announcement) {
+    public void setAnnouncement(Ssml announcement) {
         this.announcement = announcement;
     }
 
-    public SsmlItem getAnnouncement() {
+    public Ssml getAnnouncement() {
         return announcement;
     }
 

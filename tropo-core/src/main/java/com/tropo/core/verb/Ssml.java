@@ -9,12 +9,12 @@ import org.hibernate.validator.constraints.NotEmpty;
 import com.tropo.core.validation.Messages;
 import com.voxeo.utils.Networks;
 
-public class SsmlItem {
+public class Ssml {
 
 	@NotEmpty(message=Messages.MISSING_SSML)
     private String ssml;
 
-    public SsmlItem(String ssml) {
+    public Ssml(String ssml) {
         this.ssml = ssml;
     }
 

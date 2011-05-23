@@ -13,7 +13,7 @@ import com.tropo.core.verb.KickCommand;
 import com.tropo.core.verb.MuteCommand;
 import com.tropo.core.verb.OffHoldEvent;
 import com.tropo.core.verb.OnHoldEvent;
-import com.tropo.core.verb.SsmlItem;
+import com.tropo.core.verb.Ssml;
 import com.tropo.core.verb.UnmuteCommand;
 import com.tropo.core.verb.VerbCommand;
 import com.tropo.server.MohoUtil;
@@ -302,7 +302,7 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference> impl
     }
 
     private void startMusic() {
-        SsmlItem holdMusicPrompt = model.getHoldMusic();
+        Ssml holdMusicPrompt = model.getHoldMusic();
         if (holdMusicPrompt != null) {
             OutputCommand outputCommand = MohoUtil.output(holdMusicPrompt);
             outputCommand.setRepeatTimes(1000);
@@ -311,7 +311,7 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference> impl
     }
 
     private void playAnnouncement() {
-        SsmlItem announcementPrompt = model.getAnnouncement();
+        Ssml announcementPrompt = model.getAnnouncement();
         if (announcementPrompt != null) {
             OutputCommand outputCommand = MohoUtil.output(announcementPrompt);
             outputCommand.setBahavior(BehaviorIfBusy.QUEUE);

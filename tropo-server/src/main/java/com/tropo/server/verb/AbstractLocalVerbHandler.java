@@ -2,7 +2,7 @@ package com.tropo.server.verb;
 
 import java.net.URI;
 
-import com.tropo.core.verb.SsmlItem;
+import com.tropo.core.verb.Ssml;
 import com.tropo.core.verb.Verb;
 import com.tropo.core.verb.VerbCommand;
 import com.tropo.core.verb.VerbCompleteEvent;
@@ -46,7 +46,7 @@ public abstract class AbstractLocalVerbHandler<T extends Verb> implements VerbHa
         this.media = call.getMediaService();
     }
 
-    protected AudibleResource resolveAudio(final SsmlItem item) {
+    protected AudibleResource resolveAudio(final Ssml item) {
         return new AudibleResource() {
             public URI toURI() {
                 return item.toUri();
@@ -54,7 +54,7 @@ public abstract class AbstractLocalVerbHandler<T extends Verb> implements VerbHa
         };
     }
 
-    protected OutputCommand output(SsmlItem items) {
+    protected OutputCommand output(Ssml items) {
         return new OutputCommand(resolveAudio(items));
     }
 

@@ -18,7 +18,7 @@ import com.tropo.core.validation.Messages;
 import com.tropo.core.validation.ValidationException;
 import com.tropo.core.validation.Validator;
 import com.tropo.core.verb.InputMode;
-import com.tropo.core.verb.SsmlItem;
+import com.tropo.core.verb.Ssml;
 import com.tropo.core.xml.XmlProvider;
 
 public abstract class BaseProvider implements XmlProvider {
@@ -74,7 +74,7 @@ public abstract class BaseProvider implements XmlProvider {
     }
     
 	@SuppressWarnings("unchecked")
-	protected SsmlItem extractSsml(Element node) throws URISyntaxException {
+	protected Ssml extractSsml(Element node) throws URISyntaxException {
 
 		StringBuilder builder = new StringBuilder();
         List<Node> elements = node.content();
@@ -86,7 +86,7 @@ public abstract class BaseProvider implements XmlProvider {
 		        builder.append(xml);
 		    }
 		}
-		return new SsmlItem(builder.toString());
+		return new Ssml(builder.toString());
 	}
 	
 	protected void addHeaders(Map<String, String> map, Element node) {
@@ -100,7 +100,7 @@ public abstract class BaseProvider implements XmlProvider {
         }
     }
 
-	protected void addSsml(SsmlItem item, Element root) throws DocumentException {
+	protected void addSsml(Ssml item, Element root) throws DocumentException {
 		
 		if (item != null) {
 			StringBuilder builder = new StringBuilder("<wrapper>");

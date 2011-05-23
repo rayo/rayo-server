@@ -18,7 +18,7 @@ public class Transfer extends BaseVerb {
     private String voice;
 
     @Valid
-    private SsmlItem ringbackTone;
+    private Ssml ringbackTone;
 
     @NotEmpty(message=Messages.MISSING_TO)
     private List<URI> to;
@@ -37,11 +37,11 @@ public class Transfer extends BaseVerb {
         this.voice = voice;
     }
 
-    public SsmlItem getRingbackTone() {
+    public Ssml getRingbackTone() {
         return ringbackTone;
     }
 
-    public void setRingbackTone(SsmlItem items) {
+    public void setRingbackTone(Ssml items) {
         this.ringbackTone = items;
     }
 

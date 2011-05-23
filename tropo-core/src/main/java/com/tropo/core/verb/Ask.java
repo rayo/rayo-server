@@ -16,7 +16,7 @@ public class Ask extends BaseVerb {
     private String voice;
     
     @Valid
-    private SsmlItem prompt;
+    private Ssml prompt;
     
     private boolean bargein = true;
 
@@ -40,11 +40,11 @@ public class Ask extends BaseVerb {
         this.voice = voice;
     }
 
-    public SsmlItem getPrompt() {
+    public Ssml getPrompt() {
         return prompt;
     }
 
-    public void setPrompt(SsmlItem promptItems) {
+    public void setPrompt(Ssml promptItems) {
         this.prompt = promptItems;
     }
 

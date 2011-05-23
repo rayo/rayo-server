@@ -14,7 +14,7 @@ public class Say extends BaseVerb {
     
     @Valid
     @NotNull(message=Say.MISSING_PROMPT)
-    private SsmlItem prompt;
+    private Ssml prompt;
 
     public String getVoice() {
         return voice;
@@ -24,11 +24,11 @@ public class Say extends BaseVerb {
         this.voice = voice;
     }
 
-    public SsmlItem getPrompt() {
+    public Ssml getPrompt() {
 		return prompt;
 	}
 
-	public void setPrompt(SsmlItem prompt) {
+	public void setPrompt(Ssml prompt) {
 		this.prompt = prompt;
 	}
 

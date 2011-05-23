@@ -12,7 +12,7 @@ import com.tropo.core.verb.ConferenceCompleteEvent;
 import com.tropo.core.verb.KickCommand;
 import com.tropo.core.verb.OffHoldEvent;
 import com.tropo.core.verb.OnHoldEvent;
-import com.tropo.core.verb.SsmlItem;
+import com.tropo.core.verb.Ssml;
 
 public class ConferenceProvider extends BaseProvider {
 
@@ -134,12 +134,12 @@ public class ConferenceProvider extends BaseProvider {
         root.addAttribute("beep", String.valueOf(conference.isBeep()));
         root.addAttribute("moderator", String.valueOf(conference.isModerator()));
 
-        SsmlItem announcement = conference.getAnnouncement();
+        Ssml announcement = conference.getAnnouncement();
         if(announcement != null) {
             addSsml(announcement, root.addElement("announcement"));
         }
 
-        SsmlItem holdMusic = conference.getHoldMusic();
+        Ssml holdMusic = conference.getHoldMusic();
         if(holdMusic != null) {
             addSsml(holdMusic, root.addElement("music"));
         }
