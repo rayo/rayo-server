@@ -12,7 +12,7 @@ import com.tropo.core.verb.ConferenceCompleteEvent;
 import com.tropo.core.verb.KickCommand;
 import com.tropo.core.verb.OffHoldEvent;
 import com.tropo.core.verb.OnHoldEvent;
-import com.tropo.core.verb.PromptItems;
+import com.tropo.core.verb.SsmlItem;
 
 public class ConferenceProvider extends BaseProvider {
 
@@ -63,10 +63,10 @@ public class ConferenceProvider extends BaseProvider {
             conference.setModerator(toBoolean(root.attributeValue("moderator")));
         }
         if (root.element("announcement") != null) {
-            conference.setAnnouncement(extractPromptItems(root.element("announcement")));
+            conference.setAnnouncement(extractSsml(root.element("announcement")));
         }
         if (root.element("music") != null) {
-            conference.setHoldMusic(extractPromptItems(root.element("music")));
+            conference.setHoldMusic(extractSsml(root.element("music")));
         }
         
         return conference;
@@ -134,14 +134,14 @@ public class ConferenceProvider extends BaseProvider {
         root.addAttribute("beep", String.valueOf(conference.isBeep()));
         root.addAttribute("moderator", String.valueOf(conference.isModerator()));
 
-        PromptItems announcement = conference.getAnnouncement();
+        SsmlItem announcement = conference.getAnnouncement();
         if(announcement != null) {
-            addPromptItems(announcement, root.addElement("announcement"));
+            addSsml(announcement, root.addElement("announcement"));
         }
 
-        PromptItems holdMusic = conference.getHoldMusic();
+        SsmlItem holdMusic = conference.getHoldMusic();
         if(holdMusic != null) {
-            addPromptItems(holdMusic, root.addElement("music"));
+            addSsml(holdMusic, root.addElement("music"));
         }
 
     }

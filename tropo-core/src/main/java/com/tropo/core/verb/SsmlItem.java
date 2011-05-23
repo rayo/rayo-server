@@ -9,7 +9,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import com.tropo.core.validation.Messages;
 import com.voxeo.utils.Networks;
 
-public class SsmlItem implements PromptItem {
+public class SsmlItem {
 
 	@NotEmpty(message=Messages.MISSING_SSML)
     private String ssml;
@@ -26,11 +26,9 @@ public class SsmlItem implements PromptItem {
         this.ssml = text;
     }
 
-    @Override
     public URI toUri() {
-        return URI.create("data:" + Networks.urlEncode("application/ssml+xml," + getText()));
+        return URI.create("data:" + Networks.urlEncode("application/ssml+xml,<speak>" + getText() + "</speak>"));
     }
-
 
     @Override
     public String toString() {

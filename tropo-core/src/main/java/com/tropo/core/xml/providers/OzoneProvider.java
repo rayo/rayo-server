@@ -1,6 +1,7 @@
 package com.tropo.core.xml.providers;
 
 import java.net.URISyntaxException;
+import java.util.List;
 
 import org.dom4j.Document;
 import org.dom4j.Element;
@@ -104,11 +105,15 @@ public class OzoneProvider extends BaseProvider {
     private Object buildRejectCommand(Element element) throws URISyntaxException {
 
         RejectCommand reject = new RejectCommand(null);
-        Element reasonElement = (Element)element.elements().get(0);
-        try {
-        	reject.setReason(CallRejectReason.valueOf(reasonElement.getName().toUpperCase()));
-        } catch (IllegalArgumentException iae) {
-        	throw new ValidationException(Messages.INVALID_REASON);
+        @SuppressWarnings("unchecked")
+        List<Element> children = (List<Element>)element.elements();
+        if(!children.isEmpty()) {
+            Element reasonElement = children.get(0);
+            try {
+                reject.setReason(CallRejectReason.valueOf(reasonElement.getName().toUpperCase()));
+            } catch (IllegalArgumentException iae) {
+                throw new ValidationException(Messages.INVALID_REASON);
+            }
         }
         reject.setHeaders(grabHeaders(element));
 

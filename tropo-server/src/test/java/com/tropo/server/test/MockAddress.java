@@ -15,8 +15,8 @@
 package com.tropo.server.test;
 
 import java.util.Iterator;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.servlet.sip.Address;
 import javax.servlet.sip.URI;

@@ -4,16 +4,15 @@ import java.util.List;
 
 import com.tropo.core.verb.Ask;
 import com.tropo.core.verb.AskCompleteEvent;
-import com.tropo.core.verb.Choices;
-import com.tropo.core.verb.PromptItem;
 import com.tropo.core.verb.AskCompleteEvent.Reason;
+import com.tropo.core.verb.Choices;
+import com.tropo.core.verb.SsmlItem;
 import com.voxeo.moho.State;
 import com.voxeo.moho.event.InputCompleteEvent;
 import com.voxeo.moho.media.InputMode;
 import com.voxeo.moho.media.Prompt;
 import com.voxeo.moho.media.input.Grammar;
 import com.voxeo.moho.media.input.InputCommand;
-import com.voxeo.moho.media.output.AudibleResource;
 import com.voxeo.moho.media.output.OutputCommand;
 
 public class AskHandler extends AbstractLocalVerbHandler<Ask> {
@@ -24,11 +23,10 @@ public class AskHandler extends AbstractLocalVerbHandler<Ask> {
     public void start() {
 
         OutputCommand outCommand = null;
-        List<PromptItem> promptItems = model.getPromptItems();
+        SsmlItem ssml = model.getPrompt();
         
-        if (promptItems != null && !promptItems.isEmpty()) {
-            AudibleResource[] audibleResources = resolveAudio(promptItems);
-            outCommand = new OutputCommand(audibleResources);
+        if (ssml != null) {
+            outCommand = new OutputCommand(resolveAudio(ssml));
             outCommand.setBargein(model.isBargein());
             outCommand.setVoiceName(model.getVoice());
         }

@@ -46,7 +46,7 @@ public class TransferProvider extends BaseProvider {
 		}
 		
 		if(root.element("ring") != null) {
-		    transfer.setPromptItems(extractPromptItems(root.element("ring")));
+		    transfer.setRingbackTone(extractSsml(root.element("ring")));
 		}
 
 		if (root.attributeValue("from") != null) {
@@ -105,7 +105,7 @@ public class TransferProvider extends BaseProvider {
 		}
 
 		addHeaders(transfer.getHeaders(), document.getRootElement());
-		addPromptItems(transfer.getPromptItems(), document.getRootElement());
+		addSsml(transfer.getRingbackTone(), document.getRootElement());
 		
 		if (transfer.getTerminator() != null) {
 			root.addAttribute("terminator", transfer.getTerminator().toString());

@@ -84,7 +84,7 @@ public class AskProvider extends BaseProvider {
         
         Element promptElement = element.element("prompt");
         if(promptElement != null) {
-            ask.setPromptItems(extractPromptItems(promptElement));
+            ask.setPrompt(extractSsml(promptElement));
         }
 
         ChoicesList choices = new ChoicesList();
@@ -123,9 +123,9 @@ public class AskProvider extends BaseProvider {
             root.addAttribute("voice", ask.getVoice());
         }
 
-        if (ask.getPromptItems() != null) {
+        if (ask.getPrompt() != null) {
             Element prompt = root.addElement("prompt");
-            addPromptItems(ask.getPromptItems(), prompt);
+            addSsml(ask.getPrompt(), prompt);
         }
 
         if (ask.getChoices() != null) {

@@ -18,7 +18,7 @@ public class Transfer extends BaseVerb {
     private String voice;
 
     @Valid
-    private PromptItems promptItems;
+    private SsmlItem ringbackTone;
 
     @NotEmpty(message=Messages.MISSING_TO)
     private List<URI> to;
@@ -37,12 +37,12 @@ public class Transfer extends BaseVerb {
         this.voice = voice;
     }
 
-    public PromptItems getPromptItems() {
-        return promptItems;
+    public SsmlItem getRingbackTone() {
+        return ringbackTone;
     }
 
-    public void setPromptItems(PromptItems items) {
-        this.promptItems = items;
+    public void setRingbackTone(SsmlItem items) {
+        this.ringbackTone = items;
     }
 
     public List<URI> getTo() {
@@ -104,7 +104,7 @@ public class Transfer extends BaseVerb {
     		.append("timeout", timeout)
     		.append("answerOnMedia", answerOnMedia)
     		.append("terminator", terminator)
-    		.append("promptItems",promptItems)
+    		.append("ringbackTone",ringbackTone)
     		.append("voice",voice)
     		.toString();
     }

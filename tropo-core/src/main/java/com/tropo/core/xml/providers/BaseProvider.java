@@ -10,15 +10,14 @@ import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
+import org.dom4j.Node;
+import org.dom4j.Text;
 import org.joda.time.Duration;
 
 import com.tropo.core.validation.Messages;
 import com.tropo.core.validation.ValidationException;
 import com.tropo.core.validation.Validator;
-import com.tropo.core.verb.AudioItem;
 import com.tropo.core.verb.InputMode;
-import com.tropo.core.verb.PromptItem;
-import com.tropo.core.verb.PromptItems;
 import com.tropo.core.verb.SsmlItem;
 import com.tropo.core.xml.XmlProvider;
 
@@ -75,36 +74,17 @@ public abstract class BaseProvider implements XmlProvider {
     }
     
 	@SuppressWarnings("unchecked")
-	protected PromptItems extractPromptItems(Element node) throws URISyntaxException {
-
-		PromptItems items = new PromptItems();
-        List<Element> elements = node.elements();
-		for(Element element: elements) {
-			if (element.getName().equals("audio")) {
-				AudioItem item = new AudioItem();
-				item.setUri(toURI(element.attributeValue("url")));
-				items.add(item);				
-			} else if (element.getName().equals("speak")) {
-				String xml = element.asXML();
-				//TODO: Better namespaces cleanup
-				xml = xml.replaceAll(" xmlns=\"[^\"]*\"","");
-				SsmlItem ssml = new SsmlItem(xml);
-				items.add(ssml);
-			}
-		}
-		return items;
-	}
-    
-	@SuppressWarnings("unchecked")
 	protected SsmlItem extractSsml(Element node) throws URISyntaxException {
 
 		StringBuilder builder = new StringBuilder();
-        List<Element> elements = node.elements();
-		for(Element element: elements) {
-			String xml = element.asXML();
-			//TODO: Better namespaces cleanup
-			xml = xml.replaceAll(" xmlns=\"[^\"]*\"","");
-			builder.append(xml);
+        List<Node> elements = node.content();
+		for(Node element: elements) {
+		    if(element instanceof Text || element instanceof Element) {
+		        String xml = element.asXML();
+		        //TODO: Better namespaces cleanup
+		        xml = xml.replaceAll(" xmlns=\"[^\"]*\"","");
+		        builder.append(xml);
+		    }
 		}
 		return new SsmlItem(builder.toString());
 	}
@@ -120,21 +100,6 @@ public abstract class BaseProvider implements XmlProvider {
         }
     }
 
-	protected void addPromptItems(PromptItems items, Element root) throws DocumentException {
-		
-		if (items != null) {
-			for (PromptItem item: items) {
-				if (item instanceof AudioItem) {
-					Element audio = root.addElement("audio");
-					audio.addAttribute("url", ((AudioItem) item).getUri().toString());
-				} else if (item instanceof SsmlItem) {
-					Document ssmlDoc = DocumentHelper.parseText(((SsmlItem) item).getText());
-					root.add(ssmlDoc.getRootElement());
-				}
-			}
-		}
-	}
-
 	protected void addSsml(SsmlItem item, Element root) throws DocumentException {
 		
 		if (item != null) {
@@ -142,8 +107,13 @@ public abstract class BaseProvider implements XmlProvider {
 			builder.append(item.getText());
 			builder.append("</wrapper>");
 			Document ssmlDoc = DocumentHelper.parseText(builder.toString());
-			for (Object element: ssmlDoc.getRootElement().elements()) {
-				root.add(((Element)element).createCopy());
+			for (Object element: ssmlDoc.getRootElement().content()) {
+	            if(element instanceof Text) {
+                    root.addText(((Text)element).asXML());
+	            } 
+	            else if(element instanceof Element) {
+	                root.add(((Element)element).createCopy());
+	            }
 			}
 		}
 	}

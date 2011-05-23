@@ -21,7 +21,6 @@ import com.tropo.core.xml.providers.TransferProvider
 import com.tropo.server.exception.ExceptionMapper
 import com.voxeo.servlet.xmpp.XmppStanzaError
 
-
 class ValidationTest {
 
 	def providers
@@ -70,42 +69,6 @@ class ValidationTest {
 	
 	// Ask
 	// ====================================================================================
-	
-	@Test
-	public void validateAskPromptItems() {
-				
-		def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" voice=\"allison\"><choices>sales,support</choices></ask>""")
-		
-		def errorMapping = assertValidationException(ask)
-		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
-		assertEquals errorMapping.text, Messages.MISSING_PROMPT_ITEMS
-	}
-	
-	@Test
-	public void validateAskInvalidPromptItemsInvalidURI() {
-				
-		def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" voice=\"allison\"><prompt><audio url="\$?\\.com"/></prompt><choices>sales,support</choices></ask>""")
-		
-		def errorMapping = assertValidationException(ask)
-		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
-		assertEquals errorMapping.text, Messages.INVALID_URI
-	}
-		
-	@Test
-	public void validateAskInvalidPromptItemsEmptyURI() {
-				
-		def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" voice=\"allison\"><prompt><audio url=""/></prompt><choices>sales,support</choices></ask>""")
-		
-		def errorMapping = assertValidationException(ask)
-		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
-		assertEquals errorMapping.text, Messages.MISSING_URI
-	}
 	
 	@Test
 	public void validateAskChoicesNull() {

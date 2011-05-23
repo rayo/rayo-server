@@ -5,22 +5,15 @@ import static org.junit.Assert.*
 
 import java.util.concurrent.BlockingQueue
 import java.util.concurrent.CountDownLatch
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
 
-import org.jetlang.channels.Channel
-import org.jetlang.channels.MemoryChannel
-import org.jetlang.fibers.Fiber
-import org.jetlang.fibers.PoolFiberFactory
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.ApplicationContext
-import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 
 import com.tropo.core.CallRejectReason
@@ -29,16 +22,13 @@ import com.tropo.core.OfferEvent
 import com.tropo.core.RejectCommand
 import com.tropo.core.EndEvent.Reason
 import com.tropo.core.verb.PauseCommand
-import com.tropo.core.verb.PromptItems
 import com.tropo.core.verb.ResumeCommand
 import com.tropo.core.verb.Say
 import com.tropo.core.verb.SayCompleteEvent
 import com.tropo.core.verb.SsmlItem
 import com.tropo.core.verb.StopCommand
-import com.tropo.server.test.MockApplicationContext
 import com.tropo.server.test.MockCall
 import com.tropo.server.test.MockMediaService
-import com.tropo.server.verb.DefaultVerbManager
 import com.voxeo.exceptions.NotFoundException
 import com.voxeo.moho.Call
 import com.voxeo.moho.MediaService
@@ -47,6 +37,8 @@ import com.voxeo.moho.event.OutputCompleteEvent
 import com.voxeo.moho.event.OutputCompleteEvent.Cause
 import com.voxeo.moho.media.Output
 import com.voxeo.moho.media.output.OutputCommand
+
+
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations=["/tropo-context.xml"])
@@ -229,7 +221,7 @@ public class IntegrationTest {
     public void commandExceptionProducesResult() throws InterruptedException {
         
         // Supply a reject with no reason
-        callActor.command(new RejectCommand(), { messageQueue.add it } as ResponseHandler)
+        callActor.command(new RejectCommand(reason:null), { messageQueue.add it } as ResponseHandler)
 
         // We should get an exception in the result
         Response response = poll()

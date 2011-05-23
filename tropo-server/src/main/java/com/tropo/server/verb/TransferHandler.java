@@ -10,7 +10,7 @@ import java.util.TimerTask;
 
 import javax.media.mscontrol.join.Joinable.Direction;
 
-import com.tropo.core.verb.PromptItems;
+import com.tropo.core.verb.SsmlItem;
 import com.tropo.core.verb.Transfer;
 import com.tropo.core.verb.TransferCompleteEvent;
 import com.tropo.core.verb.TransferCompleteEvent.Reason;
@@ -31,7 +31,6 @@ import com.voxeo.moho.media.Input;
 import com.voxeo.moho.media.Prompt;
 import com.voxeo.moho.media.input.DigitInputCommand;
 import com.voxeo.moho.media.input.InputCommand;
-import com.voxeo.moho.media.output.AudibleResource;
 import com.voxeo.moho.media.output.OutputCommand;
 
 public class TransferHandler extends AbstractLocalVerbHandler<Transfer> implements Observer {
@@ -54,10 +53,9 @@ public class TransferHandler extends AbstractLocalVerbHandler<Transfer> implemen
     @Override
     public void start() {
 
-        PromptItems promptItems = model.getPromptItems();
-        if(promptItems != null) {
-            AudibleResource[] audibleResources = resolveAudio(promptItems);
-            OutputCommand outputCommand = new OutputCommand(audibleResources);
+        SsmlItem ringbackSsml = model.getRingbackTone();
+        if(ringbackSsml != null) {
+            OutputCommand outputCommand = output(ringbackSsml);
             outputCommand.setBargein(false);
             outputCommand.setVoiceName(model.getVoice());
             ringBack = media.prompt(outputCommand, null, 30);

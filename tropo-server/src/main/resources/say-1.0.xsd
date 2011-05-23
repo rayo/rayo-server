@@ -4,24 +4,25 @@
 	xmlns:tns="urn:xmpp:ozone:say:1" 
 	elementFormDefault="qualified">
 
-	<element name="say" type="tns:sayType" />
-	<element name="complete" />
-	<element name="stop" />
-	<element name="pause" />
-	<element name="resume" />
-	
-	<complexType name="sayType">
-		<attribute name="id" type="string" />
-		<attribute name="voice" type="string" />
-		<attribute name="prompt" type="ssmlType" />
-	</complexType>
+    <!-- Import SSML Types -->
+    <include schemaLocation="http://www.w3.org/TR/speech-synthesis/synthesis-core.xsd" />
+    
+    <!-- Main Componenet -->
+    <element name="say" type="tns:speak"></element>
 
-	<complexType name="ssmlType">
-			<any namespace="http://www.w3.org/2001/10/synthesis" />
-	</complexType>
-	
-	<complexType name="audioReferenceType">
-		<attribute name="url" type="anyURI" />
-	</complexType>
+    <complexType name="say">
+        <complexContent>
+            <extension base="tns:speak">
+                <attribute name="voice" type="string" />
+            </extension>
+        </complexContent>
+    </complexType>
+
+    <!-- Commands -->
+    <element name="pause" />
+    <element name="resume" />
+    
+    <!-- Events -->
+    <element name="complete" />
 
 </schema>

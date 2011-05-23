@@ -1,9 +1,8 @@
 package com.tropo.server.verb;
 
 import java.net.URI;
-import java.util.List;
 
-import com.tropo.core.verb.PromptItem;
+import com.tropo.core.verb.SsmlItem;
 import com.tropo.core.verb.Verb;
 import com.tropo.core.verb.VerbCommand;
 import com.tropo.core.verb.VerbCompleteEvent;
@@ -11,6 +10,7 @@ import com.tropo.core.verb.VerbEvent;
 import com.voxeo.moho.Call;
 import com.voxeo.moho.MediaService;
 import com.voxeo.moho.media.output.AudibleResource;
+import com.voxeo.moho.media.output.OutputCommand;
 
 public abstract class AbstractLocalVerbHandler<T extends Verb> implements VerbHandler<T> {
 
@@ -46,21 +46,16 @@ public abstract class AbstractLocalVerbHandler<T extends Verb> implements VerbHa
         this.media = call.getMediaService();
     }
 
-    protected AudibleResource resolveAudio(final PromptItem item) {
+    protected AudibleResource resolveAudio(final SsmlItem item) {
         return new AudibleResource() {
-
             public URI toURI() {
                 return item.toUri();
             }
         };
     }
 
-    protected AudibleResource[] resolveAudio(List<PromptItem> items) {
-        AudibleResource[] result = new AudibleResource[items.size()];
-        for (int i = 0; i < items.size(); i++) {
-            result[i] = resolveAudio(items.get(i));
-        }
-        return result;
+    protected OutputCommand output(SsmlItem items) {
+        return new OutputCommand(resolveAudio(items));
     }
 
     protected void complete(VerbCompleteEvent event) {

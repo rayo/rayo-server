@@ -8,10 +8,12 @@ import org.apache.commons.lang.builder.ToStringStyle;
 
 public class Say extends BaseVerb {
 	
+    public static final String MISSING_PROMPT = "Nothing to do";
+    
     private String voice; 
     
     @Valid
-    @NotNull
+    @NotNull(message=Say.MISSING_PROMPT)
     private SsmlItem prompt;
 
     public String getVoice() {

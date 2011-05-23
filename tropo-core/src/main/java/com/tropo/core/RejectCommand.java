@@ -2,12 +2,16 @@ package com.tropo.core;
 
 import java.util.Map;
 
+import javax.validation.constraints.NotNull;
+
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
 public class RejectCommand extends AbstractCallCommand {
 
-    private CallRejectReason reason;
+    @NotNull
+    private CallRejectReason reason = CallRejectReason.DECLINED;
+    
     private Map<String, String> headers;
 
     public RejectCommand() {}

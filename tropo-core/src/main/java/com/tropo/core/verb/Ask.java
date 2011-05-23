@@ -9,7 +9,6 @@ import org.joda.time.Duration;
 
 import com.tropo.core.validation.Messages;
 import com.tropo.core.validation.ValidChoicesList;
-import com.tropo.core.validation.ValidPromptItems;
 import com.tropo.core.validation.ValidRecognizer;
 
 public class Ask extends BaseVerb {
@@ -17,8 +16,7 @@ public class Ask extends BaseVerb {
     private String voice;
     
     @Valid
-    @ValidPromptItems 
-    private PromptItems promptItems;
+    private SsmlItem prompt;
     
     private boolean bargein = true;
 
@@ -42,12 +40,12 @@ public class Ask extends BaseVerb {
         this.voice = voice;
     }
 
-    public PromptItems getPromptItems() {
-        return promptItems;
+    public SsmlItem getPrompt() {
+        return prompt;
     }
 
-    public void setPromptItems(PromptItems promptItems) {
-        this.promptItems = promptItems;
+    public void setPrompt(SsmlItem promptItems) {
+        this.prompt = promptItems;
     }
 
     public boolean isBargein() {
@@ -117,7 +115,7 @@ public class Ask extends BaseVerb {
     	return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)    		
     		.append("callId", getCallId())
     		.append("verbId", getVerbId())
-    		.append("promptItems",promptItems)
+    		.append("prompt",prompt)
     		.append("bargein",bargein)
     		.append("choices",choices)
     		.append("mode",mode)
