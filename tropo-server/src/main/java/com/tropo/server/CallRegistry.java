@@ -1,5 +1,7 @@
 package com.tropo.server;
 
+import java.util.Collection;
+
 public interface CallRegistry {
 
     public void add(CallActor actor);
@@ -12,4 +14,5 @@ public interface CallRegistry {
     
     public CallActor get(String id);
 
+    public Collection<CallActor> getActiveCalls();
 }

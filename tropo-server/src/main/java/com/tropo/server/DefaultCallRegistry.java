@@ -1,5 +1,7 @@
 package com.tropo.server;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -32,4 +34,9 @@ public class DefaultCallRegistry implements CallRegistry {
         return calls.isEmpty();
     }
 
+    @Override
+    public Collection<CallActor> getActiveCalls() {
+
+    	return new ArrayList<CallActor>(calls.values());
+    }
 }
