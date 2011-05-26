@@ -140,4 +140,24 @@
 		<property name="mohoConferenceController" ref="conferenceController" />
 	</bean>
 
+	<!-- JMX Configuration -->
+  	<bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
+    	<property name="autodetect" value="true"/>
+		<property name="namingStrategy" ref="namingStrategy"/>
+    	<property name="assembler" ref="assembler"/>
+  	</bean>
+
+  	<bean id="callsBean" class="com.tropo.server.jmx.Calls">
+  		<property name="callRegistry" ref="callRegistry" />
+  	</bean>
+
+	<bean id="attributeSource" class="org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource"/>
+	
+  	<bean id="assembler" class="org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler">
+    	<property name="attributeSource" ref="attributeSource"/>
+  	</bean> 
+  	
+	<bean id="namingStrategy" class="org.springframework.jmx.export.naming.MetadataNamingStrategy">
+		<property name="attributeSource" ref="attributeSource"/>
+	</bean>  	  
 </beans>
