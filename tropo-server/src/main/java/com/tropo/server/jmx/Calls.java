@@ -18,6 +18,18 @@ public class Calls implements Serializable, CallsMXBean {
 
 	private CallRegistry callRegistry;
 
+	@ManagedAttribute(description="Active Verbs Count")
+	public long getActiveVerbsCount() {
+		
+		long size = 0;
+		Collection<CallActor> actors = callRegistry.getActiveCalls();
+		for (CallActor actor: actors) {
+			size+= actor.getVerbs().size();
+		}
+		
+		return size;
+	}
+
 	@ManagedAttribute(description="Active Calls Count")
 	public long getActiveCallsCount() {
 		
@@ -30,7 +42,7 @@ public class Calls implements Serializable, CallsMXBean {
 		Collection<CallActor> actors = callRegistry.getActiveCalls();
 		List<Call> calls = new ArrayList<Call>();
 		for (CallActor actor: actors) {
-			calls.add(new Call(actor.getCall()));
+			calls.add(new Call(actor.getCall(), callRegistry));
 		}
 		return calls;
 	}

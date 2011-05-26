@@ -22,10 +22,14 @@
 	<!-- Global Call Registry -->
 	<bean id="callRegistry" class="com.tropo.server.DefaultCallRegistry" />
 
+	<!-- Call Statistics Service -->
+	<bean id="callStatistics" class="com.tropo.server.CallStatistics"/>
+
 	<!-- Call Actor Factory -->
 	<bean id="callActorFactory" class="com.tropo.server.DefaultCallActorFactory">
 		<property name="fiberFactory" ref="fiberFactory" />
 		<property name="verbManager" ref="verbManager" />
+		<property name="callStatistics" ref="callStatistics" />
 	</bean>	
 
 	<!-- Call Manager: Responsible for maintaining the Call Registry and creating new CallActors -->

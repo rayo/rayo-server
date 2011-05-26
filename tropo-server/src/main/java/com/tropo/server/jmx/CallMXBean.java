@@ -1,8 +1,9 @@
 package com.tropo.server.jmx;
 
-import com.voxeo.moho.Call;
+import java.util.List;
 
 public interface CallMXBean {
 
 	public String getCallState();
+	public List<Verb> getVerbs();
 }

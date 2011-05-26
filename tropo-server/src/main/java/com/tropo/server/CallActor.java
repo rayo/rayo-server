@@ -3,6 +3,8 @@ package com.tropo.server;
 import static com.voxeo.utils.Objects.assertion;
 import static com.voxeo.utils.Objects.iterable;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -57,6 +59,7 @@ public class CallActor extends ReflectiveActor implements Observer {
 
     private Call call;
     private VerbManager verbManager;
+    private CallStatistics callStatistics;
     
     public CallActor(Call call) {
         this.call = call;
@@ -109,6 +112,7 @@ public class CallActor extends ReflectiveActor implements Observer {
             });
 
             mohoCall.join();
+            callStatistics.outgoingCall();
 
         } catch (Exception e) {
             end(Reason.ERROR);
@@ -144,6 +148,7 @@ public class CallActor extends ReflectiveActor implements Observer {
                 publish(event);
             }
         });
+        callStatistics.incomingCall();
 
         // There is a tiny chance that the call ended before we could registered
         // the Moho handler. We need to check that the call is still active and
@@ -152,7 +157,6 @@ public class CallActor extends ReflectiveActor implements Observer {
             // TODO: There should be a way to tell why the call ended if we missed the event
             end(Reason.HANGUP);
         }
-
     }
 
     // Call Commands
@@ -162,6 +166,7 @@ public class CallActor extends ReflectiveActor implements Observer {
     public void accept(AcceptCommand message) {
         Map<String, String> headers = message.getHeaders();
         call.acceptCall(headers);
+        callStatistics.callAccepted();
     }
 
     @Message
@@ -169,6 +174,7 @@ public class CallActor extends ReflectiveActor implements Observer {
         ApplicationContext applicationContext = call.getApplicationContext();
         Endpoint destination = applicationContext.createEndpoint(message.getTo().toString());
         call.redirect(destination, message.getHeaders());
+        callStatistics.callRedirected();
     }
 
     @Message
@@ -177,6 +183,7 @@ public class CallActor extends ReflectiveActor implements Observer {
         call.answer(headers);
         try {
             call.join().get();
+            callStatistics.callAnswered();
         } catch (InterruptedException e) {
             throw new CallException("Interrupted while joining media server [call=%s]", this, e);
         } catch (ExecutionException e) {
@@ -322,24 +329,30 @@ public class CallActor extends ReflectiveActor implements Observer {
             Reason reason = null;
             switch (event.getCause()) {
             case BUSY:
+            	callStatistics.callBusy();
                 reason = Reason.BUSY;
                 break;
             case CANCEL:
             case DISCONNECT:
             case NEAR_END_DISCONNECT:
-                reason = Reason.HANGUP;
+            	callStatistics.callHangedUp();
+            	reason = Reason.HANGUP;
                 break;
             case DECLINE:
             case FORBIDDEN:
+            	callStatistics.callRejected();
                 reason = Reason.REJECT;
                 break;
             case ERROR:
+            	callStatistics.callFailed();
                 reason = Reason.ERROR;
                 break;
             case TIMEOUT:
+            	callStatistics.callTimedout();
                 reason = Reason.TIMEOUT;
                 break;
             default:
+            	callStatistics.callEndedUnknownReason();
                 throw new UnsupportedOperationException("Reason not handled: " + event.getCause());
             }
             if (reason == Reason.ERROR) {
@@ -429,4 +442,17 @@ public class CallActor extends ReflectiveActor implements Observer {
     		.append("callId", call.getId())
     		.toString();
     }
+    
+    public Collection<VerbHandler<?>> getVerbs() {
+    	
+    	return new ArrayList<VerbHandler<?>>(verbs.values());
+    }
+
+	public CallStatistics getCallStatistics() {
+		return callStatistics;
+	}
+
+	public void setCallStatistics(CallStatistics callStatistics) {
+		this.callStatistics = callStatistics;
+	}
 }

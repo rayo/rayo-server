@@ -9,12 +9,14 @@ public class DefaultCallActorFactory implements CallActorFactory {
 
     private VerbManager verbManager;
     private PoolFiberFactory fiberFactory;
+    private CallStatistics callStatistics;
 
     @Override
     public CallActor create(Call call) {
         CallActor actor = new CallActor(call);
         actor.setFiberFactory(fiberFactory);
         actor.setVerbManager(verbManager);
+        actor.setCallStatistics(callStatistics);
         return actor;
     }
 
@@ -33,5 +35,13 @@ public class DefaultCallActorFactory implements CallActorFactory {
     public PoolFiberFactory getFiberFactory() {
         return fiberFactory;
     }
+
+	public CallStatistics getCallStatistics() {
+		return callStatistics;
+	}
+
+	public void setCallStatistics(CallStatistics callStatistics) {
+		this.callStatistics = callStatistics;
+	}
 
 }
