@@ -15,4 +15,5 @@ public interface CallStatisticsMXBean {
 	public long getIncomingCalls();
 	public long getOutgoingCalls();
 	public long getTotalCalls();
+	public long getTotalVerbs();
 }

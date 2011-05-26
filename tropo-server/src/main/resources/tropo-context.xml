@@ -25,6 +25,9 @@
 	<!-- Call Statistics Service -->
 	<bean id="callStatistics" class="com.tropo.server.CallStatistics"/>
 
+	<!-- Ozone Statistics Service -->
+	<bean id="ozoneStatistics" class="com.tropo.server.OzoneStatistics"/>
+
 	<!-- Call Actor Factory -->
 	<bean id="callActorFactory" class="com.tropo.server.DefaultCallActorFactory">
 		<property name="fiberFactory" ref="fiberFactory" />
@@ -153,6 +156,7 @@
 
   	<bean id="callsBean" class="com.tropo.server.jmx.Calls">
   		<property name="callRegistry" ref="callRegistry" />
+  		<property name="callStatistics" ref="callStatistics" />
   	</bean>
 
 	<bean id="attributeSource" class="org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource"/>

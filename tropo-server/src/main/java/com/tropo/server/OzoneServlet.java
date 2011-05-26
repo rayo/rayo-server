@@ -20,6 +20,7 @@ import com.tropo.core.CallEvent;
 import com.tropo.core.CallRef;
 import com.tropo.core.DialCommand;
 import com.tropo.core.HangupCommand;
+import com.tropo.core.validation.ValidationException;
 import com.tropo.core.verb.Verb;
 import com.tropo.core.verb.VerbCommand;
 import com.tropo.core.verb.VerbEvent;
@@ -54,6 +55,7 @@ public class OzoneServlet extends XmppServlet {
     private CallManager callManager;
     private CallRegistry callRegistry;
     private ExceptionMapper exceptionMapper;
+    private OzoneStatistics ozoneStatistics;
 
     private XmppFactory xmppFactory;
     private Map<String, XmppSession> clientSessions = new ConcurrentHashMap<String, XmppSession>();
@@ -81,6 +83,7 @@ public class OzoneServlet extends XmppServlet {
 
             public void handle(Object event) throws Exception {
                 if (event instanceof CallEvent) {
+                	ozoneStatistics.callReceived();
                     CallEvent callEvent = (CallEvent) event;
                     try {
                         event(callEvent);
@@ -163,6 +166,7 @@ public class OzoneServlet extends XmppServlet {
                 log.error("Failed to dispatch event [jid=%s, event=%s]", jid, event, e);
             }
         }
+        ozoneStatistics.callEventProcessed();
     }
 
     // Commands: Client -> Server
@@ -171,7 +175,8 @@ public class OzoneServlet extends XmppServlet {
     @Override
     protected void doIQRequest(final XmppServletIQRequest request) throws ServletException, IOException {
 
-        try {
+    	ozoneStatistics.iqReceived();
+    	try {
 
             WIRE.debug("%s :: %s", request.getElement().asXML(), request.getSession().getId());
 
@@ -203,6 +208,7 @@ public class OzoneServlet extends XmppServlet {
                 else if (qname.getNamespaceURI().startsWith("urn:xmpp:ozone")) {
 
                     Object command = provider.fromXML(payload);
+                    ozoneStatistics.commandReceived(command);
 
                     // Handle outbound 'dial' command
                     if (command instanceof DialCommand) {
@@ -274,6 +280,8 @@ public class OzoneServlet extends XmppServlet {
                 }
             }
 
+        } catch (ValidationException ve) {
+        	ozoneStatistics.validationError();
         }
         catch (Exception e) {
             log.error("Uncaught exception while processing IQ request", e);
@@ -286,7 +294,8 @@ public class OzoneServlet extends XmppServlet {
     protected void doIQResponse(XmppServletIQResponse request) throws ServletException, IOException {
 
         WIRE.debug("%s :: %s", request.getElement().asXML(), request.getSession().getId());
-
+        ozoneStatistics.iqResponse();
+        
         XmppStanzaError error = request.getError();
         if (error != null) {
             log.error("Client error, hanging up. [error=%s]", error.asXML());
@@ -326,11 +335,15 @@ public class OzoneServlet extends XmppServlet {
     }
 
     private void sendIqError(XmppServletIQRequest request, XmppServletIQResponse response) throws IOException {
+    	
+    	ozoneStatistics.iqError();
         response.setFrom(request.getTo());
         response.send();
     }
 
     private void sendIqResult(XmppServletIQRequest request, Element result) throws IOException {
+    	
+    	ozoneStatistics.iqResult();
         XmppServletIQResponse response = request.createIQResultResponse(result);
         response.setFrom(request.getTo());
         response.send();
@@ -385,4 +398,11 @@ public class OzoneServlet extends XmppServlet {
         this.exceptionMapper = exceptionMapper;
     }
 
+	public OzoneStatistics getOzoneStatistics() {
+		return ozoneStatistics;
+	}
+
+	public void setOzoneStatistics(OzoneStatistics ozoneStatistics) {
+		this.ozoneStatistics = ozoneStatistics;
+	}
 }

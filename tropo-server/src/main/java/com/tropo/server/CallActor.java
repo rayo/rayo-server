@@ -248,6 +248,8 @@ public class CallActor extends ReflectiveActor implements Observer {
         verbHandler.setCall(call);
         verbHandler.setEventDispatcher(verbDispatcher);
 
+        callStatistics.verbCreated();
+        
         AutowiredEventListener listener = new AutowiredEventListener(verbHandler);
         mohoListeners.add(listener);
 

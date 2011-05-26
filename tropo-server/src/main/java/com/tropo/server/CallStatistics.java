@@ -19,6 +19,7 @@ public class CallStatistics implements CallStatisticsMXBean {
 	private long callsRedirected;
 	private long callsIncoming;
 	private long callsOutgoing;
+	private long verbsCreated;
 	
 	@ManagedAttribute(description="Busy Calls Count")
 	public long getCallsBusy() {
@@ -141,5 +142,15 @@ public class CallStatistics implements CallStatisticsMXBean {
 	public long getTotalCalls() {
 		
 		return callsIncoming + callsOutgoing;
+	}
+
+	@ManagedAttribute(description="Total Verbs")
+	public long getTotalVerbs() {
+		return verbsCreated;
+	}
+
+	public void verbCreated() {
+
+		verbsCreated++;
 	}
 }
