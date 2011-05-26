@@ -207,7 +207,7 @@ public abstract class ReflectiveActor implements Actor, Callback<Object> {
             }
         }
         else {
-            log.info("Actor % is disposed. Ignoring event. [%s]", this.getClass().getSimpleName(), message);
+            log.info("Actor %s is disposed. Ignoring event. [%s]", this.getClass().getSimpleName(), message);
         }
         
     }
