@@ -13,4 +13,6 @@ public interface OzoneStatisticsMXBean {
 	public long getIQErrorsSent();
 	public long getIQResultsSent();
 	public long getValidationErrors();
+	public long getMessageStanzasReceived();
+	public long getPresenceStanzasReceived();
 }

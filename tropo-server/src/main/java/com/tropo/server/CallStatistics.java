@@ -1,5 +1,7 @@
 package com.tropo.server;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
@@ -8,149 +10,149 @@ import com.tropo.server.jmx.CallStatisticsMXBean;
 @ManagedResource(objectName="com.tropo:Type=Call Statistics", description="Call Statistics")
 public class CallStatistics implements CallStatisticsMXBean {
 
-	private long callsAccepted;
-	private long callsAnswered;
-	private long callsBusy;
-	private long callsHangedUp;
-	private long callsFailed;
-	private long callsRejected;
-	private long callsTimedout;
-	private long callsEndedUnknownReason;
-	private long callsRedirected;
-	private long callsIncoming;
-	private long callsOutgoing;
-	private long verbsCreated;
+	private AtomicLong callsAccepted = new AtomicLong(0);
+	private AtomicLong callsAnswered = new AtomicLong(0);
+	private AtomicLong callsBusy = new AtomicLong(0);
+	private AtomicLong callsHangedUp = new AtomicLong(0);
+	private AtomicLong callsFailed = new AtomicLong(0);
+	private AtomicLong callsRejected = new AtomicLong(0);
+	private AtomicLong callsTimedout = new AtomicLong(0);
+	private AtomicLong callsEndedUnknownReason = new AtomicLong(0);
+	private AtomicLong callsRedirected = new AtomicLong(0);
+	private AtomicLong callsIncoming = new AtomicLong(0);
+	private AtomicLong callsOutgoing = new AtomicLong(0);
+	private AtomicLong verbsCreated = new AtomicLong(0);
 	
 	@ManagedAttribute(description="Busy Calls Count")
 	public long getCallsBusy() {
-		return callsBusy;
+		return callsBusy.longValue();
 	}
 
 	public void callBusy() {
 
-		callsBusy++;
+		callsBusy.incrementAndGet();
 	}
 
 	public void callAccepted() {
 		
-		callsAccepted++;
+		callsAccepted.incrementAndGet();
 	}
 	
 	public void callAnswered() {
 		
-		callsAnswered++;
+		callsAnswered.incrementAndGet();
 	}
 	
 	@ManagedAttribute(description="Answered Calls Count")
 	public long getCallsAnswered() {
 		
-		return callsAnswered;
+		return callsAnswered.longValue();
 	}
 
 	@ManagedAttribute(description="Hanged Up Calls Count")
 	public long getCallsHangedUp() {
 		
-		return callsHangedUp;
+		return callsHangedUp.longValue();
 	}
 	
 	public void callHangedUp() {
 		
-		callsHangedUp++;
+		callsHangedUp.incrementAndGet();
 	}
 
 	public void callRejected() {
 		
-		callsRejected++;
+		callsRejected.incrementAndGet();
 	}
 	
 	public void callTimedout() {
 		
-		callsTimedout++;
+		callsTimedout.incrementAndGet();
 	}
 	
 	public void callFailed() {
 		
-		callsFailed++;
+		callsFailed.incrementAndGet();
 	}
 
 	@ManagedAttribute(description="Accepted Calls Count")
 	public long getCallsAccepted() {
-		return callsAccepted;
+		return callsAccepted.longValue();
 	}
 
 	@ManagedAttribute(description="Failed Calls Count")
 	public long getCallsFailed() {
-		return callsFailed;
+		return callsFailed.longValue();
 	}
 
 	@ManagedAttribute(description="Rejected Calls Count")
 	public long getCallsRejected() {
-		return callsRejected;
+		return callsRejected.longValue();
 	}
 
 	@ManagedAttribute(description="Timed out Calls Count")
 	public long getCallsTimedout() {
-		return callsTimedout;
+		return callsTimedout.longValue();
 	}
 
 	@ManagedAttribute(description="Busy Calls Count")
 	public void callEndedUnknownReason() {
 		
-		callsEndedUnknownReason++;
+		callsEndedUnknownReason.incrementAndGet();
 	}
 	
 	@ManagedAttribute(description="Calls Ended Unknown Reason")
 	public long getCallsEndedUnknownReason() {
 		
-		return callsEndedUnknownReason;
+		return callsEndedUnknownReason.longValue();
 	}
 
 	public void callRedirected() {
 		
-		callsRedirected++;
+		callsRedirected.incrementAndGet();
 	}
 	
 	@ManagedAttribute(description="Redirected Calls")
 	public long getCallsRedirected() {
 		
-		return callsRedirected;
+		return callsRedirected.longValue();
 	}
 
 	public void incomingCall() {
 		
-		callsIncoming++;
+		callsIncoming.incrementAndGet();
 	}
 	
 	@ManagedAttribute(description="Total Incoming Calls")
 	public long getIncomingCalls() {
 		
-		return callsIncoming;
+		return callsIncoming.longValue();
 	}	
 
 	public void outgoingCall() {
 		
-		callsOutgoing++;
+		callsOutgoing.incrementAndGet();
 	}
 	
 	@ManagedAttribute(description="Total Outgoing Calls")
 	public long getOutgoingCalls() {
 		
-		return callsOutgoing;
+		return callsOutgoing.longValue();
 	}	
 	
 	@ManagedAttribute(description="Total Calls")
 	public long getTotalCalls() {
 		
-		return callsIncoming + callsOutgoing;
+		return callsIncoming.longValue() + callsOutgoing.longValue();
 	}
 
 	@ManagedAttribute(description="Total Verbs")
 	public long getTotalVerbs() {
-		return verbsCreated;
+		return verbsCreated.longValue();
 	}
 
 	public void verbCreated() {
 
-		verbsCreated++;
+		verbsCreated.incrementAndGet();
 	}
 }

@@ -36,6 +36,7 @@ import com.voxeo.servlet.xmpp.XmppServlet;
 import com.voxeo.servlet.xmpp.XmppServletFeaturesRequest;
 import com.voxeo.servlet.xmpp.XmppServletIQRequest;
 import com.voxeo.servlet.xmpp.XmppServletIQResponse;
+import com.voxeo.servlet.xmpp.XmppServletStanzaRequest;
 import com.voxeo.servlet.xmpp.XmppServletStreamRequest;
 import com.voxeo.servlet.xmpp.XmppSession;
 import com.voxeo.servlet.xmpp.XmppSession.SessionType;
@@ -169,6 +170,16 @@ public class OzoneServlet extends XmppServlet {
         ozoneStatistics.callEventProcessed();
     }
 
+    protected void doMessage(XmppServletStanzaRequest req) throws ServletException, IOException {
+
+    	ozoneStatistics.messageStanzaReceived();
+    }
+
+    protected void doPresence(XmppServletStanzaRequest req) throws ServletException, IOException {
+
+    	ozoneStatistics.presenceStanzaReceived();
+    }
+
     // Commands: Client -> Server
     // ================================================================================
 
@@ -290,6 +301,8 @@ public class OzoneServlet extends XmppServlet {
 
     }
 
+    
+    
     @Override
     protected void doIQResponse(XmppServletIQResponse request) throws ServletException, IOException {
 

@@ -13,92 +13,116 @@ import com.tropo.server.jmx.OzoneStatisticsMXBean;
 @ManagedResource(objectName="com.tropo:Type=Ozone", description="Ozone Statistics")
 public class OzoneStatistics implements OzoneStatisticsMXBean {
 
-	private long callsReceived;
-	private long callEventsProcessed;
-	private long iqsReceived;
-	private long iqResponsesHandled;
-	private long iqErrorsSent;
-	private long iqResultsSent;
-	private long validationErrors;
+	private AtomicLong callsReceived = new AtomicLong(0);
+	private AtomicLong callEventsProcessed = new AtomicLong(0);
+	private AtomicLong iqsReceived = new AtomicLong(0);
+	private AtomicLong iqResponsesHandled = new AtomicLong(0);
+	private AtomicLong iqErrorsSent = new AtomicLong(0);
+	private AtomicLong iqResultsSent = new AtomicLong(0);
+	private AtomicLong validationErrors = new AtomicLong(0);
+	private AtomicLong messagesReceived = new AtomicLong(0);
+	private AtomicLong presencesReceived = new AtomicLong(0);
 	
 	private Map<String, AtomicLong> commands = new ConcurrentHashMap<String, AtomicLong>();
 	
 	@ManagedAttribute(description="Calls Received Count")
 	public long getCallsReceived() {
 		
-		return callsReceived;
+		return callsReceived.longValue();
 	}
 	
 	public void callReceived() {
 		
-		callsReceived++;
+		callsReceived.incrementAndGet();
 	}
 	
 	@ManagedAttribute(description="Processed Call Events Count")
 	public long getCallEventsProcessed() {
 		
-		return callEventsProcessed;
+		return callEventsProcessed.longValue();
 	}
 	
 	public void callEventProcessed() {
 		
-		callEventsProcessed++;
+		callEventsProcessed.incrementAndGet();
 	}
 	
 	@ManagedAttribute(description="IQs Received Count")
 	public long getIQsReceived() {
 		
-		return iqsReceived;
+		return iqsReceived.longValue();
 	}
 	
 	public void iqReceived() {
 		
-		iqsReceived++;
+		iqsReceived.incrementAndGet();
 	}
 	
 	@ManagedAttribute(description="Handled IQ Responses Count")
 	public long getIQResponsesHandled() {
 		
-		return iqResponsesHandled;
+		return iqResponsesHandled.longValue();
 	}
 	
 	public void iqResponse() {
 		
-		iqResponsesHandled++;
+		iqResponsesHandled.incrementAndGet();
 	}
 	
 	@ManagedAttribute(description="Sent IQ Errors Count")
 	public long getIQErrorsSent() {
 		
-		return iqErrorsSent;
+		return iqErrorsSent.longValue();
 	}
 	
 	public void iqError() {
 		
-		iqErrorsSent++;
+		iqErrorsSent.incrementAndGet();
 	}
 	
 	@ManagedAttribute(description="Sent IQ Results Count")
 	public long getIQResultsSent() {
 		
-		return iqResultsSent;
+		return iqResultsSent.longValue();
 	}
 	
 	public void iqResult() {
 		
-		iqResultsSent++;
+		iqResultsSent.incrementAndGet();
 	}	
+	
+	@ManagedAttribute(description="Message Stanzas Received Count")
+	public long getMessageStanzasReceived() {
+		
+		return messagesReceived.longValue();
+	}
+	
+	public void messageStanzaReceived() {
+		
+		messagesReceived.incrementAndGet();
+	}	
+	
+	@ManagedAttribute(description="Presence Stanzas Received Count")
+	public long getPresenceStanzasReceived() {
+		
+		return presencesReceived.longValue();
+	}
+	
+	public void presenceStanzaReceived() {
+		
+		presencesReceived.incrementAndGet();
+	}
 	
 	@ManagedAttribute(description="Validation Errors Count")
 	public long getValidationErrors() {
 		
-		return validationErrors;
+		return validationErrors.longValue();
 	}
 	
 	public void validationError() {
 		
-		validationErrors++;
-	}	
+		validationErrors.incrementAndGet();
+	}
 	
 	public void commandReceived(Object command) {
 		
