@@ -111,9 +111,15 @@ public class Call {
 		return builder.toString();
 	}
 	
-	public Map<String,Object> getAttributes() {
+	public Map<String,String> getAttributes() {
 		
-		return call.getAttributeMap();
+		Map<String, String> attributes = new HashMap<String, String>();
+		for (Map.Entry<String, Object> entry: call.getAttributeMap().entrySet()) {
+			attributes.put(entry.getKey(), entry.getValue().toString());
+			
+		}
+
+		return attributes;
 	}
 	
 	public String getAttributesString() {
