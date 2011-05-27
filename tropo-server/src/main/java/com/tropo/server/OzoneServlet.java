@@ -57,6 +57,7 @@ public class OzoneServlet extends XmppServlet {
     private CallRegistry callRegistry;
     private ExceptionMapper exceptionMapper;
     private OzoneStatistics ozoneStatistics;
+    private AdminService adminService;
 
     private XmppFactory xmppFactory;
     private Map<String, XmppSession> clientSessions = new ConcurrentHashMap<String, XmppSession>();
@@ -133,6 +134,11 @@ public class OzoneServlet extends XmppServlet {
 
     public void event(CallEvent event) throws IOException {
 
+    	if (adminService.isQuiesceMode()) {
+            log.debug("Quiesce Mode ON. Dropping event:: %s", event);
+            return;
+    	}
+    	
         // Send event to all registered JIDs
         // TODO: this should be pluggable
         for (XmppSession session : clientSessions.values()) {
@@ -173,11 +179,19 @@ public class OzoneServlet extends XmppServlet {
     protected void doMessage(XmppServletStanzaRequest req) throws ServletException, IOException {
 
     	ozoneStatistics.messageStanzaReceived();
+    	if (adminService.isQuiesceMode()) {
+            log.debug("Quiesce Mode ON. Dropping Message Stanza:: %s", req);
+            return;
+    	}    	
     }
 
     protected void doPresence(XmppServletStanzaRequest req) throws ServletException, IOException {
 
     	ozoneStatistics.presenceStanzaReceived();
+    	if (adminService.isQuiesceMode()) {
+            log.debug("Quiesce Mode ON. Dropping Presence Stanza:: %s", req);
+            return;
+    	}
     }
 
     // Commands: Client -> Server
@@ -186,11 +200,15 @@ public class OzoneServlet extends XmppServlet {
     @Override
     protected void doIQRequest(final XmppServletIQRequest request) throws ServletException, IOException {
 
+        WIRE.debug("%s :: %s", request.getElement().asXML(), request.getSession().getId());
     	ozoneStatistics.iqReceived();
+    	if (adminService.isQuiesceMode()) {
+            log.debug("Quiesce Mode ON. Dropping message: %s :: %s", request.getElement().asXML(), request.getSession().getId());
+
+    		sendIqError(request, XmppStanzaError.SERVICE_UNAVAILABLE_CONDITION);
+    		return;
+    	}
     	try {
-
-            WIRE.debug("%s :: %s", request.getElement().asXML(), request.getSession().getId());
-
             if (request.getSession().getSessionType() == XmppSession.SessionType.CLIENT) {
 
                 // Extract Request
@@ -301,14 +319,16 @@ public class OzoneServlet extends XmppServlet {
 
     }
 
-    
-    
     @Override
     protected void doIQResponse(XmppServletIQResponse request) throws ServletException, IOException {
 
         WIRE.debug("%s :: %s", request.getElement().asXML(), request.getSession().getId());
         ozoneStatistics.iqResponse();
-        
+    	if (adminService.isQuiesceMode()) {    		
+            log.debug("Quiesce Mode ON. Dropping message: %s :: %s", request.getElement().asXML(), request.getSession().getId());
+    		return;
+    	}
+    	
         XmppStanzaError error = request.getError();
         if (error != null) {
             log.error("Client error, hanging up. [error=%s]", error.asXML());
@@ -411,11 +431,11 @@ public class OzoneServlet extends XmppServlet {
         this.exceptionMapper = exceptionMapper;
     }
 
-	public OzoneStatistics getOzoneStatistics() {
-		return ozoneStatistics;
-	}
-
 	public void setOzoneStatistics(OzoneStatistics ozoneStatistics) {
 		this.ozoneStatistics = ozoneStatistics;
 	}
+
+	public void setAdminService(AdminService adminService) {
+		this.adminService = adminService;
+	}	
 }

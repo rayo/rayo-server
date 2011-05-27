@@ -147,6 +147,9 @@
 		<property name="mohoConferenceController" ref="conferenceController" />
 	</bean>
 
+	<!-- Admin Service -->
+	<bean id="adminService" class="com.tropo.server.AdminService"/>
+	
 	<!-- JMX Configuration -->
   	<bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
     	<property name="autodetect" value="true"/>

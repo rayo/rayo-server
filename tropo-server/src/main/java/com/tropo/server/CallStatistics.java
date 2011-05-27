@@ -13,7 +13,7 @@ public class CallStatistics implements CallStatisticsMXBean {
 	private AtomicLong callsAccepted = new AtomicLong(0);
 	private AtomicLong callsAnswered = new AtomicLong(0);
 	private AtomicLong callsBusy = new AtomicLong(0);
-	private AtomicLong callsHangedUp = new AtomicLong(0);
+	private AtomicLong callsHungUp = new AtomicLong(0);
 	private AtomicLong callsFailed = new AtomicLong(0);
 	private AtomicLong callsRejected = new AtomicLong(0);
 	private AtomicLong callsTimedout = new AtomicLong(0);
@@ -49,15 +49,15 @@ public class CallStatistics implements CallStatisticsMXBean {
 		return callsAnswered.longValue();
 	}
 
-	@ManagedAttribute(description="Hanged Up Calls Count")
-	public long getCallsHangedUp() {
+	@ManagedAttribute(description="Hung Up Calls Count")
+	public long getCallsHungUp() {
 		
-		return callsHangedUp.longValue();
+		return callsHungUp.longValue();
 	}
 	
 	public void callHangedUp() {
 		
-		callsHangedUp.incrementAndGet();
+		callsHungUp.incrementAndGet();
 	}
 
 	public void callRejected() {

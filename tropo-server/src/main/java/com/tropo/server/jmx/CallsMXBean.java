@@ -7,7 +7,7 @@ public interface CallsMXBean {
 
 	public long getActiveCallsCount();
 	public long getActiveVerbsCount();
-	public List<Call> getCalls();
+	public List<Call> getActiveCalls();
 	public long getTotalVerbs();
 	public long getTotalCalls();
 	public Map<String, Long> getActiveVerbs();

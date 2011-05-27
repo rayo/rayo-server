@@ -63,7 +63,7 @@ public class Calls implements Serializable, CallsMXBean {
 	}
 	
 	@ManagedAttribute(description="Active Calls")
-	public List<Call> getCalls() {
+	public List<Call> getActiveCalls() {
 		
 		Collection<CallActor> actors = callRegistry.getActiveCalls();
 		List<Call> calls = new ArrayList<Call>();

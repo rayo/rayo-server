@@ -18,6 +18,7 @@
 		<property name="callRegistry" ref="callRegistry" />
 		<property name="exceptionMapper" ref="exceptionMapper" />
 		<property name="ozoneStatistics" ref="ozoneStatistics" />
+		<property name="adminService" ref="adminService" />
 	</bean>
 		
 	<bean id="exceptionMapper" class="com.tropo.server.exception.ExceptionMapper"/>

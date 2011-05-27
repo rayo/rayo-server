@@ -2,6 +2,7 @@ package com.tropo.server.jmx;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -84,8 +85,19 @@ public class Call {
 		return "";
 	}
 	
-	public String getHeaders() {
-		
+	public Map<String, String> getHeaders() {
+
+		Map<String, String> map = new HashMap<String, String>();
+		Iterator<String> it = call.getHeaderNames();
+		while (it.hasNext()) {
+			String header = it.next();
+			map.put(header, call.getHeader(header));
+		}
+		return map;
+	}
+	
+	public String getHeadersString() {
+
 		StringBuilder builder = new StringBuilder("[");
 		Iterator<String> it = call.getHeaderNames();
 		while (it.hasNext()) {
@@ -99,8 +111,12 @@ public class Call {
 		return builder.toString();
 	}
 	
+	public Map<String,Object> getAttributes() {
+		
+		return call.getAttributeMap();
+	}
 	
-	public String getAttributes() {
+	public String getAttributesString() {
 		
 		StringBuilder builder = new StringBuilder("[");
 		for (Map.Entry<String, Object> entry: call.getAttributeMap().entrySet()) {

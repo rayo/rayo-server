@@ -38,10 +38,22 @@
 			<version>1.6.1</version>
 			<scope>provided</scope>
 		</dependency>
+		<!-- JMX Management Console -->
+        <dependency>
+          <groupId>org.jolokia</groupId>
+          <artifactId>jolokia-core</artifactId>
+          <version>0.90</version>
+        </dependency>		
 	</dependencies>
-	
+	<!-- Maven repository hosting Jolokia -->
+	<repositories>
+      <repository>
+        <id>labs-consol-release</id>
+        <name>ConSol* Labs Repository (Releases)</name>
+        <url>http://labs.consol.de/maven/repository</url>
+      </repository>
+    </repositories>	
 	<build>
 	  <finalName>tropo2</finalName>
-  </build>
-  
+    </build>
 </project>

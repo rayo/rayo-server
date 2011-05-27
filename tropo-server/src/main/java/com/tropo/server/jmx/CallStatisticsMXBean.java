@@ -5,7 +5,7 @@ public interface CallStatisticsMXBean {
 
 	public long getCallsBusy();
 	public long getCallsAnswered();
-	public long getCallsHangedUp();
+	public long getCallsHungUp();
 	public long getCallsAccepted();
 	public long getCallsFailed();
 	public long getCallsRejected();
