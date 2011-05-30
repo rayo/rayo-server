@@ -64,8 +64,13 @@ public class AskHandler extends AbstractLocalVerbHandler<Ask> {
     // ================================================================================
 
     public void stop(boolean hangup) {
-        prompt.getOutput().stop();
-        prompt.getInput().stop();
+        if(hangup) {
+            complete(new AskCompleteEvent(model, Reason.NOMATCH));
+        }
+        else {
+            prompt.getOutput().stop();
+            prompt.getInput().stop();
+        }
     }
 
     // Moho Events

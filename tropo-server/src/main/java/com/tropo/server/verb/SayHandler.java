@@ -35,7 +35,12 @@ public class SayHandler extends AbstractLocalVerbHandler<Say> {
     // ================================================================================
 
     public void stop(boolean hangup) {
-        output.stop();
+        if(hangup) {
+            complete(new SayCompleteEvent(model, Reason.HANGUP));
+        }
+        else {
+            output.stop();
+        }
     }
 
     @Override

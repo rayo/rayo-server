@@ -93,7 +93,12 @@ public class TransferHandler extends AbstractLocalVerbHandler<Transfer> implemen
 
     @Override
     public synchronized void stop(boolean hangup) {
-        complete(Reason.STOPPED);
+        if(hangup) {
+            complete(Reason.HANGUP);
+        }
+        else {
+            complete(Reason.STOPPED);
+        }
     }
 
     private void stopDialing() {
