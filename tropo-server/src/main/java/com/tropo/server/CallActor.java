@@ -11,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
@@ -20,7 +19,6 @@ import com.tropo.core.AcceptCommand;
 import com.tropo.core.AnswerCommand;
 import com.tropo.core.AnswerEvent;
 import com.tropo.core.CallCommand;
-import com.tropo.core.CallException;
 import com.tropo.core.EndEvent;
 import com.tropo.core.EndEvent.Reason;
 import com.tropo.core.HangupCommand;
@@ -55,16 +53,24 @@ import com.voxeo.moho.utils.EventListener;
 
 public class CallActor extends ReflectiveActor implements Observer {
 
+    private enum Direction {
+        IN, OUT
+    }
+
     private static final Loggerf log = Loggerf.getLogger(CallActor.class);
 
     private Call call;
     private VerbManager verbManager;
     private CallStatistics callStatistics;
-    
+
+    // TODO: replace with Moho Call inspection when it becomes available
+    private Direction direction;
+    private boolean initialJoin = true;
+
     public CallActor(Call call) {
         this.call = call;
     }
-    
+
     // State
     // ================================================================================
 
@@ -83,7 +89,7 @@ public class CallActor extends ReflectiveActor implements Observer {
         end(Reason.ERROR);
         return true;
     }
-    
+
     // Outgoing Calls
     // ================================================================================
 
@@ -99,6 +105,7 @@ public class CallActor extends ReflectiveActor implements Observer {
     public void onOutgoingCall(Call mohoCall) throws Exception {
 
         this.call = mohoCall;
+        this.direction = Direction.OUT;
 
         try {
 
@@ -106,6 +113,7 @@ public class CallActor extends ReflectiveActor implements Observer {
             mohoListeners.add(new AutowiredEventListener(this));
 
             mohoCall.addObservers(new EventListener<Event<EventSource>>() {
+
                 public void onEvent(Event<EventSource> event) throws Exception {
                     publish(event);
                 }
@@ -123,6 +131,7 @@ public class CallActor extends ReflectiveActor implements Observer {
     public void onIncomingCall(Call mohoCall) throws Exception {
 
         this.call = mohoCall;
+        this.direction = Direction.IN;
 
         OfferEvent offer = new OfferEvent(myId());
         offer.setFrom(mohoCall.getInvitor().getURI());
@@ -181,14 +190,7 @@ public class CallActor extends ReflectiveActor implements Observer {
     public void answer(AnswerCommand message) {
         Map<String, String> headers = message.getHeaders();
         call.answer(headers);
-        try {
-            call.join().get();
-            callStatistics.callAnswered();
-        } catch (InterruptedException e) {
-            throw new CallException("Interrupted while joining media server [call=%s]", this, e);
-        } catch (ExecutionException e) {
-            throw new CallException("Failed to join to media server [call=%s]", this, e);
-        }
+        callStatistics.callAnswered();
     }
 
     @Message
@@ -224,10 +226,9 @@ public class CallActor extends ReflectiveActor implements Observer {
         assertion(handler != null, "Could not find verb [id=%s]", command.getVerbId());
         assertion(handler.isComplete() == false, "Verb is no longer running [id=%s]", command.getVerbId());
 
-        if(command instanceof StopCommand) {
+        if (command instanceof StopCommand) {
             handler.stop(false);
-        }
-        else {
+        } else {
             handler.onCommand(command);
         }
 
@@ -237,7 +238,7 @@ public class CallActor extends ReflectiveActor implements Observer {
     public VerbRef verb(final Verb verb) throws Exception {
 
         VerbFactory verbFactory = verbManager.getVerbFactory(verb.getClass());
-        
+
         assertion(verbFactory != null, "Could not find handler class for " + verb.getClass());
 
         // Generate Verb ID
@@ -249,7 +250,7 @@ public class CallActor extends ReflectiveActor implements Observer {
         verbHandler.setEventDispatcher(verbDispatcher);
 
         callStatistics.verbCreated();
-        
+
         AutowiredEventListener listener = new AutowiredEventListener(verbHandler);
         mohoListeners.add(listener);
 
@@ -287,12 +288,12 @@ public class CallActor extends ReflectiveActor implements Observer {
             }
 
             if (event instanceof VerbCompleteEvent) {
-                
+
                 unregisterVerb(event.getVerbId());
 
                 // If this is the last Verb to complete and the call is 
                 /// over then dispatch the pending end event
-                if(verbs.isEmpty() && pendingEndEvent != null) {
+                if (verbs.isEmpty() && pendingEndEvent != null) {
                     end(pendingEndEvent);
                 }
             }
@@ -306,61 +307,69 @@ public class CallActor extends ReflectiveActor implements Observer {
     public void onMohoEvent(Event<EventSource> event) throws Exception {
         for (AutowiredEventListener listener : mohoListeners) {
             listener.onEvent(event);
-        }        
+        }
     }
 
     @com.voxeo.moho.State
     public void onJoinComplete(JoinCompleteEvent event) throws Exception {
-        if(event.getSource().equals(call)) {
-            if (event.getCause() == JoinCompleteEvent.Cause.JOINED && event.getParticipant() == null) {
-                fire(new AnswerEvent(myId()));
-            }
+
+        // Very complicated. There should be an easier way to determine this.
+        // Basically, we need to fire an AnswerEvent if
+        //   - This is an outbound call 
+        //   - This is the first time we're successfully joined to the media server
+        if (event.getSource().equals(call) && 
+            initialJoin == true && direction == Direction.OUT && 
+            event.getCause() == JoinCompleteEvent.Cause.JOINED && 
+            event.getParticipant() == null) {
+
+            initialJoin = false;
+            fire(new AnswerEvent(myId()));
         }
     }
 
     @com.voxeo.moho.State
     public void onRing(com.voxeo.moho.event.RingEvent event) throws Exception {
-        if(event.getSource().equals(call)) {
+        if (event.getSource().equals(call)) {
             fire(new RingEvent(myId()));
         }
     }
 
     @com.voxeo.moho.State
     public void onCallComplete(CallCompleteEvent event) throws Exception {
-        if(event.getSource().equals(call)) {
+        if (event.getSource().equals(call)) {
             Reason reason = null;
             switch (event.getCause()) {
             case BUSY:
-            	callStatistics.callBusy();
+                callStatistics.callBusy();
                 reason = Reason.BUSY;
                 break;
             case CANCEL:
             case DISCONNECT:
             case NEAR_END_DISCONNECT:
-            	callStatistics.callHangedUp();
-            	reason = Reason.HANGUP;
+                callStatistics.callHangedUp();
+                reason = Reason.HANGUP;
                 break;
             case DECLINE:
             case FORBIDDEN:
-            	callStatistics.callRejected();
+                callStatistics.callRejected();
                 reason = Reason.REJECT;
                 break;
             case ERROR:
-            	callStatistics.callFailed();
+                callStatistics.callFailed();
                 reason = Reason.ERROR;
                 break;
             case TIMEOUT:
-            	callStatistics.callTimedout();
+                callStatistics.callTimedout();
                 reason = Reason.TIMEOUT;
                 break;
             default:
-            	callStatistics.callEndedUnknownReason();
+                callStatistics.callEndedUnknownReason();
                 throw new UnsupportedOperationException("Reason not handled: " + event.getCause());
             }
             if (reason == Reason.ERROR) {
-            	end(reason, event.getException());
+                end(reason, event.getException());
             } else {
-            	end(reason);
+                end(reason);
             }
         }
     }
@@ -371,33 +380,32 @@ public class CallActor extends ReflectiveActor implements Observer {
     private void end(Reason reason) {
         end(new EndEvent(myId(), reason));
     }
-    
+
     private void end(Reason reason, Exception exception) {
-    	
-    	String errorMessage = null;
-    	if (exception instanceof NegotiateException) {
-    		errorMessage = "Could not negotiate call";
-    	}
-    	
+
+        String errorMessage = null;
+        if (exception instanceof NegotiateException) {
+            errorMessage = "Could not negotiate call";
+        }
+
         end(new EndEvent(myId(), reason, errorMessage));
     }
-    
+
     private void end(EndEvent endEvent) {
-        
+
         // If the call ended in error then don't bother with a graceful
         // shutdown. Just send the EndEvent, stop the actor and make a best 
         // effort to end any active verbs.
-        if(endEvent.getReason() == Reason.ERROR || verbs.isEmpty()) {
+        if (endEvent.getReason() == Reason.ERROR || verbs.isEmpty()) {
             fire(endEvent);
             stop();
             call.disconnect();
-            for(VerbHandler<?> handler : verbs.values()) {
+            for (VerbHandler<?> handler : verbs.values()) {
                 handler.stop(false);
             }
-        }
-        else {
+        } else {
             log.info("Call ended with active verbs [%s]", verbs.toString());
-            for(VerbHandler<?> handler : verbs.values()) {
+            for (VerbHandler<?> handler : verbs.values()) {
                 handler.stop(true);
             }
             pendingEndEvent = endEvent;
@@ -440,21 +448,19 @@ public class CallActor extends ReflectiveActor implements Observer {
     @Override
     public String toString() {
 
-    	return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)    		
-    		.append("callId", call.getId())
-    		.toString();
+        return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE).append("callId", call.getId()).toString();
     }
-    
+
     public Collection<VerbHandler<?>> getVerbs() {
-    	
-    	return new ArrayList<VerbHandler<?>>(verbs.values());
+
+        return new ArrayList<VerbHandler<?>>(verbs.values());
     }
 
-	public CallStatistics getCallStatistics() {
-		return callStatistics;
-	}
+    public CallStatistics getCallStatistics() {
+        return callStatistics;
+    }
 
-	public void setCallStatistics(CallStatistics callStatistics) {
-		this.callStatistics = callStatistics;
-	}
+    public void setCallStatistics(CallStatistics callStatistics) {
+        this.callStatistics = callStatistics;
+    }
 }
