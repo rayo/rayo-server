@@ -1,14 +1,16 @@
 package com.tropo.core.verb;
 
+import java.util.List;
+
 import javax.validation.Valid;
 import javax.validation.constraints.AssertTrue;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
+import org.hibernate.validator.constraints.NotEmpty;
 import org.joda.time.Duration;
 
 import com.tropo.core.validation.Messages;
-import com.tropo.core.validation.ValidChoicesList;
 import com.tropo.core.validation.ValidRecognizer;
 
 public class Ask extends BaseVerb {
@@ -20,8 +22,9 @@ public class Ask extends BaseVerb {
     
     private boolean bargein = true;
 
-    @ValidChoicesList
-    private ChoicesList choices;
+    @Valid
+    @NotEmpty(message=Messages.MISSING_CHOICES)
+    private List<Choices> choices;
     
     private InputMode mode = InputMode.both;
     
@@ -56,11 +59,11 @@ public class Ask extends BaseVerb {
         this.bargein = bargein;
     }
 
-    public ChoicesList getChoices() {
+    public List<Choices> getChoices() {
         return choices;
     }
 
-    public void setChoices(ChoicesList choicesList) {
+    public void setChoices(List<Choices> choicesList) {
         this.choices = choicesList;
     }
 

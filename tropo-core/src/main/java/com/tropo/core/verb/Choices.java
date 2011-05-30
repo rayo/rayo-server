@@ -2,8 +2,12 @@ package com.tropo.core.verb;
 
 import java.net.URI;
 
+import javax.validation.constraints.AssertTrue;
+
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
+
+import com.tropo.core.validation.Messages;
 
 public class Choices {
 
@@ -46,6 +50,16 @@ public class Choices {
         this.content = text;
     }
 
+    @AssertTrue(message=Messages.MISSING_CHOICES_CONTENT_TYPE)
+    public boolean isContentsTypeSpecifiedWithInlineContents() {
+        return (content == null) || (content != null && contentType != null);
+    }
+
+    @AssertTrue(message=Messages.MISSING_CHOICES_CONTENT_OR_URL)
+    public boolean isContentsOrUrlSpecified() {
+        return (content != null  && uri==null) || 
+               (uri != null && content == null);
+    }
 
     @Override
     public String toString() {

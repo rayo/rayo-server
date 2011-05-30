@@ -1,6 +1,9 @@
 package com.tropo.core.xml.providers;
 
+import static com.voxeo.utils.Strings.isEmpty;
+
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.dom4j.Document;
@@ -11,51 +14,50 @@ import org.dom4j.QName;
 import com.tropo.core.verb.Ask;
 import com.tropo.core.verb.AskCompleteEvent;
 import com.tropo.core.verb.Choices;
-import com.tropo.core.verb.ChoicesList;
 
 public class AskProvider extends BaseProvider {
 
-	@Override
-	protected Object processElement(Element element) throws Exception {
-        
-		if (element.getName().equals("ask")) {
+    @Override
+    protected Object processElement(Element element) throws Exception {
+
+        if (element.getName().equals("ask")) {
             return buildAsk(element);
         } else if (element.getName().equals("complete")) {
             return buildCompleteCommand(element);
         }
-		return null;
-	}
-	    
-	private Object buildCompleteCommand(Element element) throws URISyntaxException {
-		
-		AskCompleteEvent askComplete = new AskCompleteEvent();
-		if (element.attributeValue("reason") != null) {
-			askComplete.setReason(AskCompleteEvent.Reason.valueOf(element.attributeValue("reason")));			
-		}
-		if (element.element("error") != null) {
-			askComplete.setErrorText(element.elementText("error"));
-		}
-		if (element.attributeValue("concept") != null) {
-			askComplete.setConcept(element.attributeValue("concept"));			
-		}
-		if (element.attributeValue("interpretation") != null) {
-			askComplete.setInterpretation(element.attributeValue("interpretation"));			
-		}
-		if (element.attributeValue("nlsml") != null) {
-			askComplete.setNlsml(element.attributeValue("nlsml"));			
-		}
-		if (element.attributeValue("confidence") != null) {
-			askComplete.setConfidence(toFloatConfidence(element.attributeValue("confidence")));			
-		}
-		if (element.attributeValue("tag") != null) {
-			askComplete.setTag(element.attributeValue("tag"));			
-		}
-		if (element.attributeValue("utterance") != null) {
-			askComplete.setUtterance(element.attributeValue("utterance"));			
-		}
-		
-		return askComplete;
-	}	
+        return null;
+    }
+
+    private Object buildCompleteCommand(Element element) throws URISyntaxException {
+
+        AskCompleteEvent askComplete = new AskCompleteEvent();
+        if (element.attributeValue("reason") != null) {
+            askComplete.setReason(AskCompleteEvent.Reason.valueOf(element.attributeValue("reason")));
+        }
+        if (element.element("error") != null) {
+            askComplete.setErrorText(element.elementText("error"));
+        }
+        if (element.attributeValue("concept") != null) {
+            askComplete.setConcept(element.attributeValue("concept"));
+        }
+        if (element.attributeValue("interpretation") != null) {
+            askComplete.setInterpretation(element.attributeValue("interpretation"));
+        }
+        if (element.attributeValue("nlsml") != null) {
+            askComplete.setNlsml(element.attributeValue("nlsml"));
+        }
+        if (element.attributeValue("confidence") != null) {
+            askComplete.setConfidence(toFloatConfidence(element.attributeValue("confidence")));
+        }
+        if (element.attributeValue("tag") != null) {
+            askComplete.setTag(element.attributeValue("tag"));
+        }
+        if (element.attributeValue("utterance") != null) {
+            askComplete.setUtterance(element.attributeValue("utterance"));
+        }
+
+        return askComplete;
+    }
 
     @SuppressWarnings("unchecked")
     private Object buildAsk(Element element) throws URISyntaxException {
@@ -71,9 +73,9 @@ public class AskProvider extends BaseProvider {
         if (root.attributeValue("mode") != null) {
             ask.setMode(loadInputMode(root));
         }
-        
+
         ask.setRecognizer(root.attributeValue("recognizer"));
-        
+
         if (root.attributeValue("terminator") != null) {
             ask.setTerminator(toTerminator(root.attributeValue("terminator")));
         }
@@ -81,23 +83,23 @@ public class AskProvider extends BaseProvider {
             ask.setTimeout(toTimeout(root.attributeValue("timeout")));
         }
         ask.setVoice(root.attributeValue("voice"));
-        
+
         Element promptElement = element.element("prompt");
-        if(promptElement != null) {
+        if (promptElement != null) {
             ask.setPrompt(extractSsml(promptElement));
         }
 
-        ChoicesList choices = new ChoicesList();
+        List<Choices> choices = new ArrayList<Choices>();
         List<Element> choicesElements = root.elements("choices");
         for (Element choiceElement : choicesElements) {
-        	String content = choiceElement.getText();
-        	if (content.equals("")) continue; // skip empty choices tag
             Choices choice = new Choices();
             choice.setContentType(choiceElement.attributeValue("content-type"));
             if (choiceElement.attributeValue("url") != null) {
                 choice.setUri(toURI(choiceElement.attributeValue("url")));
+            } else {
+                String content = isEmpty(choiceElement.getText(), (String) null);
+                choice.setContent(content);
             }
-            choice.setContent(content);
             choices.add(choice);
         }
         ask.setChoices(choices);
@@ -108,13 +110,13 @@ public class AskProvider extends BaseProvider {
     @Override
     protected void generateDocument(Object object, Document document) throws Exception {
 
-    	if (object instanceof Ask) {
+        if (object instanceof Ask) {
             createAsk(object, document);
         } else if (object instanceof AskCompleteEvent) {
             createAskCompleteEvent(object, document);
         }
     }
-	
+
     private Document createAsk(Object object, Document document) throws Exception {
 
         Ask ask = (Ask) object;
@@ -159,40 +161,40 @@ public class AskProvider extends BaseProvider {
 
         return document;
     }
-    
+
     private Document createAskCompleteEvent(Object object, Document document) throws Exception {
 
-		AskCompleteEvent askComplete = (AskCompleteEvent)object;
-		Element root = document.addElement(new QName("complete", new Namespace("","urn:xmpp:ozone:ask:1")));
-		if (askComplete.getReason() != null) {
-			root.addAttribute("reason", askComplete.getReason().toString());
-		}
-		if (askComplete.getConcept() != null) {
-			root.addAttribute("concept", askComplete.getConcept());
-		}
-		if (askComplete.getInterpretation() != null) {
-			root.addAttribute("interpretation", askComplete.getInterpretation());
-		}
-		if (askComplete.getNlsml() != null) {
-			root.addAttribute("nlsml",askComplete.getNlsml());
-		}
-		root.addAttribute("confidence", String.valueOf(askComplete.getConfidence()));
-		if (askComplete.getTag() != null) {
-			root.addAttribute("tag", askComplete.getTag());
-		}
-		if (askComplete.getUtterance() != null) {
-			root.addAttribute("utterance", askComplete.getUtterance());
-		}
-		if (askComplete.getErrorText() != null) {
-			root.addElement("error").setText(askComplete.getErrorText());
-		}
-		return document;
+        AskCompleteEvent askComplete = (AskCompleteEvent) object;
+        Element root = document.addElement(new QName("complete", new Namespace("", "urn:xmpp:ozone:ask:1")));
+        if (askComplete.getReason() != null) {
+            root.addAttribute("reason", askComplete.getReason().toString());
+        }
+        if (askComplete.getConcept() != null) {
+            root.addAttribute("concept", askComplete.getConcept());
+        }
+        if (askComplete.getInterpretation() != null) {
+            root.addAttribute("interpretation", askComplete.getInterpretation());
+        }
+        if (askComplete.getNlsml() != null) {
+            root.addAttribute("nlsml", askComplete.getNlsml());
+        }
+        root.addAttribute("confidence", String.valueOf(askComplete.getConfidence()));
+        if (askComplete.getTag() != null) {
+            root.addAttribute("tag", askComplete.getTag());
+        }
+        if (askComplete.getUtterance() != null) {
+            root.addAttribute("utterance", askComplete.getUtterance());
+        }
+        if (askComplete.getErrorText() != null) {
+            root.addElement("error").setText(askComplete.getErrorText());
+        }
+        return document;
     }
 
-	@Override
-	public boolean handles(Class<?> clazz) {
+    @Override
+    public boolean handles(Class<?> clazz) {
 
-		//TODO: Refactor out to spring configuration and put everything in the base provider class
-		return clazz == Ask.class ||
-			   clazz == AskCompleteEvent.class;
-	}}
+        //TODO: Refactor out to spring configuration and put everything in the base provider class
+        return clazz == Ask.class || clazz == AskCompleteEvent.class;
+    }
+}

@@ -83,9 +83,9 @@ class ValidationTest {
 	}
 	
 	@Test
-	public void validateAskChoicesEmpty() {
+	public void validateAskMissingChoice() {
 				
-		def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" voice=\"allison\"><choices/><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
+		def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" voice=\"allison\"><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
 		
 		def errorMapping = assertValidationException(ask)
 		assertNotNull errorMapping
@@ -93,19 +93,31 @@ class ValidationTest {
 		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
 		assertEquals errorMapping.text, Messages.MISSING_CHOICES
 	}
-	
-	@Test
-	public void validateAskChoicesInvalidUri() {
-				
-		def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" voice=\"allison\"><choices/><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
-		
-		def errorMapping = assertValidationException(ask)
-		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
-		assertEquals errorMapping.text, Messages.MISSING_CHOICES
-	}
-	
+
+    @Test
+    public void validateAskInvalidChoice() {
+                
+        def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" voice=\"allison\"><choices/><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
+        
+        def errorMapping = assertValidationException(ask)
+        assertNotNull errorMapping
+        assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+        assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+        assertEquals errorMapping.text, Messages.MISSING_CHOICES_CONTENT_OR_URL
+    }
+
+    @Test
+    public void validateAskMissingContentType() {
+                
+        def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" voice=\"allison\"><choices>bling</choices><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
+        
+        def errorMapping = assertValidationException(ask)
+        assertNotNull errorMapping
+        assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+        assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+        assertEquals errorMapping.text, Messages.MISSING_CHOICES_CONTENT_TYPE
+    }
+
 	@Test
 	public void validateAskInvalidChoicesURI() {
 				
@@ -157,7 +169,7 @@ class ValidationTest {
 	@Test
 	public void validateAskInvalidConfidenceRange() {
 				
-		def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" min-confidence="1.2" voice=\"allison\"><choices>sales,support</choices><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
+		def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" min-confidence="1.2" voice=\"allison\"><choices content-type="application/grammar+voxeo">sales,support</choices><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
 		
 		def errorMapping = assertValidationException(ask)
 		assertNotNull errorMapping
@@ -169,7 +181,7 @@ class ValidationTest {
 	@Test
 	public void validateAskInvalidConfidenceNegative() {
 				
-		def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" min-confidence="-1.0" voice=\"allison\"><choices>sales,support</choices><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
+		def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" min-confidence="-1.0" voice=\"allison\"><choices content-type="application/grammar+voxeo">sales,support</choices><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
 		
 		def errorMapping = assertValidationException(ask)
 		assertNotNull errorMapping
@@ -181,7 +193,7 @@ class ValidationTest {
 	@Test
 	public void validateAskInvalidTerminator() {
 				
-		def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" terminator="abcd" voice=\"allison\"><choices>sales,support</choices><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
+		def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" terminator="abcd" voice=\"allison\"><choices content-type="application/grammar+voxeo">sales,support</choices><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
 		
 		def errorMapping = assertValidationException(ask)
 		assertNotNull errorMapping
@@ -193,7 +205,7 @@ class ValidationTest {
 	@Test
 	public void validateAskValid() {
 				
-		def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" recognizer="en-us" voice=\"allison\"><choices>sales,support</choices><prompt><speak xmlns=\"\">Choose your department.</speak></prompt></ask>""")		
+		def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" recognizer="en-us" voice=\"allison\"><choices content-type="application/grammar+voxeo">sales,support</choices><prompt><speak xmlns=\"\">Choose your department.</speak></prompt></ask>""")		
 		assertNotNull fromXML(ask)
 	}
 	
