@@ -90,7 +90,7 @@ public abstract class ReflectiveActor implements Actor, Callback<Object> {
             }
 
         } catch (Exception e) {
-            log.error("Uncaught exception processing command", e);
+            log.error("Exception processing command", e);
             if(!handleException(e)) {
                 stop();
             }
@@ -202,7 +202,7 @@ public abstract class ReflectiveActor implements Actor, Callback<Object> {
                 try {
                     handler.handle(message);
                 } catch (Exception e) {
-                    log.error("Uncaught exception in event handler [event=%s]", message, e);
+                    log.error("Exception in event handler [event=%s]", message, e);
                 }
             }
         }
