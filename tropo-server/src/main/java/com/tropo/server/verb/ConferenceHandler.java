@@ -58,7 +58,7 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference> impl
         // Create or get Moho Conference
         mohoConference = call.getApplicationContext().getConferenceManager().createConference(model.getRoomName(), Integer.MAX_VALUE, null, null);
 
-        synchronized (mohoConference) {
+        synchronized (mohoConference.getId()) {
 
             // If this is the first participant then we should configure the controller
             if (mohoConference.getController() == null) {
@@ -126,7 +126,7 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference> impl
 
     public synchronized void setHold(boolean hold) {
 
-        synchronized (mohoConference) {
+        synchronized (mohoConference.getId()) {
             if (hold) {
                 stopMixing();
                 startMusic();
@@ -147,7 +147,7 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference> impl
     }
 
     private List<Participant> getWaitList() {
-        synchronized (mohoConference) {
+        synchronized (mohoConference.getId()) {
             List<Participant> waitList = mohoConference.getAttribute(WAIT_LIST_KEY);
             if(waitList == null) {
                 waitList = new CopyOnWriteArrayList<Participant>();
@@ -158,13 +158,13 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference> impl
     }
 
     private void addCallToWaitList() {
-        synchronized (mohoConference) {
+        synchronized (mohoConference.getId()) {
             getWaitList().add(call);
         }
     }
 
     private void removeCallFromWaitList() {
-        synchronized (mohoConference) {
+        synchronized (mohoConference.getId()) {
             List<Participant> waitList = mohoConference.getAttribute(WAIT_LIST_KEY);
             if(waitList != null) {
                 waitList.remove(call);
@@ -215,7 +215,7 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference> impl
      */
     private void preStop(boolean hangup) {
         
-        synchronized (mohoConference) {
+        synchronized (mohoConference.getId()) {
             
             call.setAttribute(getMohoParticipantAttributeKey(), null);
             removeCallFromWaitList();
@@ -244,7 +244,7 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference> impl
     }    
 
     private boolean isLastModerator() {
-        synchronized (mohoConference) {
+        synchronized (mohoConference.getId()) {
             for (com.voxeo.moho.Participant mixerParticipant : mohoConference.getParticipants()) {
                 ParticipantController controller = (ParticipantController) mixerParticipant.getAttribute(getMohoParticipantAttributeKey());
                 if(controller.isModerator()) {
