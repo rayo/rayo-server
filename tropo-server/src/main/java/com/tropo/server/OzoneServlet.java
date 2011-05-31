@@ -309,11 +309,12 @@ public class OzoneServlet extends XmppServlet {
                 }
             }
 
-        } catch (ValidationException ve) {
-        	ozoneStatistics.validationError();
         }
         catch (Exception e) {
-            log.error("Uncaught exception while processing IQ request", e);
+            if(e instanceof ValidationException) {
+                ozoneStatistics.validationError();
+            }
+            log.error("Exception processing IQ request", e);
             sendIqError(request, e);
         }
 
