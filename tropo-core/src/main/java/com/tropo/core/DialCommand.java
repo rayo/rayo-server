@@ -15,7 +15,9 @@ public class DialCommand implements ServerCommand {
     @NotNull(message=Messages.MISSING_TO)
     private URI to;
     
+    @NotNull(message=Messages.MISSING_FROM)
     private URI from;
+    
     private Map<String, String> headers;
 
     public URI getTo() {

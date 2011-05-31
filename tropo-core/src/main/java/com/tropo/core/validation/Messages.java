@@ -5,7 +5,8 @@ public class Messages {
 	public static final String MISSING_PROMPT_ITEMS = "You need to send at least an audio or SSML item.";
 	public static final String MISSING_CHOICES = "You need to provide at least a valid choice element.";
 	public static final String INVALID_RECOGNIZER = "Invalid recognizer.";
-	public static final String MISSING_TO = "You need to provide at least an URI as a 'to' argument.";
+	public static final String MISSING_TO = "Missing required attribute 'to'";
+    public static final String MISSING_FROM = "Missing required attribute 'from'";
 	public static final String MISSING_ROOM_NAME = "Missing room name.";
 	public static final String MISSING_CHOICES_CONTENT_OR_URL = "For choices, either 'url' or inline choices text is required (not both)";
 	public static final String MISSING_CHOICES_CONTENT_TYPE = "'content-type' is required when specifying choices contents inline";
