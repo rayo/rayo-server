@@ -134,11 +134,6 @@ public class OzoneServlet extends XmppServlet {
 
     public void event(CallEvent event) throws IOException {
 
-    	if (adminService.isQuiesceMode()) {
-            log.debug("Quiesce Mode ON. Dropping event:: %s", event);
-            return;
-    	}
-    	
         // Send event to all registered JIDs
         // TODO: this should be pluggable
         for (XmppSession session : clientSessions.values()) {
@@ -179,19 +174,11 @@ public class OzoneServlet extends XmppServlet {
     protected void doMessage(XmppServletStanzaRequest req) throws ServletException, IOException {
 
     	ozoneStatistics.messageStanzaReceived();
-    	if (adminService.isQuiesceMode()) {
-            log.debug("Quiesce Mode ON. Dropping Message Stanza:: %s", req);
-            return;
-    	}    	
     }
 
     protected void doPresence(XmppServletStanzaRequest req) throws ServletException, IOException {
 
     	ozoneStatistics.presenceStanzaReceived();
-    	if (adminService.isQuiesceMode()) {
-            log.debug("Quiesce Mode ON. Dropping Presence Stanza:: %s", req);
-            return;
-    	}
     }
 
     // Commands: Client -> Server
@@ -202,12 +189,7 @@ public class OzoneServlet extends XmppServlet {
 
         WIRE.debug("%s :: %s", request.getElement().asXML(), request.getSession().getId());
     	ozoneStatistics.iqReceived();
-    	if (adminService.isQuiesceMode()) {
-            log.debug("Quiesce Mode ON. Dropping message: %s :: %s", request.getElement().asXML(), request.getSession().getId());
 
-    		sendIqError(request, XmppStanzaError.SERVICE_UNAVAILABLE_CONDITION);
-    		return;
-    	}
     	try {
             if (request.getSession().getSessionType() == XmppSession.SessionType.CLIENT) {
 
@@ -241,6 +223,12 @@ public class OzoneServlet extends XmppServlet {
 
                     // Handle outbound 'dial' command
                     if (command instanceof DialCommand) {
+                    	if (adminService.isQuiesceMode()) {
+                            log.debug("Quiesce Mode ON. Dropping incoming call: %s :: %s", request.getElement().asXML(), request.getSession().getId());
+
+                    		sendIqError(request, XmppStanzaError.SERVICE_UNAVAILABLE_CONDITION, XmppStanzaError.Type_WAIT);
+                    		return;
+                    	}                    	
                         callManager.publish(new Request(command, new ResponseHandler() {
                             public void handle(Response response) throws Exception {
                                 if (response.isSuccess()) {
@@ -325,10 +313,6 @@ public class OzoneServlet extends XmppServlet {
 
         WIRE.debug("%s :: %s", request.getElement().asXML(), request.getSession().getId());
         ozoneStatistics.iqResponse();
-    	if (adminService.isQuiesceMode()) {    		
-            log.debug("Quiesce Mode ON. Dropping message: %s :: %s", request.getElement().asXML(), request.getSession().getId());
-    		return;
-    	}
     	
         XmppStanzaError error = request.getError();
         if (error != null) {
@@ -357,11 +341,16 @@ public class OzoneServlet extends XmppServlet {
     }
 
     private void sendIqError(XmppServletIQRequest request, String error) throws IOException {
-        sendIqError(request, error, null);
+        sendIqError(request, error, XmppStanzaError.Type_CANCEL, null);
     }
 
-    private void sendIqError(XmppServletIQRequest request, String error, Element contents) throws IOException {
-        XmppServletIQResponse response = request.createIQErrorResponse(XmppStanzaError.Type_CANCEL, error, null, null, null);
+    private void sendIqError(XmppServletIQRequest request, String error, String type) throws IOException {
+    	
+        sendIqError(request, error, type, null);
+    }
+    
+    private void sendIqError(XmppServletIQRequest request, String error, String type, Element contents) throws IOException {
+        XmppServletIQResponse response = request.createIQErrorResponse(type, error, null, null, null);
         if (contents != null) {
             response.getElement().add(contents);
         }
