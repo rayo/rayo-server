@@ -3,11 +3,12 @@ package com.tropo.core;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
-public class AnswerEvent extends AbstractCallEvent {
+public class RingingEvent extends AbstractCallEvent {
 
-    public AnswerEvent(String callId) {
+    public RingingEvent(String callId) {
         super(callId);
     }
+
 
     @Override
     public String toString() {

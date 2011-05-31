@@ -17,7 +17,7 @@ import org.apache.commons.lang.builder.ToStringStyle;
 
 import com.tropo.core.AcceptCommand;
 import com.tropo.core.AnswerCommand;
-import com.tropo.core.AnswerEvent;
+import com.tropo.core.AnsweredEvent;
 import com.tropo.core.CallCommand;
 import com.tropo.core.EndEvent;
 import com.tropo.core.EndEvent.Reason;
@@ -25,7 +25,7 @@ import com.tropo.core.HangupCommand;
 import com.tropo.core.OfferEvent;
 import com.tropo.core.RedirectCommand;
 import com.tropo.core.RejectCommand;
-import com.tropo.core.RingEvent;
+import com.tropo.core.RingingEvent;
 import com.tropo.core.verb.StopCommand;
 import com.tropo.core.verb.Verb;
 import com.tropo.core.verb.VerbCommand;
@@ -199,7 +199,7 @@ public class CallActor extends ReflectiveActor implements Observer {
         case BUSY:
             call.reject(SignalEvent.Reason.BUSY, message.getHeaders());
             break;
-        case DECLINED:
+        case DECLINE:
             call.reject(SignalEvent.Reason.DECLINE, message.getHeaders());
             break;
         case ERROR:
@@ -323,14 +323,14 @@ public class CallActor extends ReflectiveActor implements Observer {
             event.getParticipant() == null) {
 
             initialJoin = false;
-            fire(new AnswerEvent(myId()));
+            fire(new AnsweredEvent(myId()));
         }
     }
 
     @com.voxeo.moho.State
     public void onRing(com.voxeo.moho.event.RingEvent event) throws Exception {
-        if (event.getSource().equals(call)) {
-            fire(new RingEvent(myId()));
+        if(event.getSource().equals(call)) {
+            fire(new RingingEvent(myId()));
         }
     }
 

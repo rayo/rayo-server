@@ -53,6 +53,8 @@
 		<property name="namespaces">
 			<list>
 				<value>urn:xmpp:ozone:1</value>
+                <value>urn:xmpp:ozone:ext:1</value>
+                <value>urn:xmpp:ozone:ext:complete:1</value>
 			</list>
 		</property>		
 	</bean>
@@ -61,6 +63,7 @@
 		<property name="namespaces">
 			<list>
 				<value>urn:xmpp:ozone:say:1</value>
+                <value>urn:xmpp:ozone:say:complete:1</value>
 			</list>
 		</property>		
 	</bean>
@@ -69,6 +72,7 @@
 		<property name="namespaces">
 			<list>
 				<value>urn:xmpp:ozone:ask:1</value>
+                <value>urn:xmpp:ozone:ask:complete:1</value>
 			</list>
 		</property>		
 	</bean>
@@ -77,6 +81,7 @@
 		<property name="namespaces">
 			<list>
 				<value>urn:xmpp:ozone:transfer:1</value>
+                <value>urn:xmpp:ozone:transfer:complete:1</value>
 			</list>
 		</property>		
 	</bean>
@@ -85,6 +90,7 @@
 		<property name="namespaces">
 			<list>
 				<value>urn:xmpp:ozone:conference:1</value>
+                <value>urn:xmpp:ozone:conference:complete:1</value>
 			</list>
 		</property>		
 	</bean>				

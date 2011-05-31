@@ -16,6 +16,9 @@ import com.tropo.core.verb.Ssml;
 
 public class ConferenceProvider extends BaseProvider {
 
+    private static final Namespace NAMESPACE = new Namespace("", "urn:xmpp:ozone:conference:1");
+    private static final Namespace COMPLETE_NAMESPACE = new Namespace("", "urn:xmpp:ozone:conference:complete:1");
+
     // XML -> Object
     // ================================================================================
 
@@ -27,9 +30,9 @@ public class ConferenceProvider extends BaseProvider {
         else if (element.getName().equals("kick")) {
             return buildKick(element);
         }
-        else if (element.getName().equals("complete")) {
-            return buildCompleteCommand(element);
-        }
+//        else if (element.getName().equals("complete")) {
+//            return buildCompleteCommand(element);
+//        }
         else if (element.getName().equals("on-hold")) {
             return new OnHoldEvent();
         }
@@ -81,21 +84,23 @@ public class ConferenceProvider extends BaseProvider {
         return command;
     }
 
-    private Object buildCompleteCommand(Element element) throws URISyntaxException {
+    // This will eventually need to be called from the OzoneProvider since <complete>is now under the main ozone namespace
 
-        ConferenceCompleteEvent conferenceComplete = new ConferenceCompleteEvent();
-        if (element.attributeValue("reason") != null) {
-            conferenceComplete.setReason(ConferenceCompleteEvent.Reason.valueOf(element.attributeValue("reason")));
-        }
-        if (element.element("error") != null) {
-            conferenceComplete.setErrorText(element.elementText("error"));
-        }
-        if(element.element("kick") != null) {
-            conferenceComplete.setKickReason(element.elementText("kick"));
-        }
-
-        return conferenceComplete;
-    }
+    //private Object buildCompleteCommand(Element element) throws URISyntaxException {
+    //
+    //    ConferenceCompleteEvent conferenceComplete = new ConferenceCompleteEvent();
+    //    if (element.attributeValue("reason") != null) {
+    //        conferenceComplete.setReason(ConferenceCompleteEvent.Reason.valueOf(element.attributeValue("reason")));
+    //    }
+    //    if (element.element("error") != null) {
+    //        conferenceComplete.setErrorText(element.elementText("error"));
+    //    }
+    //    if(element.element("kick") != null) {
+    //        conferenceComplete.setKickReason(element.elementText("kick"));
+    //    }
+    //
+    //    return conferenceComplete;
+    //}
 
     // Object -> XML
     // ================================================================================
@@ -107,7 +112,7 @@ public class ConferenceProvider extends BaseProvider {
             createConference(object, document);
         }
         else if (object instanceof ConferenceCompleteEvent) {
-            createConferenceCompleteEvent(object, document);
+            createConferenceCompleteEvent((ConferenceCompleteEvent)object, document);
         }
         else if (object instanceof KickCommand) {
             createKick((KickCommand) object, document);
@@ -123,7 +128,7 @@ public class ConferenceProvider extends BaseProvider {
     private void createConference(Object object, Document document) throws Exception {
 
         Conference conference = (Conference) object;
-        Element root = document.addElement(new QName("conference", new Namespace("", "urn:xmpp:ozone:conference:1")));
+        Element root = document.addElement(new QName("conference", NAMESPACE));
 
         root.addAttribute("name", conference.getRoomName());
         root.addAttribute("mute", String.valueOf(conference.isMute()));
@@ -146,37 +151,29 @@ public class ConferenceProvider extends BaseProvider {
 
     }
 
-    private void createConferenceCompleteEvent(Object object, Document document) throws Exception {
+    private void createConferenceCompleteEvent(ConferenceCompleteEvent event, Document document) throws Exception {
 
-        ConferenceCompleteEvent conferenceComplete = (ConferenceCompleteEvent) object;
-        Element root = document.addElement(new QName("complete", new Namespace("", "urn:xmpp:ozone:conference:1")));
+        Element reasonElement = addCompleteElement(document, event, COMPLETE_NAMESPACE);
 
-        if (conferenceComplete.getReason() != null) {
-            root.addAttribute("reason", conferenceComplete.getReason().toString());
-        }
-
-        if (conferenceComplete.getErrorText() != null) {
-            root.addElement("error").setText(conferenceComplete.getErrorText());
-        }
-        
-        if(conferenceComplete.getKickReason() != null) {
-            root.addElement("kick").setText(conferenceComplete.getKickReason());
+        // If Kick set reason
+        if(event.getKickReason() != null) {
+            reasonElement.setText(event.getKickReason());
         }
     }
 
     private void createKick(KickCommand command, Document document) throws Exception {
-        Element element = document.addElement(new QName("kick", new Namespace("", "urn:xmpp:ozone:conference:1")));
+        Element element = document.addElement(new QName("kick", NAMESPACE));
         if (command.getReason() != null) {
             element.setText(command.getReason());
         }
     }
 
     private void createOnHoldEvent(Object object, Document document) {
-        document.addElement(new QName("on-hold", new Namespace("", "urn:xmpp:ozone:conference:1")));
+        document.addElement(new QName("on-hold", NAMESPACE));
     }
     
     private void createOffHoldEvent(Object object, Document document) {
-        document.addElement(new QName("off-hold", new Namespace("", "urn:xmpp:ozone:conference:1")));
+        document.addElement(new QName("off-hold", NAMESPACE));
     }
     
     @Override

@@ -70,11 +70,22 @@ public class DefaultXmlProviderManager implements XmlProviderManager {
     @Override
     public void register(XmlProvider provider) {
         providers.add(provider);
+        provider.setManager(this);
     }
 
     @Override
     public void unregister(XmlProvider provider) {
         providers.remove(provider);
+    }
+
+    @Override
+    public XmlProviderManager getManager() {
+        return this;
+    }
+
+    @Override
+    public void setManager(XmlProviderManager manager) {
+        throw new UnsupportedOperationException("This is already a root manager");
     }
 
 }

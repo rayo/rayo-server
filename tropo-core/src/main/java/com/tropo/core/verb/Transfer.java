@@ -15,8 +15,6 @@ import com.tropo.core.validation.Messages;
 
 public class Transfer extends BaseVerb {
 
-    private String voice;
-
     @Valid
     private Ssml ringbackTone;
 
@@ -24,18 +22,10 @@ public class Transfer extends BaseVerb {
     private List<URI> to;
     
     private URI from;
-    private Duration timeout = new Duration(30000);
     private boolean answerOnMedia;
     private Character terminator = '#';
     private Map<String, String> headers;
-
-    public String getVoice() {
-        return voice;
-    }
-
-    public void setVoice(String voice) {
-        this.voice = voice;
-    }
+    private Duration timeout = new Duration(30000);
 
     public Ssml getRingbackTone() {
         return ringbackTone;
@@ -105,7 +95,6 @@ public class Transfer extends BaseVerb {
     		.append("answerOnMedia", answerOnMedia)
     		.append("terminator", terminator)
     		.append("ringbackTone",ringbackTone)
-    		.append("voice",voice)
     		.toString();
     }
 }

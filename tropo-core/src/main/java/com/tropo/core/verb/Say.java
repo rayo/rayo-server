@@ -10,19 +10,9 @@ public class Say extends BaseVerb {
 	
     public static final String MISSING_PROMPT = "Nothing to do";
     
-    private String voice; 
-    
     @Valid
     @NotNull(message=Say.MISSING_PROMPT)
     private Ssml prompt;
-
-    public String getVoice() {
-        return voice;
-    }
-
-    public void setVoice(String voice) {
-        this.voice = voice;
-    }
 
     public Ssml getPrompt() {
 		return prompt;
@@ -39,7 +29,6 @@ public class Say extends BaseVerb {
     		.append("callId", getCallId())
     		.append("verbId", getVerbId())
     		.append("prompt",prompt)
-    		.append("voice",voice)
     		.toString();
     }
 }

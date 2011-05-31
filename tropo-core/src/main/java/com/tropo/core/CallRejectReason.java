@@ -2,7 +2,7 @@ package com.tropo.core;
 
 public enum CallRejectReason {
 
-    DECLINED(603), 
+    DECLINE(603), 
     BUSY(486), 
     ERROR(500);
 

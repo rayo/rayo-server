@@ -12,8 +12,9 @@ public class Messages {
 	public static final String MISSING_CHOICES_CONTENT_TYPE = "'content-type' is required when specifying choices contents inline";
 	public static final String MISSING_SSML = "Missing SSML content.";
 	public static final String MISSING_DESTINATION = "Missing destination.";
-	
-	public static final String INVALID_INPUT_MODE = "Invalid input mode.";
+    public static final String MISSING_COMPLETE_REASON = "Complete event with no reason!";
+
+    public static final String INVALID_INPUT_MODE = "Invalid input mode.";
 	public static final String INVALID_URI = "You have submitted an invalid URI.";
 	public static final String INVALID_BOOLEAN = "You have submitted an invalid boolean value.";
 	public static final String INVALID_TIMEOUT = "Invalid timeout specified.";
@@ -21,7 +22,6 @@ public class Messages {
 	public static final String INVALID_TERMINATOR = "Invalid terminator character.";
 	public static final String INVALID_CONFIDENCE_RANGE = "Confidence must be a value between 0 and 1.";
 	public static final String INVALID_REASON = "Invalid reason";
-	
 	
 	public static final String UNKNOWN_NAMESPACE_ELEMENT = "Could not find the element on namespace.";
 

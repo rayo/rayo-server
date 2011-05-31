@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+    targetNamespace="urn:xmpp:ozone:transfer:complete:1"
+    xmlns:tns="urn:xmpp:ozone:transfer:complete:1" 
+    elementFormDefault="qualified">
+
+    <!-- Transfer timed out -->
+    <element name="timeout" type="tns:empty" />
+
+    <!-- Far end was busy -->
+    <element name="busy" type="tns:empty" />
+
+    <!-- Far end rejected -->
+    <element name="reject" type="tns:empty" />
+
+    <!-- Terminator -->
+    <element name="terminator" type="tns:empty" />
+    
+    <!-- Utility: Empty Type -->
+    <simpleType name="empty">
+        <restriction base="string">
+            <enumeration value='' />
+        </restriction>
+    </simpleType>    
+    
+</schema>

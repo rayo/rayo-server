@@ -90,7 +90,7 @@ public abstract class ReflectiveActor implements Actor, Callback<Object> {
             }
 
         } catch (Exception e) {
-            log.error("Exception processing command", e);
+            log.error("Exception while processing command", e);
             if(!handleException(e)) {
                 stop();
             }

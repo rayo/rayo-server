@@ -10,7 +10,7 @@ import org.apache.commons.lang.builder.ToStringStyle;
 public class RejectCommand extends AbstractCallCommand {
 
     @NotNull
-    private CallRejectReason reason = CallRejectReason.DECLINED;
+    private CallRejectReason reason = CallRejectReason.DECLINE;
     
     private Map<String, String> headers;
 

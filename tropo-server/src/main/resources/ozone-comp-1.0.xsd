@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+	targetNamespace="urn:xmpp:ozone:ext:1" 
+	xmlns:tns="urn:xmpp:ozone:ext:1" 
+	elementFormDefault="qualified">
+
+    <!-- Stop Command -->
+    <element name="stop" type="tns:empty" />
+
+    <!-- Complete Event -->
+    <element name="complete" type="tns:completeEvent" />
+    <complexType name="completeEvent" mixed="true">
+        <sequence>
+            <choice minOccurs="1" maxOccurs="1">
+                <any />
+            </choice>
+        </sequence>
+    </complexType>
+
+    <!-- Utility: Empty Type -->
+    <simpleType name="empty">
+        <restriction base="string">
+            <enumeration value='' />
+        </restriction>
+    </simpleType>
+
+</schema>

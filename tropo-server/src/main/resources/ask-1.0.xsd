@@ -2,54 +2,44 @@
 <schema xmlns="http://www.w3.org/2001/XMLSchema" 
 	targetNamespace="urn:xmpp:ozone:ask:1"
 	xmlns:tns="urn:xmpp:ozone:ask:1" 
+    xmlns:util="urn:xmpp:ozone:util:1"
 	elementFormDefault="qualified">
 
-	<element name="ask" type="tns:askType" />
+    <!-- Import SSML Types -->
+    <import namespace="urn:xmpp:ozone:util:1" schemaLocation="ozone-util-1.0.xsd" />
 
+    <!-- Main Componenet -->
+	<element name="ask" type="tns:askType" />
 	<complexType name="askType">
 		<sequence>
-			<element name="prompt" type="tns:promptItemsType" />
-			<element name="choices" type="tns:choicesType" />
+			<element name="prompt" type="util:ssmlType" minOccurs="0" maxOccurs="1" />
+			<element name="choices" type="tns:choicesType" minOccurs="1" maxOccurs="unbounded" />
 		</sequence>
-		<attribute name="bargein" type="boolean" />
-		<attribute name="min-confidence" type="tns:percentageType" />
-		<attribute name="mode" type="tns:choicesModeType" />
-		<attribute name="recognizer" type="string" />
-		<attribute name="voice" type="string" />
-		<attribute name="terminator" type="string" />		
-		<attribute name="timeout" type="float" />		
-	</complexType>
-
-	<!-- Utility Types -->
-
-	<complexType name="promptItemsType">
-		<choice minOccurs="1" maxOccurs="unbounded">
-			<element name="audio" type="tns:audioReferenceType" />
-			<any namespace="http://www.w3.org/2001/10/synthesis" />
-		</choice>
-	</complexType>
-
-	<complexType name="audioReferenceType">
-		<attribute name="url" type="anyURI" />
+		<attribute name="bargein" type="boolean" use="optional" />
+		<attribute name="min-confidence" type="tns:confidenceType" use="optional" />
+		<attribute name="mode" type="tns:choicesModeType" use="optional" />
+		<attribute name="recognizer" type="string" use="optional" />
+		<attribute name="terminator" type="string" use="optional" />		
+		<attribute name="timeout" type="float" use="optional" />		
 	</complexType>
 
 	<complexType name="choicesType" mixed="true">
 		<attribute name="content-type" type="string" />
-		<attribute name="url" type="anyURI" />
+		<attribute name="url" type="anyURI" use="optional" />
 	</complexType>
 	
-	<simpleType name="percentageType">
-		<restriction base="int">
+	<simpleType name="confidenceType">
+		<restriction base="float">
 			<minInclusive value="0" />
-			<maxInclusive value="100" />
+			<maxInclusive value="1" />
 		</restriction>
 	</simpleType>
 
 	<simpleType name="choicesModeType">
 		<restriction base="NCName">
-			<enumeration value="DTMF" />
-			<enumeration value="SPEECH" />
-			<enumeration value="ANY" />
+			<enumeration value="dtmf" />
+			<enumeration value="speech" />
+			<enumeration value="any" />
 		</restriction>
 	</simpleType>
 	

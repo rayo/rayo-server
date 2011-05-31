@@ -14,6 +14,8 @@ import com.tropo.core.verb.Ssml;
 import com.tropo.core.verb.Transfer;
 import com.tropo.core.verb.TransferCompleteEvent;
 import com.tropo.core.verb.TransferCompleteEvent.Reason;
+import com.tropo.core.verb.VerbCompleteEvent;
+import com.tropo.core.verb.VerbCompleteReason;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.Call;
 import com.voxeo.moho.CallableEndpoint;
@@ -57,7 +59,7 @@ public class TransferHandler extends AbstractLocalVerbHandler<Transfer> implemen
         if(ringbackSsml != null) {
             OutputCommand outputCommand = output(ringbackSsml);
             outputCommand.setBargein(false);
-            outputCommand.setVoiceName(model.getVoice());
+            outputCommand.setVoiceName(ringbackSsml.getVoice());
             ringBack = media.prompt(outputCommand, null, 30);
         }
 
@@ -94,10 +96,10 @@ public class TransferHandler extends AbstractLocalVerbHandler<Transfer> implemen
     @Override
     public synchronized void stop(boolean hangup) {
         if(hangup) {
-            complete(Reason.HANGUP);
+            complete(VerbCompleteEvent.Reason.HANGUP);
         }
         else {
-            complete(Reason.STOPPED);
+            complete(VerbCompleteEvent.Reason.STOP);
         }
     }
 
@@ -147,7 +149,7 @@ public class TransferHandler extends AbstractLocalVerbHandler<Transfer> implemen
 
             // Make sure we're running or still interested in joining someone
             if(!isRunning() || peer != null) {
-                log.info("Received JoinCompleteEvent but Trransfer verb is either already joined or no longer running");
+                log.info("Received JoinCompleteEvent but Transfer verb is either already joined or no longer running");
                 return;
             }
             
@@ -168,7 +170,7 @@ public class TransferHandler extends AbstractLocalVerbHandler<Transfer> implemen
                 break;
             case DISCONNECTED:
                 if (joints.size() == 0) {
-                    complete(Reason.HANGUP);
+                    complete(VerbCompleteEvent.Reason.HANGUP);
                 }
                 break;
             case BUSY:
@@ -191,10 +193,10 @@ public class TransferHandler extends AbstractLocalVerbHandler<Transfer> implemen
                 break;
             case ERROR:
                 log.error("Error transfering call", event.getException());
-                complete(Reason.ERROR);
+                complete(VerbCompleteEvent.Reason.ERROR);
             default:
                 log.error("Unhandled join cause [cause=%s]", event.getCause());
-                complete(Reason.ERROR);
+                complete(VerbCompleteEvent.Reason.ERROR);
             }
         }
     }
@@ -205,7 +207,7 @@ public class TransferHandler extends AbstractLocalVerbHandler<Transfer> implemen
             switch (event.getCause()) {
             case MATCH:
                 if (isRunning()) {
-                    complete(Reason.CANCEL);
+                    complete(Reason.TERMINATOR);
                 }
                 break;
             }
@@ -215,7 +217,7 @@ public class TransferHandler extends AbstractLocalVerbHandler<Transfer> implemen
     // Utility
     // ================================================================================
 
-    private void complete(Reason reason) {
+    private void complete(VerbCompleteReason reason) {
         
         running = false;
 

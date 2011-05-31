@@ -8,6 +8,10 @@ public interface XmlProvider {
 
     public <T> T fromXML(Element element);
 
+    public XmlProviderManager getManager();
+
+    public void setManager(XmlProviderManager manager);
+
     public boolean handles(Element element);
 
     public boolean handles(Class<?> clazz);

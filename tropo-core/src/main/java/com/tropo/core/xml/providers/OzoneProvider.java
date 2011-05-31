@@ -5,12 +5,11 @@ import java.util.List;
 
 import org.dom4j.Document;
 import org.dom4j.Element;
-import org.dom4j.Namespace;
 import org.dom4j.QName;
 
 import com.tropo.core.AcceptCommand;
 import com.tropo.core.AnswerCommand;
-import com.tropo.core.AnswerEvent;
+import com.tropo.core.AnsweredEvent;
 import com.tropo.core.CallRejectReason;
 import com.tropo.core.DialCommand;
 import com.tropo.core.EndEvent;
@@ -18,9 +17,12 @@ import com.tropo.core.HangupCommand;
 import com.tropo.core.OfferEvent;
 import com.tropo.core.RedirectCommand;
 import com.tropo.core.RejectCommand;
-import com.tropo.core.RingEvent;
+import com.tropo.core.RingingEvent;
 import com.tropo.core.validation.Messages;
 import com.tropo.core.validation.ValidationException;
+import com.tropo.core.verb.StopCommand;
+import com.tropo.core.verb.VerbCompleteEvent;
+import com.tropo.core.verb.VerbCompleteEvent.Reason;
 
 public class OzoneProvider extends BaseProvider {
 	
@@ -41,17 +43,47 @@ public class OzoneProvider extends BaseProvider {
             return buildRejectCommand(element);
         } else if (elementName.equals("redirect")) {
             return buildRedirectCommand(element);
-        } else if (elementName.equals("info")) {
-            return buildCallInfo(element);
+        } else if (elementName.equals("answered")) {
+            return buildAnsweredEvent(element);
+        } else if (elementName.equals("ringing")) {
+            return buildRingingEvent(element);
         } else if (elementName.equals("end")) {
             return buildCallEnd(element);
         } else if (elementName.equals("dial")) {
             return buildDialCommand(element);
+        } else if (element.getName().equals("stop")) {
+            return buildStopCommand(element);
+        } else if (element.getName().equals("complete")) {
+            return buildCompleteEvent(element);
         }
         
         return null;
 	}
 	
+    private Object buildCompleteEvent(Element element) {
+        
+        @SuppressWarnings("unchecked")
+        List<Element> children = (List<Element>)element.elements();
+        
+        if(children.size() == 1) {
+            Element reasonElement = children.get(0);
+            if(reasonElement.getNamespace().equals(OZONE_COMPLETE_NAMESPACE)) {
+                String reasonValue = reasonElement.getName().toUpperCase();
+                Reason reason = VerbCompleteEvent.Reason.valueOf(reasonValue);
+                VerbCompleteEvent event = new VerbCompleteEvent(reason);
+                if(reason == Reason.ERROR) {
+                    event.setErrorText(reasonElement.getText());
+                }
+                return event;
+            } else {
+                return getManager().fromXML(reasonElement);
+            }
+        }
+        else {
+            throw new ValidationException("Verb Complete Event can only have one child");
+        }
+    }
+
     private Object buildDialCommand(Element element) {
         DialCommand command = new DialCommand();
         command.setFrom(toURI(element.attributeValue("from")));
@@ -64,8 +96,12 @@ public class OzoneProvider extends BaseProvider {
         throw new UnsupportedOperationException();
     }
 
-    private Object buildCallInfo(Element element) {
-        throw new UnsupportedOperationException();
+    private Object buildAnsweredEvent(Element element) {
+        return new AnsweredEvent(null);
+    }
+
+    private Object buildRingingEvent(Element element) {
+        return new RingingEvent(null);
     }
 
     private Object buildOfferEvent(Element element) throws URISyntaxException {
@@ -129,6 +165,10 @@ public class OzoneProvider extends BaseProvider {
         return reject;
     }
 
+    private Object buildStopCommand(Element element) throws URISyntaxException {
+        return new StopCommand();
+    }
+
     @Override
     protected void generateDocument(Object object, Document document) throws Exception {
 
@@ -136,9 +176,9 @@ public class OzoneProvider extends BaseProvider {
             createOfferEvent(object, document);
         } else if (object instanceof EndEvent) {
             createEndEvent(object, document);
-        } else if (object instanceof RingEvent) {
+        } else if (object instanceof RingingEvent) {
             createRingEvent(object, document);
-        } else if (object instanceof AnswerEvent) {
+        } else if (object instanceof AnsweredEvent) {
             createAnswerEvent(object, document);
         } else if (object instanceof AcceptCommand) {
             createAcceptCommand(object, document);
@@ -152,13 +192,15 @@ public class OzoneProvider extends BaseProvider {
             createRedirectCommand(object, document);
         } else if (object instanceof DialCommand) {
             createDialCommand(object, document);
+        } else if (object instanceof StopCommand) {
+            createStopCommand((StopCommand)object, document);
         }
     }
 
     private Document createDialCommand(Object object, Document document) {
         
     	DialCommand command = (DialCommand) object;
-        Element root = document.addElement(new QName("dial", new Namespace("", "urn:xmpp:ozone:1")));
+        Element root = document.addElement(new QName("dial", OZONE_NAMESPACE));
         root.addAttribute("to", command.getTo().toString());
         if (command.getFrom() != null) {
         	root.addAttribute("from", command.getFrom().toString());
@@ -168,20 +210,16 @@ public class OzoneProvider extends BaseProvider {
     }
 
     private void createAnswerEvent(Object object, Document document) {
-        document
-        .addElement(new QName("info", new Namespace("", "urn:xmpp:ozone:1")))
-            .addElement("answer");
+        document.addElement(new QName("answered", OZONE_NAMESPACE));
     }
 
     private void createRingEvent(Object object, Document document) {
-        document
-            .addElement(new QName("info", new Namespace("", "urn:xmpp:ozone:1")))
-                .addElement("ring");
+        document.addElement(new QName("ringing", OZONE_NAMESPACE));
     }
 
     private void createEndEvent(Object object, Document document) {
         EndEvent event = (EndEvent)object;
-        Element root = document.addElement(new QName("end", new Namespace("", "urn:xmpp:ozone:1")));
+        Element root = document.addElement(new QName("end", OZONE_NAMESPACE));
         root.addElement(event.getReason().name().toLowerCase());
         addHeaders(event.getHeaders(), root);
     }
@@ -189,7 +227,7 @@ public class OzoneProvider extends BaseProvider {
     private Document createAcceptCommand(Object object, Document document) {
 
         AcceptCommand accept = (AcceptCommand) object;
-        Element root = document.addElement(new QName("accept", new Namespace("", "urn:xmpp:ozone:1")));
+        Element root = document.addElement(new QName("accept", OZONE_NAMESPACE));
         addHeaders(accept.getHeaders(), root);
 
         return document;
@@ -198,7 +236,7 @@ public class OzoneProvider extends BaseProvider {
     private Document createAnswerCommand(Object object, Document document) {
 
         AnswerCommand answer = (AnswerCommand) object;
-        Element root = document.addElement(new QName("answer", new Namespace("", "urn:xmpp:ozone:1")));
+        Element root = document.addElement(new QName("answer", OZONE_NAMESPACE));
         addHeaders(answer.getHeaders(), root);
 
         return document;
@@ -207,7 +245,7 @@ public class OzoneProvider extends BaseProvider {
     private Document createHangupCommand(Object object, Document document) {
 
         HangupCommand hangup = (HangupCommand) object;
-        Element root = document.addElement(new QName("hangup", new Namespace("", "urn:xmpp:ozone:1")));
+        Element root = document.addElement(new QName("hangup", OZONE_NAMESPACE));
         addHeaders(hangup.getHeaders(), root);
 
         return document;
@@ -216,7 +254,7 @@ public class OzoneProvider extends BaseProvider {
     private Document createRejectCommand(Object object, Document document) {
 
         RejectCommand reject = (RejectCommand) object;
-        Element root = document.addElement(new QName("reject", new Namespace("", "urn:xmpp:ozone:1")));
+        Element root = document.addElement(new QName("reject", OZONE_NAMESPACE));
         root.addElement(reject.getReason().name().toLowerCase());
         addHeaders(reject.getHeaders(), root);
 
@@ -226,18 +264,22 @@ public class OzoneProvider extends BaseProvider {
     private Document createRedirectCommand(Object object, Document document) {
 
         RedirectCommand redirect = (RedirectCommand) object;
-        Element root = document.addElement(new QName("redirect", new Namespace("", "urn:xmpp:ozone:1")));
+        Element root = document.addElement(new QName("redirect", OZONE_NAMESPACE));
         root.addAttribute("to", redirect.getTo().toString());
         addHeaders(redirect.getHeaders(), root);
 
         return document;
+    }
+    
+    private void createStopCommand(StopCommand command, Document document) throws Exception {
+        document.addElement(new QName("stop", OZONE_COMPONENT_NAMESPACE));
     }
 
     private Document createOfferEvent(Object object, Document document) {
 
         OfferEvent offer = (OfferEvent) object;
 
-        Element root = document.addElement(new QName("offer", new Namespace("", "urn:xmpp:ozone:1")));
+        Element root = document.addElement(new QName("offer", OZONE_NAMESPACE));
         root.addAttribute("to", offer.getTo().toString());
         root.addAttribute("from", offer.getFrom().toString());
 
@@ -252,13 +294,14 @@ public class OzoneProvider extends BaseProvider {
 		//TODO: Refactor out to spring configuration and put everything in the base provider class
 		return clazz == OfferEvent.class ||
 			   clazz == EndEvent.class ||
-			   clazz == RingEvent.class ||
-			   clazz == AnswerEvent.class ||
+			   clazz == RingingEvent.class ||
+			   clazz == AnsweredEvent.class ||
 			   clazz == AcceptCommand.class ||
 			   clazz == AnswerCommand.class ||
 			   clazz == HangupCommand.class ||
 			   clazz == RejectCommand.class ||
 			   clazz == RedirectCommand.class ||
+	           clazz == StopCommand.class  ||
 			   clazz == DialCommand.class;
 	}
 }

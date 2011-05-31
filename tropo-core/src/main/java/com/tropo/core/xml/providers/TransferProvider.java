@@ -15,13 +15,14 @@ import com.tropo.core.verb.TransferCompleteEvent;
 
 public class TransferProvider extends BaseProvider {
 
+    private static final Namespace NAMESPACE = new Namespace("", "urn:xmpp:ozone:transfer:1");
+    private static final Namespace COMPLETE_NAMESPACE = new Namespace("", "urn:xmpp:ozone:transfer:complete:1");
+
 	@Override
 	protected Object processElement(Element element) throws Exception {
 		
 		if (element.getName().equals("transfer")) {
             return buildTransfer(element);
-        } else if (element.getName().equals("complete")) {
-			return buildCompleteCommand(element);
 		}
 		
 		return null;
@@ -40,9 +41,6 @@ public class TransferProvider extends BaseProvider {
 		}
 		if (root.attributeValue("answer-on-media") != null) {
 			transfer.setAnswerOnMedia(toBoolean(root.attributeValue("answer-on-media")));
-		}
-		if (root.attributeValue("voice") != null) {
-			transfer.setVoice(root.attributeValue("voice"));
 		}
 		
 		if(root.element("ring") != null) {
@@ -73,36 +71,34 @@ public class TransferProvider extends BaseProvider {
 
     }
     
-	private Object buildCompleteCommand(Element element) throws URISyntaxException {
-
-		TransferCompleteEvent transferComplete = new TransferCompleteEvent();
-		if (element.attributeValue("reason") != null) {
-			transferComplete.setReason(TransferCompleteEvent.Reason.valueOf(element.attributeValue("reason")));			
-		}		
-		if (element.element("error") != null) {
-			transferComplete.setErrorText(element.elementText("error"));
-		}
-		
-		return transferComplete;
-	}	
+    // This will eventually need to be called from the OzoneProvider since <complete>is now under the main ozone namespace
+    
+    //private Object buildCompleteCommand(Element element) throws URISyntaxException {
+    //
+    //	TransferCompleteEvent transferComplete = new TransferCompleteEvent();
+    //	if (element.attributeValue("reason") != null) {
+    //		transferComplete.setReason(TransferCompleteEvent.Reason.valueOf(element.attributeValue("reason")));			
+    //	}		
+    //	if (element.element("error") != null) {
+    //		transferComplete.setErrorText(element.elementText("error"));
+    //	}
+    //	
+    //	return transferComplete;
+    //}	
 
 	@Override
 	protected void generateDocument(Object object, Document document) throws Exception {
-
         if (object instanceof Transfer) {
             createTransfer(object, document);
         } else if (object instanceof TransferCompleteEvent) {
-            createTransferCompleteEvent(object, document);
+            createTransferCompleteEvent((TransferCompleteEvent)object, document);
         }
     }
 
-    private Document createTransfer(Object object, Document document) throws Exception {
+    private void createTransfer(Object object, Document document) throws Exception {
 
 		Transfer transfer = (Transfer)object;
-		Element root = document.addElement(new QName("transfer", new Namespace("","urn:xmpp:ozone:transfer:1")));
-		if (transfer.getVoice() != null) {
-			root.addAttribute("voice", transfer.getVoice());
-		}
+		Element root = document.addElement(new QName("transfer", NAMESPACE));
 
 		addHeaders(transfer.getHeaders(), document.getRootElement());
 		addSsml(transfer.getRingbackTone(), document.getRootElement());
@@ -126,27 +122,14 @@ public class TransferProvider extends BaseProvider {
 			}
 		}
 		root.addAttribute("answer-on-media", String.valueOf(transfer.isAnswerOnMedia()));
-		return document;
 	}
     
-	private Document createTransferCompleteEvent(Object object, Document document) throws Exception {
-		
-		TransferCompleteEvent transferComplete = (TransferCompleteEvent)object;
-		Element root = document.addElement(new QName("complete", new Namespace("","urn:xmpp:ozone:transfer:1")));
-		
-		if (transferComplete.getReason() != null) {
-			root.addAttribute("reason", transferComplete.getReason().toString());
-		}
-		
-		if (transferComplete.getErrorText() != null) {
-			root.addElement("error").setText(transferComplete.getErrorText());
-		}		
-		return document;
+	private void createTransferCompleteEvent(TransferCompleteEvent event, Document document) throws Exception {
+	    addCompleteElement(document, event, COMPLETE_NAMESPACE);
 	}
 
 	@Override
 	public boolean handles(Class<?> clazz) {
-
 		//TODO: Refactor out to spring configuration and put everything in the base provider class
 		return clazz == Transfer.class ||
 			   clazz == TransferCompleteEvent.class;
