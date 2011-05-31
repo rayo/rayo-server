@@ -293,7 +293,7 @@ public class IntegrationTest {
     
     /**
     * Ensure that a hangup during verb execution results in a controlled
-    * shutdown consisting on {@link VerbCompleteEvent}s followed by the
+    * shutdown consisting of {@link VerbCompleteEvent}s followed by the
     * call's {@link EndEvent}
     */
     @Test
@@ -323,7 +323,7 @@ public class IntegrationTest {
        
        // We should get a say complete event
        SayCompleteEvent sayComplete = poll()
-       assertEquals SayCompleteEvent.Reason.STOP, sayComplete.reason
+       assertEquals SayCompleteEvent.Reason.HANGUP, sayComplete.reason
 
        // We should get an end event
        EndEvent end = poll()

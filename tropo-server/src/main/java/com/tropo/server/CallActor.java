@@ -401,14 +401,25 @@ public class CallActor extends ReflectiveActor implements Observer {
             stop();
             call.disconnect();
             for (VerbHandler<?> handler : verbs.values()) {
-                handler.stop(false);
+                try {
+                    handler.stop(false);
+                } catch (Exception e) {
+                    log.error("Verb Handler did not shut down cleanly", e);
+                }
             }
         } else {
+            
             log.info("Call ended with active verbs [%s]", verbs.toString());
-            for (VerbHandler<?> handler : verbs.values()) {
-                handler.stop(true);
-            }
+            
             pendingEndEvent = endEvent;
+            
+            for (VerbHandler<?> handler : verbs.values()) {
+                try {
+                    handler.stop(true);
+                } catch (Exception e) {
+                    log.error("Verb Handler did not shut down cleanly", e);
+                }
+            }
         }
     }
 
