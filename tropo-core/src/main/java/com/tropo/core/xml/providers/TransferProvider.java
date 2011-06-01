@@ -111,7 +111,7 @@ public class TransferProvider extends BaseProvider {
 			root.addAttribute("terminator", transfer.getTerminator().toString());
 		}
 		if (transfer.getTimeout() != null) {
-			root.addAttribute("timeout", transfer.getTimeout().toString());
+			root.addAttribute("timeout", Long.toString(transfer.getTimeout().getMillis()));
 		}
 		if (transfer.getFrom() != null) {
 			root.addAttribute("from", transfer.getFrom().toString());

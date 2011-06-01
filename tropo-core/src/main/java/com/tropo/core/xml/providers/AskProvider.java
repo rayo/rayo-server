@@ -155,7 +155,7 @@ public class AskProvider extends BaseProvider {
             root.addAttribute("terminator", ask.getTerminator().toString());
         }
         if (ask.getTimeout() != null) {
-            root.addAttribute("timeout", ask.getTimeout().toString());
+            root.addAttribute("timeout", Long.toString(ask.getTimeout().getMillis()));
         }
         root.addAttribute("bargein", String.valueOf(ask.isBargein()));
 
