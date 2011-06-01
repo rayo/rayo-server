@@ -132,14 +132,14 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference> impl
                 startMusic();
                 startHotwordListener();
                 addCallToWaitList();
-                fire(new OnHoldEvent());
+                fire(new OnHoldEvent(model));
             }
             else {
                 stopMusic();
                 startMixing();
                 startHotwordListener();
                 removeCallFromWaitList();
-                fire(new OffHoldEvent());
+                fire(new OffHoldEvent(model));
             }
         }
 

@@ -17,7 +17,7 @@
 		</init-param>
 		<init-param>
 			<param-name>mediaDialectClass</param-name>
-			<param-value>com.tropo.server.PrismDialect</param-value>
+			<param-value>com.voxeo.prism.moho.PrismDialect</param-value>
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>	
