@@ -162,6 +162,14 @@
   		<property name="callStatistics" ref="callStatistics" />
   	</bean>
 
+  	<bean id="infoBean" class="com.tropo.server.jmx.Info">
+  		<property name="adminService" ref="adminService" />
+  	</bean>
+  	
+  	<bean id="adminBean" class="com.tropo.server.jmx.Admin">
+  		<property name="adminService" ref="adminService" />
+  	</bean>
+  	
 	<bean id="attributeSource" class="org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource"/>
 	
   	<bean id="assembler" class="org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler">

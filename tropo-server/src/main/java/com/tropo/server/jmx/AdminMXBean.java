@@ -1,6 +1,6 @@
 package com.tropo.server.jmx;
 
-public interface AdminServiceMXBean {
+public interface AdminMXBean {
 
 	public void enableQuiesce();
 	public void disableQuiesce();
