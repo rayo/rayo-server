@@ -69,6 +69,9 @@ public class OzoneServlet extends XmppServlet {
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
         xmppFactory = (XmppFactory) config.getServletContext().getAttribute(XMPP_FACTORY);
+        
+        // Read Manifest information and pass it to the admin service
+        adminService.readConfigurationFromContext(getServletConfig().getServletContext());     
     }
 
     /**
