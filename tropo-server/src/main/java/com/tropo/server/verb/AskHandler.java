@@ -104,6 +104,11 @@ public class AskHandler extends AbstractLocalVerbHandler<Ask> {
         case CANCEL:
             completeEvent = new AskCompleteEvent(model, Reason.STOP);
             break;
+        case DISCONNECT:
+            completeEvent = new AskCompleteEvent(model, Reason.HANGUP);
+            break;
+        case ERROR:
+        case UNKNOWN:
         default:
             completeEvent = new AskCompleteEvent(model, "Could not complete Ask at this time.");
         }
