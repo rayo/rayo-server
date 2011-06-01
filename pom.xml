@@ -245,21 +245,17 @@
       </plugin>
     </plugins>
   </build>
+  <scm>
+    <connection>scm:git:git@github.com:tropo/tropo2.git</connection>
+    <url>scm:git:git@github.com:tropo/tropo2.git</url>
+    <developerConnection>scm:git:git@github.com:tropo/tropo2.git</developerConnection>
+  </scm>
   <modules>
     <module>tropo-server</module>
     <module>tropo-core</module>
     <module>tropo-war</module>
   </modules>
   <profiles>
-    <profile>
-      <id>functional</id>
-      <modules>
-        <module>tropo-server</module>
-        <module>tropo-core</module>
-        <module>tropo-war</module>
-        <module>tropo-functional-test</module>
-      </modules>
-    </profile>
     <profile>
       <id>uml</id>
       <activation>

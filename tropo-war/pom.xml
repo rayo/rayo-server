@@ -52,7 +52,36 @@
         <name>ConSol* Labs Repository (Releases)</name>
         <url>http://labs.consol.de/maven/repository</url>
       </repository>
-    </repositories>	
+    </repositories>
+    <profiles>
+	  <profile> 
+	     <id>hudson</id> 
+	     <activation> 
+	        <property><name>BUILD_NUMBER</name></property> 
+	     </activation> 
+	     <build> 
+	       <finalName>tropo-2.0_b${BUILD_NUMBER}</finalName> 
+	       <!-- any plugin configuration --> 
+	        <plugins>
+	            <plugin>
+	                <artifactId>maven-war-plugin</artifactId>
+	                <configuration>
+	                    <manifest>
+	                        <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+	                    </manifest>
+	                    <archive>
+	                        <manifestEntries>
+	                            <Specification-Title>${project.name}</Specification-Title>
+	                            <Specification-Version>${project.version}</Specification-Version>
+	                            <Implementation-Version>${BUILD_TAG}</Implementation-Version>
+	                        </manifestEntries>
+	                    </archive>
+	                </configuration>
+	            </plugin>
+	        </plugins>	       
+	     </build> 
+	  </profile>     
+    </profiles>	
 	<build>
 	  <finalName>tropo2</finalName>
     </build>
