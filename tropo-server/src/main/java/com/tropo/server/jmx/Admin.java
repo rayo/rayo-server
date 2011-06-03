@@ -2,6 +2,7 @@ package com.tropo.server.jmx;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
@@ -32,6 +33,13 @@ public class Admin implements AdminMXBean {
 		}
 	}
 
+	@Override
+	@ManagedAttribute(description = "Quiesce Mode")
+	public boolean getQuiesceMode() {
+
+		return adminService.getQuiesceMode();
+	}
+	
 	@Override
 	@ManagedOperation(description = "Change Log Level")
 	public void setLogLevel(String loggerName, String level) {

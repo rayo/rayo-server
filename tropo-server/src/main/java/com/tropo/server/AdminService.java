@@ -36,6 +36,11 @@ public class AdminService {
 		quiesceMode.set(true);
 	}
 	
+	public boolean getQuiesceMode() {
+		
+		return quiesceMode.get();
+	}
+	
 	public long getBuildNumber() {
 		
 		return buildNumber;
