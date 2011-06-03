@@ -6,7 +6,9 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 
 import org.jetlang.channels.Channel;
@@ -95,6 +97,10 @@ public abstract class ReflectiveActor implements Actor, Callback<Object> {
                 stop();
             }
         }
+        finally {
+            flushEvents();
+        }
+        
     }
 
     private Method findMethod(Object message) {
@@ -194,9 +200,11 @@ public abstract class ReflectiveActor implements Actor, Callback<Object> {
         this.fiberFactory = fiberFactory;
     }
     
-    protected void fire(Object message) {
-        
-        if(running) {
+    private Queue<Object> eventQueue = new LinkedList<Object>();
+
+    private void flushEvents() {
+        while(!eventQueue.isEmpty()) {
+            Object message = eventQueue.poll();
             log.info("Event [%s]", message);
             for (EventHandler handler : eventHandlers) {
                 try {
@@ -206,10 +214,16 @@ public abstract class ReflectiveActor implements Actor, Callback<Object> {
                 }
             }
         }
+    }
+    
+    protected void fire(Object message) {
+        if(running) {
+            log.info("Queued Event [%s]", message);
+            eventQueue.offer(message);
+        }
         else {
             log.info("Actor %s is disposed. Ignoring event. [%s]", this.getClass().getSimpleName(), message);
         }
-        
     }
     
     public void addEventHandler(EventHandler handler) {

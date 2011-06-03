@@ -19,7 +19,8 @@ import com.tropo.core.CallCommand;
 import com.tropo.core.CallEvent;
 import com.tropo.core.CallRef;
 import com.tropo.core.DialCommand;
-import com.tropo.core.HangupCommand;
+import com.tropo.core.EndCommand;
+import com.tropo.core.EndEvent;
 import com.tropo.core.validation.ValidationException;
 import com.tropo.core.verb.Verb;
 import com.tropo.core.verb.VerbCommand;
@@ -376,7 +377,7 @@ public class OzoneServlet extends XmppServlet {
     }
 
     private void fail(String callId) {
-        findCallActor(callId).publish(new HangupCommand());
+        findCallActor(callId).publish(new EndCommand(callId, EndEvent.Reason.ERROR));
     }
 
     private CallActor findCallActor(String callId) throws NotFoundException {

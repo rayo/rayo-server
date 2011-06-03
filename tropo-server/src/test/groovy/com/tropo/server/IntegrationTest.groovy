@@ -17,6 +17,7 @@ import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 
 import com.tropo.core.CallRejectReason
+import com.tropo.core.EndCommand;
 import com.tropo.core.EndEvent
 import com.tropo.core.OfferEvent
 import com.tropo.core.RejectCommand
@@ -409,6 +410,27 @@ public class IntegrationTest {
 
       // Wait to make sure the complete event never arrives
       assertNull messageQueue.poll(1, TimeUnit.SECONDS)
+
+    }
+    
+    /**
+    * Ensure that sending an EndCommand results in the call ending with
+    * the appropriate reason.
+    */
+    @Test
+    public void completeViaEndCommand() throws InterruptedException {
+  
+      // End EndCommand
+      callActor.command(
+          new EndCommand(mohoCall.id, EndEvent.Reason.ERROR), 
+          { messageQueue.add it } as ResponseHandler
+      )
+      // null response from command
+      poll()
+      
+      // We should get an end event
+      EndEvent end = poll()
+      assertEquals Reason.ERROR, end.reason
 
     }
    
