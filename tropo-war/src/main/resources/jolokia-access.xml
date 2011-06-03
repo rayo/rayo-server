@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<restrict>
+
+  <!-- Allowed IPs and Hosts -->
+  <remote>
+    <host>localhost</host>
+    <host>127.0.0.1</host>
+    <host>10.0.0.0/16</host>
+  </remote>
+
+  <!-- Allowed methods -->
+  <commands>
+    <command>read</command>
+    <command>list</command>
+    <command>exec</command>
+  </commands>
+
+  <!--  
+  Within an <allow> section, access to MBean can be granted regardless independently of 
+  the operations specified in the <commands> section.
+  
+  <allow>
+    <mbean>
+      <name>java.lang:type=Memory</name>
+      <operation>gc</operation>
+    </mbean>
+  </allow>
+
+  The reverse is true for the <deny> section: It rejects access to the MBeans specified here.
+  
+  <deny>
+    <mbean>
+      <name>com.mchange.v2.c3p0:type=PooledDataSource,*</name>
+      <attribute>properties</attribute>
+    </mbean>
+  </deny>
+  
+  Access can be restricted based on the HTTP method with which an Jolokia request was received 
+  with the <http> element. Method allowed (post or get) are specified with an <method> inner 
+  element. The following example restricts the acces to POST requests only:
+  
+  <http>
+    <method>post</method>
+  </http>        
+  -->
+</restrict>
