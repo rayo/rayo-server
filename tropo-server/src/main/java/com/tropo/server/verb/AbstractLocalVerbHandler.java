@@ -7,6 +7,7 @@ import com.tropo.core.verb.Verb;
 import com.tropo.core.verb.VerbCommand;
 import com.tropo.core.verb.VerbCompleteEvent;
 import com.tropo.core.verb.VerbEvent;
+import com.tropo.server.Actor;
 import com.voxeo.moho.Call;
 import com.voxeo.moho.MediaService;
 import com.voxeo.moho.media.output.AudibleResource;
@@ -16,6 +17,7 @@ public abstract class AbstractLocalVerbHandler<T extends Verb> implements VerbHa
 
     protected T model;
     protected Call call;
+    protected Actor actor;
     protected MediaService media;
     private EventDispatcher eventDispatcher;
 
@@ -80,6 +82,14 @@ public abstract class AbstractLocalVerbHandler<T extends Verb> implements VerbHa
     @Override
     public boolean isComplete() {
         return complete;
+    }
+
+    public void setActor(Actor actor) {
+        this.actor = actor;
+    }
+
+    public Actor getActor() {
+        return actor;
     }
 
 }

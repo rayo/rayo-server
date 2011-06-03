@@ -14,6 +14,7 @@ import com.tropo.core.verb.Ssml;
 import com.tropo.core.verb.Transfer;
 import com.tropo.core.verb.TransferCompleteEvent;
 import com.tropo.core.verb.TransferCompleteEvent.Reason;
+import com.tropo.server.ActorEventListener;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.Call;
 import com.voxeo.moho.CallableEndpoint;
@@ -147,7 +148,7 @@ public class TransferHandler extends AbstractLocalVerbHandler<Transfer> implemen
 
             // Make sure we're running or still interested in joining someone
             if(!isRunning() || peer != null) {
-                log.info("Received JoinCompleteEvent but Trransfer verb is either already joined or no longer running");
+                log.info("Received JoinCompleteEvent but Transfer verb is either already joined or no longer running");
                 return;
             }
             
@@ -234,7 +235,7 @@ public class TransferHandler extends AbstractLocalVerbHandler<Transfer> implemen
     }
 
     private void dial(CallableEndpoint to) {
-        Call destination = to.call(resolveFrom(), model.getHeaders(), this);
+        Call destination = to.call(resolveFrom(), model.getHeaders(), new ActorEventListener(actor));
         Joint joint = destination.join();
         joints.put(destination, joint);
     }

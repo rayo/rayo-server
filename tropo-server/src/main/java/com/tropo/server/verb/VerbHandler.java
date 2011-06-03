@@ -2,6 +2,7 @@ package com.tropo.server.verb;
 
 import com.tropo.core.verb.Verb;
 import com.tropo.core.verb.VerbCommand;
+import com.tropo.server.Actor;
 import com.voxeo.moho.Call;
 
 public interface VerbHandler<T extends Verb> {
@@ -15,6 +16,10 @@ public interface VerbHandler<T extends Verb> {
     public Verb getModel();
 
     public void setModel(Verb model);
+
+    public Actor getActor();
+
+    public void setActor(Actor actor);
 
     public Call getCall();
 

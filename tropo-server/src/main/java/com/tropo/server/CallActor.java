@@ -50,7 +50,6 @@ import com.voxeo.moho.event.JoinCompleteEvent;
 import com.voxeo.moho.event.Observer;
 import com.voxeo.moho.event.SignalEvent;
 import com.voxeo.moho.utils.Event;
-import com.voxeo.moho.utils.EventListener;
 
 public class CallActor extends ReflectiveActor implements Observer {
 
@@ -112,13 +111,7 @@ public class CallActor extends ReflectiveActor implements Observer {
 
             // Now we setup the moho handlers
             mohoListeners.add(new AutowiredEventListener(this));
-
-            mohoCall.addObservers(new EventListener<Event<EventSource>>() {
-
-                public void onEvent(Event<EventSource> event) throws Exception {
-                    publish(event);
-                }
-            });
+            mohoCall.addObservers(new ActorEventListener(this));
 
             mohoCall.join();
             callStatistics.outgoingCall();
@@ -151,13 +144,8 @@ public class CallActor extends ReflectiveActor implements Observer {
 
         // Now we setup the moho handlers
         mohoListeners.add(new AutowiredEventListener(this));
-
-        mohoCall.addObservers(new EventListener<Event<EventSource>>() {
-
-            public void onEvent(Event<EventSource> event) throws Exception {
-                publish(event);
-            }
-        });
+        mohoCall.addObservers(new ActorEventListener(this));
+        
         callStatistics.incomingCall();
 
         // There is a tiny chance that the call ended before we could registered
@@ -253,6 +241,7 @@ public class CallActor extends ReflectiveActor implements Observer {
         VerbHandler<? extends Verb> verbHandler = verbFactory.createVerbHandler();
         verbHandler.setModel(verb);
         verbHandler.setCall(call);
+        verbHandler.setActor(this);
         verbHandler.setEventDispatcher(verbDispatcher);
 
         callStatistics.verbCreated();
