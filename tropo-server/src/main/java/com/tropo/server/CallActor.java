@@ -19,6 +19,7 @@ import com.tropo.core.AcceptCommand;
 import com.tropo.core.AnswerCommand;
 import com.tropo.core.AnswerEvent;
 import com.tropo.core.CallCommand;
+import com.tropo.core.EndCommand;
 import com.tropo.core.EndEvent;
 import com.tropo.core.EndEvent.Reason;
 import com.tropo.core.HangupCommand;
@@ -213,6 +214,11 @@ public class CallActor extends ReflectiveActor implements Observer {
     @Message
     public void hangup(HangupCommand message) {
         call.disconnect(message.getHeaders());
+    }
+
+    @Message
+    public void end(EndCommand command) {
+        end(new EndEvent(myId(), command.getReason()));
     }
 
     // Verbs
