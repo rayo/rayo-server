@@ -45,6 +45,7 @@ public class MohoDriver implements Application {
     	if (adminService.isQuiesceMode()) {
             log.warn("Quiesce Mode ON. Dropping incoming call: %s", call.getId());
             callStatistics.callRejected();
+            callStatistics.callBusy();
             call.reject(Reason.BUSY);
             return;
     	}                    	
