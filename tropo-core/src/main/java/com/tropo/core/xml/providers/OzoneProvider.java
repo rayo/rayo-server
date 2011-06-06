@@ -182,7 +182,10 @@ public class OzoneProvider extends BaseProvider {
     private void createEndEvent(Object object, Document document) {
         EndEvent event = (EndEvent)object;
         Element root = document.addElement(new QName("end", new Namespace("", "urn:xmpp:ozone:1")));
-        root.addElement(event.getReason().name().toLowerCase());
+        Element cause = root.addElement(event.getReason().name().toLowerCase());
+        if (event.getErrorText() != null) {
+        	cause.setText(event.getErrorText());
+        }
         addHeaders(event.getHeaders(), root);
     }
 
