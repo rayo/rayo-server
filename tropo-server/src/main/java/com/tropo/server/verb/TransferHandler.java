@@ -228,7 +228,6 @@ public class TransferHandler extends AbstractLocalVerbHandler<Transfer> implemen
         // Join back to the media server
         if(peer != null) {
             peer.unjoin(call);
-            call.getMediaService(true);
         }
 
         complete(event);
