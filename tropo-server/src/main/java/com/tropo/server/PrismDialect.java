@@ -48,4 +48,9 @@ public class PrismDialect implements MediaDialect {
         parameters.put(VoxeoParameter.DTMF_TYPE_AHEAD_ENABLED, value);
     }
 
+    @Override
+    public void setConfidence(Parameters parameters, float value) {
+    	// Uncomment when the parameter gets into maven repo
+    	//parameters.put(VoxeoParameter.VOXEO_CONFIDENCE_THRESHOLD, value);
+    }
 }
