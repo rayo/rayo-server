@@ -142,25 +142,23 @@ public class OzoneServlet extends XmppServlet {
 
             try {
 
-                Element iq = DocumentHelper.createElement("iq");
-                iq.addAttribute("type", "set");
+                Element eventStanza = DocumentHelper.createElement("presence");
 
                 // Resolve IQ.from
                 JID from = xmppFactory.createJID(event.getCallId() + "@" + jid.getDomain());
                 if (event instanceof VerbEvent) {
                     from.setResource(((VerbEvent) event).getVerbId());
                 }
-                iq.addAttribute("from", from.toString());
+                eventStanza.addAttribute("from", from.toString());
 
                 // Serialize the event to XML
                 Element eventElement = provider.toXML(event);
                 assertion(eventElement != null, "Could not serialize event [event=%s]", event);
 
-                iq.add(eventElement);
+                eventStanza.add(eventElement);
 
                 // Send
-                XmppServletIQRequest request = session.createStanzaIQRequest(iq, null, null, null, null, null);
-                request.send();
+                session.createStanzaRequest(eventStanza, null, null, null, null, null).send();
 
             }
             catch (Exception e) {
@@ -303,20 +301,6 @@ public class OzoneServlet extends XmppServlet {
             }
             log.error("Exception processing IQ request", e);
             sendIqError(request, e);
-        }
-
-    }
-
-    @Override
-    protected void doIQResponse(XmppServletIQResponse request) throws ServletException, IOException {
-
-        WIRE.debug("%s :: %s", request.getElement().asXML(), request.getSession().getId());
-        ozoneStatistics.iqResponse();
-    	
-        XmppStanzaError error = request.getError();
-        if (error != null) {
-            log.error("Client error, hanging up. [error=%s]", error.asXML());
-            fail(callId(request.getTo()));
         }
 
     }
