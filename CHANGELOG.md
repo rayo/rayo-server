@@ -1,5 +1,7 @@
 # Changelog
 
+## Build 162 / Released 2011-06-03
+
 This release improves consistency between API elements, makes it easier to work with complete events, simplifies the API by reducing unnecessary element nesting, adds some future-proofing to naming and call IDs, and also adds management and monitoring of cluster status through HTTP and JMX APIs.
 
 ## API
