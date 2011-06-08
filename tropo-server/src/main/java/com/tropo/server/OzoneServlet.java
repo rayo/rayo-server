@@ -59,6 +59,7 @@ public class OzoneServlet extends XmppServlet {
     private ExceptionMapper exceptionMapper;
     private OzoneStatistics ozoneStatistics;
     private AdminService adminService;
+    private CdrManager cdrManager;
 
     private XmppFactory xmppFactory;
     private Map<String, XmppSession> clientSessions = new ConcurrentHashMap<String, XmppSession>();
@@ -137,6 +138,15 @@ public class OzoneServlet extends XmppServlet {
     // ================================================================================
 
     public void event(CallEvent event) throws IOException {
+    	
+        // Serialize the event to XML
+        Element eventElement = provider.toXML(event);
+        assertion(eventElement != null, "Could not serialize event [event=%s]", event);
+    	cdrManager.append(event.getCallId(),eventElement.asXML());
+
+    	if (event instanceof EndEvent) {
+    		cdrManager.store(event.getCallId());
+    	}
 
         // Send event to all registered JIDs
         // TODO: this should be pluggable
@@ -155,10 +165,6 @@ public class OzoneServlet extends XmppServlet {
                     from.setResource(((VerbEvent) event).getVerbId());
                 }
                 iq.addAttribute("from", from.toString());
-
-                // Serialize the event to XML
-                Element eventElement = provider.toXML(event);
-                assertion(eventElement != null, "Could not serialize event [event=%s]", event);
 
                 iq.add(eventElement);
 
@@ -222,6 +228,14 @@ public class OzoneServlet extends XmppServlet {
                 }
                 else if (qname.getNamespaceURI().startsWith("urn:xmpp:ozone")) {
 
+                    // Extract Call ID
+                    final String callId = request.getTo().getNode();
+                    if (callId == null) {
+                    	throw new IllegalArgumentException("Call id cannot be null");
+                    }
+                    
+                    cdrManager.append(callId, payload.asXML());
+                    
                     Object command = provider.fromXML(payload);
                     ozoneStatistics.commandReceived(command);
 
@@ -239,7 +253,7 @@ public class OzoneServlet extends XmppServlet {
                                     CallRef callRef = (CallRef) response.getValue();
                                     String callJid = callRef.getCallId() + "@" + request.getTo().getDomain();
                                     result.addElement("ref","urn:xmpp:ozone:1").addAttribute("jid", callJid);
-                                    sendIqResult(request, result);
+                                    sendIqResult(callId, request, result);
                                 }
                                 else {
                                     sendIqError(request, (Exception) response.getValue());
@@ -253,12 +267,7 @@ public class OzoneServlet extends XmppServlet {
                     assertion(command instanceof CallCommand, "Is this a valid call command?");
                     
                     final CallCommand callCommand = (CallCommand) command;
-
-                    // Extract Call ID
-                    String callId = request.getTo().getNode();
-                    if (callId == null) {
-                    	throw new IllegalArgumentException("Call id cannot be null");
-                    }
+                                        
                     callCommand.setCallId(callId);
                     
                     // Find the call actor
@@ -286,9 +295,9 @@ public class OzoneServlet extends XmppServlet {
                             else if (value instanceof VerbRef) {
                                 String verbJid = request.getTo().getBareJID() + "/" + ((VerbRef) value).getVerbId();
                                 result.addElement("ref","urn:xmpp:ozone:1").addAttribute("jid", verbJid);
-                                sendIqResult(request, result);
+                                sendIqResult(callId, request, result);
                             } else {
-                                sendIqResult(request, result);
+                                sendIqResult(callId, request, result);
                             }
                         }
                     });
@@ -318,6 +327,16 @@ public class OzoneServlet extends XmppServlet {
         WIRE.debug("%s :: %s", request.getElement().asXML(), request.getSession().getId());
         ozoneStatistics.iqResponse();
     	
+        // Extract Request and append elemnt to CDR's transcript
+        Element payload = (Element) request.getElement().elementIterator().next();
+        QName qname = payload.getQName();
+        if (qname.getNamespaceURI().startsWith("urn:xmpp:ozone")) {
+            String callId = request.getTo().getNode();
+            if (callId != null) {
+            	cdrManager.append(callId, payload.asXML());
+            }
+        }
+        
         XmppStanzaError error = request.getError();
         if (error != null) {
             log.error("Client error, hanging up. [error=%s]", error.asXML());
@@ -364,13 +383,39 @@ public class OzoneServlet extends XmppServlet {
     private void sendIqError(XmppServletIQRequest request, XmppServletIQResponse response) throws IOException {
     	
     	ozoneStatistics.iqError();
+    	generateErrorCdr(request,response);
         response.setFrom(request.getTo());
         response.send();
     }
 
+    private void generateErrorCdr(XmppServletIQRequest request, XmppServletIQResponse response) {
+    	
+    	Element payload = (Element) request.getElement().elementIterator().next();
+        QName qname = payload.getQName();
+        if (qname.getNamespaceURI().startsWith("urn:xmpp:ozone")) {
+        	final String callId = request.getTo().getNode();
+            if (callId == null) {
+	        	Element responsePayload = (Element) request.getElement().elementIterator().next();	        	
+	        	cdrManager.append(callId, responsePayload.asXML());
+            }
+        }
+    }
+    
+    private void sendIqResult(String callId, XmppServletIQRequest request, Element result) throws IOException {
+
+    	if (result.elementIterator().hasNext()) {
+    		Element resultPayload = (Element) result.elementIterator().next();
+    		cdrManager.append(callId, resultPayload.asXML());
+    	} else {	
+    		cdrManager.append(callId,"TODO: Empty IQ Result");
+    	}
+    	sendIqResult(request, result);
+    }
+    
     private void sendIqResult(XmppServletIQRequest request, Element result) throws IOException {
     	
     	ozoneStatistics.iqResult();
+    	
         XmppServletIQResponse response = request.createIQResultResponse(result);
         response.setFrom(request.getTo());
         response.send();
@@ -431,5 +476,10 @@ public class OzoneServlet extends XmppServlet {
 
 	public void setAdminService(AdminService adminService) {
 		this.adminService = adminService;
-	}	
+	}
+	
+	public void setCdrManager(CdrManager cdrManager) {
+		
+		this.cdrManager = cdrManager;
+	}
 }

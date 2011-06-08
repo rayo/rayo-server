@@ -19,6 +19,7 @@
 		<property name="exceptionMapper" ref="exceptionMapper" />
 		<property name="ozoneStatistics" ref="ozoneStatistics" />
 		<property name="adminService" ref="adminService" />
+		<property name="cdrManager" ref="cdrManager" />
 	</bean>
 		
 	<bean id="exceptionMapper" class="com.tropo.server.exception.ExceptionMapper"/>

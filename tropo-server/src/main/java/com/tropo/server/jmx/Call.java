@@ -7,8 +7,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import com.tropo.core.cdr.Cdr;
 import com.tropo.server.CallActor;
 import com.tropo.server.CallRegistry;
+import com.tropo.server.CdrManager;
 import com.tropo.server.verb.VerbHandler;
 
 public class Call {
@@ -17,11 +19,13 @@ public class Call {
 
 	private transient com.voxeo.moho.Call call;
 	private transient CallRegistry callRegistry;
+	private transient CdrManager cdrManager;
 	
-	public Call(com.voxeo.moho.Call call, CallRegistry registry) {
+	public Call(com.voxeo.moho.Call call, CallRegistry registry, CdrManager cdrManager) {
 		
 		this.call = call;
 		this.callRegistry = registry;
+		this.cdrManager = cdrManager;
 	}
 
 	public String getCallState() {
@@ -160,5 +164,10 @@ public class Call {
 			}
 		}
 		return verbs;
+	}
+	
+	public Cdr getCdr() {
+		
+		return cdrManager.getCdr(call.getId());
 	}
 }

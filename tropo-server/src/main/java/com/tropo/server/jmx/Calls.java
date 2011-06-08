@@ -13,6 +13,7 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 import com.tropo.server.CallActor;
 import com.tropo.server.CallRegistry;
 import com.tropo.server.CallStatistics;
+import com.tropo.server.CdrManager;
 import com.tropo.server.verb.VerbHandler;
 
 @ManagedResource(objectName="com.tropo:Type=Calls", description="Active Calls")
@@ -22,6 +23,7 @@ public class Calls implements Serializable, CallsMXBean {
 
 	private CallRegistry callRegistry;
 	private CallStatistics callStatistics;
+	private CdrManager cdrManager;
 
 	@ManagedAttribute(description="Active Verbs Count")
 	public long getActiveVerbsCount() {
@@ -68,7 +70,7 @@ public class Calls implements Serializable, CallsMXBean {
 		Collection<CallActor> actors = callRegistry.getActiveCalls();
 		List<Call> calls = new ArrayList<Call>();
 		for (CallActor actor: actors) {
-			calls.add(new Call(actor.getCall(), callRegistry));
+			calls.add(new Call(actor.getCall(), callRegistry, cdrManager));
 		}
 		return calls;
 	}
@@ -91,5 +93,10 @@ public class Calls implements Serializable, CallsMXBean {
 
 	public void setCallStatistics(CallStatistics callStatistics) {
 		this.callStatistics = callStatistics;
+	}
+	
+	public void setCdrManager(CdrManager cdrManager) {
+		
+		this.cdrManager = cdrManager;
 	}
 }

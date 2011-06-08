@@ -160,6 +160,11 @@
   	<bean id="callsBean" class="com.tropo.server.jmx.Calls">
   		<property name="callRegistry" ref="callRegistry" />
   		<property name="callStatistics" ref="callStatistics" />
+  		<property name="cdrManager" ref="cdrManager" />
+  	</bean>
+  	
+  	<bean id="cdrsBean" class="com.tropo.server.jmx.Cdrs">
+  		<property name="cdrManager" ref="cdrManager" />
   	</bean>
 
   	<bean id="infoBean" class="com.tropo.server.jmx.Info">
@@ -178,5 +183,22 @@
   	
 	<bean id="namingStrategy" class="org.springframework.jmx.export.naming.MetadataNamingStrategy">
 		<property name="attributeSource" ref="attributeSource"/>
-	</bean>  	  
+	</bean>  	
+	
+  	<!-- CDR Handling -->
+  	<bean id="fileCdrStorageStrategy" class="com.tropo.server.cdr.FileCdrStorageStrategy" 
+  		  init-method="init"
+  		  destroy-method="shutdown">
+  		<property name="path" value="/tmp/test.log"/>
+  	</bean>
+  	
+  	<bean id="cdrErrorHandler" class="com.tropo.server.cdr.DefaultErrorHandler"/>
+  	<bean id="cdrManager" class="com.tropo.server.CdrManager">
+  		<property name="errorHandler" ref="cdrErrorHandler"/>
+  		<property name="storageStrategies">
+  			<list>
+  				<ref bean="fileCdrStorageStrategy"/>
+  			</list>
+  		</property>
+  	</bean> 	  
 </beans>

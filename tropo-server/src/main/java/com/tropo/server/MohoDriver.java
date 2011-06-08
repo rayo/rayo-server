@@ -16,6 +16,7 @@ public class MohoDriver implements Application {
     private CallManager callManager;
     private AdminService adminService;
     private CallStatistics callStatistics;
+    private CdrManager cdrManager;
 
     public void destroy() {}
 
@@ -33,6 +34,7 @@ public class MohoDriver implements Application {
         
         adminService = wac.getBean(AdminService.class);
         callStatistics = wac.getBean(CallStatistics.class);
+        cdrManager = wac.getBean(CdrManager.class);
     }
 
     @State
@@ -41,6 +43,8 @@ public class MohoDriver implements Application {
     	if (log.isDebugEnabled()) {
     		log.debug("Received incoming call");
     	}
+    	
+    	cdrManager.create(call);
     	
     	if (adminService.isQuiesceMode()) {
             log.warn("Quiesce Mode ON. Dropping incoming call: %s", call.getId());
