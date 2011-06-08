@@ -4,9 +4,9 @@
 
 This release improves consistency between API elements, makes it easier to work with complete events, simplifies the API by reducing unnecessary element nesting, adds some future-proofing to naming and call IDs, and also adds management and monitoring of cluster status through HTTP and JMX APIs.
 
-## API
+### API
 
-### New
+#### New
 
 * `Complete` events now include one of the following reasons: `stop`, `hangup`, or `error`.
 
@@ -16,7 +16,7 @@ This release improves consistency between API elements, makes it easier to work 
 
 * Added `CallRegistry` method to return all active calls
 
-### Changed
+#### Changed
 
 * Complete events are part of the Ozone namespace, allowing the event to be read without needing to load a new namespace.
 
@@ -32,7 +32,7 @@ This release improves consistency between API elements, makes it easier to work 
 
 * Timeouts are now in milliseconds (previously they were in PT format)
 
-### Fixed
+#### Fixed
 
 * `say`, `ask` and `transfer` now properly report the reason 'HANGUP' when forced to terminate due to far end disconnect.
 
@@ -42,9 +42,9 @@ This release improves consistency between API elements, makes it easier to work 
 
 * Validation of `from` on outbound call was missing the error message
 
-## Management & Monitoring
+### Management & Monitoring
 
-### New
+#### New
 
 * Added HTTP and JMX interfaces for retrieving monitoring info.
 
