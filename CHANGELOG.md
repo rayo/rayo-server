@@ -6,7 +6,7 @@ This release improves consistency between API elements, makes it easier to work 
 
 ### API
 
-- #### New
+#### New
 
 * `Complete` events now include one of the following reasons: `stop`, `hangup`, or `error`.
 
@@ -16,7 +16,7 @@ This release improves consistency between API elements, makes it easier to work 
 
 * Added `CallRegistry` method to return all active calls
 
-- #### Changed
+#### Changed
 
 * Complete events are part of the Ozone namespace, allowing the event to be read without needing to load a new namespace.
 
@@ -32,7 +32,7 @@ This release improves consistency between API elements, makes it easier to work 
 
 * Timeouts are now in milliseconds (previously they were in PT format)
 
-- #### Fixed
+#### Fixed
 
 * `say`, `ask` and `transfer` now properly report the reason 'HANGUP' when forced to terminate due to far end disconnect.
 
@@ -44,18 +44,18 @@ This release improves consistency between API elements, makes it easier to work 
 
 ### Management & Monitoring
 
-- #### New
+#### New
 
--- Added HTTP and JMX interfaces for retrieving monitoring info.
+* Added HTTP and JMX interfaces for retrieving monitoring info.
 
--- You can now quiesce a server through HTTP or JMX.
+* You can now quiesce a server through HTTP or JMX.
 
--- You can now change logging level on running servers through JMX.
+* You can now change logging level on running servers through JMX.
 
--- Added call statistics for monitoring: total calls, outgoing calls, incoming calls, rejected, redirected, busy, timed out, failed, accepted, answered, and the count of active verbs
+* Added call statistics for monitoring: total calls, outgoing calls, incoming calls, rejected, redirected, busy, timed out, failed, accepted, answered, and the count of active verbs
 
--- Added Ozone message statistics for monitoring different message types, iq, call events, validation errors, all commands, presence and message stanzas received.
+* Added Ozone message statistics for monitoring different message types, iq, call events, validation errors, all commands, presence and message stanzas received.
 
--- Monitoring data includes build version information, quiesce status.
+* Monitoring data includes build version information, quiesce status.
 
 Go [here](https://github.com/tropo/tropo2/wiki/Tropo-2-Monitoring) for detailed info about Management & Monitoring.
