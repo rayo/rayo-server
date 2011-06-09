@@ -89,7 +89,21 @@
 		<dependency>
 			<groupId>cglib</groupId>
 			<artifactId>cglib-nodep</artifactId>
+		</dependency>		
+		<!-- JMS CDRs Storage -->
+		<dependency>
+            <groupId>javax.jms</groupId>
+            <artifactId>jms</artifactId>
+            <version>1.1</version>
 		</dependency>
+		<!-- ActiveMQ client. Only used for integration tests. 
+		     Scope can be changed if you plan to deliver messages to an Active MQ server  -->
+		<dependency>
+		    <groupId>org.apache.activemq</groupId>
+		    <artifactId>activemq-core</artifactId>
+		    <scope>test</scope>
+		</dependency>
+
 	</dependencies>
 	
 </project>

@@ -78,4 +78,9 @@ public class CdrManager {
 		
 		return cdrs.get(callId);
 	}
+	
+	public void reset() {
+		
+		cdrs.clear();
+	}
 }

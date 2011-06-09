@@ -9,7 +9,7 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 import com.tropo.server.AdminService;
 import com.voxeo.logging.Loggerf;
 
-@ManagedResource(objectName = "com.tropo:Type=Admin", description = "Admin Interface")
+@ManagedResource(objectName = "com.tropo:Type=Admin,name=Admin", description = "Admin Interface")
 public class Admin implements AdminMXBean {
 
 	private Loggerf log = Loggerf.getLogger(Admin.class);

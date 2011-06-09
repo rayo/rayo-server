@@ -192,8 +192,6 @@
   		<property name="path" value="/tmp/test.log"/>
   	</bean>
   	
-  	<!--  Uncomment to enable the JMS CDR Storage
-	
   	<util:map id="env" map-class="java.util.HashMap" key-type="java.lang.String" value-type="java.lang.String">
 		<entry>
 			<key><util:constant static-field="javax.naming.Context.INITIAL_CONTEXT_FACTORY"/></key>
@@ -201,7 +199,7 @@
 		</entry>
 		<entry>
 			<key><util:constant static-field="javax.naming.Context.PROVIDER_URL"/></key>
-			<value>tcp://localhost:61616</value>
+			<value>vm://localhost?broker.persistent=false</value>
 		</entry>
 	</util:map>
   	
@@ -210,9 +208,8 @@
   		  destroy-method="shutdown">
 		<property name="environment" ref="env"/>
 		<property name="connectionFactory" value="QueueConnectionFactory"/>
-		<property name="queue" value="example.A"/>
+		<property name="queue" value="dynamicQueues/cdr"/>
   	</bean>  	
-  	-->
   	
   	<bean id="cdrErrorHandler" class="com.tropo.server.cdr.DefaultErrorHandler"/>
   	<bean id="cdrManager" class="com.tropo.server.CdrManager">
@@ -220,7 +217,7 @@
   		<property name="storageStrategies">
   			<list>
   				<ref bean="fileCdrStorageStrategy"/>
-  				<!-- <ref bean="jmsCdrStorageStrategy"/> -->
+  				<ref bean="jmsCdrStorageStrategy"/>
   			</list>
   		</property>
   	</bean> 
