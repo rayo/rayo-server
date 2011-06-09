@@ -42,7 +42,7 @@ import com.voxeo.moho.media.output.OutputCommand
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations=["/tropo-context.xml"])
+@ContextConfiguration(locations=["/tropo-context-activemq-cdr.xml"])
 public class IntegrationTest {
 
     @Autowired
