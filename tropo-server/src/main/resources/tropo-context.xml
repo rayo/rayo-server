@@ -33,6 +33,7 @@
 		<property name="fiberFactory" ref="fiberFactory" />
 		<property name="verbManager" ref="verbManager" />
 		<property name="callStatistics" ref="callStatistics" />
+		<property name="cdrManager" ref="cdrManager" />
 	</bean>	
 
 	<!-- Call Manager: Responsible for maintaining the Call Registry and creating new CallActors -->

@@ -407,7 +407,7 @@ public class OzoneServlet extends XmppServlet {
     		Element resultPayload = (Element) result.elementIterator().next();
     		cdrManager.append(callId, resultPayload.asXML());
     	} else {	
-    		cdrManager.append(callId,"TODO: Empty IQ Result");
+    		cdrManager.append(callId,"<todo>TODO: Empty IQ Result</todo>");
     	}
     	sendIqResult(request, result);
     }

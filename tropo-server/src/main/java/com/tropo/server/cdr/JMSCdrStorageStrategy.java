@@ -11,7 +11,6 @@ import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.MessageProducer;
 import javax.jms.QueueConnectionFactory;
-import javax.jms.QueueReceiver;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.naming.InitialContext;
@@ -92,16 +91,9 @@ public class JMSCdrStorageStrategy implements CdrStorageStrategy {
 	@Override
 	public void store(Cdr cdr) throws CdrException {
 
-		StringBuilder builder = new StringBuilder(String.format(
-				"<cdr callId=\"%s\">", cdr.getCallId()));
-		for (String element : cdr.getTranscript()) {
-			builder.append(element);
-		}
-		builder.append("</xml>\n");
-
 		try {
 			lock.readLock().lock();
-	        TextMessage message = session.createTextMessage(builder.toString());
+	        TextMessage message = session.createTextMessage(cdr.toString());
 	        producer.send(message);
 		} catch (Exception e) {
 			logger.error("Error while sending CDR message", e.getMessage());

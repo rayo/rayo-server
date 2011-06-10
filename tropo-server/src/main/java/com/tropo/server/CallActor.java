@@ -62,6 +62,7 @@ public class CallActor extends ReflectiveActor implements Observer {
     private Call call;
     private VerbManager verbManager;
     private CallStatistics callStatistics;
+    private CdrManager cdrManager;
 
     // TODO: replace with Moho Call inspection when it becomes available
     private Direction direction;
@@ -366,6 +367,8 @@ public class CallActor extends ReflectiveActor implements Observer {
             } else {
                 end(reason);
             }
+            
+            cdrManager.end(call);
         }
     }
 
@@ -469,4 +472,8 @@ public class CallActor extends ReflectiveActor implements Observer {
     public void setCallStatistics(CallStatistics callStatistics) {
         this.callStatistics = callStatistics;
     }
+
+	public void setCdrManager(CdrManager cdrManager) {
+		this.cdrManager = cdrManager;
+	}
 }

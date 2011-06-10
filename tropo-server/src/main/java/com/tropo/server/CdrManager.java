@@ -23,10 +23,25 @@ public class CdrManager {
 	public Cdr create(Call call) {
 
 		Cdr cdr = new Cdr();
+		cdr.setStartTime(System.currentTimeMillis());
 		cdr.setCallId(call.getId());
+		cdr.setFrom(call.getInvitor().toString());
+		cdr.setTo(call.getInvitee().toString());
+		
 		cdrs.put(call.getId(),cdr);
 		
 		return cdr;
+	}
+	
+	public void end(Call call) {
+		
+		Cdr cdr = cdrs.get(call.getId());
+		if (cdr == null) {
+			logger.error("Could not find CDR for call id %s", call.getId());
+			return;
+		}
+		cdr.setEndTime(System.currentTimeMillis());
+		cdr.setState(call.getCallState().toString());
 	}
 	
 	public void append(String callId, String element) {
@@ -48,7 +63,6 @@ public class CdrManager {
 		}
 
 		for(CdrStorageStrategy storageStrategy: storageStrategies) {
-
 			try {
 				storageStrategy.store(cdr);
 			} catch (Exception e) {

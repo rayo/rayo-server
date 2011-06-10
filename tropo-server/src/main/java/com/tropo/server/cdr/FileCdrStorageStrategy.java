@@ -64,13 +64,8 @@ public class FileCdrStorageStrategy implements CdrStorageStrategy, FileCdrMXBean
 	public void store(Cdr cdr) throws CdrException {
 		
 		try {
-			StringBuilder builder = new StringBuilder(String.format("<cdr callId=\"%s\">", cdr.getCallId()));
-			for (String element: cdr.getTranscript()) {
-				builder.append(element);
-			}
-			builder.append("</xml>\n");
 			lock.readLock().lock();
-			out.write(builder.toString().getBytes());
+			out.write(cdr.toString().getBytes());
 			out.flush();
 		} catch (IOException e) {
 			throw new CdrException(e);
