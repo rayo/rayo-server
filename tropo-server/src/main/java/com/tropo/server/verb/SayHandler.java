@@ -4,6 +4,8 @@ import com.tropo.core.verb.PauseCommand;
 import com.tropo.core.verb.ResumeCommand;
 import com.tropo.core.verb.Say;
 import com.tropo.core.verb.SayCompleteEvent;
+import com.tropo.core.verb.Ssml;
+import com.tropo.core.verb.VerbCompleteEvent;
 import com.tropo.core.verb.SayCompleteEvent.Reason;
 import com.tropo.core.verb.VerbCommand;
 import com.voxeo.moho.State;
@@ -22,10 +24,11 @@ public class SayHandler extends AbstractLocalVerbHandler<Say> {
     @Override
     public void start() {
 
-        AudibleResource audibleResource = resolveAudio(model.getPrompt());
+        Ssml prompt = model.getPrompt();
+        AudibleResource audibleResource = resolveAudio(prompt);
         OutputCommand outcommand = new OutputCommand(audibleResource);
         outcommand.setBargein(false);
-        outcommand.setVoiceName(model.getVoice());
+        outcommand.setVoiceName(prompt.getVoice());
         
         output = media.output(outcommand);
         
@@ -36,7 +39,7 @@ public class SayHandler extends AbstractLocalVerbHandler<Say> {
 
     public void stop(boolean hangup) {
         if(hangup) {
-            complete(new SayCompleteEvent(model, Reason.HANGUP));
+            complete(new SayCompleteEvent(model, VerbCompleteEvent.Reason.HANGUP));
         }
         else {
             output.stop();
@@ -73,17 +76,15 @@ public class SayHandler extends AbstractLocalVerbHandler<Say> {
             complete(new SayCompleteEvent(model, Reason.SUCCESS));
             break;
         case DISCONNECT:
-            complete(new SayCompleteEvent(model, Reason.HANGUP));
+            complete(new SayCompleteEvent(model, VerbCompleteEvent.Reason.HANGUP));
             break;
         case CANCEL:
-            complete(new SayCompleteEvent(model, Reason.STOP));
+            complete(new SayCompleteEvent(model, VerbCompleteEvent.Reason.STOP));
             break;
         case ERROR:
         case UNKNOWN:
-            complete(new SayCompleteEvent(model, Reason.ERROR));
-            break;
         case TIMEOUT:
-            complete(new SayCompleteEvent(model, Reason.TIMEOUT));
+            complete(new SayCompleteEvent(model, VerbCompleteEvent.Reason.ERROR));
             break;
         }
     }

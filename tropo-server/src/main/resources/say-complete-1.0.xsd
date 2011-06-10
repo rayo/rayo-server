@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+	targetNamespace="urn:xmpp:ozone:say:complete:1"
+	xmlns:tns="urn:xmpp:ozone:say:complete:1" 
+	elementFormDefault="qualified">
+
+    <!-- Playback completed -->
+    <element name="success" type="tns:empty" />
+    
+    <!-- Utility: Empty Type -->
+    <simpleType name="empty">
+        <restriction base="string">
+            <enumeration value='' />
+        </restriction>
+    </simpleType>
+
+</schema>

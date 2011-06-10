@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" 
+	targetNamespace="urn:xmpp:ozone:ask:complete:1"
+	xmlns:tns="urn:xmpp:ozone:ask:complete:1" 
+	elementFormDefault="qualified">
+
+    <!-- Grammar Match -->
+    <element name="success" type="tns:empty" />
+    <complexType name="successType">
+        <sequence>
+            <element name="interpretation" type="string" />
+            <element name="utterance" type="string" />
+            <element name="tag" type="string" />
+			<!--  <element name="concept" type="string" /> -->
+			<!--  <element name="nlsml" type="string" /> -->
+        </sequence>
+        <attribute name="mode" type="tns:choicesModeType" />
+        <attribute name="confidence" type="tns:confidenceType" />
+    </complexType>
+    
+    <simpleType name="confidenceType">
+        <restriction base="float">
+            <minInclusive value="0" />
+            <maxInclusive value="1" />
+        </restriction>
+    </simpleType>
+    
+    <simpleType name="choicesModeType">
+        <restriction base="NCName">
+            <enumeration value="dtmf" />
+            <enumeration value="speech" />
+        </restriction>
+    </simpleType>
+
+    <!-- No Match -->
+    <element name="nomatch" type="tns:empty" />
+
+    <!-- Scilence Timeout -->
+    <element name="noinput" type="tns:empty" />
+
+    <!-- Input Timeout -->
+    <element name="timeout" type="tns:empty" />
+    
+    <!-- Utility: Empty Type -->
+    <simpleType name="empty">
+        <restriction base="string">
+            <enumeration value='' />
+        </restriction>
+    </simpleType>    
+	
+</schema>

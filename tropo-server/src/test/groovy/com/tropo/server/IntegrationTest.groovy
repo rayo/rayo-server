@@ -28,6 +28,7 @@ import com.tropo.core.verb.Say
 import com.tropo.core.verb.SayCompleteEvent
 import com.tropo.core.verb.Ssml
 import com.tropo.core.verb.StopCommand
+import com.tropo.core.verb.VerbCompleteEvent;
 import com.tropo.server.test.MockCall
 import com.tropo.server.test.MockMediaService
 import com.voxeo.exceptions.NotFoundException
@@ -149,7 +150,7 @@ public class IntegrationTest {
     @Test
     public void incomingCallAndReject() throws InterruptedException {
 
-        callActor.command(new RejectCommand([reason:CallRejectReason.DECLINED]), { messageQueue.add it } as ResponseHandler)
+        callActor.command(new RejectCommand([reason:CallRejectReason.DECLINE]), { messageQueue.add it } as ResponseHandler)
 
         // We should get a response from the reject command
         assertTrue poll().success
@@ -167,7 +168,7 @@ public class IntegrationTest {
     @Test
     public void publishFailsAfterDisposal() throws InterruptedException {
 
-        callActor.command(new RejectCommand([reason:CallRejectReason.DECLINED]), { messageQueue.add it } as ResponseHandler)
+        callActor.command(new RejectCommand([reason:CallRejectReason.DECLINE]), { messageQueue.add it } as ResponseHandler)
 
         poll() // Command Result
         poll() // EndEvent
@@ -188,7 +189,7 @@ public class IntegrationTest {
 
         CountDownLatch latch = new CountDownLatch(1)
         
-        callActor.command(new RejectCommand([reason:CallRejectReason.DECLINED]), {
+        callActor.command(new RejectCommand([reason:CallRejectReason.DECLINE]), {
             messageQueue.add it
             // Wait for Moho Event to be queued
             sleep 200
@@ -202,7 +203,7 @@ public class IntegrationTest {
         latch.await()
         
         // Do it again. This one should fail
-        callActor.command(new RejectCommand([reason:CallRejectReason.DECLINED]), { messageQueue.add it } as ResponseHandler)
+        callActor.command(new RejectCommand([reason:CallRejectReason.DECLINE]), { messageQueue.add it } as ResponseHandler)
 
         poll() // Command Result
         poll() // EndEvent
@@ -282,7 +283,7 @@ public class IntegrationTest {
 
         // We should get a say complete event
         SayCompleteEvent sayComplete = poll()
-        assertEquals SayCompleteEvent.Reason.STOP, sayComplete.reason
+        assertEquals VerbCompleteEvent.Reason.STOP, sayComplete.reason
         
         mohoCall.disconnect()
                 
@@ -324,7 +325,7 @@ public class IntegrationTest {
        
        // We should get a say complete event
        SayCompleteEvent sayComplete = poll()
-       assertEquals SayCompleteEvent.Reason.HANGUP, sayComplete.reason
+       assertEquals VerbCompleteEvent.Reason.HANGUP, sayComplete.reason
 
        // We should get an end event
        EndEvent end = poll()

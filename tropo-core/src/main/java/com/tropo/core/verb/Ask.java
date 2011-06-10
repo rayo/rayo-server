@@ -26,7 +26,7 @@ public class Ask extends BaseVerb {
     @NotEmpty(message=Messages.MISSING_CHOICES)
     private List<Choices> choices;
     
-    private InputMode mode = InputMode.both;
+    private InputMode mode = InputMode.ANY;
     
     @ValidRecognizer
     private String recognizer;

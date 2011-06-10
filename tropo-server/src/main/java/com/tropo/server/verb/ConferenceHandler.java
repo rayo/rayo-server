@@ -16,6 +16,7 @@ import com.tropo.core.verb.OnHoldEvent;
 import com.tropo.core.verb.Ssml;
 import com.tropo.core.verb.UnmuteCommand;
 import com.tropo.core.verb.VerbCommand;
+import com.tropo.core.verb.VerbCompleteEvent;
 import com.tropo.server.MohoUtil;
 import com.tropo.server.conference.ParticipantController;
 import com.voxeo.moho.Participant;
@@ -96,7 +97,7 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference> impl
     public void stop(boolean hangup) {
         try {
             preStop(hangup);
-            complete(new ConferenceCompleteEvent(model, hangup ? Reason.HANGUP : Reason.STOP));
+            complete(new ConferenceCompleteEvent(model, hangup ? VerbCompleteEvent.Reason.HANGUP : VerbCompleteEvent.Reason.STOP));
         }
         catch (RuntimeException e) {
             complete(new ConferenceCompleteEvent(model, e.getMessage()));

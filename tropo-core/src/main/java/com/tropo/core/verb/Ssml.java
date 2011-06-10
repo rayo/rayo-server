@@ -14,6 +14,8 @@ public class Ssml {
 	@NotEmpty(message=Messages.MISSING_SSML)
     private String ssml;
 
+    private String voice;
+
     public Ssml(String ssml) {
         this.ssml = ssml;
     }
@@ -26,6 +28,14 @@ public class Ssml {
         this.ssml = text;
     }
 
+    public void setVoice(String voice) {
+        this.voice = voice;
+    }
+
+    public String getVoice() {
+        return voice;
+    }    
+
     public URI toUri() {
         return URI.create("data:" + Networks.urlEncode("application/ssml+xml,<speak>" + getText() + "</speak>"));
     }
@@ -35,7 +45,9 @@ public class Ssml {
 
     	return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)    		
 			.append("ssml",ssml)
+			.append("voice",getVoice())
     		.append("uri",toUri())
     		.toString();
-    }    
+    }
+
 }

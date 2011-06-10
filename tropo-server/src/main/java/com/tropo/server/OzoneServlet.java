@@ -156,21 +156,19 @@ public class OzoneServlet extends XmppServlet {
 
             try {
 
-                Element iq = DocumentHelper.createElement("iq");
-                iq.addAttribute("type", "set");
+                Element eventStanza = DocumentHelper.createElement("presence");
 
                 // Resolve IQ.from
                 JID from = xmppFactory.createJID(event.getCallId() + "@" + jid.getDomain());
                 if (event instanceof VerbEvent) {
                     from.setResource(((VerbEvent) event).getVerbId());
                 }
-                iq.addAttribute("from", from.toString());
+                eventStanza.addAttribute("from", from.toString());
 
-                iq.add(eventElement);
+                eventStanza.add(eventElement);
 
                 // Send
-                XmppServletIQRequest request = session.createStanzaIQRequest(iq, null, null, null, null, null);
-                request.send();
+                session.createStanzaRequest(eventStanza, null, null, null, null, null).send();
 
             }
             catch (Exception e) {
@@ -251,9 +249,8 @@ public class OzoneServlet extends XmppServlet {
                             public void handle(Response response) throws Exception {
                                 if (response.isSuccess()) {
                                     CallRef callRef = (CallRef) response.getValue();
-                                    String callJid = callRef.getCallId() + "@" + request.getTo().getDomain();
-                                    result.addElement("ref","urn:xmpp:ozone:1").addAttribute("jid", callJid);
-                                    sendIqResult(callId, request, result);
+                                    result.addElement("ref","urn:xmpp:ozone:1").addAttribute("id", callRef.getCallId());
+                                    sendIqResult(request, result);
                                 }
                                 else {
                                     sendIqError(request, (Exception) response.getValue());
@@ -293,9 +290,9 @@ public class OzoneServlet extends XmppServlet {
                                 sendIqError(request, (Exception)value);
                             }
                             else if (value instanceof VerbRef) {
-                                String verbJid = request.getTo().getBareJID() + "/" + ((VerbRef) value).getVerbId();
-                                result.addElement("ref","urn:xmpp:ozone:1").addAttribute("jid", verbJid);
-                                sendIqResult(callId, request, result);
+                                String verbId = ((VerbRef) value).getVerbId();
+                                result.addElement("ref","urn:xmpp:ozone:1").addAttribute("id", verbId);
+                                sendIqResult(request, result);
                             } else {
                                 sendIqResult(callId, request, result);
                             }
@@ -317,30 +314,6 @@ public class OzoneServlet extends XmppServlet {
             }
             log.error("Exception processing IQ request", e);
             sendIqError(request, e);
-        }
-
-    }
-
-    @Override
-    protected void doIQResponse(XmppServletIQResponse request) throws ServletException, IOException {
-
-        WIRE.debug("%s :: %s", request.getElement().asXML(), request.getSession().getId());
-        ozoneStatistics.iqResponse();
-    	
-        // Extract Request and append elemnt to CDR's transcript
-        Element payload = (Element) request.getElement().elementIterator().next();
-        QName qname = payload.getQName();
-        if (qname.getNamespaceURI().startsWith("urn:xmpp:ozone")) {
-            String callId = request.getTo().getNode();
-            if (callId != null) {
-            	cdrManager.append(callId, payload.asXML());
-            }
-        }
-        
-        XmppStanzaError error = request.getError();
-        if (error != null) {
-            log.error("Client error, hanging up. [error=%s]", error.asXML());
-            fail(callId(request.getTo()));
         }
 
     }

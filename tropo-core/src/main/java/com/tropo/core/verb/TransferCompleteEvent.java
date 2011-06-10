@@ -3,7 +3,7 @@ package com.tropo.core.verb;
 public class TransferCompleteEvent extends VerbCompleteEvent {
 
     public enum Reason implements VerbCompleteReason {
-        SUCCESS, TIMEOUT, CANCEL, HANGUP, BUSY, REJECT, ERROR, STOPPED
+        TIMEOUT, TERMINATOR, BUSY, REJECT, SUCCESS
     }
 
     public TransferCompleteEvent() {}
@@ -12,25 +12,16 @@ public class TransferCompleteEvent extends VerbCompleteEvent {
         super(verb);
     }
 
-    public TransferCompleteEvent(Transfer verb, Reason reason) {
+    public TransferCompleteEvent(VerbCompleteReason reason) {
+        super(reason);
+    }
+
+    public TransferCompleteEvent(Transfer verb, VerbCompleteReason reason) {
         super(verb, reason);
     }
 
     public TransferCompleteEvent(Transfer verb, String errorText) {
-        super(verb, Reason.ERROR, errorText);
-    }
-
-    public Reason getReason() {
-        return (Reason)reason;
-    }
-
-    public void setReason(Reason reason) {
-        this.reason = reason;
-    }
-
-    @Override
-    public boolean isSuccess() {
-        return reason != Reason.ERROR;
+        super(verb, errorText);
     }
 
 }

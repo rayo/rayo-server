@@ -1,11 +1,21 @@
 package com.tropo.core.verb;
 
+import javax.validation.constraints.NotNull;
+
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
-public abstract class VerbCompleteEvent extends AbstractVerbEvent {
+import com.tropo.core.validation.Messages;
+
+public class VerbCompleteEvent extends AbstractVerbEvent {
+
+    public enum Reason implements VerbCompleteReason {
+        STOP, ERROR, HANGUP
+    }
 
     private String errorText;
+    
+    @NotNull(message=Messages.MISSING_COMPLETE_REASON)
     protected VerbCompleteReason reason;
 
     public VerbCompleteEvent() {}
@@ -13,7 +23,11 @@ public abstract class VerbCompleteEvent extends AbstractVerbEvent {
     public VerbCompleteEvent(Verb verb) {
         super(verb);
     }
-    
+
+    public VerbCompleteEvent(VerbCompleteReason reason) {
+        this.reason = reason;
+    }
+
     public VerbCompleteEvent(Verb verb, VerbCompleteReason reason) {
         super(verb);
         this.reason = reason;
@@ -22,6 +36,11 @@ public abstract class VerbCompleteEvent extends AbstractVerbEvent {
     public VerbCompleteEvent(Verb verb, VerbCompleteReason reason, String errorText) {
         super(verb);
         this.errorText = errorText;
+    }
+
+    public VerbCompleteEvent(Verb verb, String errorText) {
+        this(verb, Reason.ERROR, errorText);
+
     }
 
     public VerbCompleteReason getReason() {
@@ -40,8 +59,9 @@ public abstract class VerbCompleteEvent extends AbstractVerbEvent {
         this.errorText = errorText;
     }
 
-    public abstract boolean isSuccess();
-
+    public boolean isSuccess() {
+        return reason != VerbCompleteEvent.Reason.ERROR;
+    }
 
     @Override
     public String toString() {

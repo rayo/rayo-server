@@ -2,27 +2,24 @@
 <schema xmlns="http://www.w3.org/2001/XMLSchema" 
 	targetNamespace="urn:xmpp:ozone:say:1"
 	xmlns:tns="urn:xmpp:ozone:say:1" 
+	xmlns:util="urn:xmpp:ozone:util:1"
 	elementFormDefault="qualified">
 
     <!-- Import SSML Types -->
-    <include schemaLocation="http://www.w3.org/TR/speech-synthesis/synthesis-core.xsd" />
+    <import namespace="urn:xmpp:ozone:util:1" schemaLocation="ozone-util-1.0.xsd" />
     
     <!-- Main Componenet -->
-    <element name="say" type="tns:speak"></element>
-
-    <complexType name="say">
-        <complexContent>
-            <extension base="tns:speak">
-                <attribute name="voice" type="string" />
-            </extension>
-        </complexContent>
-    </complexType>
+    <element name="say" type="util:ssmlType" />
 
     <!-- Commands -->
-    <element name="pause" />
-    <element name="resume" />
+    <element name="pause" type="tns:empty" />
+    <element name="resume" type="tns:empty" />
     
-    <!-- Events -->
-    <element name="complete" />
+    <!-- Utility: Empty Type -->
+    <simpleType name="empty">
+        <restriction base="string">
+            <enumeration value='' />
+        </restriction>
+    </simpleType>
 
 </schema>

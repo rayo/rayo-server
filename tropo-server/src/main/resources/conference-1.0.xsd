@@ -1,17 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schema xmlns="http://www.w3.org/2001/XMLSchema" 
-	targetNamespace="urn:xmpp:ozone:conference:1"
-	xmlns:tns="urn:xmpp:ozone:conference:1" 
-	elementFormDefault="qualified">
+    targetNamespace="urn:xmpp:ozone:conference:1" 
+    xmlns:tns="urn:xmpp:ozone:conference:1" 
+    xmlns:util="urn:xmpp:ozone:util:1"
+    elementFormDefault="qualified">
 
+	<!-- Import SSML Types -->
+	<import namespace="urn:xmpp:ozone:util:1" schemaLocation="ozone-util-1.0.xsd" />
+
+	<!-- Main Component -->
 	<element name="conference" type="tns:conferenceType" />
-
 	<complexType name="conferenceType">
-		<attribute name="id" type="string" use="required" />
-		<attribute name="beep" type="boolean" use="optional" />
+        <sequence>
+            <element name="announcement" type="util:ssmlType" />
+            <element name="music" type="util:ssmlType" />
+        </sequence>
+		<attribute name="name" type="string" use="required" />
 		<attribute name="mute" type="boolean" use="optional" />
-		<attribute name="tone-passthrough" type="boolean" use="optional" />
 		<attribute name="terminator" type="string" use="optional" />
+		<attribute name="tone-passthrough" type="boolean" use="optional" />
+		<attribute name="moderator" type="boolean" use="optional" />
 	</complexType>
 
+    <!-- Commands -->
+    <element name="mute" type="tns:empty" />
+    <element name="unmute" type="tns:empty" />
+    <element name="kick" type="tns:empty" />
+
+    <!-- Events -->
+    <element name="on-hold" type="tns:empty" />
+    <element name="off-hold" type="tns:empty" />
+    
+    <!-- Utility: Empty Type -->
+    <simpleType name="empty">
+        <restriction base="string">
+            <enumeration value='' />
+        </restriction>
+    </simpleType>
+ 
 </schema>

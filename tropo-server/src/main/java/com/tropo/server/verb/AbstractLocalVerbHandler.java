@@ -2,6 +2,7 @@ package com.tropo.server.verb;
 
 import java.net.URI;
 
+import com.tropo.core.verb.InputMode;
 import com.tropo.core.verb.Ssml;
 import com.tropo.core.verb.Verb;
 import com.tropo.core.verb.VerbCommand;
@@ -55,6 +56,33 @@ public abstract class AbstractLocalVerbHandler<T extends Verb> implements VerbHa
             }
         };
     }
+    
+    protected com.voxeo.moho.media.InputMode getMohoMode(InputMode mode) {
+        switch(mode) {
+            case ANY:
+                return com.voxeo.moho.media.InputMode.both;
+            case DTMF:
+                return com.voxeo.moho.media.InputMode.dtmf;
+            case VOICE:
+                return com.voxeo.moho.media.InputMode.voice;
+            default:
+                throw new UnsupportedOperationException("Mode not supported: " + mode);
+        }
+    }
+    
+    protected InputMode getTropoMode(com.voxeo.moho.media.InputMode mode) {
+        switch(mode) {
+            case both:
+                return InputMode.ANY;
+            case dtmf:
+                return InputMode.DTMF;
+            case voice:
+                return InputMode.VOICE;
+            default:
+                throw new UnsupportedOperationException("Mode not supported: " + mode);
+        }
+    }
+    
 
     protected OutputCommand output(Ssml items) {
         return new OutputCommand(resolveAudio(items));

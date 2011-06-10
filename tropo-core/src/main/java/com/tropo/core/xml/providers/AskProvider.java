@@ -13,51 +13,51 @@ import org.dom4j.QName;
 
 import com.tropo.core.verb.Ask;
 import com.tropo.core.verb.AskCompleteEvent;
+import com.tropo.core.verb.InputMode;
+import com.tropo.core.verb.AskCompleteEvent.Reason;
 import com.tropo.core.verb.Choices;
 
 public class AskProvider extends BaseProvider {
 
-    @Override
-    protected Object processElement(Element element) throws Exception {
+    private static final Namespace NAMESPACE = new Namespace("", "urn:xmpp:ozone:ask:1");
+    private static final Namespace COMPLETE_NAMESPACE = new Namespace("", "urn:xmpp:ozone:ask:complete:1");
 
-        if (element.getName().equals("ask")) {
+	@Override
+	protected Object processElement(Element element) throws Exception {
+		if (element.getName().equals("ask")) {
             return buildAsk(element);
-        } else if (element.getName().equals("complete")) {
+        } else if (element.getNamespace().equals(COMPLETE_NAMESPACE)) {
             return buildCompleteCommand(element);
         }
         return null;
     }
 
     private Object buildCompleteCommand(Element element) throws URISyntaxException {
+    	
+    	AskCompleteEvent event = new AskCompleteEvent();
 
-        AskCompleteEvent askComplete = new AskCompleteEvent();
-        if (element.attributeValue("reason") != null) {
-            askComplete.setReason(AskCompleteEvent.Reason.valueOf(element.attributeValue("reason")));
-        }
-        if (element.element("error") != null) {
-            askComplete.setErrorText(element.elementText("error"));
-        }
-        if (element.attributeValue("concept") != null) {
-            askComplete.setConcept(element.attributeValue("concept"));
-        }
-        if (element.attributeValue("interpretation") != null) {
-            askComplete.setInterpretation(element.attributeValue("interpretation"));
-        }
-        if (element.attributeValue("nlsml") != null) {
-            askComplete.setNlsml(element.attributeValue("nlsml"));
-        }
+    	String reasonValue = element.getName().toUpperCase();
+        Reason reason = Reason.valueOf(reasonValue);
+        event.setReason(reason);
+
         if (element.attributeValue("confidence") != null) {
-            askComplete.setConfidence(toFloatConfidence(element.attributeValue("confidence")));
+            event.setConfidence(toFloatConfidence(element.attributeValue("confidence")));           
         }
-        if (element.attributeValue("tag") != null) {
-            askComplete.setTag(element.attributeValue("tag"));
-        }
-        if (element.attributeValue("utterance") != null) {
-            askComplete.setUtterance(element.attributeValue("utterance"));
+        if (element.attributeValue("mode") != null) {
+            String modeValue = element.attributeValue("mode").toUpperCase();
+            InputMode mode = InputMode.valueOf(modeValue);
+            event.setMode(mode);           
         }
 
-        return askComplete;
-    }
+        if (element.element("interpretation") != null) {
+            event.setInterpretation(element.element("interpretation").getText());          
+        }
+        if (element.element("utterance") != null) {
+            event.setUtterance(element.element("utterance").getText());            
+        }
+    	
+    	return event;
+    }	
 
     @SuppressWarnings("unchecked")
     private Object buildAsk(Element element) throws URISyntaxException {
@@ -109,18 +109,16 @@ public class AskProvider extends BaseProvider {
 
     @Override
     protected void generateDocument(Object object, Document document) throws Exception {
-
-        if (object instanceof Ask) {
-            createAsk(object, document);
+    	if (object instanceof Ask) {
+            createAsk((Ask)object, document);
         } else if (object instanceof AskCompleteEvent) {
-            createAskCompleteEvent(object, document);
+            createAskCompleteEvent((AskCompleteEvent)object, document);
         }
     }
 
-    private Document createAsk(Object object, Document document) throws Exception {
+    private void createAsk(Ask ask, Document document) throws Exception {
 
-        Ask ask = (Ask) object;
-        Element root = document.addElement(new QName("ask", new Namespace("", "urn:xmpp:ozone:ask:1")));
+        Element root = document.addElement(new QName("ask", NAMESPACE));
         if (ask.getVoice() != null) {
             root.addAttribute("voice", ask.getVoice());
         }
@@ -146,7 +144,7 @@ public class AskProvider extends BaseProvider {
         }
         root.addAttribute("min-confidence", String.valueOf(ask.getMinConfidence()));
         if (ask.getMode() != null) {
-            root.addAttribute("mode", ask.getMode().toString());
+            root.addAttribute("mode", ask.getMode().name().toLowerCase());
         }
         if (ask.getRecognizer() != null) {
             root.addAttribute("recognizer", ask.getRecognizer());
@@ -159,42 +157,48 @@ public class AskProvider extends BaseProvider {
         }
         root.addAttribute("bargein", String.valueOf(ask.isBargein()));
 
-        return document;
     }
 
-    private Document createAskCompleteEvent(Object object, Document document) throws Exception {
+    private void createAskCompleteEvent(AskCompleteEvent event, Document document) throws Exception {
 
-        AskCompleteEvent askComplete = (AskCompleteEvent) object;
-        Element root = document.addElement(new QName("complete", new Namespace("", "urn:xmpp:ozone:ask:1")));
-        if (askComplete.getReason() != null) {
-            root.addAttribute("reason", askComplete.getReason().toString());
+        Element completeElement = addCompleteElement(document, event, COMPLETE_NAMESPACE);
+        
+        if(event.getReason() instanceof Reason) {
+            Reason reason = (Reason)event.getReason();
+            if(reason == Reason.SUCCESS) {
+                
+                completeElement.addAttribute("confidence", String.valueOf(event.getConfidence()));
+                
+                if(event.getMode()!= null) {
+                    completeElement.addAttribute("mode", event.getMode().name().toLowerCase());
+                }
+                if (event.getInterpretation() != null) {
+                    completeElement.addElement("interpretation").setText(event.getInterpretation());
+                }
+                if (event.getUtterance() != null) {
+                    completeElement.addElement("utterance").setText(event.getUtterance());
+                }
+
+                // Not sure about these yet so comment them out
+                //if (event.getTag() != null) {
+                //    completeElement.addElement("tag").setText(event.getTag());
+                //}
+                //if (event.getConcept() != null) {
+                //    completeElement.addElement("concept").setText(event.getConcept());
+                //}
+                //if (event.getNlsml() != null) {
+                //    completeElement.addElement("nlsml").setText(event.getNlsml());
+                //}
+                
+            }
         }
-        if (askComplete.getConcept() != null) {
-            root.addAttribute("concept", askComplete.getConcept());
-        }
-        if (askComplete.getInterpretation() != null) {
-            root.addAttribute("interpretation", askComplete.getInterpretation());
-        }
-        if (askComplete.getNlsml() != null) {
-            root.addAttribute("nlsml", askComplete.getNlsml());
-        }
-        root.addAttribute("confidence", String.valueOf(askComplete.getConfidence()));
-        if (askComplete.getTag() != null) {
-            root.addAttribute("tag", askComplete.getTag());
-        }
-        if (askComplete.getUtterance() != null) {
-            root.addAttribute("utterance", askComplete.getUtterance());
-        }
-        if (askComplete.getErrorText() != null) {
-            root.addElement("error").setText(askComplete.getErrorText());
-        }
-        return document;
     }
 
-    @Override
-    public boolean handles(Class<?> clazz) {
-
-        //TODO: Refactor out to spring configuration and put everything in the base provider class
-        return clazz == Ask.class || clazz == AskCompleteEvent.class;
-    }
+	@Override
+	public boolean handles(Class<?> clazz) {
+		//TODO: Refactor out to spring configuration and put everything in the base provider class
+		return clazz == Ask.class ||
+			   clazz == AskCompleteEvent.class;
+	}
+	
 }

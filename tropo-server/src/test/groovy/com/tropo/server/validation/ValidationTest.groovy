@@ -145,7 +145,7 @@ class ValidationTest {
 	@Test
 	public void validateAskInvalidTimeout() {
 				
-		def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" mode="both" timeout="aaaa" voice=\"allison\"><choices>sales,support</choices><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
+		def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" mode="any" timeout="aaaa" voice=\"allison\"><choices>sales,support</choices><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
 		
 		def errorMapping = assertValidationException(ask)
 		assertNotNull errorMapping

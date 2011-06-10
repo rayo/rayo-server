@@ -7,7 +7,7 @@ import org.apache.commons.lang.builder.ToStringStyle;
 public class AskCompleteEvent extends VerbCompleteEvent {
 
     public enum Reason implements VerbCompleteReason {
-        SUCCESS, NOMATCH, NOINPUT, TIMEOUT, STOP, ERROR, HANGUP
+        SUCCESS, NOMATCH, NOINPUT, TIMEOUT
     }
 
     private String concept;
@@ -16,6 +16,7 @@ public class AskCompleteEvent extends VerbCompleteEvent {
     private String nlsml;
     private String tag;
     private float confidence;
+    private InputMode mode;
 
     public AskCompleteEvent() {}
     
@@ -23,12 +24,16 @@ public class AskCompleteEvent extends VerbCompleteEvent {
         super(verb);
     }
     
-    public AskCompleteEvent(Ask verb, Reason reason) {
+    public AskCompleteEvent(VerbCompleteReason reason) {
+        super(reason);
+    }
+    
+    public AskCompleteEvent(Ask verb, VerbCompleteReason reason) {
         super(verb, reason);
     }
     
     public AskCompleteEvent(Ask verb, String errorText) {
-        super(verb, Reason.ERROR, errorText);
+        super(verb, errorText);
     }
 
     public String getConcept() {
@@ -81,7 +86,7 @@ public class AskCompleteEvent extends VerbCompleteEvent {
 
     @Override
     public boolean isSuccess() {
-        return reason != Reason.ERROR;
+        return reason == Reason.SUCCESS;
     }
 
     @Override
@@ -99,5 +104,13 @@ public class AskCompleteEvent extends VerbCompleteEvent {
     		.append("interpretation",interpretation)
     		.append("tag",tag)
     		.toString();
+    }
+
+    public void setMode(InputMode mode) {
+        this.mode = mode;
+    }
+
+    public InputMode getMode() {
+        return mode;
     }
 }

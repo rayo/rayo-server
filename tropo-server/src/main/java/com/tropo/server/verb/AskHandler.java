@@ -7,9 +7,9 @@ import com.tropo.core.verb.AskCompleteEvent;
 import com.tropo.core.verb.AskCompleteEvent.Reason;
 import com.tropo.core.verb.Choices;
 import com.tropo.core.verb.Ssml;
+import com.tropo.core.verb.VerbCompleteEvent;
 import com.voxeo.moho.State;
 import com.voxeo.moho.event.InputCompleteEvent;
-import com.voxeo.moho.media.InputMode;
 import com.voxeo.moho.media.Prompt;
 import com.voxeo.moho.media.input.Grammar;
 import com.voxeo.moho.media.input.InputCommand;
@@ -52,7 +52,7 @@ public class AskHandler extends AbstractLocalVerbHandler<Ask> {
         inputCommand.setInitialTimeout(timeout);
         inputCommand.setInterSigTimeout(timeout);
         inputCommand.setSpeechLanguage(model.getRecognizer());
-        inputCommand.setInputMode(InputMode.valueOf(model.getMode().name()));
+        inputCommand.setInputMode(getMohoMode(model.getMode()));
         inputCommand.setTermChar(model.getTerminator());
         inputCommand.setConfidence(model.getMinConfidence());
 
@@ -90,6 +90,7 @@ public class AskHandler extends AbstractLocalVerbHandler<Ask> {
             completeEvent.setUtterance(event.getUtterance());
             completeEvent.setNlsml(event.getNlsml());
             completeEvent.setTag(event.getTag());
+            completeEvent.setMode(getTropoMode(event.getInputMode()));
             break;
         case INI_TIMEOUT:
             completeEvent = new AskCompleteEvent(model, Reason.NOINPUT);
@@ -102,15 +103,15 @@ public class AskHandler extends AbstractLocalVerbHandler<Ask> {
             completeEvent = new AskCompleteEvent(model, Reason.NOMATCH);
             break;
         case CANCEL:
-            completeEvent = new AskCompleteEvent(model, Reason.STOP);
+            completeEvent = new AskCompleteEvent(model, VerbCompleteEvent.Reason.STOP);
             break;
         case DISCONNECT:
-            completeEvent = new AskCompleteEvent(model, Reason.HANGUP);
+            completeEvent = new AskCompleteEvent(model, VerbCompleteEvent.Reason.HANGUP);
             break;
         case ERROR:
         case UNKNOWN:
         default:
-            completeEvent = new AskCompleteEvent(model, "Could not complete Ask at this time.");
+            completeEvent = new AskCompleteEvent(model, "Internal Server Error");
         }
         
         complete(completeEvent);
