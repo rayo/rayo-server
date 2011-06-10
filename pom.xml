@@ -92,6 +92,12 @@
   			<scope>provided</scope>
   		</dependency>
   		<dependency>
+  			<groupId>com.voxeo</groupId>
+  			<artifactId>msctrl-spi</artifactId>
+  			<version>10_0_2_C201103190002_0</version>
+  			<scope>provided</scope>
+  		</dependency>
+  		<dependency>
   			<groupId>com.voxeo.xmpp</groupId>
   			<artifactId>xmppservlet-api</artifactId>
   			<version>1.0</version>
