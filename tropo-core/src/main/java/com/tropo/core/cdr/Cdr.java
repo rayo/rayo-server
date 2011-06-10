@@ -73,19 +73,36 @@ public class Cdr implements Serializable {
 	public String toString() {
 		
 		StringBuilder builder = new StringBuilder(String.format(
-				"<cdr callId=\"%s\" from=\"%s\" to=\"%s\" start=\"%s\" end=\"%s\" state=\"%s\">", 
+				"<cdr callId=\"%s\" from=\"%s\" to=\"%s\" start=\"%s\" end=\"%s\" state=\"%s\" xmlns=\"http://tropo.com/schema/cdr\"  xmlns:cdr=\"http://tropo.com/schema/cdr\">", 
 				getCallId(), getFrom(), getTo(), 
 				formatDate(new Date(getStartTime())), formatDate(new Date(getEndTime())), getState()
 		));
 		for (String element: getTranscript()) {
-			builder.append(element);
+			builder.append(addTimestamp(element));
 		}
 		builder.append("</cdr>\n");	
 		
 		return builder.toString();
 	}
 	
+	private String addTimestamp(String element) {
+		
+		int i = element.indexOf('>');
+		if (i == element.length()-1) {
+			i--;
+		}
+		StringBuffer builder = new StringBuffer(element.substring(0,i));
+		if (! (builder.charAt(builder.length()-1) == ' ')) {
+			builder.append(' ');
+		}
+		builder.append(String.format("cdr:ts=\"%s\"", formatDate(new Date())));
+		builder.append(element.substring(i));
+		
+		return builder.toString();
+	}
+	
 	private String formatDate(Date date) {
+		
 		return DateFormatUtils.format(new Date(), "yyyy-dd-MM hh:mm:ss.SZ");
 	}
 }
