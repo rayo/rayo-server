@@ -1,5 +1,9 @@
 package com.tropo.server.cdr
 
+import java.io.IOException;
+
+import com.tropo.core.cdr.Cdr;
+import com.tropo.core.cdr.CdrException;
 
 import static org.junit.Assert.*
 
@@ -157,6 +161,41 @@ public class CdrTest {
 		cdrManager.store(mohoCall.id)
                 
 		assertNull cdrManager.getCdr(mohoCall.id)
+	}
+	
+	@Test
+	public void testErrorHandler() {
+		
+		def oldStrategies = cdrManager.storageStrategies
+		def oldErrorHandler = cdrManager.errorHandler
+		
+		try {
+			def exceptionStrategy = new CdrStorageStrategy() {
+				public void init() throws IOException {}
+				public void store(Cdr cdr) throws CdrException {
+					throw new CdrException("Always fails")
+				}
+				public void shutdown() {}
+			}
+			cdrManager.storageStrategies = [exceptionStrategy]
+			
+			def errors = 0
+			def countErrorHandler = new CdrErrorHandler() {
+				public void handleException(Exception e) {
+					errors++
+				}
+			}
+			cdrManager.errorHandler = countErrorHandler
+			
+			mohoCall.disconnect()
+			cdrManager.store(mohoCall.id)
+
+			assertEquals errors,1
+						
+		} finally {
+			cdrManager.storageStrategies = oldStrategies
+			cdrManager.errorHandler = oldErrorHandler
+		}
 	}
    
     def poll = {
