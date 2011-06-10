@@ -173,7 +173,7 @@ public abstract class BaseProvider implements XmlProvider {
     protected Duration toTimeout(String value) {
 
         try {
-            return new Duration(value);
+            return new Duration(Long.parseLong(value));
         } catch (IllegalArgumentException iae) {
             throw new ValidationException(Messages.INVALID_TIMEOUT);
         }
