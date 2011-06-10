@@ -28,6 +28,8 @@ import com.tropo.server.CallRegistry
 import com.tropo.server.CdrManager
 import com.tropo.server.EventHandler
 import com.tropo.server.test.MockCall
+import com.tropo.server.test.MockCdrErrorHandler;
+import com.tropo.server.test.MockCdrExceptionStrategy;
 import com.tropo.server.test.MockMediaService
 import com.voxeo.moho.Call
 
@@ -170,28 +172,16 @@ public class CdrTest {
 		def oldErrorHandler = cdrManager.errorHandler
 		
 		try {
-			def exceptionStrategy = new CdrStorageStrategy() {
-				public void init() throws IOException {}
-				public void store(Cdr cdr) throws CdrException {
-					throw new CdrException("Always fails")
-				}
-				public void shutdown() {}
-			}
-			cdrManager.storageStrategies = [exceptionStrategy]
+			cdrManager.storageStrategies = [new MockCdrExceptionStrategy()]
+			cdrManager.errorHandler = new MockCdrErrorHandler()
 			
-			def errors = 0
-			def countErrorHandler = new CdrErrorHandler() {
-				public void handleException(Exception e) {
-					errors++
-				}
-			}
-			cdrManager.errorHandler = countErrorHandler
-			
+			assertEquals cdrManager.errorHandler.errors,0
 			mohoCall.disconnect()
 			cdrManager.store(mohoCall.id)
 
-			assertEquals errors,1
-						
+			assertEquals cdrManager.errorHandler.errors,1
+		} catch (Exception e) {
+		e.printStackTrace()
 		} finally {
 			cdrManager.storageStrategies = oldStrategies
 			cdrManager.errorHandler = oldErrorHandler
