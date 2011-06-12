@@ -1,6 +1,6 @@
 # Changelog
 
-## Build 162 / Released 2011-06-03
+## Build 188 / Released 2011-06-10
 
 This release improves consistency between API elements, makes it easier to work with complete events, simplifies the API by reducing unnecessary element nesting, adds some future-proofing to naming and call IDs, and also adds management and monitoring of cluster status through HTTP and JMX APIs.
 
@@ -57,5 +57,7 @@ This release improves consistency between API elements, makes it easier to work 
     * Added Ozone message statistics for monitoring different message types, iq, call events, validation errors, all commands, presence and message stanzas received.
 
     * Monitoring data includes build version information, quiesce status.
+
+    * New CDRs: available via file storage and amqp
 
 Go [here](https://github.com/tropo/tropo2/wiki/Tropo-2-Monitoring) for detailed info about Management & Monitoring.

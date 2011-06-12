@@ -333,6 +333,7 @@ public class CallActor extends ReflectiveActor implements Observer {
     @com.voxeo.moho.State
     public void onCallComplete(CallCompleteEvent event) throws Exception {
         if (event.getSource().equals(call)) {
+            cdrManager.end(call);
             Reason reason = null;
             switch (event.getCause()) {
             case BUSY:
@@ -366,9 +367,7 @@ public class CallActor extends ReflectiveActor implements Observer {
                 end(reason, event.getException());
             } else {
                 end(reason);
-            }
-            
-            cdrManager.end(call);
+            }            
         }
     }
 
