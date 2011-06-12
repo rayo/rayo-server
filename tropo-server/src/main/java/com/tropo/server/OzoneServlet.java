@@ -226,14 +226,6 @@ public class OzoneServlet extends XmppServlet {
                 }
                 else if (qname.getNamespaceURI().startsWith("urn:xmpp:ozone")) {
 
-                    // Extract Call ID
-                    final String callId = request.getTo().getNode();
-                    if (callId == null) {
-                    	throw new IllegalArgumentException("Call id cannot be null");
-                    }
-                    
-                    cdrManager.append(callId, payload.asXML());
-                    
                     Object command = provider.fromXML(payload);
                     ozoneStatistics.commandReceived(command);
 
@@ -265,7 +257,15 @@ public class OzoneServlet extends XmppServlet {
                     
                     final CallCommand callCommand = (CallCommand) command;
                                         
+                    // Extract Call ID
+                    final String callId = request.getTo().getNode();
+                    if (callId == null) {
+                        throw new IllegalArgumentException("Call id cannot be null");
+                    }
                     callCommand.setCallId(callId);
+
+                    // Log the message
+                    cdrManager.append(callId, payload.asXML());
                     
                     // Find the call actor
                     CallActor actor = findCallActor(callCommand.getCallId());
