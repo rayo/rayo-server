@@ -15,8 +15,6 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.naming.InitialContext;
 
-import org.springframework.jmx.export.annotation.ManagedResource;
-
 import com.tropo.core.cdr.Cdr;
 import com.tropo.core.cdr.CdrException;
 import com.voxeo.logging.Loggerf;
