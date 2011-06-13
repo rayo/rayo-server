@@ -21,7 +21,6 @@ import com.tropo.core.cdr.Cdr;
 import com.tropo.core.cdr.CdrException;
 import com.voxeo.logging.Loggerf;
 
-@ManagedResource(objectName = "com.tropo:Type=Admin,name=JMS CDR", description = "JMS based CDR storage")
 public class JMSCdrStorageStrategy implements CdrStorageStrategy {
 
 	private Loggerf logger = Loggerf.getLogger(JMSCdrStorageStrategy.class);
