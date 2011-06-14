@@ -16,7 +16,7 @@ import com.tropo.core.cdr.CdrException;
 import com.tropo.server.jmx.AmqpCdrMXBean;
 import com.voxeo.logging.Loggerf;
 
-@ManagedResource(objectName = "com.tropo:Type=Admin,name=AMQP CDR", description = "AMQP based CDR storage")
+@ManagedResource(objectName = "com.tropo:Type=Admin,name=Amqp CDR", description = "AMQP based CDR storage")
 public class AmqpCdrStorageStrategy implements CdrStorageStrategy, AmqpCdrMXBean {
 
 	private Loggerf logger = Loggerf.getLogger(AmqpCdrStorageStrategy.class);

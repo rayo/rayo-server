@@ -230,7 +230,7 @@
   		  <property name="port" value="6222"/>
   		  <property name="username" value="admin"/>
   		  <property name="password" value="admin"/>
-  		  <property name="node" value="tropo-cdr-5"/>
+  		  <property name="node" value="tropo-cdr"/>
   	</bean>
   	-->
   	
