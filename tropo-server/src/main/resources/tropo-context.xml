@@ -221,6 +221,18 @@
   	</bean>  	
   	-->
   	
+  	<!-- Uncomment to enable the Xmpp PubSub based CDR Storage
+  	
+  	<bean id="xmppCdrStorageStrategy" class="com.tropo.server.cdr.XmppCdrStorageStrategy"
+  		  init-method="init"
+  		  destroy-method="shutdown">
+  		  <property name="server" value="localhost"/>
+  		  <property name="port" value="6222"/>
+  		  <property name="username" value="admin"/>
+  		  <property name="password" value="admin"/>
+  		  <property name="node" value="tropo-cdr-5"/>
+  	</bean>
+  	-->
   	<bean id="cdrErrorHandler" class="com.tropo.server.cdr.DefaultErrorHandler"/>
   	<bean id="cdrManager" class="com.tropo.server.CdrManager">
   		<property name="errorHandler" ref="cdrErrorHandler"/>
@@ -228,6 +240,7 @@
   			<list>
   				<ref bean="fileCdrStorageStrategy"/>
   				<!-- <ref bean="jmsCdrStorageStrategy"/> -->
+  				<!-- <ref bean="xmppCdrStorageStrategy"/>  -->
   			</list>
   		</property>
   	</bean> 

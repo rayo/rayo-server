@@ -25,8 +25,8 @@ public class CdrManager {
 		Cdr cdr = new Cdr();
 		cdr.setStartTime(System.currentTimeMillis());
 		cdr.setCallId(call.getId());
-		cdr.setFrom(call.getInvitor().toString());
-		cdr.setTo(call.getInvitee().toString());
+		cdr.setFrom(call.getInvitor().getURI().toString());
+		cdr.setTo(call.getInvitee().getURI().toString());
 		
 		cdrs.put(call.getId(),cdr);
 		
