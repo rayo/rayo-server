@@ -19,6 +19,11 @@
       <name>Uncle Voxeo's Public Maven Repo</name>
       <url>http://maven.voxeo.net/nexus/content/groups/public</url>
     </repository>
+    <repository>
+      <id>glassfish-maven-repository'</id>
+      <name>Glassfish Maven Repository</name>
+      <url>http://maven.glassfish.org/content/repositories/maven.hudson-labs.org</url>
+    </repository>
   </repositories>  
   
   <dependencyManagement>
@@ -171,7 +176,23 @@
         <artifactId>nist-sdp</artifactId>
         <version>1.0</version>
         <scope>test</scope>
+      </dependency>
+      <dependency>
+	<groupId>jivesoftware</groupId>
+	<artifactId>smack</artifactId>
+	<version>3.2.0</version>	
+      </dependency>		
+      <dependency>
+	<groupId>jivesoftware</groupId>
+	<artifactId>smackx</artifactId>
+	<version>3.2.0</version>	
       </dependency>      
+      <!-- AMQP CDR delivery -->
+      <dependency>
+        <groupId>com.rabbitmq</groupId>
+        <artifactId>amqp-client</artifactId>
+        <version>2.4.1</version>
+      </dependency>
     </dependencies>
   </dependencyManagement>
   

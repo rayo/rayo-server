@@ -13,6 +13,7 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 
 import com.tropo.core.cdr.Cdr;
 import com.tropo.core.cdr.CdrException;
+import com.tropo.server.jmx.FileCdrMXBean;
 import com.voxeo.logging.Loggerf;
 
 @ManagedResource(objectName = "com.tropo:Type=Admin,name=File CDR", description = "Filebased CDR storage")

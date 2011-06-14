@@ -29,7 +29,7 @@ public class Cdr implements Serializable {
 	
 	public void add(String element) {
 		
-		transcript.add(element);
+		transcript.add(timestamp(element));
 	}
 	
 	public List<String> getTranscript() {
@@ -78,14 +78,14 @@ public class Cdr implements Serializable {
 				formatDate(new Date(getStartTime())), formatDate(new Date(getEndTime())), getState()
 		));
 		for (String element: getTranscript()) {
-			builder.append(addTimestamp(element));
+			builder.append(element);
 		}
 		builder.append("</cdr>\n");	
 		
 		return builder.toString();
 	}
 	
-	private String addTimestamp(String element) {
+	private String timestamp(String element) {
 		
 		int i = element.indexOf('>');
 		if (i == element.length()-1) {

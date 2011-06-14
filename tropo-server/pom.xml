@@ -103,7 +103,20 @@
 		    <artifactId>activemq-core</artifactId>
 		    <scope>test</scope>
 		</dependency>
-
+		<!-- Xmpp-based CDR delivery -->
+		<dependency>
+			<groupId>jivesoftware</groupId>
+			<artifactId>smack</artifactId>
+		</dependency>		
+		<dependency>
+			<groupId>jivesoftware</groupId>
+			<artifactId>smackx</artifactId>
+		</dependency>
+		<!-- AMQP CDR delivery -->
+		<dependency>
+		  <groupId>com.rabbitmq</groupId>
+		  <artifactId>amqp-client</artifactId>
+		  <version>2.4.1</version>
+		</dependency>				
 	</dependencies>
-	
 </project>

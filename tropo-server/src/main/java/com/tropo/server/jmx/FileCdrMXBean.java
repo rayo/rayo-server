@@ -1,4 +1,4 @@
-package com.tropo.server.cdr;
+package com.tropo.server.jmx;
 
 public interface FileCdrMXBean {
 
