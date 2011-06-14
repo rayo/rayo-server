@@ -35,6 +35,7 @@ public class VerbCompleteEvent extends AbstractVerbEvent {
 
     public VerbCompleteEvent(Verb verb, VerbCompleteReason reason, String errorText) {
         super(verb);
+        this.reason = reason;
         this.errorText = errorText;
     }
 
