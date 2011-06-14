@@ -233,6 +233,20 @@
   		  <property name="node" value="tropo-cdr-5"/>
   	</bean>
   	-->
+  	
+  	<!-- Uncomment to enable AMQP based CDR storage 
+  	<bean id="amqpCdrStorageStrategy" class="com.tropo.server.cdr.AmqpCdrStorageStrategy"
+  		  init-method="init"
+  		  destroy-method="shutdown">
+  		  <property name="server" value="localhost"/>
+  		  <property name="port" value="5672"/>
+  		  <property name="username" value="guest"/>
+  		  <property name="password" value="guest"/>
+  		  <property name="exchange" value="tropo-exchange"/>
+  		  <property name="route" value="tropo-route"/>
+  	</bean>
+  	-->
+  	
   	<bean id="cdrErrorHandler" class="com.tropo.server.cdr.DefaultErrorHandler"/>
   	<bean id="cdrManager" class="com.tropo.server.CdrManager">
   		<property name="errorHandler" ref="cdrErrorHandler"/>
@@ -241,6 +255,7 @@
   				<ref bean="fileCdrStorageStrategy"/>
   				<!-- <ref bean="jmsCdrStorageStrategy"/> -->
   				<!-- <ref bean="xmppCdrStorageStrategy"/>  -->
+  				<!-- <ref bean="amqpCdrStorageStrategy"/> -->
   			</list>
   		</property>
   	</bean> 
