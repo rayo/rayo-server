@@ -42,8 +42,8 @@
 			<artifactId>mscontrol-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.voxeo</groupId>
-			<artifactId>msctrl-spi</artifactId>
+			<groupId>com.voxeo.mscontrol</groupId>
+			<artifactId>voxeo-309parameter</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>log4j</groupId>

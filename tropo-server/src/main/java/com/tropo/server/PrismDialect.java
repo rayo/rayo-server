@@ -51,6 +51,6 @@ public class PrismDialect implements MediaDialect {
     @Override
     public void setConfidence(Parameters parameters, float value) {
     	// Uncomment when the parameter gets into maven repo
-    	//parameters.put(VoxeoParameter.VOXEO_CONFIDENCE_THRESHOLD, value);
+    	parameters.put(VoxeoParameter.VOXEO_CONFIDENCE_THRESHOLD, value);
     }
 }
