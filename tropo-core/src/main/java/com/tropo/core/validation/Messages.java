@@ -22,6 +22,7 @@ public class Messages {
 	public static final String INVALID_TERMINATOR = "Invalid terminator character.";
 	public static final String INVALID_CONFIDENCE_RANGE = "Confidence must be a value between 0 and 1.";
 	public static final String INVALID_REASON = "Invalid reason";
+    public static final String INVALID_MEDIA = "Invalid media.";
 	
 	public static final String UNKNOWN_NAMESPACE_ELEMENT = "Could not find the element on namespace.";
 

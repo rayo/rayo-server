@@ -33,6 +33,7 @@ import com.tropo.core.verb.Conference
 import com.tropo.core.verb.ConferenceCompleteEvent
 import com.tropo.core.verb.InputMode
 import com.tropo.core.verb.KickCommand
+import com.tropo.core.verb.MediaType;
 import com.tropo.core.verb.PauseCommand
 import com.tropo.core.verb.ResumeCommand
 import com.tropo.core.verb.Say
@@ -604,7 +605,15 @@ public class OzoneProviderTest {
         assertEquals transfer.to[0].toString(),"sip:martin@127.0.0.1:6089"
         assertEquals transfer.to[1].toString(),"sip:jose@127.0.0.1:6088"
     }
-
+	
+	@Test
+	public void directMediaTransferFromXml() {
+		
+		def transfer = fromXml("""<transfer xmlns="urn:xmpp:ozone:transfer:1" terminator="#" timeout="20000" media="direct" to="sip:martin@127.0.0.1:6089"><to>sip:jose@127.0.0.1:6088</to></transfer>""")
+		assertNotNull transfer
+		assertEquals transfer.media, MediaType.DIRECT
+	}
+	
     @Test
     public void audioTransferFromXml() {
         
@@ -627,7 +636,7 @@ public class OzoneProviderTest {
     public void emptyTransferToXml() {
         
         def transfer = new Transfer()
-        assertEquals("""<transfer xmlns="urn:xmpp:ozone:transfer:1" terminator="#" timeout="30000" answer-on-media="false"/>""", toXml(transfer));
+        assertEquals("""<transfer xmlns="urn:xmpp:ozone:transfer:1" terminator="#" timeout="30000" media="bridge" answer-on-media="false"/>""", toXml(transfer));
     }
     
     @Test
@@ -638,7 +647,7 @@ public class OzoneProviderTest {
         transfer.terminator = '#' as char
         transfer.to = [new URI("sip:martin@127.0.0.1:6089")]
 
-        assertEquals("""<transfer xmlns="urn:xmpp:ozone:transfer:1" terminator="#" timeout="20000" to="sip:martin@127.0.0.1:6089" answer-on-media="false"/>""", toXml(transfer));
+        assertEquals("""<transfer xmlns="urn:xmpp:ozone:transfer:1" terminator="#" timeout="20000" media="bridge" to="sip:martin@127.0.0.1:6089" answer-on-media="false"/>""", toXml(transfer));
     }
         
     @Test
@@ -650,7 +659,7 @@ public class OzoneProviderTest {
         transfer.to = [new URI("sip:martin@127.0.0.1:6089")]
         transfer.ringbackTone = new Ssml("""<audio src="http://ccmixter.org/content/DoKashiteru/DoKashiteru_-_you_(na-na-na-na).mp3" />""")
 
-        assertEquals("""<transfer xmlns="urn:xmpp:ozone:transfer:1" terminator="#" timeout="20000" to="sip:martin@127.0.0.1:6089" answer-on-media="false"><audio xmlns="" src="http://ccmixter.org/content/DoKashiteru/DoKashiteru_-_you_(na-na-na-na).mp3"/></transfer>""", toXml(transfer));
+        assertEquals("""<transfer xmlns="urn:xmpp:ozone:transfer:1" terminator="#" timeout="20000" media="bridge" to="sip:martin@127.0.0.1:6089" answer-on-media="false"><audio xmlns="" src="http://ccmixter.org/content/DoKashiteru/DoKashiteru_-_you_(na-na-na-na).mp3"/></transfer>""", toXml(transfer));
     }
     
     @Test
@@ -662,11 +671,11 @@ public class OzoneProviderTest {
         transfer.to = [new URI("sip:martin@127.0.0.1:6089")]
         transfer.ringbackTone = new Ssml("We are going to transfer your call. Wait a couple of seconds.")
 
-        assertEquals("""<transfer xmlns="urn:xmpp:ozone:transfer:1" terminator="#" timeout="20000" to="sip:martin@127.0.0.1:6089" answer-on-media="false">We are going to transfer your call. Wait a couple of seconds.</transfer>""", toXml(transfer));
+        assertEquals("""<transfer xmlns="urn:xmpp:ozone:transfer:1" terminator="#" timeout="20000" media="bridge" to="sip:martin@127.0.0.1:6089" answer-on-media="false">We are going to transfer your call. Wait a couple of seconds.</transfer>""", toXml(transfer));
     }
     
     @Test
-    public void TransferWithMultipleUrisToXml() {
+    public void transferWithMultipleUrisToXml() {
         
         def transfer = new Transfer()
         transfer.timeout = new Duration(20000)
@@ -674,7 +683,7 @@ public class OzoneProviderTest {
         transfer.to = [new URI("sip:martin@127.0.0.1:6089"),new URI("sip:jose@127.0.0.1:6088")]
         transfer.ringbackTone = new Ssml("We are going to transfer your call. Wait a couple of seconds.")
 
-        assertEquals("""<transfer xmlns="urn:xmpp:ozone:transfer:1" terminator="#" timeout="20000" answer-on-media="false">We are going to transfer your call. Wait a couple of seconds.<to>sip:martin@127.0.0.1:6089</to><to>sip:jose@127.0.0.1:6088</to></transfer>""", toXml(transfer));
+        assertEquals("""<transfer xmlns="urn:xmpp:ozone:transfer:1" terminator="#" timeout="20000" media="bridge" answer-on-media="false">We are going to transfer your call. Wait a couple of seconds.<to>sip:martin@127.0.0.1:6089</to><to>sip:jose@127.0.0.1:6088</to></transfer>""", toXml(transfer));
     }
     
     // Ask Complete

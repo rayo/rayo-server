@@ -10,6 +10,7 @@ import java.util.TimerTask;
 
 import javax.media.mscontrol.join.Joinable.Direction;
 
+import com.tropo.core.verb.MediaType;
 import com.tropo.core.verb.Ssml;
 import com.tropo.core.verb.Transfer;
 import com.tropo.core.verb.TransferCompleteEvent;
@@ -23,6 +24,7 @@ import com.voxeo.moho.CallableEndpoint;
 import com.voxeo.moho.Endpoint;
 import com.voxeo.moho.Joint;
 import com.voxeo.moho.MediaService;
+import com.voxeo.moho.Participant;
 import com.voxeo.moho.Participant.JoinType;
 import com.voxeo.moho.RedirectException;
 import com.voxeo.moho.State;
@@ -161,7 +163,7 @@ public class TransferHandler extends AbstractLocalVerbHandler<Transfer> implemen
             case JOINED:
                 peer = (Call)event.getSource();
                 peer.setSupervised(true);
-                call.join(peer, JoinType.BRIDGE, Direction.DUPLEX);
+                call.join(peer, resolveJoinType(), Direction.DUPLEX);
                 stopDialing();
                 break;
             case TIMEOUT:
@@ -251,6 +253,15 @@ public class TransferHandler extends AbstractLocalVerbHandler<Transfer> implemen
             fromEndpoint = call.getAddress();
         }
         return fromEndpoint;
+    }
+    
+    private Participant.JoinType resolveJoinType() {
+    	
+    	switch(model.getMedia()) {
+    		case BRIDGE : return Participant.JoinType.BRIDGE;
+    		case DIRECT : return Participant.JoinType.DIRECT;
+    	}
+    	return null;
     }
 
 }

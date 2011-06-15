@@ -10,6 +10,9 @@ import org.dom4j.Element;
 import org.dom4j.Namespace;
 import org.dom4j.QName;
 
+import com.tropo.core.validation.Messages;
+import com.tropo.core.validation.ValidationException;
+import com.tropo.core.verb.MediaType;
 import com.tropo.core.verb.Transfer;
 import com.tropo.core.verb.TransferCompleteEvent;
 
@@ -42,11 +45,18 @@ public class TransferProvider extends BaseProvider {
 		if (root.attributeValue("answer-on-media") != null) {
 			transfer.setAnswerOnMedia(toBoolean(root.attributeValue("answer-on-media")));
 		}
-		
+		if(root.attributeValue("media") != null) {
+			try {
+				transfer.setMedia(MediaType.getFromString(root.attributeValue("media")));
+			} catch (Exception e) {
+				throw new ValidationException(Messages.INVALID_MEDIA);
+			}
+		}
+
 		if(root.element("ring") != null) {
 		    transfer.setRingbackTone(extractSsml(root.element("ring")));
 		}
-
+				
 		if (root.attributeValue("from") != null) {
 			transfer.setFrom(toURI(root.attributeValue("from")));
 		}
@@ -108,6 +118,9 @@ public class TransferProvider extends BaseProvider {
 		}
 		if (transfer.getTimeout() != null) {
 			root.addAttribute("timeout", Long.toString(transfer.getTimeout().getMillis()));
+		}
+		if (transfer.getMedia() != null) {
+			root.addAttribute("media", transfer.getMedia().toString());
 		}
 		if (transfer.getFrom() != null) {
 			root.addAttribute("from", transfer.getFrom().toString());

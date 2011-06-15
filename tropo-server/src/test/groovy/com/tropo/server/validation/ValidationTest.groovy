@@ -316,6 +316,18 @@ class ValidationTest {
 	}
 	
 	@Test
+	public void validateTransferInvalidMedia() {
+				
+		def transfer = parseXml("""<transfer xmlns=\"urn:xmpp:ozone:transfer:1\" from="tel:12345666" media="aaa" terminator="#"><to>tel:123456789</to></transfer>""")
+		
+		def errorMapping = assertValidationException(transfer)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.INVALID_MEDIA
+	}
+	
+	@Test
 	public void validateTransferValid() {
 				
 		def transfer = parseXml("""<transfer xmlns=\"urn:xmpp:ozone:transfer:1\" from="tel:12345666"><to>tel:123456789</to></transfer>""")

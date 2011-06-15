@@ -26,6 +26,7 @@ public class Transfer extends BaseVerb {
     private Character terminator = '#';
     private Map<String, String> headers;
     private Duration timeout = new Duration(30000);
+    private MediaType media = MediaType.BRIDGE;
 
     public Ssml getRingbackTone() {
         return ringbackTone;
@@ -82,8 +83,16 @@ public class Transfer extends BaseVerb {
     public void setHeaders(Map<String, String> headers) {
         this.headers = headers;
     }
+    
+    public MediaType getMedia() {
+		return media;
+	}
 
-    @Override
+	public void setMedia(MediaType media) {
+		this.media = media;
+	}
+
+	@Override
     public String toString() {
 
     	return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)    		
