@@ -10,7 +10,6 @@ import java.util.TimerTask;
 
 import javax.media.mscontrol.join.Joinable.Direction;
 
-import com.tropo.core.verb.MediaType;
 import com.tropo.core.verb.Ssml;
 import com.tropo.core.verb.Transfer;
 import com.tropo.core.verb.TransferCompleteEvent;
@@ -25,7 +24,6 @@ import com.voxeo.moho.Endpoint;
 import com.voxeo.moho.Joint;
 import com.voxeo.moho.MediaService;
 import com.voxeo.moho.Participant;
-import com.voxeo.moho.Participant.JoinType;
 import com.voxeo.moho.RedirectException;
 import com.voxeo.moho.State;
 import com.voxeo.moho.event.DisconnectEvent;
