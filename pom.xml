@@ -102,9 +102,9 @@
   			<scope>provided</scope>
   		</dependency>
   		<dependency>
-  			<groupId>com.voxeo</groupId>
-  			<artifactId>msctrl-spi</artifactId>
-  			<version>10_0_2_C201103190002_0</version>
+  			<groupId>com.voxeo.mscontrol</groupId>
+  			<artifactId>voxeo-309parameter</artifactId>
+  			<version>1.0-SNAPSHOT</version>
   			<scope>provided</scope>
   		</dependency>
   		<dependency>
