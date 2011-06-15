@@ -44,7 +44,9 @@ public class CdrManager {
 			return;
 		}
 		cdr.setEndTime(System.currentTimeMillis());
-		cdr.setState(call.getCallState().toString());
+		if (call.getCallState() != null) {
+			cdr.setState(call.getCallState().toString());
+		}
 	}
 	
 	public void append(String callId, String element) {
