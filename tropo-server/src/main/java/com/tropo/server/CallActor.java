@@ -359,6 +359,10 @@ public class CallActor extends ReflectiveActor implements Observer {
                 callStatistics.callTimedout();
                 reason = Reason.TIMEOUT;
                 break;
+            case REDIRECT:
+                callStatistics.callRedirected();
+                reason = Reason.REDIRECT;
+                break;
             default:
                 callStatistics.callEndedUnknownReason();
                 throw new UnsupportedOperationException("Reason not handled: " + event.getCause());

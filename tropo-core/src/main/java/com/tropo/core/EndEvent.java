@@ -8,7 +8,7 @@ import org.apache.commons.lang.builder.ToStringStyle;
 public class EndEvent extends AbstractCallEvent {
 
     public enum Reason {
-        HANGUP, TIMEOUT, BUSY, REJECT, ERROR
+        HANGUP, TIMEOUT, BUSY, REJECT, ERROR, REDIRECT
     }
 
     private Reason reason;
