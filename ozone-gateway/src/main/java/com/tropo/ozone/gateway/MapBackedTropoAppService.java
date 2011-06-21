@@ -8,6 +8,7 @@ import com.voxeo.servlet.xmpp.JID;
 public class MapBackedTropoAppService implements TropoAppService {
 
 	private CollectionMap<JID, ArrayList<JID>, JID> jids;
+	private int ppid;
 	
 	public MapBackedTropoAppService () {
 		this.jids = new CollectionMap<JID, ArrayList<JID>, JID>();
@@ -31,5 +32,13 @@ public class MapBackedTropoAppService implements TropoAppService {
 
 	public Collection<JID> lookupAll () {
 		return jids.lookupAll();
+	}
+	
+	public int getPPID (JID jid) {
+		return ppid;
+	}
+	
+	public void setPPID (int ppid) {
+		this.ppid = ppid;
 	}
 }

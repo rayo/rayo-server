@@ -50,10 +50,10 @@ public class ExternalGatewayServlet extends GatewayServlet {
 						getTropoAppService().remove(fromJid);
 					}
 					else if (null != presenceElement.element("show")) {
-						if (isAppInDNS(fromJid)) {
+						try {
 							getTropoAppService().add(fromJid);
 						}
-						else {
+						catch (UnknownApplicationException ex) {
 							Element presenceStanza = DocumentHelper.createElement("presence");
 							presenceStanza.addAttribute("type", "error");
 							// TODO: to/from JIDs?
@@ -145,10 +145,6 @@ public class ExternalGatewayServlet extends GatewayServlet {
     		getWireLogger().debug("%s :: %s", iqError.getElement().asXML(), iqError.getSession().getId());
         }
 	}
-	
-	private boolean isAppInDNS (JID jid) {
-		return true;
-	}
 
 	/**
 	 * Find a node that can run the app requested (production, staging, etc.)
@@ -157,17 +153,12 @@ public class ExternalGatewayServlet extends GatewayServlet {
 	 * @return
 	 */
 	private JID getTargetJID (JID fromJidExternal) {
-		int ppid = getPPID(fromJidExternal);
+		int ppid = getTropoAppService().getPPID(fromJidExternal);
 		TropoNode tropoNode = getTropoNodeService().lookup(ppid);
 		JID targetJID = null;
 		if (tropoNode != null) {
 			targetJID = getXmppFactory().createJID(tropoNode.getHostname());
 		}
 		return targetJID;
-	}
-	
-	private int getPPID (JID appJid) {
-		// TODO: Dip into DNS to get PPID
-		return 0;
 	}
 }

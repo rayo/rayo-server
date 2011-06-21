@@ -133,7 +133,9 @@ public class OzoneServlet extends XmppServlet {
     // ================================================================================
 
     public void event(CallEvent event) throws IOException {
-
+    	// OfferEvent => incoming
+    	// AnsweredEvent => outgoing
+    	
         // Send event to all registered JIDs
         // TODO: this should be pluggable
         for (XmppSession session : clientSessions.values()) {
