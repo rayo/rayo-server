@@ -17,9 +17,9 @@ public class Validator {
         validator = factory.getValidator();		
 	}
 	
-	public void validate(Object command) throws ValidationException {
+	public void validate(Object object) throws ValidationException {
 		
-		Set<ConstraintViolation<Object>> violations = validator.validate(command);
+		Set<ConstraintViolation<Object>> violations = validator.validate(object);
 		if (violations.size() > 0) {
 			throw new ValidationException(violations);
 		}

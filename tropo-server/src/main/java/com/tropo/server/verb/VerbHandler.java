@@ -1,5 +1,7 @@
 package com.tropo.server.verb;
 
+import javax.validation.ConstraintValidatorContext;
+
 import com.tropo.core.verb.Verb;
 import com.tropo.core.verb.VerbCommand;
 import com.tropo.server.Actor;
@@ -30,5 +32,6 @@ public interface VerbHandler<T extends Verb> {
     public void setEventDispatcher(EventDispatcher eventDispatcher);
     
     public boolean isComplete();
-
+    
+    public boolean isStateValid(ConstraintValidatorContext context);
 }

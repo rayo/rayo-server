@@ -2,6 +2,8 @@ package com.tropo.server.verb;
 
 import java.net.URI;
 
+import javax.validation.ConstraintValidatorContext;
+
 import com.tropo.core.verb.InputMode;
 import com.tropo.core.verb.Ssml;
 import com.tropo.core.verb.Verb;
@@ -9,11 +11,13 @@ import com.tropo.core.verb.VerbCommand;
 import com.tropo.core.verb.VerbCompleteEvent;
 import com.tropo.core.verb.VerbEvent;
 import com.tropo.server.Actor;
+import com.tropo.server.validation.ValidHandlerState;
 import com.voxeo.moho.Call;
 import com.voxeo.moho.MediaService;
 import com.voxeo.moho.media.output.AudibleResource;
 import com.voxeo.moho.media.output.OutputCommand;
 
+@ValidHandlerState
 public abstract class AbstractLocalVerbHandler<T extends Verb> implements VerbHandler<T> {
 
     protected T model;
@@ -110,6 +114,12 @@ public abstract class AbstractLocalVerbHandler<T extends Verb> implements VerbHa
     @Override
     public boolean isComplete() {
         return complete;
+    }
+    
+    @Override
+    public boolean isStateValid(ConstraintValidatorContext context) {
+
+    	return true;
     }
 
     public void setActor(Actor actor) {

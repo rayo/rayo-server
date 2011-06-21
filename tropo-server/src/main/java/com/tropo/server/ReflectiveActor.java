@@ -70,9 +70,10 @@ public abstract class ReflectiveActor implements Actor, Callback<Object> {
                     Throwable targetException = e.getCause();
                     if (targetException != null) {
                         request.reply(targetException);
+                        throw targetException;
                     } else {
                         request.reply(e);
-                    }
+                    }                    
                     throw e;
                 } catch (Exception e) {
                     request.reply(e);
@@ -91,7 +92,7 @@ public abstract class ReflectiveActor implements Actor, Callback<Object> {
                 method.invoke(this, message);
             }
 
-        } catch (Exception e) {
+        } catch (Throwable e) {
             log.error("Exception while processing command", e);
             if(!handleException(e)) {
                 stop();

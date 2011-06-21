@@ -27,6 +27,8 @@ import com.tropo.core.OfferEvent;
 import com.tropo.core.RedirectCommand;
 import com.tropo.core.RejectCommand;
 import com.tropo.core.RingingEvent;
+import com.tropo.core.validation.ValidationException;
+import com.tropo.core.validation.Validator;
 import com.tropo.core.verb.StopCommand;
 import com.tropo.core.verb.Verb;
 import com.tropo.core.verb.VerbCommand;
@@ -67,6 +69,8 @@ public class CallActor extends ReflectiveActor implements Observer {
     // TODO: replace with Moho Call inspection when it becomes available
     private Direction direction;
     private boolean initialJoin = true;
+    
+    private Validator validator = new Validator();
 
     public CallActor(Call call) {
         this.call = call;
@@ -87,6 +91,13 @@ public class CallActor extends ReflectiveActor implements Observer {
 
     @Override
     protected boolean handleException(Throwable throwable) {
+    	
+    	if (throwable instanceof ValidationException) {
+    		// Right now, validation exceptions are considered as Recoverable exceptions
+    		// so we won't be ending the call when a validation error happens
+    		//TODO: This may be revisited in the future
+    		return true;
+    	}
         end(Reason.ERROR);
         return true;
     }
@@ -253,6 +264,7 @@ public class CallActor extends ReflectiveActor implements Observer {
         verbs.put(verb.getId(), verbHandler);
 
         try {
+        	validator.validate(verbHandler);
             verbHandler.start();
         } catch (Exception e) {
             unregisterVerb(verb.getId());

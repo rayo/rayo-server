@@ -5,6 +5,7 @@ import java.util.Properties;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import javax.media.mscontrol.join.Joinable.Direction;
+import javax.validation.ConstraintValidatorContext;
 
 import com.tropo.core.verb.Conference;
 import com.tropo.core.verb.ConferenceCompleteEvent;
@@ -19,6 +20,7 @@ import com.tropo.core.verb.VerbCommand;
 import com.tropo.core.verb.VerbCompleteEvent;
 import com.tropo.server.MohoUtil;
 import com.tropo.server.conference.ParticipantController;
+import com.voxeo.moho.Call;
 import com.voxeo.moho.Participant;
 import com.voxeo.moho.Participant.JoinType;
 import com.voxeo.moho.State;
@@ -65,8 +67,8 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference> impl
             if (mohoConference.getController() == null) {
                 mohoConference.setController(mohoConferenceController);
             }
-
-            // Register Tropo Participant object as an attribute of the Mogo Call
+            
+            // Register Tropo Participant object as an attribute of the Moho Call
             call.setAttribute(getMohoParticipantAttributeKey(), this);
 
             // Determine if the conference is 'open' by checking if there are any moderators
@@ -94,7 +96,36 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference> impl
 
     }
 
-    public void stop(boolean hangup) {
+    @Override
+    public boolean isStateValid(ConstraintValidatorContext context) {
+
+        String participantKey = getMohoParticipantAttributeKey();
+        if (call.getAttribute(participantKey) != null) {
+        	context.buildConstraintViolationWithTemplate(
+        			"Call is already a member of the conference: " + model.getRoomName())
+        			.addConstraintViolation();
+        	return false;
+        }
+        if (isOnAnotherConference(call)) {
+        	context.buildConstraintViolationWithTemplate(
+        			"Call is already joined to another conference")
+        			.addConstraintViolation();
+        	return false;
+        }
+        return true;
+    }
+    
+    private boolean isOnAnotherConference(Call call) {
+
+    	for (String key: call.getAttributeMap().keySet()) {
+    		if (key.startsWith(PARTICIPANT_KEY)) {
+    			return true;
+    		}
+    	}
+    	return false;
+	}
+
+	public void stop(boolean hangup) {
         try {
             preStop(hangup);
             complete(new ConferenceCompleteEvent(model, hangup ? VerbCompleteEvent.Reason.HANGUP : VerbCompleteEvent.Reason.STOP));
