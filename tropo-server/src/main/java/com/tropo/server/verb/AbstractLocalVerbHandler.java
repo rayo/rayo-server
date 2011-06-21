@@ -121,6 +121,16 @@ public abstract class AbstractLocalVerbHandler<T extends Verb> implements VerbHa
 
     	return true;
     }
+    
+    boolean isOnConference(Call call) {
+
+    	for (String key: call.getAttributeMap().keySet()) {
+    		if (key.startsWith(ConferenceHandler.PARTICIPANT_KEY)) {
+    			return true;
+    		}
+    	}
+    	return false;
+	}
 
     public void setActor(Actor actor) {
         this.actor = actor;

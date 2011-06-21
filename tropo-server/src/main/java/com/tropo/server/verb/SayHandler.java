@@ -1,5 +1,7 @@
 package com.tropo.server.verb;
 
+import javax.validation.ConstraintValidatorContext;
+
 import com.tropo.core.verb.PauseCommand;
 import com.tropo.core.verb.ResumeCommand;
 import com.tropo.core.verb.Say;
@@ -34,6 +36,18 @@ public class SayHandler extends AbstractLocalVerbHandler<Say> {
         
     }
 
+    @Override
+    public boolean isStateValid(ConstraintValidatorContext context) {
+
+        if (isOnConference(call)) {
+        	context.buildConstraintViolationWithTemplate(
+        			"Call is joined to a conference.")
+        			.addConstraintViolation();
+        	return false;
+        }
+        return true;
+    }
+    
     // Commands
     // ================================================================================
 

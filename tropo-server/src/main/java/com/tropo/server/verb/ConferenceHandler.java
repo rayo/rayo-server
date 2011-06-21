@@ -20,7 +20,6 @@ import com.tropo.core.verb.VerbCommand;
 import com.tropo.core.verb.VerbCompleteEvent;
 import com.tropo.server.MohoUtil;
 import com.tropo.server.conference.ParticipantController;
-import com.voxeo.moho.Call;
 import com.voxeo.moho.Participant;
 import com.voxeo.moho.Participant.JoinType;
 import com.voxeo.moho.State;
@@ -106,7 +105,7 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference> impl
         			.addConstraintViolation();
         	return false;
         }
-        if (isOnAnotherConference(call)) {
+        if (isOnConference(call)) {
         	context.buildConstraintViolationWithTemplate(
         			"Call is already joined to another conference")
         			.addConstraintViolation();
@@ -114,16 +113,6 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference> impl
         }
         return true;
     }
-    
-    private boolean isOnAnotherConference(Call call) {
-
-    	for (String key: call.getAttributeMap().keySet()) {
-    		if (key.startsWith(PARTICIPANT_KEY)) {
-    			return true;
-    		}
-    	}
-    	return false;
-	}
 
 	public void stop(boolean hangup) {
         try {

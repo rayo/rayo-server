@@ -2,6 +2,8 @@ package com.tropo.server.verb;
 
 import java.util.List;
 
+import javax.validation.ConstraintValidatorContext;
+
 import com.tropo.core.verb.Ask;
 import com.tropo.core.verb.AskCompleteEvent;
 import com.tropo.core.verb.AskCompleteEvent.Reason;
@@ -58,6 +60,18 @@ public class AskHandler extends AbstractLocalVerbHandler<Ask> {
 
         prompt = media.prompt(outCommand, inputCommand, 0);
         
+    }
+    
+    @Override
+    public boolean isStateValid(ConstraintValidatorContext context) {
+
+        if (isOnConference(call)) {
+        	context.buildConstraintViolationWithTemplate(
+        			"Call is joined to a conference.")
+        			.addConstraintViolation();
+        	return false;
+        }
+        return true;
     }
     
     // Commands
