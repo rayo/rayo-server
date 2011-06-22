@@ -3,6 +3,7 @@ package com.tropo.server.exception;
 import javax.validation.ConstraintViolation;
 
 import com.tropo.core.validation.ValidationException;
+import com.tropo.server.validation.ValidHandlerState;
 import com.voxeo.exceptions.NotFoundException;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.servlet.xmpp.XmppStanzaError;
@@ -19,13 +20,13 @@ public class ExceptionMapper {
 		
 		if (e instanceof ValidationException) {
 			ConstraintViolation<?> violation = ((ValidationException)e).getFirstViolation();
-			if (violation.getPropertyPath() !=  null) {
-				errorCondition = violation.getPropertyPath().toString();
-			} else {
-				errorCondition = XmppStanzaError.BAD_REQUEST_CONDITION;
-			}
 			errorType = XmppStanzaError.Type_MODIFY;
+			errorCondition = XmppStanzaError.BAD_REQUEST_CONDITION;
 			if (violation != null) {				
+				if (violation.getConstraintDescriptor() != null &&
+					violation.getConstraintDescriptor().getAnnotation() instanceof ValidHandlerState) {
+					errorCondition = violation.getPropertyPath().toString();
+				}
 				if (violation.getMessageTemplate() != null) {
 					errorMessage = violation.getMessageTemplate();				
 				} else {
