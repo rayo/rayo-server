@@ -16,6 +16,7 @@ import com.voxeo.moho.media.Prompt;
 import com.voxeo.moho.media.input.Grammar;
 import com.voxeo.moho.media.input.InputCommand;
 import com.voxeo.moho.media.output.OutputCommand;
+import com.voxeo.servlet.xmpp.XmppStanzaError;
 
 public class AskHandler extends AbstractLocalVerbHandler<Ask> {
 
@@ -68,6 +69,7 @@ public class AskHandler extends AbstractLocalVerbHandler<Ask> {
         if (isOnConference(call)) {
         	context.buildConstraintViolationWithTemplate(
         			"Call is joined to a conference.")
+        			.addNode(XmppStanzaError.RESOURCE_CONSTRAINT_CONDITION)
         			.addConstraintViolation();
         	return false;
         }

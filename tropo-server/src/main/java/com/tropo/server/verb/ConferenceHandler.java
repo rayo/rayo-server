@@ -30,6 +30,7 @@ import com.voxeo.moho.media.Output;
 import com.voxeo.moho.media.input.DigitInputCommand;
 import com.voxeo.moho.media.output.OutputCommand;
 import com.voxeo.moho.media.output.OutputCommand.BehaviorIfBusy;
+import com.voxeo.servlet.xmpp.XmppStanzaError;
 
 public class ConferenceHandler extends AbstractLocalVerbHandler<Conference> implements ParticipantController {
 
@@ -102,12 +103,14 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference> impl
         if (call.getAttribute(participantKey) != null) {
         	context.buildConstraintViolationWithTemplate(
         			"Call is already a member of the conference: " + model.getRoomName())
+        			.addNode(XmppStanzaError.RESOURCE_CONSTRAINT_CONDITION)
         			.addConstraintViolation();
         	return false;
         }
         if (isOnConference(call)) {
         	context.buildConstraintViolationWithTemplate(
         			"Call is already joined to another conference")
+        			.addNode(XmppStanzaError.RESOURCE_CONSTRAINT_CONDITION)
         			.addConstraintViolation();
         	return false;
         }

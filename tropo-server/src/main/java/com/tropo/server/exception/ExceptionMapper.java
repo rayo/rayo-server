@@ -19,7 +19,11 @@ public class ExceptionMapper {
 		
 		if (e instanceof ValidationException) {
 			ConstraintViolation<?> violation = ((ValidationException)e).getFirstViolation();
-			errorCondition = XmppStanzaError.BAD_REQUEST_CONDITION;
+			if (violation.getPropertyPath() !=  null) {
+				errorCondition = violation.getPropertyPath().toString();
+			} else {
+				errorCondition = XmppStanzaError.BAD_REQUEST_CONDITION;
+			}
 			errorType = XmppStanzaError.Type_MODIFY;
 			if (violation != null) {				
 				if (violation.getMessageTemplate() != null) {

@@ -15,6 +15,7 @@ import com.voxeo.moho.event.OutputCompleteEvent;
 import com.voxeo.moho.media.Output;
 import com.voxeo.moho.media.output.AudibleResource;
 import com.voxeo.moho.media.output.OutputCommand;
+import com.voxeo.servlet.xmpp.XmppStanzaError;
 
 public class SayHandler extends AbstractLocalVerbHandler<Say> {
 
@@ -42,6 +43,7 @@ public class SayHandler extends AbstractLocalVerbHandler<Say> {
         if (isOnConference(call)) {
         	context.buildConstraintViolationWithTemplate(
         			"Call is joined to a conference.")
+        			.addNode(XmppStanzaError.RESOURCE_CONSTRAINT_CONDITION)
         			.addConstraintViolation();
         	return false;
         }
