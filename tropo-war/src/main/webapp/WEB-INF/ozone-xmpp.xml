@@ -20,6 +20,11 @@
 		<property name="ozoneStatistics" ref="ozoneStatistics" />
 		<property name="adminService" ref="adminService" />
 		<property name="cdrManager" ref="cdrManager" />
+		<property name="tropoLookupService">
+			<bean class="com.tropo.server.application.XmlBackedMetaDataLookupService">
+				<constructor-arg value="classpath:routes.xml"/>
+			</bean>
+		</property>
 	</bean>
 		
 	<bean id="exceptionMapper" class="com.tropo.server.exception.ExceptionMapper"/>

@@ -5,7 +5,6 @@ import static com.voxeo.utils.Objects.assertion;
 import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -14,6 +13,7 @@ import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.dom4j.Namespace;
 import org.dom4j.QName;
+import org.dom4j.io.DOMWriter;
 
 import com.tropo.core.CallCommand;
 import com.tropo.core.CallEvent;
@@ -21,6 +21,8 @@ import com.tropo.core.CallRef;
 import com.tropo.core.DialCommand;
 import com.tropo.core.EndCommand;
 import com.tropo.core.EndEvent;
+import com.tropo.core.OfferEvent;
+import com.tropo.core.application.TropoLookupService;
 import com.tropo.core.validation.ValidationException;
 import com.tropo.core.verb.Verb;
 import com.tropo.core.verb.VerbCommand;
@@ -31,17 +33,14 @@ import com.tropo.server.exception.ErrorMapping;
 import com.tropo.server.exception.ExceptionMapper;
 import com.voxeo.exceptions.NotFoundException;
 import com.voxeo.logging.Loggerf;
+import com.voxeo.servlet.xmpp.IQRequest;
+import com.voxeo.servlet.xmpp.InstantMessage;
 import com.voxeo.servlet.xmpp.JID;
+import com.voxeo.servlet.xmpp.PresenceMessage;
 import com.voxeo.servlet.xmpp.XmppFactory;
 import com.voxeo.servlet.xmpp.XmppServlet;
-import com.voxeo.servlet.xmpp.XmppServletFeaturesRequest;
-import com.voxeo.servlet.xmpp.XmppServletIQRequest;
-import com.voxeo.servlet.xmpp.XmppServletIQResponse;
-import com.voxeo.servlet.xmpp.XmppServletStanzaRequest;
-import com.voxeo.servlet.xmpp.XmppServletStreamRequest;
+import com.voxeo.servlet.xmpp.XmppServletRequest;
 import com.voxeo.servlet.xmpp.XmppSession;
-import com.voxeo.servlet.xmpp.XmppSession.SessionType;
-import com.voxeo.servlet.xmpp.XmppStanzaError;
 
 @SuppressWarnings("serial")
 public class OzoneServlet extends XmppServlet {
@@ -51,6 +50,9 @@ public class OzoneServlet extends XmppServlet {
 
     private static final QName BIND_QNAME = new QName("bind", new Namespace("", "urn:ietf:params:xml:ns:xmpp-bind"));
     private static final QName SESSION_QNAME = new QName("session", new Namespace("", "urn:ietf:params:xml:ns:xmpp-session"));
+    
+    private static final String TROPO_METADATA = "com.tropo.metadata";
+	private static final String TROPO_METADATA_JID = "com.tropo.metadata.jid";
 
     // Spring injected
     private XmlProvider provider;
@@ -62,7 +64,7 @@ public class OzoneServlet extends XmppServlet {
     private CdrManager cdrManager;
 
     private XmppFactory xmppFactory;
-    private Map<String, XmppSession> clientSessions = new ConcurrentHashMap<String, XmppSession>();
+    private TropoLookupService tropoLookupService;
 
     // Setup
     // ================================================================================
@@ -73,7 +75,7 @@ public class OzoneServlet extends XmppServlet {
         xmppFactory = (XmppFactory) config.getServletContext().getAttribute(XMPP_FACTORY);
         
         // Read Manifest information and pass it to the admin service
-        adminService.readConfigurationFromContext(getServletConfig().getServletContext());     
+        adminService.readConfigurationFromContext(getServletConfig().getServletContext());
     }
 
     /**
@@ -83,7 +85,6 @@ public class OzoneServlet extends XmppServlet {
      * called twice: once by Spring and once by super.init(context)
      */
     public void start() {
-
         log.info("Registering Ozone Event Handler");
 
         callManager.addEventHandler(new EventHandler() {
@@ -102,36 +103,6 @@ public class OzoneServlet extends XmppServlet {
                 }
             }
         });
-
-    }
-
-    // Connection Management
-    // ================================================================================
-
-    @Override
-    protected void doStreamEnd(XmppServletStreamRequest request) throws ServletException, IOException {
-        if (request.getSession().getSessionType() == XmppSession.SessionType.CLIENT) {
-            JID jid = request.getSession().getRemoteJIDs().iterator().next();
-            clientSessions.remove(jid.getNode());
-        }
-    }
-
-    @Override
-    protected void doStreamStart(XmppServletStreamRequest request) throws ServletException, IOException {
-        if (request.getSession().getSessionType() == SessionType.CLIENT && request.isInitial()) {
-
-            request.createRespXMPPServletStreamRequest().send();
-            XmppServletFeaturesRequest featuresReq = request.createFeaturesRequest();
-            featuresReq.addFeature("urn:ietf:params:xml:ns:xmpp-session", "session");
-            featuresReq.send();
-
-            // Store the session
-            JID jid = request.getSession().getRemoteJIDs().iterator().next();
-            clientSessions.put(jid.getNode(), request.getSession());
-
-            // Store the remote address
-            request.getSession().setAttribute("remoteAddr", request.getRemoteAddr());
-        }
     }
 
     // Events: Server -> Client
@@ -147,53 +118,55 @@ public class OzoneServlet extends XmppServlet {
     	if (event instanceof EndEvent) {
     		cdrManager.store(event.getCallId());
     	}
+    	
+    	Map<String, String> metadata = null;
+    	if (event instanceof OfferEvent) {
+    		metadata = tropoLookupService.lookup(event);
+    		if (metadata == null) {
+    			throw new NotFoundException("Cannot find route for %s", event);
+    		}
+    		findCallActor(event.getCallId()).getCall().setAttribute(TROPO_METADATA, metadata);
+    	}
+    	else {
+    		metadata = findCallActor(event.getCallId()).getCall().getAttribute(TROPO_METADATA);
+    	}
+    	
+    	JID jid = xmppFactory.createJID(metadata.get(TROPO_METADATA_JID));
+    	
+    	try {
+    		// Resolve IQ.from
+    		JID from = xmppFactory.createJID(event.getCallId() + "@" + jid.getDomain());
+    		if (event instanceof VerbEvent) {
+    			from.setResource(((VerbEvent) event).getVerbId());
+    		}
 
-        // Send event to all registered JIDs
-        // TODO: this should be pluggable
-        for (XmppSession session : clientSessions.values()) {
-
-            JID jid = session.getRemoteJIDs().iterator().next();
-
-            try {
-
-                Element eventStanza = DocumentHelper.createElement("presence");
-
-                // Resolve IQ.from
-                JID from = xmppFactory.createJID(event.getCallId() + "@" + jid.getDomain());
-                if (event instanceof VerbEvent) {
-                    from.setResource(((VerbEvent) event).getVerbId());
-                }
-                eventStanza.addAttribute("from", from.toString());
-
-                eventStanza.add(eventElement);
-
-                // Send
-                session.createStanzaRequest(eventStanza, null, null, null, null, null).send();
-
-            }
-            catch (Exception e) {
-                // In the event of an error, continue dispatching to all remaining JIDs
-                log.error("Failed to dispatch event [jid=%s, event=%s]", jid, event, e);
-            }
-        }
+    		// Send presence
+    		xmppFactory.createPresence(from, jid, null,
+    				new DOMWriter().write(eventElement.getDocument()).getDocumentElement() // TODO: ouch
+    			).send();
+    	}
+    	catch (Exception e) {
+    		// In the event of an error, continue dispatching to all remaining JIDs
+    		log.error("Failed to dispatch event [jid=%s, event=%s]", jid, event, e);
+    	}
         ozoneStatistics.callEventProcessed();
     }
 
-    protected void doMessage(XmppServletStanzaRequest req) throws ServletException, IOException {
-
+    @Override
+    protected void doMessage(InstantMessage arg0) throws ServletException, IOException {
     	ozoneStatistics.messageStanzaReceived();
     }
 
-    protected void doPresence(XmppServletStanzaRequest req) throws ServletException, IOException {
-
+    @Override
+    protected void doPresence(PresenceMessage arg0) throws ServletException, IOException {
     	ozoneStatistics.presenceStanzaReceived();
     }
 
     // Commands: Client -> Server
     // ================================================================================
 
-    @Override
-    protected void doIQRequest(final XmppServletIQRequest request) throws ServletException, IOException {
+	@Override
+	protected void doIQRequest(IQRequest request) throws ServletException, IOException {
 
         WIRE.debug("%s :: %s", request.getElement().asXML(), request.getSession().getId());
     	ozoneStatistics.iqReceived();
@@ -454,5 +427,13 @@ public class OzoneServlet extends XmppServlet {
 	public void setCdrManager(CdrManager cdrManager) {
 		
 		this.cdrManager = cdrManager;
+	}
+
+	public TropoLookupService getTropoLookupService() {
+		return tropoLookupService;
+	}
+
+	public void setTropoLookupService(TropoLookupService tropoLookupService) {
+		this.tropoLookupService = tropoLookupService;
 	}
 }
