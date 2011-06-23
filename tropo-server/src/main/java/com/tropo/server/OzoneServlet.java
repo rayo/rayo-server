@@ -367,7 +367,7 @@ public class OzoneServlet extends XmppServlet {
         QName qname = payload.getQName();
         if (qname.getNamespaceURI().startsWith("urn:xmpp:ozone")) {
         	final String callId = request.getTo().getNode();
-            if (callId == null) {
+            if (callId != null) {
 	        	Element responsePayload = (Element) request.getElement().elementIterator().next();	        	
 	        	cdrManager.append(callId, responsePayload.asXML());
             }

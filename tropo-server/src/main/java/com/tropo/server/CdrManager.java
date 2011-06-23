@@ -51,6 +51,10 @@ public class CdrManager {
 	
 	public void append(String callId, String element) {
 		
+		if (callId == null) {
+			logger.error("Received null call id from element %s", element);
+			return;
+		}
 		Cdr cdr = cdrs.get(callId);
 		if (cdr == null) {
 			logger.error("Could not find CDR for call id %s", callId);
