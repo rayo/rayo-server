@@ -217,7 +217,6 @@ public class Output extends BaseVerb {
     		.append("codec", getCodec())
     		.append("format", getFormat())
     		.append("voice", getVoice())
-    		.append("")
     		.toString();
     }
 }
