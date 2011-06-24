@@ -5,10 +5,10 @@ import javax.validation.ConstraintValidatorContext;
 
 import com.tropo.core.verb.Output;
 
-public class FileFormatValidator implements ConstraintValidator<ValidRecognizer, String> {
+public class FileFormatValidator implements ConstraintValidator<ValidFileFormat, String> {
 
 	@Override
-	public void initialize(ValidRecognizer constraint) {
+	public void initialize(ValidFileFormat constraint) {
 		
 	}
 	

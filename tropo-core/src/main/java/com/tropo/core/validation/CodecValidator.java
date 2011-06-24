@@ -5,10 +5,10 @@ import javax.validation.ConstraintValidatorContext;
 
 import com.tropo.core.verb.Output;
 
-public class CodecValidator implements ConstraintValidator<ValidRecognizer, String> {
+public class CodecValidator implements ConstraintValidator<ValidCodec, String> {
 
 	@Override
-	public void initialize(ValidRecognizer constraint) {
+	public void initialize(ValidCodec constraint) {
 		
 	}
 	
