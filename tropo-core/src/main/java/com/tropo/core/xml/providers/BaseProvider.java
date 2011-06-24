@@ -158,18 +158,33 @@ public abstract class BaseProvider implements XmlProvider {
         }
     }
 
-    protected Boolean toBoolean(String string) {
+    protected Boolean toBoolean(String attribute, Element element) {
 
+    	String string = element.attributeValue(attribute);
         if (string == null) {
-            throw new ValidationException(Messages.INVALID_BOOLEAN);
+            throw new ValidationException(String.format(Messages.INVALID_BOOLEAN, attribute));
         }
         string = string.toLowerCase();
         if (string.equals("false") || string.equals("true")) {
             return Boolean.valueOf(string);
         }
-        throw new ValidationException(Messages.INVALID_BOOLEAN);
+        throw new ValidationException(String.format(Messages.INVALID_BOOLEAN, attribute));
     }
 
+    protected int toInteger(String attribute, Element element) {
+
+    	String string = element.attributeValue(attribute);
+        if (string == null) {
+            throw new ValidationException(String.format(Messages.INVALID_INTEGER, attribute));
+        }
+        string = string.toLowerCase();
+        try {
+        	return Integer.parseInt(string);
+        } catch (NumberFormatException nfe) {
+        	throw new ValidationException(String.format(Messages.INVALID_INTEGER, attribute));
+        }
+    }
+    
     protected Duration toTimeout(String value) {
 
         try {

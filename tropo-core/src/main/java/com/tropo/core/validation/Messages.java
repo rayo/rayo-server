@@ -16,14 +16,22 @@ public class Messages {
 
     public static final String INVALID_INPUT_MODE = "Invalid input mode.";
 	public static final String INVALID_URI = "You have submitted an invalid URI.";
-	public static final String INVALID_BOOLEAN = "You have submitted an invalid boolean value.";
+	public static final String INVALID_BOOLEAN = "You have submitted an invalid boolean value for '%s'";
+	public static final String INVALID_INTEGER = "You have submitted an invalid integer value for '%s'";
 	public static final String INVALID_TIMEOUT = "Invalid timeout specified.";
 	public static final String INVALID_CONFIDENCE = "Invalid confidence specified.";
 	public static final String INVALID_TERMINATOR = "Invalid terminator character.";
 	public static final String INVALID_CONFIDENCE_RANGE = "Confidence must be a value between 0 and 1.";
 	public static final String INVALID_REASON = "Invalid reason";
     public static final String INVALID_MEDIA = "Invalid media.";
-	
+    public static final String INVALID_DIRECTION = "Invalid direction. Should be either true or false.";
+    public static final String INVALID_POSITION = "Invalid position. It needs to be an integer value.";
+    public static final String INVALID_TIME = "Invalid time. It needs to be an integer value.";
+    public static final String INVALID_SPEED = "Invalid speed. It needs to be a boolean.";
+    public static final String INVALID_VOLUME = "Invalid volume. It needs to be a boolean.";
+    public static final String INVALID_CODEC = "Invalid codec value.";
+    public static final String INVALID_FILE_FORMAT = "Invalid file format.";
+
 	public static final String UNKNOWN_NAMESPACE_ELEMENT = "Could not find the element on namespace.";
 
 }

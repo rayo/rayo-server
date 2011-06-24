@@ -43,7 +43,7 @@ public class TransferProvider extends BaseProvider {
 			transfer.setTimeout(toTimeout(root.attributeValue("timeout")));
 		}
 		if (root.attributeValue("answer-on-media") != null) {
-			transfer.setAnswerOnMedia(toBoolean(root.attributeValue("answer-on-media")));
+			transfer.setAnswerOnMedia(toBoolean("answer-on-media",element));
 		}
 		if(root.attributeValue("media") != null) {
 			try {

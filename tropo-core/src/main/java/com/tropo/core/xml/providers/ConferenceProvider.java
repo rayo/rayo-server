@@ -51,19 +51,19 @@ public class ConferenceProvider extends BaseProvider {
             conference.setRoomName(root.attributeValue("name"));
         }
         if (root.attributeValue("mute") != null) {
-            conference.setMute(toBoolean(root.attributeValue("mute")));
+            conference.setMute(toBoolean("mute", element));
         }
         if (root.attributeValue("terminator") != null) {
             conference.setTerminator(toTerminator(root.attributeValue("terminator")));
         }
         if (root.attributeValue("tone-passthrough") != null) {
-            conference.setTonePassthrough(toBoolean(root.attributeValue("tone-passthrough")));
+            conference.setTonePassthrough(toBoolean("tone-passthrough", element));
         }
         if (root.attributeValue("beep") != null) {
-            conference.setBeep(toBoolean(root.attributeValue("beep")));
+            conference.setBeep(toBoolean("beep", element));
         }
         if (root.attributeValue("moderator") != null) {
-            conference.setModerator(toBoolean(root.attributeValue("moderator")));
+            conference.setModerator(toBoolean("moderator", element));
         }
         if (root.element("announcement") != null) {
             conference.setAnnouncement(extractSsml(root.element("announcement")));

@@ -95,6 +95,15 @@
 			</list>
 		</property>		
 	</bean>				
+	<bean id="outputProvider" class="com.tropo.core.xml.providers.OutputProvider">
+		<property name="validator" ref="validator" />
+		<property name="namespaces">
+			<list>
+				<value>urn:xmpp:ozone:output:1</value>
+                <value>urn:xmpp:ozone:output:complete:1</value>
+			</list>
+		</property>		
+	</bean>
 
 	<!-- Create a global XML Provider -->
 	<bean id="xmlProviderManager" class="com.tropo.core.xml.DefaultXmlProviderManagerFactoryBean">
@@ -105,6 +114,7 @@
 				<ref bean="askProvider"/>
 				<ref bean="transferProvider"/>
 				<ref bean="conferenceProvider"/>
+				<ref bean="outputProvider"/>
 			</list>
 		</property>		
 	</bean>
@@ -142,6 +152,12 @@
 					<property name="modelClass" value="com.tropo.core.verb.Conference" />
 					<lookup-method name="createVerbHandler" bean="conferenceHandler" />
 				</bean>
+				<!-- Output -->
+				<bean class="com.tropo.server.verb.AbstractVerbFactory">
+					<property name="xmlProvider" ref="outputProvider" />
+					<property name="modelClass" value="com.tropo.core.verb.Output" />
+					<lookup-method name="createVerbHandler" bean="outputHandler" />
+				</bean>
 			</list>
 		</property>
 	</bean>
@@ -153,6 +169,7 @@
 	<bean id="conferenceHandler" class="com.tropo.server.verb.ConferenceHandler" scope="prototype">
 		<property name="mohoConferenceController" ref="conferenceController" />
 	</bean>
+	<bean id="outputHandler" class="com.tropo.server.verb.OutputHandler" scope="prototype" />
 
 	<!-- Admin Service -->
 	<bean id="adminService" class="com.tropo.server.AdminService"/>

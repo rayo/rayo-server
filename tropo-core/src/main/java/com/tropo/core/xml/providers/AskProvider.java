@@ -65,7 +65,7 @@ public class AskProvider extends BaseProvider {
         Element root = element;
         Ask ask = new Ask();
         if (root.attributeValue("bargein") != null) {
-            ask.setBargein(toBoolean(root.attributeValue("bargein")));
+            ask.setBargein(toBoolean("bargein", element));
         }
         if (root.attributeValue("min-confidence") != null) {
             ask.setMinConfidence(toFloatConfidence(root.attributeValue("min-confidence")));
