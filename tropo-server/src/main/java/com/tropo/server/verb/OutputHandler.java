@@ -36,10 +36,10 @@ public class OutputHandler extends AbstractLocalVerbHandler<Output> {
         	outcommand.setBargein(model.isBargein());
         }
         if (model.getCodec() != null) {
-        	outcommand.setCodec(model.getCodecValue());
+        	outcommand.setCodec(Output.toCodecValue(model.getCodec()));
         }
         if (model.getFormat() != null) {
-        	outcommand.setFormat(model.getFileFormat());
+        	outcommand.setFormat(Output.toFileFormat(model.getFormat()));
         }
         if (model.getJumpPlaylistIncrement() != null) {
         	outcommand.setJumpPlaylistIncrement(model.getJumpPlaylistIncrement());
