@@ -288,7 +288,7 @@ class ValidationTest {
 		assertNotNull errorMapping
 		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
 		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
-		assertEquals errorMapping.text, Messages.INVALID_BOOLEAN
+		assertEquals errorMapping.text, String.format(Messages.INVALID_BOOLEAN,"answer-on-media")
 	}
 	
 	@Test
@@ -358,7 +358,7 @@ class ValidationTest {
 		assertNotNull errorMapping
 		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
 		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
-		assertEquals errorMapping.text, Messages.INVALID_BOOLEAN
+		assertEquals errorMapping.text, String.format(Messages.INVALID_BOOLEAN,"beep")
 	}
 	
 	@Test
@@ -370,7 +370,7 @@ class ValidationTest {
 		assertNotNull errorMapping
 		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
 		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
-		assertEquals errorMapping.text, Messages.INVALID_BOOLEAN
+		assertEquals errorMapping.text, String.format(Messages.INVALID_BOOLEAN,"mute")
 	}
 	
 	@Test
@@ -382,7 +382,7 @@ class ValidationTest {
 		assertNotNull errorMapping
 		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
 		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
-		assertEquals errorMapping.text, Messages.INVALID_BOOLEAN
+		assertEquals errorMapping.text, String.format(Messages.INVALID_BOOLEAN,"tone-passthrough")
 	}
 	
 	@Test
