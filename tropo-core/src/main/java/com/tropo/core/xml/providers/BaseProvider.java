@@ -184,6 +184,20 @@ public abstract class BaseProvider implements XmlProvider {
         	throw new ValidationException(String.format(Messages.INVALID_INTEGER, attribute));
         }
     }
+
+    protected float toFloat(String attribute, Element element) {
+
+    	String string = element.attributeValue(attribute);
+        if (string == null) {
+            throw new ValidationException(String.format(Messages.INVALID_FLOAT, attribute));
+        }
+        string = string.toLowerCase();
+        try {
+        	return Float.parseFloat(string);
+        } catch (NumberFormatException nfe) {
+        	throw new ValidationException(String.format(Messages.INVALID_FLOAT, attribute));
+        }
+    }
     
     protected Duration toTimeout(String value) {
 

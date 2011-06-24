@@ -4,6 +4,7 @@ public class Messages {
 
 	public static final String MISSING_PROMPT_ITEMS = "You need to send at least an audio or SSML item.";
 	public static final String MISSING_CHOICES = "You need to provide at least a valid choice element.";
+	public static final String MISSING_GRAMMARS = "You need to provide at least a valid grammar element.";
 	public static final String INVALID_RECOGNIZER = "Invalid recognizer.";
 	public static final String MISSING_TO = "Missing required attribute 'to'";
     public static final String MISSING_FROM = "Missing required attribute 'from'";
@@ -18,6 +19,7 @@ public class Messages {
 	public static final String INVALID_URI = "You have submitted an invalid URI.";
 	public static final String INVALID_BOOLEAN = "You have submitted an invalid boolean value for '%s'";
 	public static final String INVALID_INTEGER = "You have submitted an invalid integer value for '%s'";
+	public static final String INVALID_FLOAT = "You have submitted an invalid float value for '%s'";
 	public static final String INVALID_TIMEOUT = "Invalid timeout specified.";
 	public static final String INVALID_CONFIDENCE = "Invalid confidence specified.";
 	public static final String INVALID_TERMINATOR = "Invalid terminator character.";

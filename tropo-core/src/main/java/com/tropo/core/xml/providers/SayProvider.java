@@ -39,9 +39,12 @@ public class SayProvider extends BaseProvider {
     }
 
     private Object buildCompleteCommand(Element element) {
+    	
         String reasonValue = element.getName().toUpperCase();
         Reason reason = Reason.valueOf(reasonValue);
-        return new SayCompleteEvent(null, reason);
+        SayCompleteEvent complete = new SayCompleteEvent();
+        complete.setReason(reason);
+        return complete;
     }
 
     private Object buildSay(Element element) throws URISyntaxException {

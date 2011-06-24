@@ -13,6 +13,7 @@ import com.tropo.core.verb.JumpCommand;
 import com.tropo.core.verb.MoveCommand;
 import com.tropo.core.verb.Output;
 import com.tropo.core.verb.OutputCompleteEvent;
+import com.tropo.core.verb.SayCompleteEvent;
 import com.tropo.core.verb.VolumeCommand;
 import com.tropo.core.verb.OutputCompleteEvent.Reason;
 import com.tropo.core.verb.PauseCommand;
@@ -59,7 +60,9 @@ public class OutputProvider extends BaseProvider {
     private Object buildCompleteCommand(Element element) {
         String reasonValue = element.getName().toUpperCase();
         Reason reason = Reason.valueOf(reasonValue);
-        return new OutputCompleteEvent(null, reason);
+        OutputCompleteEvent complete = new OutputCompleteEvent();
+        complete.setReason(reason);
+        return complete;
     }
 
     private Object buildOutput(Element element) throws URISyntaxException {
@@ -96,9 +99,6 @@ public class OutputProvider extends BaseProvider {
         }
         if (element.attribute("volume-unit") != null) {
         	output.setVolumeUnit(toInteger("volume-unit", element));
-        }
-        if (element.attribute("voice") != null) {
-        	output.setVoice(element.attributeValue("voice"));
         }
         return output;
     }
