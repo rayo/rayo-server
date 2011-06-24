@@ -32,7 +32,7 @@ public class OutputHandler extends AbstractLocalVerbHandler<Output> {
         Ssml prompt = model.getPrompt();
         AudibleResource audibleResource = resolveAudio(prompt);
         OutputCommand outcommand = new OutputCommand(audibleResource);
-        if (model.isBargein()) {
+        if (model.isBargein() != null) {
         	outcommand.setBargein(model.isBargein());
         }
         if (model.getCodec() != null) {
@@ -55,9 +55,6 @@ public class OutputHandler extends AbstractLocalVerbHandler<Output> {
         }
         if (model.getTimeout() != null) {
         	outcommand.setTimeout(model.getTimeout());
-        }
-        if (model.getVoice() != null) {
-        	outcommand.setVoiceName(model.getVoice());
         }
         if (model.getVolumeUnit() != null) {
         	outcommand.setVolumeUnit(model.getVolumeUnit());
