@@ -16,11 +16,11 @@ public class SayCompleteEvent extends VerbCompleteEvent {
         super(reason);
     }
 
-    public SayCompleteEvent(Output verb, VerbCompleteReason reason) {
+    public SayCompleteEvent(Say verb, VerbCompleteReason reason) {
         super(verb, reason);
     }
 
-    public SayCompleteEvent(Output verb, String errorText) {
+    public SayCompleteEvent(Say verb, String errorText) {
         super(verb, errorText);
     }
 
