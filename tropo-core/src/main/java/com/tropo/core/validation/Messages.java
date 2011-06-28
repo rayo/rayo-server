@@ -33,6 +33,8 @@ public class Messages {
     public static final String INVALID_VOLUME = "Invalid volume. It needs to be a boolean.";
     public static final String INVALID_CODEC = "Invalid codec value.";
     public static final String INVALID_FILE_FORMAT = "Invalid file format.";
+    public static final String INVALID_MEDIA_DIRECTION = "Invalid direction. It should be one of DUPLEX|RECV|SEND.";
+    public static final String INVALID_JOIN_TYPE = "Invalid join type. It should be one of BRIDGE|DIRECT.";
 
 	public static final String UNKNOWN_NAMESPACE_ELEMENT = "Could not find the element on namespace.";
 
