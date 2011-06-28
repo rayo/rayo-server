@@ -31,8 +31,14 @@ public class JoinProvider extends BaseProvider {
     	Join join = new Join();
     	if (element.attribute("type") != null) {
     		join.setType(element.attributeValue("type"));
-    	} else if (element.attribute("direction") != null) {
+    	}
+    	
+    	if (element.attribute("direction") != null) {
     		join.setDirection(element.attributeValue("direction"));
+    	}
+    	
+    	if (element.attribute("to") != null) {
+    		join.setTo(element.attributeValue("to"));
     	}
     	join.setHeaders(grabHeaders(element));
         return join;
@@ -66,6 +72,9 @@ public class JoinProvider extends BaseProvider {
         }
         if (join.getType() != null) {
         	root.addAttribute("type", join.getType());
+        }
+        if (join.getTo() != null) {
+        	root.addAttribute("to", join.getTo());
         }
         addHeaders(join.getHeaders(), root);
     }

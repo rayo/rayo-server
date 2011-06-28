@@ -16,6 +16,8 @@ public class Join extends BaseVerb {
 	@ValidJoinType
 	private String type;
 
+	private String to;
+
 	private Map<String, String> headers;
 
 	public String getDirection() {
@@ -40,6 +42,14 @@ public class Join extends BaseVerb {
 
 	public void setHeaders(Map<String, String> headers) {
 		this.headers = headers;
+	}
+
+	public String getTo() {
+		return to;
+	}
+
+	public void setTo(String to) {
+		this.to = to;
 	}
 
 	@Override
