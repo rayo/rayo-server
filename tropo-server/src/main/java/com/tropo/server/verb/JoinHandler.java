@@ -39,7 +39,7 @@ public class JoinHandler extends AbstractLocalVerbHandler<Join> {
 					if (model.getHeaders() != null) {
 						props.putAll(model.getHeaders());
 					}
-					conference.join(call, JoinType.valueOf(model.getType()), 
+					conference.join(call, JoinType.valueOf(model.getMedia()), 
 							Direction.valueOf(model.getDirection()), props);
 					return;
 				}
@@ -51,13 +51,13 @@ public class JoinHandler extends AbstractLocalVerbHandler<Join> {
 		}
 		
 		if (model.getDirection() == null) {
-			if (model.getType() == null) {
+			if (model.getMedia() == null) {
 				joinable.join();
 			} else {
 
 			}
 		} else {
-			if (model.getType() == null) {
+			if (model.getMedia() == null) {
 				call.join(joinable,JoinType.BRIDGE,Direction.valueOf(model.getDirection()));
 			} else {
 

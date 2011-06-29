@@ -30,7 +30,7 @@ public class JoinProvider extends BaseProvider {
         
     	Join join = new Join();
     	if (element.attribute("type") != null) {
-    		join.setType(element.attributeValue("type"));
+    		join.setMedia(element.attributeValue("media"));
     	}
     	
     	if (element.attribute("direction") != null) {
@@ -70,8 +70,8 @@ public class JoinProvider extends BaseProvider {
         if (join.getDirection() != null) {
         	root.addAttribute("direction", join.getDirection());        	
         }
-        if (join.getType() != null) {
-        	root.addAttribute("type", join.getType());
+        if (join.getMedia() != null) {
+        	root.addAttribute("media", join.getMedia());
         }
         if (join.getTo() != null) {
         	root.addAttribute("to", join.getTo());

@@ -14,7 +14,7 @@ public class Join extends BaseVerb {
 	private String direction;
 
 	@ValidJoinType
-	private String type;
+	private String media;
 
 	private String to;
 
@@ -28,12 +28,12 @@ public class Join extends BaseVerb {
 		this.direction = direction;
 	}
 
-	public String getType() {
-		return type;
+	public String getMedia() {
+		return media;
 	}
 
-	public void setType(String type) {
-		this.type = type;
+	public void setMedia(String media) {
+		this.media = media;
 	}
 
 	public Map<String, String> getHeaders() {
@@ -57,7 +57,7 @@ public class Join extends BaseVerb {
 
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
 				.append("callId", getCallId()).append("verbId", getVerbId())
-				.append("direction", direction).append("type", type)
+				.append("direction", direction).append("media", media)
 				.append("headers", headers).toString();
 
 	}
