@@ -30,11 +30,11 @@ public class JoinProvider extends BaseProvider {
         
     	Join join = new Join();
     	if (element.attribute("type") != null) {
-    		join.setMedia(element.attributeValue("media"));
+    		join.setMedia(element.attributeValue("media").toUpperCase());
     	}
     	
     	if (element.attribute("direction") != null) {
-    		join.setDirection(element.attributeValue("direction"));
+    		join.setDirection(element.attributeValue("direction").toUpperCase());
     	}
     	
     	if (element.attribute("to") != null) {
