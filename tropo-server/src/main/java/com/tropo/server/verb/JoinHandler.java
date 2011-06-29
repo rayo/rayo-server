@@ -1,5 +1,7 @@
 package com.tropo.server.verb;
 
+import java.util.Properties;
+
 import javax.media.mscontrol.join.Joinable.Direction;
 
 import com.tropo.core.verb.Join;
@@ -13,6 +15,8 @@ import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.Call;
 import com.voxeo.moho.Participant.JoinType;
 import com.voxeo.moho.State;
+import com.voxeo.moho.conference.Conference;
+import com.voxeo.moho.conference.ConferenceManager;
 
 public class JoinHandler extends AbstractLocalVerbHandler<Join> {
 
@@ -28,10 +32,22 @@ public class JoinHandler extends AbstractLocalVerbHandler<Join> {
 		if (model.getTo() != null) {
 			CallActor actor = callRegistry.get(model.getTo());
 			if (actor == null) {
+				ConferenceManager conferenceManager = call.getApplicationContext().getConferenceManager();
+				Conference conference = conferenceManager.getConference(model.getTo());
+				if (conference != null) {
+					Properties props = new Properties();
+					if (model.getHeaders() != null) {
+						props.putAll(model.getHeaders());
+					}
+					conference.join(call, JoinType.valueOf(model.getType()), 
+							Direction.valueOf(model.getDirection()), props);
+					return;
+				}
 				throw new IllegalStateException("Call not found");
+			} else {
+				joinable = actor.getCall();
+				joinable.join();
 			}
-			joinable = actor.getCall();
-			joinable.join();
 		}
 		
 		if (model.getDirection() == null) {
@@ -108,5 +124,4 @@ public class JoinHandler extends AbstractLocalVerbHandler<Join> {
 	public void setCallRegistry(CallRegistry callRegistry) {
 		this.callRegistry = callRegistry;
 	}
-
 }
