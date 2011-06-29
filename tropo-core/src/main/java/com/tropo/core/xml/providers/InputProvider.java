@@ -194,7 +194,34 @@ public class InputProvider extends BaseProvider {
     
     private void createInputCompleteEvent(InputCompleteEvent event, Document document) throws Exception {
         
-    	addCompleteElement(document, event, COMPLETE_NAMESPACE);
+    	Element completeElement =  addCompleteElement(document, event, COMPLETE_NAMESPACE);
+        if(event.getReason() instanceof Reason) {
+            Reason reason = (Reason)event.getReason();
+            if(reason == Reason.SUCCESS) {
+                
+                completeElement.addAttribute("confidence", String.valueOf(event.getConfidence()));
+                
+                if(event.getMode()!= null) {
+                    completeElement.addAttribute("mode", event.getMode().name().toLowerCase());
+                }
+                if (event.getInterpretation() != null) {
+                    completeElement.addElement("interpretation").setText(event.getInterpretation());
+                }
+                if (event.getUtterance() != null) {
+                    completeElement.addElement("utterance").setText(event.getUtterance());
+                }
+
+                if (event.getTag() != null) {
+                	completeElement.addElement("tag").setText(event.getTag());
+                }
+                if (event.getConcept() != null) {
+                	completeElement.addElement("concept").setText(event.getConcept());
+                }
+                if (event.getNlsml() != null) {
+                	completeElement.addElement("nlsml").setText(event.getNlsml());
+                }    
+            }
+        }
     }
 
     @Override
