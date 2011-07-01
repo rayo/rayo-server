@@ -14,14 +14,16 @@ import com.tropo.server.Actor;
 import com.tropo.server.validation.ValidHandlerState;
 import com.voxeo.moho.Call;
 import com.voxeo.moho.MediaService;
+import com.voxeo.moho.Mixer;
+import com.voxeo.moho.Participant;
 import com.voxeo.moho.media.output.AudibleResource;
 import com.voxeo.moho.media.output.OutputCommand;
 
 @ValidHandlerState
-public abstract class AbstractLocalVerbHandler<T extends Verb> implements VerbHandler<T> {
+public abstract class AbstractLocalVerbHandler<T extends Verb, S extends Participant> implements VerbHandler<T, S> {
 
     protected T model;
-    protected Call call;
+    protected S participant;
     protected Actor actor;
     protected MediaService media;
     private EventDispatcher eventDispatcher;
@@ -43,14 +45,19 @@ public abstract class AbstractLocalVerbHandler<T extends Verb> implements VerbHa
     }
 
     @Override
-    public Call getCall() {
-        return call;
+    public S getParticipant() {
+        return participant;
     }
 
     @Override
-    public void setCall(Call call) {
-        this.call = call;
-        this.media = call.getMediaService();
+    public void setParticipant(S participant) {
+        this.participant = participant;
+        //TODO: Participant should probably have a getMediaService definition
+        if (participant instanceof Call) {
+        	this.media = ((Call)participant).getMediaService();
+        } else if (participant instanceof Mixer) {
+        	this.media = ((Mixer)participant).getMediaService();        	
+        }
     }
 
     protected AudibleResource resolveAudio(final Ssml item) {
@@ -122,12 +129,15 @@ public abstract class AbstractLocalVerbHandler<T extends Verb> implements VerbHa
     	return true;
     }
     
-    boolean isOnConference(Call call) {
+    boolean isOnConference(Participant participant) {
 
-    	for (String key: call.getAttributeMap().keySet()) {
-    		if (key.startsWith(ConferenceHandler.PARTICIPANT_KEY)) {
-    			return true;
-    		}
+    	if (participant instanceof Call) {
+    		Call call = (Call)participant;
+	    	for (String key: call.getAttributeMap().keySet()) {
+	    		if (key.startsWith(ConferenceHandler.PARTICIPANT_KEY)) {
+	    			return true;
+	    		}
+	    	}
     	}
     	return false;
 	}

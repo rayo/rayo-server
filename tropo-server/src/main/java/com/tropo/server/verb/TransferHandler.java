@@ -36,7 +36,7 @@ import com.voxeo.moho.media.input.DigitInputCommand;
 import com.voxeo.moho.media.input.InputCommand;
 import com.voxeo.moho.media.output.OutputCommand;
 
-public class TransferHandler extends AbstractLocalVerbHandler<Transfer> implements Observer {
+public class TransferHandler extends AbstractLocalVerbHandler<Transfer, Call> implements Observer {
 
     private static final Loggerf log = Loggerf.getLogger(TransferHandler.class);
 
@@ -76,7 +76,7 @@ public class TransferHandler extends AbstractLocalVerbHandler<Transfer> implemen
         }, model.getTimeout().getMillis());
 
         for (URI destination : model.getTo()) {
-            Endpoint endpoint = call.getApplicationContext().createEndpoint(destination.toString());
+            Endpoint endpoint = participant.getApplicationContext().createEndpoint(destination.toString());
             if (endpoint instanceof CallableEndpoint) {
                 dial((CallableEndpoint) endpoint);
             }
@@ -85,7 +85,7 @@ public class TransferHandler extends AbstractLocalVerbHandler<Transfer> implemen
         Character terminator = model.getTerminator();
         if(terminator != null) {
             InputCommand inputCommand = new DigitInputCommand(terminator);
-            MediaService mediaService = call.getMediaService(true);
+            MediaService mediaService = participant.getMediaService(true);
             input = mediaService.input(inputCommand);
         }
 
@@ -146,7 +146,7 @@ public class TransferHandler extends AbstractLocalVerbHandler<Transfer> implemen
     @State
     public synchronized void onJoinComplete(JoinCompleteEvent event) {
         
-        if (event.source != call) {
+        if (event.source != participant) {
 
             // Make sure we're running or still interested in joining someone
             if(!isRunning() || peer != null) {
@@ -161,7 +161,7 @@ public class TransferHandler extends AbstractLocalVerbHandler<Transfer> implemen
             case JOINED:
                 peer = (Call)event.getSource();
                 peer.setSupervised(true);
-                call.join(peer, resolveJoinType(), Direction.DUPLEX);
+                participant.join(peer, resolveJoinType(), Direction.DUPLEX);
                 stopDialing();
                 break;
             case TIMEOUT:
@@ -188,7 +188,7 @@ public class TransferHandler extends AbstractLocalVerbHandler<Transfer> implemen
                 // Determine the redirect target and spin up a new candidate
                 List<String> redirectTargets = ((RedirectException) event.getException()).getTargets();
                 for(String redirectTarget : redirectTargets) {
-                    CallableEndpoint to = (CallableEndpoint) call.getApplicationContext().createEndpoint(redirectTarget);
+                    CallableEndpoint to = (CallableEndpoint) participant.getApplicationContext().createEndpoint(redirectTarget);
                     dial(to);
                 }
                 break;
@@ -204,7 +204,7 @@ public class TransferHandler extends AbstractLocalVerbHandler<Transfer> implemen
 
     @State
     public synchronized void onTermChar(InputCompleteEvent event) {
-        if (event.source == call) {
+        if (event.source == participant) {
             switch (event.getCause()) {
             case MATCH:
                 if (isRunning()) {
@@ -229,7 +229,7 @@ public class TransferHandler extends AbstractLocalVerbHandler<Transfer> implemen
         
         // Join back to the media server
         if(peer != null) {
-            peer.unjoin(call);
+            peer.unjoin(participant);
         }
 
         complete(event);
@@ -245,10 +245,10 @@ public class TransferHandler extends AbstractLocalVerbHandler<Transfer> implemen
         Endpoint fromEndpoint = null;
         URI from = model.getFrom();
         if (from != null) {
-            call.getApplicationContext().createEndpoint(from.toString());
+        	participant.getApplicationContext().createEndpoint(from.toString());
         }
         else {
-            fromEndpoint = call.getAddress();
+            fromEndpoint = participant.getAddress();
         }
         return fromEndpoint;
     }

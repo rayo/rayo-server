@@ -6,10 +6,11 @@ import com.tropo.core.verb.PauseCommand;
 import com.tropo.core.verb.ResumeCommand;
 import com.tropo.core.verb.Say;
 import com.tropo.core.verb.SayCompleteEvent;
-import com.tropo.core.verb.Ssml;
-import com.tropo.core.verb.VerbCompleteEvent;
 import com.tropo.core.verb.SayCompleteEvent.Reason;
+import com.tropo.core.verb.Ssml;
 import com.tropo.core.verb.VerbCommand;
+import com.tropo.core.verb.VerbCompleteEvent;
+import com.voxeo.moho.Participant;
 import com.voxeo.moho.State;
 import com.voxeo.moho.event.OutputCompleteEvent;
 import com.voxeo.moho.media.Output;
@@ -17,7 +18,7 @@ import com.voxeo.moho.media.output.AudibleResource;
 import com.voxeo.moho.media.output.OutputCommand;
 import com.voxeo.servlet.xmpp.XmppStanzaError;
 
-public class SayHandler extends AbstractLocalVerbHandler<Say> {
+public class SayHandler extends AbstractLocalVerbHandler<Say, Participant> {
 
     private Output output;
 
@@ -40,7 +41,7 @@ public class SayHandler extends AbstractLocalVerbHandler<Say> {
     @Override
     public boolean isStateValid(ConstraintValidatorContext context) {
 
-        if (isOnConference(call)) {
+        if (isOnConference(participant)) {
         	context.buildConstraintViolationWithTemplate(
         			"Call is joined to a conference.")
         			.addNode(XmppStanzaError.RESOURCE_CONSTRAINT_CONDITION)

@@ -18,8 +18,12 @@ import com.tropo.core.verb.Ssml;
 import com.tropo.core.verb.UnmuteCommand;
 import com.tropo.core.verb.VerbCommand;
 import com.tropo.core.verb.VerbCompleteEvent;
+import com.tropo.server.MixerActor;
+import com.tropo.server.MixerActorFactory;
+import com.tropo.server.MixerRegistry;
 import com.tropo.server.MohoUtil;
 import com.tropo.server.conference.ParticipantController;
+import com.voxeo.moho.Call;
 import com.voxeo.moho.Participant;
 import com.voxeo.moho.Participant.JoinType;
 import com.voxeo.moho.State;
@@ -32,12 +36,14 @@ import com.voxeo.moho.media.output.OutputCommand;
 import com.voxeo.moho.media.output.OutputCommand.BehaviorIfBusy;
 import com.voxeo.servlet.xmpp.XmppStanzaError;
 
-public class ConferenceHandler extends AbstractLocalVerbHandler<Conference> implements ParticipantController {
+public class ConferenceHandler extends AbstractLocalVerbHandler<Conference, Call> implements ParticipantController {
 
     public static final String PARTICIPANT_KEY = "com.tropo.conference.participant.";
     private static final String WAIT_LIST_KEY = "com.tropo.conference.waitList";
 
     private ConferenceController mohoConferenceController;
+    private MixerActorFactory mixerActoryFactory;
+    private MixerRegistry mixerRegistry;
 
     private boolean hold;
     private boolean joined;
@@ -59,7 +65,7 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference> impl
         this.tonePassthrough = model.isTonePassthrough();
 
         // Create or get Moho Conference
-        mohoConference = call.getApplicationContext().getConferenceManager().createConference(model.getRoomName(), Integer.MAX_VALUE, null, null);
+        mohoConference = participant.getApplicationContext().getConferenceManager().createConference(model.getRoomName(), Integer.MAX_VALUE, null, null);
 
         synchronized (mohoConference.getId()) {
 
@@ -69,7 +75,7 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference> impl
             }
             
             // Register Tropo Participant object as an attribute of the Moho Call
-            call.setAttribute(getMohoParticipantAttributeKey(), this);
+            participant.setAttribute(getMohoParticipantAttributeKey(), this);
 
             // Determine if the conference is 'open' by checking if there are any moderators
             Boolean open = isConferenceOpen();
@@ -94,20 +100,25 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference> impl
             }
         }
 
+        //TODO: This is the only place I found to create the actual conference actor. I didn't find events for 
+        // conference/mixer creation
+        MixerActor actor = mixerActoryFactory.create(mohoConference);
+        actor.start();
+        mixerRegistry.add(actor);
     }
 
     @Override
     public boolean isStateValid(ConstraintValidatorContext context) {
 
         String participantKey = getMohoParticipantAttributeKey();
-        if (call.getAttribute(participantKey) != null) {
+        if (participant.getAttribute(participantKey) != null) {
         	context.buildConstraintViolationWithTemplate(
         			"Call is already a member of the conference: " + model.getRoomName())
         			.addNode(XmppStanzaError.RESOURCE_CONSTRAINT_CONDITION)
         			.addConstraintViolation();
         	return false;
         }
-        if (isOnConference(call)) {
+        if (isOnConference(participant)) {
         	context.buildConstraintViolationWithTemplate(
         			"Call is already joined to another conference")
         			.addNode(XmppStanzaError.RESOURCE_CONSTRAINT_CONDITION)
@@ -125,6 +136,8 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference> impl
         catch (RuntimeException e) {
             complete(new ConferenceCompleteEvent(model, e.getMessage()));
             throw e;
+        } finally {
+        	mixerRegistry.remove(mohoConference.getId());
         }
     }
 
@@ -183,7 +196,7 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference> impl
 
     private void addCallToWaitList() {
         synchronized (mohoConference.getId()) {
-            getWaitList().add(call);
+            getWaitList().add(participant);
         }
     }
 
@@ -191,7 +204,7 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference> impl
         synchronized (mohoConference.getId()) {
             List<Participant> waitList = mohoConference.getAttribute(WAIT_LIST_KEY);
             if(waitList != null) {
-                waitList.remove(call);
+                waitList.remove(participant);
             }
         }
     }
@@ -241,7 +254,7 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference> impl
         
         synchronized (mohoConference.getId()) {
             
-            call.setAttribute(getMohoParticipantAttributeKey(), null);
+        	participant.setAttribute(getMohoParticipantAttributeKey(), null);
             removeCallFromWaitList();
 
             // Free up media resources if the call is still active
@@ -290,7 +303,7 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference> impl
             // TODO: Added property for 'beep' when it becomes available
             // https://evolution.voxeo.com/ticket/1430585
             try {
-                mohoConference.join(call, JoinType.BRIDGE, mute ? Direction.RECV : Direction.DUPLEX, props).get();
+                mohoConference.join(participant, JoinType.BRIDGE, mute ? Direction.RECV : Direction.DUPLEX, props).get();
             }
             catch (Exception e) {
                 throw new IllegalStateException(e);
@@ -301,9 +314,9 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference> impl
 
     private void stopMixing() {
         if (joined) {
-            call.unjoin(mohoConference);
+        	participant.unjoin(mohoConference);
             // Rejoin the media server
-            call.getMediaService(true);
+        	participant.getMediaService(true);
             joined = false;
         }
     }
@@ -383,10 +396,18 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference> impl
     @State
     public void onTermChar(InputCompleteEvent event) {
         // This event can come from another verb so we first check that
-        if(hotwordListener != null && event.hasMatch() && event.source == call) {
+        if(hotwordListener != null && event.hasMatch() && event.source == participant) {
             complete(Reason.TERMINATOR);
         }
     }
 
-
+    public void setMixerActoryFactory(MixerActorFactory mixerActoryFactory) {
+		
+    	this.mixerActoryFactory = mixerActoryFactory;
+	}
+    
+    public void setMixerRegistry(MixerRegistry mixerRegistry) {
+	
+    	this.mixerRegistry = mixerRegistry;
+	}
 }

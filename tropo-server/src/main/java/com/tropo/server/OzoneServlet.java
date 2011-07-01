@@ -56,6 +56,7 @@ public class OzoneServlet extends XmppServlet {
     private XmlProvider provider;
     private CallManager callManager;
     private CallRegistry callRegistry;
+    private MixerRegistry mixerRegistry;
     private ExceptionMapper exceptionMapper;
     private OzoneStatistics ozoneStatistics;
     private AdminService adminService;
@@ -268,7 +269,7 @@ public class OzoneServlet extends XmppServlet {
                     cdrManager.append(callId, payload.asXML());
                     
                     // Find the call actor
-                    CallActor actor = findCallActor(callCommand.getCallId());
+                    AbstractActor actor = findActor(callCommand.getCallId());
 
                     if (callCommand instanceof VerbCommand) {
                         VerbCommand verbCommand = (VerbCommand) callCommand;
@@ -395,19 +396,23 @@ public class OzoneServlet extends XmppServlet {
     }
 
     private void fail(String callId) {
-        findCallActor(callId).publish(new EndCommand(callId, EndEvent.Reason.ERROR));
+        findActor(callId).publish(new EndCommand(callId, EndEvent.Reason.ERROR));
     }
 
-    private CallActor findCallActor(String callId) throws NotFoundException {
+    private AbstractActor findActor(String callId) throws NotFoundException {
+    	
         CallActor callActor = callRegistry.get(callId);
         if (callActor != null) {
             return callActor;
         }
-        else {
-            throw new NotFoundException("Could not find call [id=%s]", callId);
+        MixerActor mixerActor = mixerRegistry.get(callId);
+        if (mixerActor != null) {
+            return mixerActor;
         }
+        
+        throw new NotFoundException("Could not find a matching call or conference [id=%s]", callId);
     }
-
+    
     private String callId(JID jid) {
         return jid.getNode();
     }
@@ -438,8 +443,16 @@ public class OzoneServlet extends XmppServlet {
     public void setCallRegistry(CallRegistry callRegistry) {
         this.callRegistry = callRegistry;
     }
+    
+    public MixerRegistry getMixerRegistry() {
+		return mixerRegistry;
+	}
 
-    public void setExceptionMapper(ExceptionMapper exceptionMapper) {
+	public void setMixerRegistry(MixerRegistry mixerRegistry) {
+		this.mixerRegistry = mixerRegistry;
+	}
+
+	public void setExceptionMapper(ExceptionMapper exceptionMapper) {
         this.exceptionMapper = exceptionMapper;
     }
 

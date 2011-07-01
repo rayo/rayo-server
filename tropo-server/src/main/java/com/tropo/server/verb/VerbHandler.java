@@ -5,9 +5,9 @@ import javax.validation.ConstraintValidatorContext;
 import com.tropo.core.verb.Verb;
 import com.tropo.core.verb.VerbCommand;
 import com.tropo.server.Actor;
-import com.voxeo.moho.Call;
+import com.voxeo.moho.Participant;
 
-public interface VerbHandler<T extends Verb> {
+public interface VerbHandler<T extends Verb, S extends Participant> {
 
     public void stop(boolean hangup);
     
@@ -23,9 +23,9 @@ public interface VerbHandler<T extends Verb> {
 
     public void setActor(Actor actor);
 
-    public Call getCall();
+    public S getParticipant();
 
-    public void setCall(Call call);
+    public void setParticipant(S participant);
 
     public EventDispatcher getEventDispatcher();
 

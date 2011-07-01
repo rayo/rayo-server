@@ -5,7 +5,7 @@ import javax.validation.ConstraintValidatorContext;
 
 import com.tropo.server.verb.VerbHandler;
 
-public class VerbHandlerStateValidator implements ConstraintValidator<ValidHandlerState, VerbHandler<?>> {
+public class VerbHandlerStateValidator implements ConstraintValidator<ValidHandlerState, VerbHandler<?,?>> {
 
 	
 	@Override
@@ -14,7 +14,7 @@ public class VerbHandlerStateValidator implements ConstraintValidator<ValidHandl
 	}
 
 	@Override
-	public boolean isValid(VerbHandler<?> verbHandler, ConstraintValidatorContext context) {
+	public boolean isValid(VerbHandler<?,?> verbHandler, ConstraintValidatorContext context) {
 		
 		context.disableDefaultConstraintViolation();
 		return verbHandler.isStateValid(context);

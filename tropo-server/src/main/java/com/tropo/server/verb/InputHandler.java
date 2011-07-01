@@ -7,12 +7,13 @@ import com.tropo.core.verb.Input;
 import com.tropo.core.verb.InputCompleteEvent;
 import com.tropo.core.verb.InputCompleteEvent.Reason;
 import com.tropo.core.verb.VerbCompleteEvent;
+import com.voxeo.moho.Participant;
 import com.voxeo.moho.State;
 import com.voxeo.moho.event.InputDetectedEvent;
 import com.voxeo.moho.media.input.Grammar;
 import com.voxeo.moho.media.input.InputCommand;
 
-public class InputHandler extends AbstractLocalVerbHandler<Input> {
+public class InputHandler extends AbstractLocalVerbHandler<Input, Participant> {
 
 	private com.voxeo.moho.media.Input input;
 	

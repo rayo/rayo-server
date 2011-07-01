@@ -1,0 +1,172 @@
+package com.tropo.core.xml.providers;
+
+import java.net.URISyntaxException;
+
+import org.dom4j.Document;
+import org.dom4j.Element;
+import org.dom4j.Namespace;
+import org.dom4j.QName;
+
+import com.tropo.core.verb.Record;
+import com.tropo.core.verb.RecordCompleteEvent;
+
+public class RecordProvider extends BaseProvider {
+
+    // XML -> Object
+    // ================================================================================
+
+    private static final Namespace NAMESPACE = new Namespace("", "urn:xmpp:ozone:record:1");
+    private static final Namespace COMPLETE_NAMESPACE = new Namespace("", "urn:xmpp:ozone:record:complete:1");
+    
+    @Override
+    protected Object processElement(Element element) throws Exception {
+        if (element.getName().equals("record")) {
+            return buildJoin(element);
+        }
+        return null;
+    }
+
+    private Object buildJoin(Element element) throws URISyntaxException {
+        
+    	Record record = new Record();
+    	if (element.attribute("to") !=  null) {
+    		record.setTo(toURI(element.attributeValue("to")));
+    	}
+        Element promptElement = element.element("prompt");
+        if (promptElement != null) {
+            record.setPrompt(extractSsml(promptElement));
+        }
+    	if (element.attribute("voice") !=  null) {
+    		record.setVoice(element.attributeValue("voice"));
+    	}
+    	if (element.attribute("bargein") !=  null) {
+    		record.setBargein(toBoolean("bargein",element));
+    	}
+    	if (element.attribute("append") !=  null) {
+    		record.setAppend(toBoolean("append",element));
+    	}
+    	if (element.attribute("codec") !=  null) {
+    		record.setCodec(element.attributeValue("codec"));
+    	}
+    	if (element.attribute("codec-params") !=  null) {
+    		record.setCodecParameters(element.attributeValue("codec-params"));
+    	}
+    	if (element.attribute("dtmf-truncate") !=  null) {
+    		record.setDtmfTruncate(toBoolean("dtmf-truncate", element));
+    	}
+    	if (element.attribute("final-timeout") !=  null) {
+    		record.setFinalTimeout(toInteger("final-timeout", element));
+    	}
+    	if (element.attribute("format") !=  null) {
+    		record.setFormat(element.attributeValue("format"));
+    	}
+    	if (element.attribute("initial-timeout") !=  null) {
+    		record.setInitialTimeout(toInteger("initial-timeout",element));
+    	}
+    	if (element.attribute("max-length") !=  null) {
+    		record.setMaxDuration(toInteger("max-length", element));
+    	}
+    	if (element.attribute("min-length") !=  null) {
+    		record.setMinDuration(toInteger("min-length",element));
+    	}
+    	if (element.attribute("sample-rate") !=  null) {
+    		record.setSampleRate(toInteger("sample-rate",element));
+    	}
+    	if (element.attribute("silence-terminate") !=  null) {
+    		record.setSilenceTerminate(toBoolean("silence-terminate",element));
+    	}
+    	if (element.attribute("start-beep") !=  null) {
+    		record.setStartBeep(toBoolean("start-beep", element));
+    	}
+    	if (element.attribute("start-pause-mode") !=  null) {
+    		record.setStartPauseMode(toBoolean("start-pause-mode", element));
+    	}
+        return record;
+    }
+    
+    // Object -> XML
+    // ================================================================================
+
+    @Override
+    protected void generateDocument(Object object, Document document) throws Exception {
+
+        if (object instanceof Record) {
+            createRecord((Record) object, document);
+        } else if (object instanceof RecordCompleteEvent) {
+        	createRecordCompleteEvent((RecordCompleteEvent) object, document);
+        }
+    }
+    
+	private void createRecordCompleteEvent(RecordCompleteEvent event, Document document) throws Exception {
+	    
+		Element complete = addCompleteElement(document, event, COMPLETE_NAMESPACE);
+		if (event.getUri() != null) {
+			complete.addAttribute("uri", event.getUri().toString());
+		}
+	}
+    
+    private void createRecord(Record record, Document document) throws Exception {
+    	
+        Element root = document.addElement(new QName("record", NAMESPACE));
+        if (record.getTo() != null) {
+        	root.addAttribute("to", record.getTo().toString());
+        }
+        if (record.getPrompt() != null) {
+            Element prompt = root.addElement("prompt");
+            addSsml(record.getPrompt(), prompt);
+        }
+        if (record.getAppend() != null) {
+        	root.addAttribute("append", record.getAppend().toString());
+        }
+        if (record.getVoice() != null) {
+        	root.addAttribute("voice", record.getVoice());
+        }
+        if (record.isBargein() != null) {
+        	root.addAttribute("bargein", record.isBargein().toString());
+        }
+        if (record.getDtmfTruncate() != null) {
+        	root.addAttribute("dtmf-truncate", record.getDtmfTruncate().toString());
+        }
+        if (record.getSilenceTerminate() != null) {
+        	root.addAttribute("silence-terminate", record.getSilenceTerminate().toString());
+        }
+        if (record.getStartBeep() != null) {
+        	root.addAttribute("start-beep", record.getStartBeep().toString());
+        }
+        if (record.getStartPauseMode() != null) {
+        	root.addAttribute("start-pause-mode", record.getStartPauseMode().toString());
+        }
+        if (record.getCodec() != null) {
+        	root.addAttribute("codec", record.getCodec());
+        }
+        if (record.getCodecParameters() != null) {
+        	root.addAttribute("codec-params", record.getCodecParameters());
+        }
+        if (record.getFinalTimeout() != null) {
+        	root.addAttribute("final-timeout", record.getFinalTimeout().toString());
+        }
+        if (record.getFormat() != null) {
+        	root.addAttribute("format", record.getFormat());
+        }
+        if (record.getInitialTimeout() != null) {
+        	root.addAttribute("initial-timeout", record.getInitialTimeout().toString());
+        }
+        if (record.getMaxDuration() != null) {
+        	root.addAttribute("max-length", record.getMaxDuration().toString());
+        }
+        if (record.getMinDuration() != null) {
+        	root.addAttribute("min-length", record.getMinDuration().toString());
+        }
+        if (record.getSampleRate() != null) {
+        	root.addAttribute("sample-rate", record.getSampleRate().toString());
+        }        
+    }
+
+    @Override
+    public boolean handles(Class<?> clazz) {
+
+        //TODO: Refactor out to spring configuration and put everything in the base provider class
+        return clazz == Record.class ||
+        	   clazz == RecordCompleteEvent.class;
+    }
+}

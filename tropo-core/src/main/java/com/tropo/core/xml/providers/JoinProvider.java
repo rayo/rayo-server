@@ -1,7 +1,5 @@
 package com.tropo.core.xml.providers;
 
-import java.net.URISyntaxException;
-
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.Namespace;
@@ -26,10 +24,10 @@ public class JoinProvider extends BaseProvider {
         return null;
     }
 
-    private Object buildJoin(Element element) throws URISyntaxException {
+    private Object buildJoin(Element element) {
         
     	Join join = new Join();
-    	if (element.attribute("type") != null) {
+    	if (element.attribute("media") != null) {
     		join.setMedia(element.attributeValue("media").toUpperCase());
     	}
     	

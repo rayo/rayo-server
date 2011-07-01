@@ -22,6 +22,9 @@
 	<!-- Global Call Registry -->
 	<bean id="callRegistry" class="com.tropo.server.DefaultCallRegistry" />
 
+	<!-- Global Mixer Registry -->
+	<bean id="mixerRegistry" class="com.tropo.server.DefaultMixerRegistry" />
+
 	<!-- Call Statistics Service -->
 	<bean id="callStatistics" class="com.tropo.server.CallStatistics"/>
 
@@ -31,7 +34,7 @@
 	<!-- Call Actor Factory -->
 	<bean id="callActorFactory" class="com.tropo.server.DefaultCallActorFactory">
 		<property name="fiberFactory" ref="fiberFactory" />
-		<property name="verbManager" ref="verbManager" />
+		<property name="verbManager" ref="callVerbManager" />
 		<property name="callStatistics" ref="callStatistics" />
 		<property name="cdrManager" ref="cdrManager" />
 	</bean>	
@@ -42,8 +45,14 @@
 		<property name="callActorFactory" ref="callActorFactory" />
 	</bean>
 
+	<!-- Mixer Actor Factory -->
+	<bean id="mixerActorFactory" class="com.tropo.server.DefaultMixerActorFactory">
+		<property name="fiberFactory" ref="fiberFactory" />
+		<property name="verbManager" ref="mixerVerbManager" />
+	</bean>	
+	
 	<!-- Conference Manager -->	
-	<bean id="conferenceController" class="com.tropo.server.conference.MohoConferenceController" />
+	<bean id="conferenceController" class="com.tropo.server.conference.MohoConferenceController"/>
 
 	<!-- Model / Request Validation -->
 	<bean id="validator" class="com.tropo.core.validation.Validator"/>
@@ -121,6 +130,14 @@
 			</list>
 		</property>		
 	</bean>
+	<bean id="recordProvider" class="com.tropo.core.xml.providers.RecordProvider">
+		<property name="validator" ref="validator" />
+		<property name="namespaces">
+			<list>
+				<value>urn:xmpp:ozone:record:1</value>
+			</list>
+		</property>		
+	</bean>
 	
 	<!-- Create a global XML Provider -->
 	<bean id="xmlProviderManager" class="com.tropo.core.xml.DefaultXmlProviderManagerFactoryBean">
@@ -134,12 +151,13 @@
 				<ref bean="outputProvider"/>
 				<ref bean="inputProvider"/>
 				<ref bean="joinProvider"/>
+				<ref bean="recordProvider"/>
 			</list>
 		</property>		
 	</bean>
 
 	<!-- Verb Manager: Used to create VerbHandler instances and read/write XML -->
-	<bean id="verbManager" class="com.tropo.server.verb.DefaultVerbManagerFactoryBean">
+	<bean id="callVerbManager" class="com.tropo.server.verb.DefaultVerbManagerFactoryBean">
 		<property name="verbManager">
 			<bean class="com.tropo.server.verb.DefaultVerbManager">
 				<property name="xmlProviderManager" ref="xmlProviderManager" />
@@ -189,9 +207,41 @@
 					<property name="modelClass" value="com.tropo.core.verb.Join" />
 					<lookup-method name="createVerbHandler" bean="joinHandler" />
 				</bean>
+				<!-- Record -->
+				<bean class="com.tropo.server.verb.AbstractVerbFactory">
+					<property name="xmlProvider" ref="recordProvider" />
+					<property name="modelClass" value="com.tropo.core.verb.Record" />
+					<lookup-method name="createVerbHandler" bean="recordHandler" />
+				</bean>				
 			</list>
 		</property>
 	</bean>
+
+	<!-- Mixer verb manager. Handles verbs that can be processed by a mixer -->
+	<bean id="mixerVerbManager" class="com.tropo.server.verb.DefaultVerbManagerFactoryBean">
+		<property name="verbManager">
+			<bean class="com.tropo.server.verb.DefaultVerbManager">
+				<property name="xmlProviderManager" ref="xmlProviderManager" />
+			</bean>
+		</property>
+		<property name="verbFactoryList">
+			<list>
+				<!-- Say -->
+				<bean class="com.tropo.server.verb.AbstractVerbFactory">
+					<property name="xmlProvider" ref="sayProvider" />
+					<property name="modelClass" value="com.tropo.core.verb.Say" />
+					<lookup-method name="createVerbHandler" bean="sayHandler" />
+				</bean>
+				<!-- Record -->
+				<bean class="com.tropo.server.verb.AbstractVerbFactory">
+					<property name="xmlProvider" ref="recordProvider" />
+					<property name="modelClass" value="com.tropo.core.verb.Record" />
+					<lookup-method name="createVerbHandler" bean="recordHandler" />
+				</bean>
+			</list>
+		</property>
+	</bean>
+
 
 	<!-- Verb Handlers -->	
 	<bean id="sayHandler" class="com.tropo.server.verb.SayHandler" scope="prototype" />
@@ -199,12 +249,14 @@
 	<bean id="transferHandler" class="com.tropo.server.verb.TransferHandler" scope="prototype" />
 	<bean id="conferenceHandler" class="com.tropo.server.verb.ConferenceHandler" scope="prototype">
 		<property name="mohoConferenceController" ref="conferenceController" />
+		<property name="mixerActoryFactory" ref="mixerActorFactory"/>
 	</bean>
 	<bean id="outputHandler" class="com.tropo.server.verb.OutputHandler" scope="prototype" />
 	<bean id="inputHandler" class="com.tropo.server.verb.InputHandler" scope="prototype" />
 	<bean id="joinHandler" class="com.tropo.server.verb.JoinHandler" scope="prototype">
 		<property name="callRegistry" ref="callRegistry"/>
 	</bean>
+	<bean id="recordHandler" class="com.tropo.server.verb.RecordHandler" scope="prototype"/>
 
 	<!-- Admin Service -->
 	<bean id="adminService" class="com.tropo.server.AdminService"/>

@@ -16,6 +16,7 @@
 		<property name="provider" ref="xmlProviderManager" />
 		<property name="callManager" ref="callManager" />
 		<property name="callRegistry" ref="callRegistry" />
+		<property name="mixerRegistry" ref="mixerRegistry" />
 		<property name="exceptionMapper" ref="exceptionMapper" />
 		<property name="ozoneStatistics" ref="ozoneStatistics" />
 		<property name="adminService" ref="adminService" />

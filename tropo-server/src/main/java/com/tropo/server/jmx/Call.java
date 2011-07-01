@@ -154,8 +154,8 @@ public class Call {
 		List<Verb> verbs = new ArrayList<Verb>();
 		CallActor actor = callRegistry.get(call.getId());
 		if (actor != null) {
-			Collection<VerbHandler<?>> verbHandlers = actor.getVerbs();
-			for (VerbHandler<?> handler: verbHandlers) {
+			Collection<VerbHandler<?,?>> verbHandlers = actor.getVerbs();
+			for (VerbHandler<?,?> handler: verbHandlers) {
 				com.tropo.core.verb.Verb verb = handler.getModel();
 				if (verb != null) {
 					Verb jmxVerb = new Verb(handler, verb);

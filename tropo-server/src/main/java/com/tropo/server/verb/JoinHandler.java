@@ -13,12 +13,13 @@ import com.tropo.server.CallActor;
 import com.tropo.server.CallRegistry;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.Call;
+import com.voxeo.moho.Participant;
 import com.voxeo.moho.Participant.JoinType;
 import com.voxeo.moho.State;
 import com.voxeo.moho.conference.Conference;
 import com.voxeo.moho.conference.ConferenceManager;
 
-public class JoinHandler extends AbstractLocalVerbHandler<Join> {
+public class JoinHandler extends AbstractLocalVerbHandler<Join, Participant> {
 
 	private static final Loggerf log = Loggerf.getLogger(JoinHandler.class);
 
@@ -27,19 +28,19 @@ public class JoinHandler extends AbstractLocalVerbHandler<Join> {
 	@Override
 	public void start() {
 
-		Call joinable = this.call;
+		Call joinable = (Call)this.participant;
 		
 		if (model.getTo() != null) {
 			CallActor actor = callRegistry.get(model.getTo());
 			if (actor == null) {
-				ConferenceManager conferenceManager = call.getApplicationContext().getConferenceManager();
+				ConferenceManager conferenceManager = participant.getApplicationContext().getConferenceManager();
 				Conference conference = conferenceManager.getConference(model.getTo());
 				if (conference != null) {
 					Properties props = new Properties();
 					if (model.getHeaders() != null) {
 						props.putAll(model.getHeaders());
 					}
-					conference.join(call, JoinType.valueOf(model.getMedia()), 
+					conference.join(participant, JoinType.valueOf(model.getMedia()), 
 							Direction.valueOf(model.getDirection()), props);
 					return;
 				}
@@ -58,7 +59,7 @@ public class JoinHandler extends AbstractLocalVerbHandler<Join> {
 			}
 		} else {
 			if (model.getMedia() == null) {
-				call.join(joinable,JoinType.BRIDGE,Direction.valueOf(model.getDirection()));
+				participant.join(joinable,JoinType.BRIDGE,Direction.valueOf(model.getDirection()));
 			} else {
 
 			}
@@ -66,9 +67,9 @@ public class JoinHandler extends AbstractLocalVerbHandler<Join> {
 	}
 
 	@Override
-	public void setCall(Call call) {
+	public void setParticipant(Participant participant) {
 
-		this.call = call;
+		this.participant = participant;
 	}
 
 	@Override

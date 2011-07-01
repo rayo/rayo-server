@@ -43,8 +43,8 @@ public class Calls implements Serializable, CallsMXBean {
 		Map<String,Long> verbsCount = new HashMap<String, Long>();
 		Collection<CallActor> actors = callRegistry.getActiveCalls();
 		for (CallActor actor: actors) {
-			Collection<VerbHandler<?>> handlers = actor.getVerbs();
-			for (VerbHandler<?> handler: handlers) {
+			Collection<VerbHandler<?,?>> handlers = actor.getVerbs();
+			for (VerbHandler<?,?> handler: handlers) {
 				String verbName = handler.getModel().getClass().getName();
 				verbName = verbName.substring(verbName.lastIndexOf('.') + 1);
 				Long count = verbsCount.get(verbName);

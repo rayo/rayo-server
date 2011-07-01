@@ -8,9 +8,9 @@ public class Verb implements VerbMXBean {
 	private static final long serialVersionUID = -7637717188369158628L;
 
 	private transient final com.tropo.core.verb.Verb verb;
-	private transient final VerbHandler<?> verbHandler;
+	private transient final VerbHandler<?,?> verbHandler;
 	
-	public Verb(VerbHandler<?> handler, com.tropo.core.verb.Verb verb) {
+	public Verb(VerbHandler<?,?> handler, com.tropo.core.verb.Verb verb) {
 		
 		this.verb = verb;
 		this.verbHandler = handler;
