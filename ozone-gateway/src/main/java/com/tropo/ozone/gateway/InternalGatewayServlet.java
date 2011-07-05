@@ -1,171 +1,245 @@
 package com.tropo.ozone.gateway;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.util.List;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.ServletException;
 
-import org.dom4j.DocumentHelper;
-import org.dom4j.Element;
-import org.dom4j.QName;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
 
 import com.voxeo.logging.Loggerf;
+import com.voxeo.servlet.xmpp.IQRequest;
+import com.voxeo.servlet.xmpp.IQResponse;
+import com.voxeo.servlet.xmpp.InstantMessage;
 import com.voxeo.servlet.xmpp.JID;
-import com.voxeo.servlet.xmpp.XmppServletIQRequest;
-import com.voxeo.servlet.xmpp.XmppServletIQResponse;
-import com.voxeo.servlet.xmpp.XmppServletStanzaRequest;
+import com.voxeo.servlet.xmpp.PresenceMessage;
 
-public class InternalGatewayServlet extends GatewayServlet {
+public class InternalGatewayServlet extends GatewayServlet
+{
 
 	private static final long serialVersionUID = 1L;
 	private static final Loggerf log = Loggerf.getLogger(InternalGatewayServlet.class);
 
-	protected void doMessage (XmppServletStanzaRequest request)
-			throws ServletException, IOException {
-//		getOzoneStatistics().messageStanzaReceived();
-		getWireLogger().debug("%s :: %s", request.getElement().asXML(), request.getSession().getId());
-		log.debug("Message stanza unhandled: %s", request.getElement().asXML());
+	protected void doMessage (InstantMessage message) throws ServletException, IOException
+	{
+		// getOzoneStatistics().messageStanzaReceived();
+		if (getWireLogger().isDebugEnabled() || log.isDebugEnabled())
+		{
+			String xml = asXML(message.getElement());
+			getWireLogger().debug("%s :: %s", xml, message.getSession().getId());
+			log.debug("Message stanza unhandled: %s", xml);
+		}
 	}
 
-	protected void doPresence (XmppServletStanzaRequest request)
-			throws ServletException, IOException {
-		getWireLogger().debug("%s :: %s", request.getElement().asXML(), request.getSession().getId());
-//		getOzoneStatistics().presenceStanzaReceived();
+	protected void doPresence (PresenceMessage message) throws ServletException, IOException
+	{
+		if (getWireLogger().isDebugEnabled())
+		{
+			getWireLogger().debug("%s :: %s", asXML(message.getElement()), message.getSession().getId());
+		}
+		// getOzoneStatistics().presenceStanzaReceived();
 
-		Element presenceElement = request.getElement();
-		@SuppressWarnings("unchecked")
-		List<Element> presenceChildren = (List<Element>)presenceElement.elements();
-		if (presenceChildren.size() == 1) {
-			Element payload = presenceChildren.get(0);
-			if (payload.getQName().getNamespaceURI().startsWith("urn:xmpp:ozone")) {
-				JID toJid = getXmppFactory().createJID(presenceElement.attributeValue("to"));
-				JID fromJid = getXmppFactory().createJID(presenceElement.attributeValue("from"));
-				if (null == presenceElement.attributeValue("type") &&
-					null == toJid.getNode() &&
-					isMyInternalDomain(toJid) &&
-					payload.getQName().getNamespaceURI().startsWith("urn:xmpp:ozone:cluster") &&
-					payload.getQName().getName().equals("node-info")) {
-					Element ppidNode = payload.element("ppid");
-					if (ppidNode != null) {
-						String remoteAddress = InetAddress.getByName(fromJid.getDomain()).getHostAddress();
-						int ppid = Integer.parseInt(ppidNode.getText());
-						addTropoNode(fromJid.getDomain(), remoteAddress, ppid);
+		Element presenceElement = message.getElement();
+		NodeList presenceChildren = presenceElement.getChildNodes();
+		if (presenceChildren.getLength() == 1)
+		{
+			Element payload = (Element)presenceChildren.item(0);
+			if (payload.getNamespaceURI().startsWith("urn:xmpp:ozone"))
+			{
+				JID fromJid = getXmppFactory().createJID(presenceElement.getAttribute("from"));
+				JID toJid = getXmppFactory().createJID(presenceElement.getAttribute("to"));
+
+				if (null == toJid.getNode() && isMyInternalDomain(toJid))
+				{
+					String type = presenceElement.getAttribute("type");
+					if (null == type)
+					{
+						NodeList showNodes = payload.getElementsByTagName("show");
+						if (showNodes.getLength() == 1)
+						{
+							String show = showNodes.item(0).getTextContent();
+							if ("chat".equals(show))
+							{
+								NodeList nodeInfoNodes = payload.getElementsByTagNameNS("urn:xmpp:ozone:cluster", "node-info");
+								if (nodeInfoNodes.getLength() == 1)
+								{
+									NodeList platformNodes = ((Element)nodeInfoNodes.item(0)).getElementsByTagName("platform");
+									if (platformNodes.getLength() > 0)
+									{
+										Set<String> platforms = new HashSet<String>();
+										for (int i=0; i<platformNodes.getLength(); ++i)
+										{
+											Element platformNode = (Element)platformNodes.item(0);
+											platforms.add(platformNode.getTextContent());
+										}
+										getGatewayDatastore().setPlatformIDs(fromJid, platforms);
+									}
+								}
+							}
+							else  // away, xa, or dnd - remove node but leave calls untouched   QUIESCE!
+							{
+								getGatewayDatastore().removeTropoNode(fromJid);
+							}
+						}
+					}
+					else if ("unavailable".equals(type))
+					{
+						getGatewayDatastore().removeTropoNode(fromJid);
+						Collection<String> calls = getGatewayDatastore().getCallsForNode(fromJid);
+						// TODO send hangup
+						for (String callID : calls)
+						{
+							getGatewayDatastore().removeCall(callID);
+						}
 					}
 				}
-				else {
-        			JID toJidExternal = getXmppFactory().createJID(toJid.getResource());
-        			JID fromJidExternal = getXmppFactory().createJID(fromJid.getNode() + "@" + getExternalDomain() + "/1");
+				else
+				{
+					// TODO <end>
+					JID toJidExternal = getXmppFactory().createJID(toJid.getResource());
+					JID fromJidExternal = getXmppFactory().createJID(fromJid.getNode() + "@" + getExternalDomain() + "/1");
 
-                    Element presenceStanza = DocumentHelper.createElement("presence");
-                    presenceStanza.addAttribute("to", toJidExternal.toString());
-                    presenceStanza.addAttribute("from", fromJidExternal.toString());
-                    presenceStanza.add(payload);
-                    
-            		log.debug("Translating presence %s -> %s as %s -> %s", fromJid, toJid, fromJidExternal, toJidExternal);
+					Element presenceStanza = presenceElement.getOwnerDocument().createElement("presence");
+					presenceStanza.setAttribute("to", toJidExternal.toString());
+					presenceStanza.setAttribute("from", fromJidExternal.toString());
+					presenceStanza.appendChild(payload);
 
-                    XmppServletStanzaRequest presenceRequest = request.getSession().createStanzaRequest(presenceStanza, null, null, null, null, null);
-                    presenceRequest.send();
-            		getWireLogger().debug("%s :: %s", presenceRequest.getElement().asXML(), presenceRequest.getSession().getId());
-            	}
+					log.debug("Translating presence %s -> %s as %s -> %s", fromJid, toJid, fromJidExternal, toJidExternal);
+
+					PresenceMessage presenceMessage = getXmppFactory().createPresence(fromJidExternal, toJidExternal, presenceElement.getAttribute("type"), null, presenceStanza);
+					presenceMessage.send();
+					if (getWireLogger().isDebugEnabled())
+					{
+						getWireLogger().debug("%s :: %s", asXML(presenceMessage.getElement()), presenceMessage.getSession().getId());
+					}
+				}
 			}
 		}
 	}
 
-	protected void doIQRequest (XmppServletIQRequest request)
-			throws ServletException, IOException {
-		getWireLogger().debug("%s :: %s", request.getElement().asXML(), request.getSession().getId());
-//		getOzoneStatistics().iqReceived();
-
-        final Element iqResponse = DocumentHelper.createElement("iq");
+	protected void doIQRequest (IQRequest request) throws ServletException, IOException
+	{
+		if (getWireLogger().isDebugEnabled())
+		{
+			getWireLogger().debug("%s :: %s", asXML(request.getElement()), request.getSession().getId());
+		}
+		// getOzoneStatistics().iqReceived();
 
 		Element iqElement = request.getElement();
-        Element payload = (Element) iqElement.elementIterator().next();
-        QName qname = payload.getQName();
+		Element payload = (Element) iqElement.getChildNodes().item(0);
 
-        if (qname.getNamespaceURI().startsWith("urn:xmpp:ozone")) {
-        	if (qname.getName().equals("offer")) {
-	        	if ("set".equals(iqElement.attributeValue("type"))) {
-	        		JID toJidInternal = getXmppFactory().createJID(iqElement.attributeValue("to"));
-	        		JID fromJidInternal = getXmppFactory().createJID(iqElement.attributeValue("from"));
-	        		
-	        		if (isMe(toJidInternal.getBareJID())) {
-	        			JID toJidExternal = getTargetJid(getXmppFactory().createJID(toJidInternal.getResource()));
-	        			if (toJidExternal != null) {
-		        			JID fromJidExternal = getXmppFactory().createJID(fromJidInternal.getNode() + "@" + getExternalDomain() + "/1");
-		        			
-		                    Element presenceStanza = DocumentHelper.createElement("presence");
-		                    presenceStanza.addAttribute("to", toJidExternal.toString());
-		                    presenceStanza.addAttribute("from", fromJidExternal.toString());
-		                    presenceStanza.add(payload);
-		                    
-		            		log.debug("Proxying offer %s -> %s as %s -> %s", fromJidInternal, toJidInternal, fromJidExternal, toJidExternal);
+		Element iqResponse = iqElement.getOwnerDocument().createElement("iq");
 
-		                    XmppServletStanzaRequest presenceRequest = request.getSession().createStanzaRequest(presenceStanza, toJidExternal, fromJidExternal, null, null, null);
-		                    presenceRequest.send();
-		            		getWireLogger().debug("%s :: %s", presenceRequest.getElement().asXML(), presenceRequest.getSession().getId());
+		if (payload.getNamespaceURI().startsWith("urn:xmpp:ozone"))
+		{
+			if (payload.getNodeName().equals("offer"))
+			{
+				if ("set".equals(iqElement.getAttribute("type")))
+				{
+					JID toJidInternal = getXmppFactory().createJID(iqElement.getAttribute("to"));
+					JID fromJidInternal = getXmppFactory().createJID(iqElement.getAttribute("from"));
 
-		                    iqResponse.addAttribute("type", "result");
-		                    iqResponse.addElement("resource", "urn:xmpp:ozone:1").addAttribute("id", toJidExternal.getResource());
-	        			}
-	        		}
-	        	}
-        	}
-        }
-        
-        if (null != iqResponse.attributeValue("type")) {
-        	iqResponse.addAttribute("type", "error");
-//        	getOzoneStatistics().iqError();
-        }
-        else {
-//            getOzoneStatistics().iqResult();
-        }
-        
-        XmppServletIQResponse response = request.createIQResultResponse(iqResponse);
-        response.setFrom(request.getTo());
-        response.send();
+					if (isMe(toJidInternal.getBareJID()))
+					{
+						Map<String, String> headers = new HashMap<String, String>();
+						NodeList headerNodes = iqElement.getElementsByTagName("header");
+						for (int i=0; i < headerNodes.getLength(); ++i)
+						{
+							Element headerNode = (Element)headerNodes.item(i);
+							headers.put(headerNode.getAttribute("name"), headerNode.getAttribute("value"));
+						}
+						JID toJidExternal = getGatewayDatastore().lookupJID(payload.getAttribute("from"), payload.getAttribute("to"), headers);
+						if (toJidExternal != null)
+						{
+							JID fromJidExternal = getXmppFactory().createJID(fromJidInternal.getNode() + "@" + getExternalDomain() + "/1");
 
-		getWireLogger().debug("%s :: %s", response.getElement().asXML(), response.getSession().getId());
+							Element presenceStanza = iqElement.getOwnerDocument().createElement("presence");
+							presenceStanza.setAttribute("to", toJidExternal.toString());
+							presenceStanza.setAttribute("from", fromJidExternal.toString());
+							presenceStanza.appendChild(payload);
+
+							log.debug("Proxying offer %s -> %s as %s -> %s", fromJidInternal, toJidInternal, fromJidExternal, toJidExternal);
+
+							PresenceMessage presenceMessage = getXmppFactory().createPresence(fromJidExternal, toJidExternal, null, presenceStanza);
+							presenceMessage.send();
+							if (getWireLogger().isDebugEnabled())
+							{
+								getWireLogger().debug("%s :: %s", asXML(presenceMessage.getElement()), presenceMessage.getSession().getId());
+							}
+
+							iqResponse.setAttribute("type", "result");
+
+							Element resourceElement = iqElement.getOwnerDocument().createElementNS("urn:xmpp:ozone:1", "resource");
+							resourceElement.setAttribute("id", toJidExternal.getResource());
+							iqResponse.appendChild(resourceElement);
+						}
+					}
+				}
+			}
+		}
+
+		if (null != iqResponse.getAttribute("type"))
+		{
+			iqResponse.setAttribute("type", "error");
+			// getOzoneStatistics().iqError();
+		}
+		else
+		{
+			// getOzoneStatistics().iqResult();
+		}
+
+		IQResponse response = request.createResult(iqResponse);
+		response.setFrom(request.getTo());
+		response.send();
+
+		if (getWireLogger().isDebugEnabled())
+		{
+			getWireLogger().debug("%s :: %s", asXML(response.getElement()), response.getSession().getId());
+		}
 	}
-	
-	protected void doIQResponse (XmppServletIQResponse response)
-			throws ServletException, IOException {
-		getWireLogger().debug("%s :: %s", response.getElement().asXML(), response.getSession().getId());
-//		getOzoneStatistics().iqReceived();
+
+	protected void doIQResponse (IQResponse response) throws ServletException, IOException
+	{
+		if (getWireLogger().isDebugEnabled())
+		{
+			getWireLogger().debug("%s :: %s", asXML(response.getElement()), response.getSession().getId());
+		}
+		// getOzoneStatistics().iqReceived();
 
 		Element iqElement = response.getElement();
-        Element payload = (Element) iqElement.elementIterator().next();
-        QName qname = payload.getQName();
+		Element payload = (Element) iqElement.getChildNodes().item(0);
 
-        if (qname.getNamespaceURI().startsWith("urn:xmpp:ozone")) {
-    		JID toJidInternal = getXmppFactory().createJID(iqElement.attributeValue("to"));
-    		JID fromJidInternal = getXmppFactory().createJID(iqElement.attributeValue("from"));
-    		
-    		if (isMe(toJidInternal.getBareJID())) {
-    			JID toJidExternal = toExternalJID(toJidInternal);
-    			JID fromJidExternal = toExternalJID(fromJidInternal);
-        			
-                Element iqResponseStanza = DocumentHelper.createElement("iq");
-                iqResponseStanza.addAttribute("type", iqElement.attributeValue("type"));
-                iqResponseStanza.addAttribute("to", toJidExternal.toString());
-                iqResponseStanza.addAttribute("from", fromJidExternal.toString());
-                iqResponseStanza.add(payload);
-                
-        		log.debug("Proxying offer %s -> %s as %s -> %s", fromJidInternal, toJidInternal, fromJidExternal, toJidExternal);
+		if (payload.getNamespaceURI().startsWith("urn:xmpp:ozone"))
+		{
+			JID toJidInternal = getXmppFactory().createJID(iqElement.getAttribute("to"));
+			JID fromJidInternal = getXmppFactory().createJID(iqElement.getAttribute("from"));
 
-                XmppServletStanzaRequest forwardedResponse = response.getSession().createStanzaRequest(iqResponseStanza, toJidExternal, fromJidExternal, null, null, null);
-                forwardedResponse.send();
-        		getWireLogger().debug("%s :: %s", forwardedResponse.getElement().asXML(), forwardedResponse.getSession().getId());
-    		}
-        }
-	}
+			if (isMe(toJidInternal.getBareJID()))
+			{
+				JID toJidExternal = toExternalJID(toJidInternal);
+				JID fromJidExternal = toExternalJID(fromJidInternal);
 
-	private void addTropoNode (String hostname, String address, int ppid) {
-		log.debug("Adding tropo node: [%s %s %s]", hostname, address, ppid);
-		getTropoNodeService().add(hostname, address, ppid);
-	}
-	
-	private JID getTargetJid (JID jid) {
-		return getTropoAppService().lookup(jid);
+				Element iqResponseStanza = iqElement.getOwnerDocument().createElement("iq");
+				iqResponseStanza.setAttribute("type", iqElement.getAttribute("type"));
+				iqResponseStanza.setAttribute("to", toJidExternal.toString());
+				iqResponseStanza.setAttribute("from", fromJidExternal.toString());
+				iqResponseStanza.appendChild(payload);
+
+				log.debug("Proxying offer %s -> %s as %s -> %s", fromJidInternal, toJidInternal, fromJidExternal, toJidExternal);
+
+				IQRequest originalRequest = (IQRequest)response.getRequest().getAttribute("com.tropo.ozone.gateway.originalRequest");
+				IQResponse nattedResponse = originalRequest.createResult(iqResponseStanza);
+				nattedResponse.send();
+				if (getWireLogger().isDebugEnabled())
+				{
+					getWireLogger().debug("%s :: %s", asXML(nattedResponse.getElement()), nattedResponse.getSession().getId());
+				}
+			}
+		}
 	}
 }

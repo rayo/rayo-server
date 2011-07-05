@@ -21,6 +21,11 @@
 			<artifactId>log4j</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>com.tropo</groupId>
+			<artifactId>tropo-core</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>com.voxeo</groupId>
 			<artifactId>vlib-core</artifactId>
 		</dependency>
@@ -29,9 +34,9 @@
 			<artifactId>xmppservlet-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>dom4j</groupId>
-			<artifactId>dom4j</artifactId>
-			<version>1.6.1</version>
+			<groupId>net.sourceforge.cobertura</groupId>
+			<artifactId>cobertura</artifactId>
+			<version>1.9</version>
 		</dependency>
 		<!-- 
 		<dependency>

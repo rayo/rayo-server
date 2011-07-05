@@ -6,115 +6,133 @@ import java.util.Set;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 
+import org.w3c.dom.Element;
+import org.w3c.dom.ls.DOMImplementationLS;
+import org.w3c.dom.ls.LSSerializer;
+
 import com.voxeo.logging.Loggerf;
 import com.voxeo.servlet.xmpp.JID;
 import com.voxeo.servlet.xmpp.XmppFactory;
 import com.voxeo.servlet.xmpp.XmppServlet;
 
-public abstract class GatewayServlet extends XmppServlet {
-
+public abstract class GatewayServlet extends XmppServlet
+{
 	private static final long serialVersionUID = 1L;
 	private static final Loggerf WIRE = Loggerf.getLogger("com.tropo.ozone.wire");
 	private static final Loggerf log = Loggerf.getLogger(GatewayServlet.class);
 
-	protected static Loggerf getWireLogger () {
+	protected static Loggerf getWireLogger ()
+	{
 		return WIRE;
 	}
 
 	private XmppFactory xmppFactory;
-//	private OzoneStatistics ozoneStatistics;
-	private TropoNodeService tropoNodeService;
-	private TropoAppService tropoAppService;
+	// private OzoneStatistics ozoneStatistics;
+	private GatewayDatastore gatewayDatastore;
 
 	private Set<JID> myJids = new HashSet<JID>();
 	private Set<String> myInternalDomains = new HashSet<String>();
 	private Set<String> myExternalDomains = new HashSet<String>();
 
 	@Override
-	public void init (ServletConfig config)
-			throws ServletException {
+	public void init (ServletConfig config) throws ServletException
+	{
 		super.init(config);
 		xmppFactory = (XmppFactory) config.getServletContext().getAttribute(XMPP_FACTORY);
 	}
 
-	protected XmppFactory getXmppFactory () {
+	protected XmppFactory getXmppFactory ()
+	{
 		return xmppFactory;
 	}
-	
-//	public void setOzoneStatistics(OzoneStatistics ozoneStatistics) {
-//		this.ozoneStatistics = ozoneStatistics;
-//	}
-//	
-//	protected OzoneStatistics getOzoneStatistics () {
-//		return ozoneStatistics;
-//	}
-	
-	protected boolean isMe (JID jid) {
+
+	// public void setOzoneStatistics(OzoneStatistics ozoneStatistics) {
+	// this.ozoneStatistics = ozoneStatistics;
+	// }
+	//
+	// protected OzoneStatistics getOzoneStatistics () {
+	// return ozoneStatistics;
+	// }
+
+	protected boolean isMe (JID jid)
+	{
 		return myJids.contains(jid);
 	}
-	
-	public void addJid (String jid) {
+
+	public void addJid (String jid)
+	{
 		myJids.add(xmppFactory.createJID(jid));
 	}
-	
-	public void removeJid (String jid) {
+
+	public void removeJid (String jid)
+	{
 		myJids.remove(xmppFactory.createJID(jid));
 	}
 
-	protected boolean isMyInternalDomain (JID jid) {
+	protected boolean isMyInternalDomain (JID jid)
+	{
 		return myInternalDomains.contains(jid.getDomain());
 	}
-	
-	public void addInternalDomain (String internalDomain) {
+
+	public void addInternalDomain (String internalDomain)
+	{
 		myInternalDomains.add(internalDomain);
 	}
-	
-	public void removeInternalDomain (String internalDomain) {
+
+	public void removeInternalDomain (String internalDomain)
+	{
 		myInternalDomains.remove(internalDomain);
 	}
 
-	protected boolean isMyExternalDomain (JID jid) {
+	protected boolean isMyExternalDomain (JID jid)
+	{
 		return myExternalDomains.contains(jid.getDomain());
 	}
-	
-	public void addExternalDomain (String externalDomain) {
+
+	public void addExternalDomain (String externalDomain)
+	{
 		myExternalDomains.add(externalDomain);
 	}
-	
-	public void removeExternalDomain (String externalDomain) {
+
+	public void removeExternalDomain (String externalDomain)
+	{
 		myExternalDomains.remove(externalDomain);
 	}
-	
-	public String getExternalDomain () {
+
+	public String getExternalDomain ()
+	{
 		return myExternalDomains.iterator().next();
 	}
-	
-	public void setTropoNodeService (TropoNodeService tropoNodeService) {
-		this.tropoNodeService = tropoNodeService;
-	}
-	
-	public TropoNodeService getTropoNodeService () {
-		return tropoNodeService;
-	}
-	
-	public void setTropoAppService (TropoAppService tropoAppService) {
-		this.tropoAppService = tropoAppService;
-	}
-	
-	public TropoAppService getTropoAppService () {
-		return tropoAppService;
-	}
-	
-	protected JID toExternalJID (JID internalJID) {
+
+	protected JID toExternalJID (JID internalJID)
+	{
 		JID externalJID = getXmppFactory().createJID(getExternalDomain());
 		externalJID.setResource(internalJID.toString());
 		log.debug("Internal->External: %s -> %s", internalJID, externalJID);
 		return externalJID;
 	}
-	
-	protected JID toInternalJID (JID externalJID) {
+
+	protected JID toInternalJID (JID externalJID)
+	{
 		JID internalJID = getXmppFactory().createJID(externalJID.getResource());
 		log.debug("External->Internal: %s -> %s", externalJID, internalJID);
 		return internalJID;
+	}
+
+	public GatewayDatastore getGatewayDatastore ()
+	{
+		return gatewayDatastore;
+	}
+
+	public void setGatewayDatastore (GatewayDatastore gatewayDatastore)
+	{
+		this.gatewayDatastore = gatewayDatastore;
+	}
+	
+	protected String asXML (Element element)
+	{
+		DOMImplementationLS impl = (DOMImplementationLS)element.getOwnerDocument().getImplementation();
+		LSSerializer serializer = impl.createLSSerializer();
+		return serializer.writeToString(element);
 	}
 }
