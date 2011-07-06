@@ -1,5 +1,6 @@
 package com.tropo.ozone.gateway;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -15,11 +16,13 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.apache.log4j.Logger;
+import org.springframework.core.io.Resource;
 
 import com.tropo.core.util.CollectionMap;
 import com.voxeo.guido.Guido;
 import com.voxeo.guido.GuidoException;
 import com.voxeo.servlet.xmpp.JID;
+import com.voxeo.servlet.xmpp.XmppFactory;
 
 public class InMemoryGatewayDatastore implements GatewayDatastore
 {
@@ -544,5 +547,7 @@ public class InMemoryGatewayDatastore implements GatewayDatastore
 	public interface Router
 	{
 		JID lookupJID (String from, String to, Map<String, String> headers);
+		void setXmppFactory (XmppFactory xmppFactory);
+		void setResource (Resource resource) throws IOException;
 	}
 }
