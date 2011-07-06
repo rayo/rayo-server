@@ -153,7 +153,7 @@ public class InternalGatewayServlet extends GatewayServlet
 							Element headerNode = (Element)headerNodes.item(i);
 							headers.put(headerNode.getAttribute("name"), headerNode.getAttribute("value"));
 						}
-						JID toJidExternal = getGatewayDatastore().lookupJID(payload.getAttribute("from"), payload.getAttribute("to"), headers);
+						JID toJidExternal = getXmppFactory().createJID(getGatewayDatastore().lookupJID(payload.getAttribute("from"), payload.getAttribute("to"), headers));
 						if (toJidExternal != null)
 						{
 							JID fromJidExternal = getXmppFactory().createJID(fromJidInternal.getNode() + "@" + getExternalDomain() + "/1");

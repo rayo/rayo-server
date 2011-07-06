@@ -291,6 +291,7 @@
     <module>tropo-server</module>
     <module>tropo-core</module>
     <module>tropo-war</module>
+	<module>ozone-gateway</module>
   </modules>
   <profiles>
     <profile>

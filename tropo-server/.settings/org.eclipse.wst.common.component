@@ -5,5 +5,7 @@
         <wb-resource deploy-path="/" source-path="/src/main/resources"/>
         <wb-resource deploy-path="/" source-path="/src/main/groovy"/>
         <wb-resource deploy-path="/" source-path="/src/test/groovy"/>
+        <wb-resource deploy-path="/" source-path="/src/test/java"/>
+        <wb-resource deploy-path="/" source-path="/src/test/resources"/>
     </wb-module>
 </project-modules>

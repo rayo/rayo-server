@@ -112,7 +112,9 @@ public class ExternalGatewayServlet extends GatewayServlet
 	    		if (payload.getNodeName().equals("dial")) {
 		        	if ("set".equals(iqElement.getAttribute("type"))) {
 		        		String platformID = getGatewayDatastore().lookupPlatformID(toJidExternal);
-		        		toJidInternal = (platformID == null) ? null : getGatewayDatastore().selectTropoNode(platformID);
+		        		toJidInternal = (platformID == null)
+		        			? null
+		        			: getXmppFactory().createJID(getGatewayDatastore().selectTropoNodeJID(platformID));
 		        		if (toJidInternal == null) {
 		        			payload = iqElement.getOwnerDocument().createElement("service-unavailable");
 		        			success = false;

@@ -22,7 +22,6 @@ import com.tropo.core.util.CollectionMap;
 import com.voxeo.guido.Guido;
 import com.voxeo.guido.GuidoException;
 import com.voxeo.servlet.xmpp.JID;
-import com.voxeo.servlet.xmpp.XmppFactory;
 
 public class InMemoryGatewayDatastore implements GatewayDatastore
 {
@@ -51,7 +50,7 @@ public class InMemoryGatewayDatastore implements GatewayDatastore
 		this.router = router;
 	}
 	
-	public JID lookupJID (String from, String to, Map<String, String> headers)
+	public String lookupJID (String from, String to, Map<String, String> headers)
 	{
 		return router.lookupJID(from, to, headers);
 	}
@@ -185,14 +184,14 @@ public class InMemoryGatewayDatastore implements GatewayDatastore
 		}
 	}
 
-	public JID selectTropoNode (String platformID)
+	public String selectTropoNodeJID (String platformID)
 	{
 		Lock readLock = tropoNodeLock.readLock();
 		readLock.lock();
 		try
 		{
 			TropoNode node = platformMap.lookup(platformID, readLock);
-			return node.getJID();
+			return node.getJID().toString();
 		}
 		finally
 		{
@@ -275,13 +274,13 @@ public class InMemoryGatewayDatastore implements GatewayDatastore
 		}
 	}
 
-	public JID getClient (String callID)
+	public String getClientJID (String callID)
 	{
 		Lock readLock = callLock.readLock();
 		readLock.lock();
 		try
 		{
-			return callToClientMap.get(callID);
+			return callToClientMap.get(callID).toString();
 		}
 		finally
 		{
@@ -546,8 +545,7 @@ public class InMemoryGatewayDatastore implements GatewayDatastore
 	
 	public interface Router
 	{
-		JID lookupJID (String from, String to, Map<String, String> headers);
-		void setXmppFactory (XmppFactory xmppFactory);
+		String lookupJID (String from, String to, Map<String, String> headers);
 		void setResource (Resource resource) throws IOException;
 	}
 }

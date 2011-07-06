@@ -8,7 +8,7 @@ import com.voxeo.servlet.xmpp.JID;
 
 public interface GatewayDatastore
 {
-	JID lookupJID (String from, String to, Map<String, String> headers);
+	String lookupJID (String from, String to, Map<String, String> headers);
 	String lookupPlatformID (JID clientJid);
 	String getDomainName (String ipAddress);
 	
@@ -18,12 +18,12 @@ public interface GatewayDatastore
 	void removeApplication (JID appJid);
 	
 	Collection<JID> getTropoNodes (String platformID);
-	JID selectTropoNode (String platformID);
+	String selectTropoNodeJID (String platformID);
 	Collection<String> getPlatformIDs (JID tropoNode);
 	void setPlatformIDs (JID tropoNode, Collection<String> platformIDs) throws UnknownHostException;
 	void removeTropoNode (JID tropoNode);
 	
-	JID getClient (String callID);
+	String getClientJID (String callID);
 	Collection<String> getCalls (JID clientJid);
 	void mapCallToClient (String callID, JID clientJid);
 	void removeCall (String callID);
