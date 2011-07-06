@@ -9,11 +9,17 @@ import java.util.UUID;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 
-import org.dom4j.DocumentHelper;
+import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.Namespace;
 import org.dom4j.QName;
+import org.dom4j.dom.DOMDocument;
+import org.dom4j.dom.DOMDocumentFactory;
+import org.dom4j.dom.DOMElement;
+import org.dom4j.io.DOMReader;
 import org.dom4j.io.DOMWriter;
+import org.w3c.dom.ls.DOMImplementationLS;
+import org.w3c.dom.ls.LSSerializer;
 
 import com.tropo.core.CallCommand;
 import com.tropo.core.CallEvent;
@@ -34,12 +40,13 @@ import com.tropo.server.exception.ExceptionMapper;
 import com.voxeo.exceptions.NotFoundException;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.servlet.xmpp.IQRequest;
+import com.voxeo.servlet.xmpp.IQResponse;
 import com.voxeo.servlet.xmpp.InstantMessage;
 import com.voxeo.servlet.xmpp.JID;
 import com.voxeo.servlet.xmpp.PresenceMessage;
+import com.voxeo.servlet.xmpp.StanzaError;
 import com.voxeo.servlet.xmpp.XmppFactory;
 import com.voxeo.servlet.xmpp.XmppServlet;
-import com.voxeo.servlet.xmpp.XmppServletRequest;
 import com.voxeo.servlet.xmpp.XmppSession;
 
 @SuppressWarnings("serial")
@@ -166,20 +173,27 @@ public class OzoneServlet extends XmppServlet {
     // ================================================================================
 
 	@Override
-	protected void doIQRequest(IQRequest request) throws ServletException, IOException {
-
-        WIRE.debug("%s :: %s", request.getElement().asXML(), request.getSession().getId());
+	protected void doIQRequest(final IQRequest request) throws ServletException, IOException {
+		DOMElement requestElement = null;
+		try {
+			requestElement = toDOM(request.getElement());
+		}
+		catch (DocumentException oops) {
+			throw new IOException("Could not parse XML content", oops);
+		}
+		
+        WIRE.debug("%s :: %s", requestElement.asXML(), request.getSession().getId());
     	ozoneStatistics.iqReceived();
 
     	try {
-            if (request.getSession().getSessionType() == XmppSession.SessionType.CLIENT) {
+            if (request.getSession().getType() == XmppSession.Type.INBOUNDCLIENT) {
 
                 // Extract Request
-                Element payload = (Element) request.getElement().elementIterator().next();
+            	DOMElement payload = (DOMElement) requestElement.elementIterator().next();
                 QName qname = payload.getQName();
 
                 // Create empty result element
-                final Element result = DocumentHelper.createElement("iq");
+                final DOMElement result = (DOMElement) DOMDocumentFactory.getInstance().createElement("iq");
                 result.addAttribute("type", "result");
 
                 // Resource Binding
@@ -188,15 +202,13 @@ public class OzoneServlet extends XmppServlet {
                     result.addElement(BIND_QNAME).addElement("jid").setText(boundJid);
                     sendIqResult(request, result);
                     log.info("Bound client resource [jid=%s]", boundJid);
-
-                    // Session Binding
                 }
+                // Session Binding
                 else if (qname.equals(SESSION_QNAME)) {
                     result.addElement(SESSION_QNAME);
                     sendIqResult(request, result);
-
-                    // Ozone Command
                 }
+                // Ozone Command
                 else if (qname.getNamespaceURI().startsWith("urn:xmpp:ozone")) {
 
                     Object command = provider.fromXML(payload);
@@ -205,9 +217,8 @@ public class OzoneServlet extends XmppServlet {
                     // Handle outbound 'dial' command
                     if (command instanceof DialCommand) {
                     	if (adminService.isQuiesceMode()) {
-                            log.debug("Quiesce Mode ON. Dropping incoming call: %s :: %s", request.getElement().asXML(), request.getSession().getId());
-
-                    		sendIqError(request, XmppStanzaError.SERVICE_UNAVAILABLE_CONDITION, XmppStanzaError.Type_WAIT);
+                            log.debug("Quiesce Mode ON. Dropping incoming call: %s :: %s", requestElement.asXML(), request.getSession().getId());
+                            sendIqError(request, StanzaError.Type.WAIT, StanzaError.Condition.SERVICE_UNAVAILABLE, "Quiesce Mode ON.");
                     		return;
                     	}                    	
                         callManager.publish(new Request(command, new ResponseHandler() {
@@ -218,7 +229,7 @@ public class OzoneServlet extends XmppServlet {
                                     sendIqResult(request, result);
                                 }
                                 else {
-                                    sendIqError(request, (Exception) response.getValue());
+                                    sendIqError(request, StanzaError.Type.CANCEL, StanzaError.Condition.INTERNAL_SERVER_ERROR, ((Exception)response.getValue()).getMessage());
                                 }
                             }
                         }));
@@ -267,7 +278,7 @@ public class OzoneServlet extends XmppServlet {
                                 result.addElement("ref","urn:xmpp:ozone:1").addAttribute("id", verbId);
                                 sendIqResult(request, result);
                             } else {
-                                sendIqResult(callId, request, result);
+                            	sendIqResult(callId, request, result);
                             }
                         }
                     });
@@ -276,7 +287,7 @@ public class OzoneServlet extends XmppServlet {
 
                 // We don't handle this type of request...
                 else {
-                    sendIqError(request, XmppStanzaError.FEATURE_NOT_IMPLEMENTED_CONDITION);
+                    sendIqError(request, StanzaError.Type.CANCEL, StanzaError.Condition.FEATURE_NOT_IMPLEMENTED, "Feature not supported");
                 }
             }
 
@@ -286,7 +297,7 @@ public class OzoneServlet extends XmppServlet {
                 ozoneStatistics.validationError();
             }
             log.error("Exception processing IQ request", e);
-            sendIqError(request, e);
+            sendIqError(request, StanzaError.Type.CANCEL, StanzaError.Condition.INTERNAL_SERVER_ERROR, e.getMessage());
         }
 
     }
@@ -294,75 +305,54 @@ public class OzoneServlet extends XmppServlet {
     // Util
     // ================================================================================
 
-    /**
-     * We are currently not using the XmlProvider for this because it lacks the XMPP context 
-     * needed to construct a proper reply. We should consider factoring out am XMPP-aware 
-     * serialization provider for this purpose.
-     * 
-     * @param request
-     * @param e
-     * @throws IOException
-     */
-    private void sendIqError(XmppServletIQRequest request, Exception e) throws IOException {
+    private void sendIqError(IQRequest request, Exception e) throws IOException {
         ErrorMapping error = exceptionMapper.toXmppError(e);
-        XmppServletIQResponse response = request.createIQErrorResponse(error.getType(), error.getCondition(), error.getText(), null, null);
-        sendIqError(request, response);
+        sendIqError(request, error.getType(), error.getCondition(), error.getText());
     }
 
-    private void sendIqError(XmppServletIQRequest request, String error) throws IOException {
-        sendIqError(request, error, XmppStanzaError.Type_CANCEL, null);
+    private void sendIqError(IQRequest request, String type, String error, String text) throws IOException {
+        sendIqError(request, request.createError(StanzaError.Type.valueOf(type), StanzaError.Condition.valueOf(error), text));
     }
 
-    private void sendIqError(XmppServletIQRequest request, String error, String type) throws IOException {
-    	
-        sendIqError(request, error, type, null);
-    }
-    
-    private void sendIqError(XmppServletIQRequest request, String error, String type, Element contents) throws IOException {
-        XmppServletIQResponse response = request.createIQErrorResponse(type, error, null, null, null);
-        if (contents != null) {
-            response.getElement().add(contents);
-        }
-        sendIqError(request, response);
+    private void sendIqError(IQRequest request, StanzaError.Type type, StanzaError.Condition error, String text) throws IOException {
+         sendIqError(request, request.createError(type, error, text));
     }
 
-    private void sendIqError(XmppServletIQRequest request, XmppServletIQResponse response) throws IOException {
-    	
+    private void sendIqError(IQRequest request, IQResponse response) throws IOException {
     	ozoneStatistics.iqError();
     	generateErrorCdr(request,response);
         response.setFrom(request.getTo());
         response.send();
     }
 
-    private void generateErrorCdr(XmppServletIQRequest request, XmppServletIQResponse response) {
+    private void generateErrorCdr(IQRequest request, IQResponse response) {
     	
-    	Element payload = (Element) request.getElement().elementIterator().next();
-        QName qname = payload.getQName();
-        if (qname.getNamespaceURI().startsWith("urn:xmpp:ozone")) {
+    	org.w3c.dom.Element payload = (org.w3c.dom.Element) request.getElement().getChildNodes().item(0);
+        if (payload.getNamespaceURI().startsWith("urn:xmpp:ozone")) {
         	final String callId = request.getTo().getNode();
             if (callId == null) {
-	        	Element responsePayload = (Element) request.getElement().elementIterator().next();	        	
-	        	cdrManager.append(callId, responsePayload.asXML());
+            	org.w3c.dom.Element responsePayload = (org.w3c.dom.Element) response.getElement().getChildNodes().item(0);      	
+	        	cdrManager.append(callId, asXML(responsePayload));
             }
         }
     }
     
-    private void sendIqResult(String callId, XmppServletIQRequest request, Element result) throws IOException {
+    private void sendIqResult(String callId, IQRequest request, org.w3c.dom.Element result) throws IOException {
 
-    	if (result.elementIterator().hasNext()) {
-    		Element resultPayload = (Element) result.elementIterator().next();
-    		cdrManager.append(callId, resultPayload.asXML());
+    	if (result.getChildNodes().getLength() > 0) {
+    		org.w3c.dom.Element resultPayload = (org.w3c.dom.Element) result.getChildNodes().item(0);
+    		cdrManager.append(callId, asXML(resultPayload));
     	} else {	
     		cdrManager.append(callId,"<todo>TODO: Empty IQ Result</todo>");
     	}
     	sendIqResult(request, result);
     }
     
-    private void sendIqResult(XmppServletIQRequest request, Element result) throws IOException {
+    private void sendIqResult(IQRequest request, org.w3c.dom.Element result) throws IOException {
     	
     	ozoneStatistics.iqResult();
     	
-        XmppServletIQResponse response = request.createIQResultResponse(result);
+        IQResponse response = request.createResult(result);
         response.setFrom(request.getTo());
         response.send();
     }
@@ -435,5 +425,22 @@ public class OzoneServlet extends XmppServlet {
 
 	public void setTropoLookupService(TropoLookupService tropoLookupService) {
 		this.tropoLookupService = tropoLookupService;
+	}
+	
+	public static DOMElement toDOM (org.dom4j.Element dom4jElement) throws DocumentException {
+		DOMDocument requestDocument = (DOMDocument)new DOMWriter().write(dom4jElement.getDocument());
+		return (DOMElement)requestDocument.getDocumentElement();
+	}
+	
+	public static DOMElement toDOM (org.w3c.dom.Element w3cElement) throws DocumentException {
+		DOMDocument requestDocument = (DOMDocument)new DOMReader(DOMDocumentFactory.getInstance()).read(w3cElement.getOwnerDocument());
+		return (DOMElement)requestDocument.getDocumentElement();
+	}
+	
+	protected static String asXML (org.w3c.dom.Element element)
+	{
+		DOMImplementationLS impl = (DOMImplementationLS)element.getOwnerDocument().getImplementation();
+		LSSerializer serializer = impl.createLSSerializer();
+		return serializer.writeToString(element);
 	}
 }
