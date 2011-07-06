@@ -6,6 +6,7 @@ import com.tropo.core.validation.ValidationException;
 import com.tropo.server.validation.ValidHandlerState;
 import com.voxeo.exceptions.NotFoundException;
 import com.voxeo.logging.Loggerf;
+import com.voxeo.moho.MediaException;
 import com.voxeo.servlet.xmpp.XmppStanzaError;
 
 public class ExceptionMapper {
