@@ -44,6 +44,13 @@ public class ExceptionMapper {
 		    errorCondition = XmppStanzaError.ITEM_NOT_FOUND_CONDITION;
 		} else if (e instanceof IllegalArgumentException) {
 			errorCondition = XmppStanzaError.BAD_REQUEST_CONDITION;
+		} else if (e instanceof MediaException) {
+			//TODO: Media Server needs to propagate proper response codes
+			if (e.getMessage().contains("Response code of 407")) {
+				// This is a grammar compilation issue
+				errorCondition = XmppStanzaError.BAD_REQUEST_CONDITION;
+				errorMessage = "There is an error in the grammar. It could not be compiled";
+			}
 		}
 		
 		log.debug("Mapping unknown exception [type=%s, message=%s]",e.getClass(), e.getMessage());
