@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>ozone-gateway</artifactId>
-	<packaging>jar</packaging>
+	<packaging>war</packaging>
 	
 	<name>Tropo2/Ozone Gateway</name>
   
@@ -38,7 +38,6 @@
 			<artifactId>cobertura</artifactId>
 			<version>1.9</version>
 		</dependency>
-		<!-- 
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-beans</artifactId>
@@ -51,11 +50,52 @@
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>
 		</dependency>
+		<!-- 
   		<dependency>
   			<groupId>org.springframework</groupId>
   			<artifactId>spring-test</artifactId>
   		</dependency>
   		-->
 	</dependencies>
-	
+	<!-- Maven repository hosting Jolokia -->
+	<repositories>
+      <repository>
+        <id>labs-consol-release</id>
+        <name>ConSol* Labs Repository (Releases)</name>
+        <url>http://labs.consol.de/maven/repository</url>
+      </repository>
+    </repositories>
+    <profiles>
+	  <profile> 
+	     <id>hudson</id> 
+	     <activation> 
+	        <property><name>BUILD_NUMBER</name></property> 
+	     </activation> 
+	     <build> 
+	       <finalName>ozone-gateway-1.0_b${BUILD_NUMBER}</finalName> 
+	       <!-- any plugin configuration --> 
+	        <plugins>
+	            <plugin>
+	                <artifactId>maven-war-plugin</artifactId>
+	                <configuration>
+	                    <manifest>
+	                        <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+	                    </manifest>
+	                    <archive>
+	                        <manifestEntries>
+	                            <Specification-Title>${project.name}</Specification-Title>
+	                            <Specification-Version>${project.version}</Specification-Version>
+	                            <Implementation-Version>${BUILD_TAG}</Implementation-Version>
+	                            <Build-Id>${BUILD_ID}</Build-Id>
+	                        </manifestEntries>
+	                    </archive>
+	                </configuration>
+	            </plugin>
+	        </plugins>	       
+	     </build> 
+	  </profile>     
+    </profiles>	
+	<build>
+	  <finalName>ozone-gateway</finalName>
+    </build>
 </project>

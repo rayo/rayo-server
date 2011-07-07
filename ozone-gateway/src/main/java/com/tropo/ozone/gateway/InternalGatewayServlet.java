@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 
 import org.w3c.dom.Element;
@@ -21,10 +22,18 @@ import com.voxeo.servlet.xmpp.PresenceMessage;
 
 public class InternalGatewayServlet extends GatewayServlet
 {
-
 	private static final long serialVersionUID = 1L;
 	private static final Loggerf log = Loggerf.getLogger(InternalGatewayServlet.class);
 
+	private JIDLookupService jidLookupService;
+	
+	@Override
+	public void init (ServletConfig config) throws ServletException
+	{
+		super.init(config);
+		jidLookupService = (JIDLookupService)getApplicationContext().getBean("jidLookupService");
+	}
+	
 	protected void doMessage (InstantMessage message) throws ServletException, IOException
 	{
 		// getOzoneStatistics().messageStanzaReceived();
@@ -153,7 +162,7 @@ public class InternalGatewayServlet extends GatewayServlet
 							Element headerNode = (Element)headerNodes.item(i);
 							headers.put(headerNode.getAttribute("name"), headerNode.getAttribute("value"));
 						}
-						JID toJidExternal = getXmppFactory().createJID(getGatewayDatastore().lookupJID(payload.getAttribute("from"), payload.getAttribute("to"), headers));
+						JID toJidExternal = getXmppFactory().createJID(jidLookupService.lookupJID(payload.getAttribute("from"), payload.getAttribute("to"), headers));
 						if (toJidExternal != null)
 						{
 							JID fromJidExternal = getXmppFactory().createJID(fromJidInternal.getNode() + "@" + getExternalDomain() + "/1");
@@ -241,5 +250,10 @@ public class InternalGatewayServlet extends GatewayServlet
 				}
 			}
 		}
+	}
+
+	public void setJidLookupService (JIDLookupService jidLookupService)
+	{
+		this.jidLookupService = jidLookupService;
 	}
 }

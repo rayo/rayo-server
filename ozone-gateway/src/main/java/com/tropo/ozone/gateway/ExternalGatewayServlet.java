@@ -76,6 +76,14 @@ public class ExternalGatewayServlet extends GatewayServlet
 						}
 					}
 				}
+				else if ("subscribe".equals(presenceElement.getAttribute("type"))) {
+					PresenceMessage subscribed = getXmppFactory().createPresence(message.getTo(), message.getFrom(), "subscribed", (Element)null);
+					subscribed.send();
+					if (getWireLogger().isDebugEnabled())
+					{
+						getWireLogger().debug("%s :: %s", asXML(subscribed.getElement()), subscribed.getSession().getId());
+					}
+				}
 				else if ("subscribed".equals(presenceElement.getAttribute("type"))) {
 					// TODO: update DNS?
 					log.debug("Subscribed: %s", fromJid);

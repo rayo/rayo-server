@@ -2,13 +2,11 @@ package com.tropo.ozone.gateway;
 
 import java.net.UnknownHostException;
 import java.util.Collection;
-import java.util.Map;
 
 import com.voxeo.servlet.xmpp.JID;
 
 public interface GatewayDatastore
 {
-	String lookupJID (String from, String to, Map<String, String> headers);
 	String lookupPlatformID (JID clientJid);
 	String getDomainName (String ipAddress);
 	

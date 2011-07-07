@@ -6,6 +6,10 @@ import java.util.Set;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 
+import org.springframework.context.ApplicationContext;
+import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.context.support.WebApplicationContextUtils;
+import org.springframework.web.context.support.XmlWebApplicationContext;
 import org.w3c.dom.Element;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSSerializer;
@@ -29,6 +33,7 @@ public abstract class GatewayServlet extends XmppServlet
 	private XmppFactory xmppFactory;
 	// private OzoneStatistics ozoneStatistics;
 	private GatewayDatastore gatewayDatastore;
+	private ApplicationContext applicationContext;
 
 	private Set<JID> myJids = new HashSet<JID>();
 	private Set<String> myInternalDomains = new HashSet<String>();
@@ -39,6 +44,18 @@ public abstract class GatewayServlet extends XmppServlet
 	{
 		super.init(config);
 		xmppFactory = (XmppFactory) config.getServletContext().getAttribute(XMPP_FACTORY);
+
+        // Parent Context loaded by ContextLoaderListener
+//        WebApplicationContext wac = WebApplicationContextUtils.getRequiredWebApplicationContext(getServletContext());
+
+        XmlWebApplicationContext xmlWebApplicationContext = new XmlWebApplicationContext();
+        xmlWebApplicationContext.setServletContext(getServletContext());
+//        xmlWebApplicationContext.setParent(wac);
+        xmlWebApplicationContext.setConfigLocation("/WEB-INF/ozone-gateway-xmpp.xml");
+        xmlWebApplicationContext.refresh();
+        
+        this.applicationContext = xmlWebApplicationContext;
+        this.gatewayDatastore = (GatewayDatastore)applicationContext.getBean("gatewayDatastore");
 	}
 
 	protected XmppFactory getXmppFactory ()
@@ -46,6 +63,11 @@ public abstract class GatewayServlet extends XmppServlet
 		return xmppFactory;
 	}
 
+	protected ApplicationContext getApplicationContext ()
+	{
+		return applicationContext;
+	}
+	
 	// public void setOzoneStatistics(OzoneStatistics ozoneStatistics) {
 	// this.ozoneStatistics = ozoneStatistics;
 	// }

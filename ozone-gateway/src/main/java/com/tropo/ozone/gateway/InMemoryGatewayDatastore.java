@@ -1,6 +1,5 @@
 package com.tropo.ozone.gateway;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -15,19 +14,15 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import org.apache.log4j.Logger;
-import org.springframework.core.io.Resource;
-
 import com.tropo.core.util.CollectionMap;
 import com.voxeo.guido.Guido;
 import com.voxeo.guido.GuidoException;
+import com.voxeo.logging.Loggerf;
 import com.voxeo.servlet.xmpp.JID;
 
 public class InMemoryGatewayDatastore implements GatewayDatastore
 {
-	private static final Logger LOG = Logger.getLogger(InMemoryGatewayDatastore.class);
-
-	private Router router;
+	private static final Loggerf LOG = Loggerf.getLogger(InMemoryGatewayDatastore.class);
 	
 	private Map<String, TropoNode> hostnameMap = new HashMap<String, TropoNode>();
 	private Map<String, TropoNode> addressMap = new HashMap<String, TropoNode>();
@@ -45,15 +40,7 @@ public class InMemoryGatewayDatastore implements GatewayDatastore
 	private Map<TropoNode, Collection<String>> nodeToCallMap = new HashMap<TropoNode, Collection<String>>();
 	private ReadWriteLock callLock = new ReentrantReadWriteLock();
 
-	public InMemoryGatewayDatastore (Router router)
-	{
-		this.router = router;
-	}
-	
-	public String lookupJID (String from, String to, Map<String, String> headers)
-	{
-		return router.lookupJID(from, to, headers);
-	}
+	public InMemoryGatewayDatastore () {}
 
 	public String lookupPlatformID (JID clientJid)
 	{
@@ -61,7 +48,9 @@ public class InMemoryGatewayDatastore implements GatewayDatastore
 		readLock.lock();
 		try
 		{
-			return jidToPlatformMap.get(clientJid);
+			String platformId = jidToPlatformMap.get(clientJid);
+			LOG.debug("Platform lookup for %s found %s", clientJid, platformId);
+			return platformId;
 		}
 		finally
 		{
@@ -92,6 +81,7 @@ public class InMemoryGatewayDatastore implements GatewayDatastore
 			{
 				domain = node.getHostname();
 			}
+			LOG.debug("%s mapped to domain %s", ipAddress, domain);
 			return domain;
 		}
 		finally
@@ -106,7 +96,9 @@ public class InMemoryGatewayDatastore implements GatewayDatastore
 		readLock.lock();
 		try
 		{
-			return clientJIDs.lookupAll(appJid);
+			Collection<JID> clients = clientJIDs.lookupAll(appJid);
+			LOG.debug("Clients for %s found: %s", appJid, clients);
+			return clients;
 		}
 		finally
 		{
@@ -122,6 +114,7 @@ public class InMemoryGatewayDatastore implements GatewayDatastore
 		{
 			clientJIDs.add(clientJid.getBareJID(), clientJid);
 			jidToPlatformMap.put(clientJid, platformID);
+			LOG.debug("Client %s added for platform %s", clientJid, platformID);
 		}
 		finally
 		{
@@ -137,6 +130,7 @@ public class InMemoryGatewayDatastore implements GatewayDatastore
 		{
 			clientJIDs.remove(clientJid.getBareJID(), clientJid);
 			jidToPlatformMap.remove(clientJid);
+			LOG.debug("Client %s removed", clientJid);
 		}
 		finally
 		{
@@ -155,9 +149,11 @@ public class InMemoryGatewayDatastore implements GatewayDatastore
 			{
 				for (JID jid : jids)
 				{
-					jidToPlatformMap.remove(jid);
+					String platformId = jidToPlatformMap.remove(jid);
+					LOG.debug("Removed %s from platform %s", jid, platformId);
 				}
 			}
+			LOG.debug("Removed application %s", appJid);
 		}
 		finally
 		{
@@ -176,6 +172,7 @@ public class InMemoryGatewayDatastore implements GatewayDatastore
 			{
 				jids.add(node.getJID());
 			}
+			LOG.debug("Tropo nodes found for %s: %s", platformID, jids);
 			return jids;
 		}
 		finally
@@ -191,7 +188,9 @@ public class InMemoryGatewayDatastore implements GatewayDatastore
 		try
 		{
 			TropoNode node = platformMap.lookup(platformID, readLock);
-			return node.getJID().toString();
+			String nodeJid = node.getJID().toString();
+			LOG.debug("Selected Tropo node %s for platform %s", nodeJid, platformID);
+			return nodeJid;
 		}
 		finally
 		{
@@ -206,7 +205,9 @@ public class InMemoryGatewayDatastore implements GatewayDatastore
 		try
 		{
 			TropoNode node = nodeMap.get(nodeJid);
-			return Collections.unmodifiableSet(node.getPlatformIds());
+			Collection<String> platformIDs = Collections.unmodifiableSet(node.getPlatformIds());
+			LOG.debug("Platform IDs found for %s: %s", nodeJid, platformIDs);
+			return platformIDs;
 		}
 		finally
 		{
@@ -220,6 +221,7 @@ public class InMemoryGatewayDatastore implements GatewayDatastore
 		writeLock.lock();
 		try
 		{
+			LOG.debug("Adding %s to platforms %s", nodeJid, platformIDs);
 			TropoNode node = nodeMap.get(nodeJid);
 			if (node == null)
 			{
@@ -229,6 +231,7 @@ public class InMemoryGatewayDatastore implements GatewayDatastore
 				hostnameMap.put(hostname, node);
 				addressMap.put(ipAddress, node);
 				nodeMap.put(nodeJid, node);
+				LOG.debug("Created: %s", node);
 			}
 			else
 			{
@@ -236,6 +239,7 @@ public class InMemoryGatewayDatastore implements GatewayDatastore
 				for (String platformID : platformIDs)
 				{
 					platformMap.remove(platformID, node, writeLock);
+					LOG.debug("Removed %s from platform %s", node, platformID);
 				}
 				node.setPlatformIds(new HashSet<String>(platformIDs));
 			}
@@ -243,6 +247,7 @@ public class InMemoryGatewayDatastore implements GatewayDatastore
 			for (String platformID : platformIDs)
 			{
 				platformMap.add(platformID, node);
+				LOG.debug("Added %s to platform %s", node, platformID);
 			}
 		}
 		finally
@@ -265,8 +270,10 @@ public class InMemoryGatewayDatastore implements GatewayDatastore
 				for (String platformID : node.getPlatformIds())
 				{
 					platformMap.remove(platformID, node, writeLock);
+					LOG.debug("Removed %s from platform %s", node, platformID);
 				}
 			}
+			LOG.debug("Removed node %s", nodeJid);
 		}
 		finally
 		{
@@ -280,7 +287,9 @@ public class InMemoryGatewayDatastore implements GatewayDatastore
 		readLock.lock();
 		try
 		{
-			return callToClientMap.get(callID).toString();
+			String clientJid = callToClientMap.get(callID).toString();
+			LOG.debug("Call ID %s mapped to client JID %s", callID, clientJid);
+			return clientJid;
 		}
 		finally
 		{
@@ -300,6 +309,7 @@ public class InMemoryGatewayDatastore implements GatewayDatastore
 			{
 				calls = Collections.EMPTY_SET;
 			}
+			LOG.debug("Found calls for %s: %s", clientJid, calls);
 			return Collections.unmodifiableCollection(calls);
 		}
 		finally
@@ -338,6 +348,7 @@ public class InMemoryGatewayDatastore implements GatewayDatastore
 			}
 
 			callToClientMap.put(callID, clientJid);
+			LOG.debug("Call %s mapped to client %s", callID, clientJid);
 
 			Collection<String> clientCalls = clientToCallMap.get(clientJid);
 			if (clientCalls == null)
@@ -346,6 +357,7 @@ public class InMemoryGatewayDatastore implements GatewayDatastore
 				clientToCallMap.put(clientJid, clientCalls);
 			}
 			clientCalls.add(callID);
+			LOG.debug("Client %s is mapped to calls %s", clientJid, clientCalls);
 
 			callToNodeMap.put(callID, node);
 
@@ -356,6 +368,7 @@ public class InMemoryGatewayDatastore implements GatewayDatastore
 				nodeToCallMap.put(node, nodeCalls);
 			}
 			nodeCalls.add(callID);
+			LOG.debug("Node %s is mapped to calls %s", node, nodeCalls);
 		}
 		finally
 		{
@@ -373,10 +386,12 @@ public class InMemoryGatewayDatastore implements GatewayDatastore
 			JID client = callToClientMap.remove(callID);
 			if (client != null)
 			{
+				LOG.debug("Call %s removed from client %s", callID, client);
 				Collection<String> calls = clientToCallMap.get(client);
 				if (calls != null)
 				{
 					calls.remove(callID);
+					LOG.debug("Client %s mapped to calls %s", client, calls);
 					if (calls.isEmpty())
 					{
 						clientToCallMap.remove(client);
@@ -387,10 +402,12 @@ public class InMemoryGatewayDatastore implements GatewayDatastore
 			TropoNode node = callToNodeMap.remove(callID);
 			if (node != null)
 			{
+				LOG.debug("Call %s removed from Tropo node %s", callID, node);
 				Collection<String> calls = nodeToCallMap.get(client);
 				if (calls != null)
 				{
 					calls.remove(callID);
+					LOG.debug("Node %s mapped to call %s", node, calls);
 					if (calls.isEmpty())
 					{
 						nodeToCallMap.remove(node);
@@ -422,6 +439,7 @@ public class InMemoryGatewayDatastore implements GatewayDatastore
 					retval = Collections.unmodifiableCollection(calls);
 				}
 			}
+			LOG.debug("Node %s has calls %s", nodeJid, retval);
 			return retval;
 		}
 		finally
@@ -541,11 +559,5 @@ public class InMemoryGatewayDatastore implements GatewayDatastore
 			}
 			return isEqual;
 		}
-	}
-	
-	public interface Router
-	{
-		String lookupJID (String from, String to, Map<String, String> headers);
-		void setResource (Resource resource) throws IOException;
 	}
 }

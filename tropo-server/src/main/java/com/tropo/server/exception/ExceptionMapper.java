@@ -5,7 +5,7 @@ import javax.validation.ConstraintViolation;
 import com.tropo.core.validation.ValidationException;
 import com.voxeo.exceptions.NotFoundException;
 import com.voxeo.logging.Loggerf;
-import com.voxeo.servlet.xmpp.XmppStanzaError;
+import com.voxeo.servlet.xmpp.StanzaError;
 
 public class ExceptionMapper {
 
@@ -13,14 +13,14 @@ public class ExceptionMapper {
 	 
 	public ErrorMapping toXmppError(Exception e) {
 		
-		String errorType = XmppStanzaError.Type_CANCEL;
-		String errorCondition = XmppStanzaError.INTERNAL_SERVER_ERROR_CONDITION;
+		String errorType = StanzaError.Type.CANCEL.toString();
+		String errorCondition = StanzaError.Condition.INTERNAL_SERVER_ERROR.toString();
 		String errorMessage = e.getMessage();
 		
 		if (e instanceof ValidationException) {
 			ConstraintViolation<?> violation = ((ValidationException)e).getFirstViolation();
-			errorCondition = XmppStanzaError.BAD_REQUEST_CONDITION;
-			errorType = XmppStanzaError.Type_MODIFY;
+			errorCondition = StanzaError.Condition.BAD_REQUEST.toString();
+			errorType = StanzaError.Type.MODIFY.toString();
 			if (violation != null) {				
 				if (violation.getMessageTemplate() != null) {
 					errorMessage = violation.getMessageTemplate();				
@@ -36,9 +36,9 @@ public class ExceptionMapper {
 			return new ErrorMapping(errorType, errorCondition, errorMessage);
 		}
 		else if(e instanceof NotFoundException) {
-		    errorCondition = XmppStanzaError.ITEM_NOT_FOUND_CONDITION;
+		    errorCondition = StanzaError.Condition.ITEM_NOT_FOUND.toString();
 		} else if (e instanceof IllegalArgumentException) {
-			errorCondition = XmppStanzaError.BAD_REQUEST_CONDITION;
+			errorCondition = StanzaError.Condition.BAD_REQUEST.toString();
 		}
 		
 		log.debug("Mapping unknown exception [type=%s, message=%s]",e.getClass(), e.getMessage());

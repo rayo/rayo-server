@@ -428,13 +428,31 @@ public class OzoneServlet extends XmppServlet {
 	}
 	
 	public static DOMElement toDOM (org.dom4j.Element dom4jElement) throws DocumentException {
-		DOMDocument requestDocument = (DOMDocument)new DOMWriter().write(dom4jElement.getDocument());
-		return (DOMElement)requestDocument.getDocumentElement();
+		DOMElement domElement = null;
+		if (dom4jElement instanceof DOMElement)
+		{
+			domElement = (DOMElement) dom4jElement;
+		}
+		else
+		{
+			DOMDocument requestDocument = (DOMDocument)new DOMWriter().write(dom4jElement.getDocument());
+			domElement = (DOMElement)requestDocument.getDocumentElement();
+		}
+		return domElement;
 	}
 	
 	public static DOMElement toDOM (org.w3c.dom.Element w3cElement) throws DocumentException {
-		DOMDocument requestDocument = (DOMDocument)new DOMReader(DOMDocumentFactory.getInstance()).read(w3cElement.getOwnerDocument());
-		return (DOMElement)requestDocument.getDocumentElement();
+		DOMElement domElement = null;
+		if (w3cElement instanceof DOMElement)
+		{
+			domElement = (DOMElement) w3cElement;
+		}
+		else
+		{
+			DOMDocument requestDocument = (DOMDocument)new DOMReader(DOMDocumentFactory.getInstance()).read(w3cElement.getOwnerDocument());
+			domElement = (DOMElement)requestDocument.getDocumentElement();
+		}
+		return domElement;
 	}
 	
 	protected static String asXML (org.w3c.dom.Element element)
