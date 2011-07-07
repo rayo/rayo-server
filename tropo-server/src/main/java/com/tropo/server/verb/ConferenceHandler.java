@@ -7,6 +7,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import javax.media.mscontrol.join.Joinable.Direction;
 import javax.validation.ConstraintValidatorContext;
 
+import com.tropo.core.verb.AskCompleteEvent;
 import com.tropo.core.verb.Conference;
 import com.tropo.core.verb.ConferenceCompleteEvent;
 import com.tropo.core.verb.ConferenceCompleteEvent.Reason;
@@ -18,6 +19,8 @@ import com.tropo.core.verb.Ssml;
 import com.tropo.core.verb.UnmuteCommand;
 import com.tropo.core.verb.VerbCommand;
 import com.tropo.core.verb.VerbCompleteEvent;
+import com.tropo.server.CallManager;
+import com.tropo.server.EventHandler;
 import com.tropo.server.MixerActor;
 import com.tropo.server.MixerActorFactory;
 import com.tropo.server.MixerRegistry;
@@ -44,6 +47,7 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference, Call
     private ConferenceController mohoConferenceController;
     private MixerActorFactory mixerActoryFactory;
     private MixerRegistry mixerRegistry;
+    private CallManager callManager;
 
     private boolean hold;
     private boolean joined;
@@ -103,8 +107,14 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference, Call
         //TODO: This is the only place I found to create the actual conference actor. I didn't find events for 
         // conference/mixer creation
         MixerActor actor = mixerActoryFactory.create(mohoConference);
+        actor.setupMohoListeners(mohoConference);
+        // Wire up default call handlers
+        for (EventHandler handler : callManager.getEventHandlers()) {
+            actor.addEventHandler(handler);
+        }
         actor.start();
         mixerRegistry.add(actor);
+                
     }
 
     @Override
@@ -401,6 +411,47 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference, Call
         }
     }
 
+    @State
+    public void onAskComplete(InputCompleteEvent event) {
+        
+        AskCompleteEvent completeEvent = null;
+        
+        switch (event.getCause()) {
+        case MATCH:
+            completeEvent = new AskCompleteEvent(null, AskCompleteEvent.Reason.SUCCESS);
+            completeEvent.setConcept(event.getConcept());
+            completeEvent.setInterpretation(event.getInterpretation());
+            completeEvent.setConfidence(event.getConfidence());
+            completeEvent.setUtterance(event.getUtterance());
+            completeEvent.setNlsml(event.getNlsml());
+            completeEvent.setTag(event.getTag());
+            completeEvent.setMode(getTropoMode(event.getInputMode()));
+            break;
+        case INI_TIMEOUT:
+            completeEvent = new AskCompleteEvent(null, AskCompleteEvent.Reason.NOINPUT);
+            break;
+        case IS_TIMEOUT:
+        case MAX_TIMEOUT:
+            completeEvent = new AskCompleteEvent(null, AskCompleteEvent.Reason.TIMEOUT);
+            break;
+        case NO_MATCH:
+            completeEvent = new AskCompleteEvent(null, AskCompleteEvent.Reason.NOMATCH);
+            break;
+        case CANCEL:
+            completeEvent = new AskCompleteEvent(null, VerbCompleteEvent.Reason.STOP);
+            break;
+        case DISCONNECT:
+            completeEvent = new AskCompleteEvent(null, VerbCompleteEvent.Reason.HANGUP);
+            break;
+        case ERROR:
+        case UNKNOWN:
+        default:
+            completeEvent = new AskCompleteEvent(null, "Internal Server Error");
+        }
+        
+        complete(completeEvent);
+    }
+    
     public void setMixerActoryFactory(MixerActorFactory mixerActoryFactory) {
 		
     	this.mixerActoryFactory = mixerActoryFactory;
@@ -409,5 +460,9 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference, Call
     public void setMixerRegistry(MixerRegistry mixerRegistry) {
 	
     	this.mixerRegistry = mixerRegistry;
+	}
+
+	public void setCallManager(CallManager callManager) {
+		this.callManager = callManager;
 	}
 }

@@ -272,6 +272,7 @@
 	<bean id="conferenceHandler" class="com.tropo.server.verb.ConferenceHandler" scope="prototype">
 		<property name="mohoConferenceController" ref="conferenceController" />
 		<property name="mixerActoryFactory" ref="mixerActorFactory"/>
+		<property name="callManager" ref="callManager"/>
 	</bean>
 	<bean id="outputHandler" class="com.tropo.server.verb.OutputHandler" scope="prototype" />
 	<bean id="inputHandler" class="com.tropo.server.verb.InputHandler" scope="prototype" />
