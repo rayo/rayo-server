@@ -7,7 +7,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import javax.media.mscontrol.join.Joinable.Direction;
 import javax.validation.ConstraintValidatorContext;
 
-import com.tropo.core.verb.AskCompleteEvent;
 import com.tropo.core.verb.Conference;
 import com.tropo.core.verb.ConferenceCompleteEvent;
 import com.tropo.core.verb.ConferenceCompleteEvent.Reason;
@@ -409,47 +408,6 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference, Call
         if(hotwordListener != null && event.hasMatch() && event.source == participant) {
             complete(Reason.TERMINATOR);
         }
-    }
-
-    @State
-    public void onAskComplete(InputCompleteEvent event) {
-        
-        AskCompleteEvent completeEvent = null;
-        
-        switch (event.getCause()) {
-        case MATCH:
-            completeEvent = new AskCompleteEvent(null, AskCompleteEvent.Reason.SUCCESS);
-            completeEvent.setConcept(event.getConcept());
-            completeEvent.setInterpretation(event.getInterpretation());
-            completeEvent.setConfidence(event.getConfidence());
-            completeEvent.setUtterance(event.getUtterance());
-            completeEvent.setNlsml(event.getNlsml());
-            completeEvent.setTag(event.getTag());
-            completeEvent.setMode(getTropoMode(event.getInputMode()));
-            break;
-        case INI_TIMEOUT:
-            completeEvent = new AskCompleteEvent(null, AskCompleteEvent.Reason.NOINPUT);
-            break;
-        case IS_TIMEOUT:
-        case MAX_TIMEOUT:
-            completeEvent = new AskCompleteEvent(null, AskCompleteEvent.Reason.TIMEOUT);
-            break;
-        case NO_MATCH:
-            completeEvent = new AskCompleteEvent(null, AskCompleteEvent.Reason.NOMATCH);
-            break;
-        case CANCEL:
-            completeEvent = new AskCompleteEvent(null, VerbCompleteEvent.Reason.STOP);
-            break;
-        case DISCONNECT:
-            completeEvent = new AskCompleteEvent(null, VerbCompleteEvent.Reason.HANGUP);
-            break;
-        case ERROR:
-        case UNKNOWN:
-        default:
-            completeEvent = new AskCompleteEvent(null, "Internal Server Error");
-        }
-        
-        complete(completeEvent);
     }
     
     public void setMixerActoryFactory(MixerActorFactory mixerActoryFactory) {
