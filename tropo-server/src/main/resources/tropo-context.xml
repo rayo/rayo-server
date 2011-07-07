@@ -238,6 +238,24 @@
 					<property name="modelClass" value="com.tropo.core.verb.Record" />
 					<lookup-method name="createVerbHandler" bean="recordHandler" />
 				</bean>
+				<!-- Ask -->
+				<bean class="com.tropo.server.verb.AbstractVerbFactory">
+					<property name="xmlProvider" ref="askProvider" />
+					<property name="modelClass" value="com.tropo.core.verb.Ask" />
+					<lookup-method name="createVerbHandler" bean="askHandler" />
+				</bean>
+				<!-- Output -->
+				<bean class="com.tropo.server.verb.AbstractVerbFactory">
+					<property name="xmlProvider" ref="outputProvider" />
+					<property name="modelClass" value="com.tropo.core.verb.Output" />
+					<lookup-method name="createVerbHandler" bean="outputHandler" />
+				</bean>
+				<!-- Input -->
+				<bean class="com.tropo.server.verb.AbstractVerbFactory">
+					<property name="xmlProvider" ref="inputProvider" />
+					<property name="modelClass" value="com.tropo.core.verb.Input" />
+					<lookup-method name="createVerbHandler" bean="inputHandler" />
+				</bean>
 			</list>
 		</property>
 	</bean>
