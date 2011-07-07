@@ -4,11 +4,11 @@ import java.io.File;
 import java.io.IOException;
 
 import com.tropo.core.verb.Output;
-import com.tropo.core.verb.PauseCommand;
 import com.tropo.core.verb.Record;
 import com.tropo.core.verb.RecordCompleteEvent;
 import com.tropo.core.verb.RecordCompleteEvent.Reason;
-import com.tropo.core.verb.ResumeCommand;
+import com.tropo.core.verb.RecordPauseCommand;
+import com.tropo.core.verb.RecordResumeCommand;
 import com.tropo.core.verb.Ssml;
 import com.tropo.core.verb.VerbCommand;
 import com.tropo.core.verb.VerbCompleteEvent;
@@ -109,10 +109,10 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
     @Override
     public void onCommand(VerbCommand command) {
     	
-        if (command instanceof PauseCommand) {
-            pause();
-        } else if (command instanceof ResumeCommand) {
-            resume();
+        if (command instanceof RecordPauseCommand) {
+        	pause();
+        } else if (command instanceof RecordResumeCommand) {
+        	resume();
         }
     }
 	

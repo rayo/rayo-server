@@ -9,6 +9,8 @@ import org.dom4j.QName;
 
 import com.tropo.core.verb.Record;
 import com.tropo.core.verb.RecordCompleteEvent;
+import com.tropo.core.verb.RecordPauseCommand;
+import com.tropo.core.verb.RecordResumeCommand;
 
 public class RecordProvider extends BaseProvider {
 
@@ -18,14 +20,29 @@ public class RecordProvider extends BaseProvider {
     private static final Namespace NAMESPACE = new Namespace("", "urn:xmpp:ozone:record:1");
     private static final Namespace COMPLETE_NAMESPACE = new Namespace("", "urn:xmpp:ozone:record:complete:1");
     
+    private static final QName PAUSE_QNAME = new QName("pause", NAMESPACE);
+    private static final QName RESUME_QNAME = new QName("resume", NAMESPACE);
+    
     @Override
     protected Object processElement(Element element) throws Exception {
         if (element.getName().equals("record")) {
             return buildJoin(element);
+        } else if (PAUSE_QNAME.equals(element.getQName())) {
+            return buildPauseCommand(element);
+        } else if (RESUME_QNAME.equals(element.getQName())) {
+            return buildResumeCommand(element);
         }
         return null;
     }
 
+    private Object buildPauseCommand(Element element) throws URISyntaxException {
+        return new RecordPauseCommand();
+    }
+
+    private Object buildResumeCommand(Element element) throws URISyntaxException {
+        return new RecordResumeCommand();
+    }
+    
     private Object buildJoin(Element element) throws URISyntaxException {
         
     	Record record = new Record();
@@ -94,7 +111,19 @@ public class RecordProvider extends BaseProvider {
             createRecord((Record) object, document);
         } else if (object instanceof RecordCompleteEvent) {
         	createRecordCompleteEvent((RecordCompleteEvent) object, document);
+        } else if (object instanceof RecordPauseCommand) {
+            createPauseCommand((RecordPauseCommand) object, document);
+        } else if (object instanceof RecordResumeCommand) {
+            createResumeCommand((RecordResumeCommand) object, document);
         }
+    }
+    
+    private void createPauseCommand(RecordPauseCommand command, Document document) throws Exception {
+        document.addElement(new QName("pause", NAMESPACE));
+    }
+
+    private void createResumeCommand(RecordResumeCommand command, Document document) throws Exception {
+        document.addElement(new QName("resume", NAMESPACE));
     }
     
 	private void createRecordCompleteEvent(RecordCompleteEvent event, Document document) throws Exception {
@@ -167,6 +196,8 @@ public class RecordProvider extends BaseProvider {
 
         //TODO: Refactor out to spring configuration and put everything in the base provider class
         return clazz == Record.class ||
-        	   clazz == RecordCompleteEvent.class;
+        	   clazz == RecordCompleteEvent.class ||
+        	   clazz == RecordPauseCommand.class ||
+        	   clazz == RecordResumeCommand.class;
     }
 }
