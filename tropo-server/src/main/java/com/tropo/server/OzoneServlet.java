@@ -192,21 +192,17 @@ public class OzoneServlet extends XmppServlet {
             	DOMElement payload = (DOMElement) requestElement.elementIterator().next();
                 QName qname = payload.getQName();
 
-                // Create empty result element
-                final DOMElement result = (DOMElement) DOMDocumentFactory.getInstance().createElement("iq");
-                result.addAttribute("type", "result");
-
                 // Resource Binding
                 if (qname.equals(BIND_QNAME)) {
                     String boundJid = request.getFrom().getNode() + "@" + request.getFrom().getDomain() + "/voxeo";
-                    result.addElement(BIND_QNAME).addElement("jid").setText(boundJid);
-                    sendIqResult(request, result);
+                    DOMElement bindElement = (DOMElement) DOMDocumentFactory.getInstance().createElement(BIND_QNAME);
+                    bindElement.addElement("jid").setText(boundJid);
+                    sendIqResult(request, bindElement);
                     log.info("Bound client resource [jid=%s]", boundJid);
                 }
                 // Session Binding
                 else if (qname.equals(SESSION_QNAME)) {
-                    result.addElement(SESSION_QNAME);
-                    sendIqResult(request, result);
+                    sendIqResult(request, (DOMElement) DOMDocumentFactory.getInstance().createElement(SESSION_QNAME));
                 }
                 // Ozone Command
                 else if (qname.getNamespaceURI().startsWith("urn:xmpp:ozone")) {
@@ -225,8 +221,8 @@ public class OzoneServlet extends XmppServlet {
                             public void handle(Response response) throws Exception {
                                 if (response.isSuccess()) {
                                     CallRef callRef = (CallRef) response.getValue();
-                                    result.addElement("ref","urn:xmpp:ozone:1").addAttribute("id", callRef.getCallId());
-                                    sendIqResult(request, result);
+                                    DOMElement refElement = (DOMElement) DOMDocumentFactory.getInstance().createElement("ref","urn:xmpp:ozone:1").addAttribute("id", callRef.getCallId());
+                                    sendIqResult(request, refElement);
                                 }
                                 else {
                                     sendIqError(request, StanzaError.Type.CANCEL, StanzaError.Condition.INTERNAL_SERVER_ERROR, ((Exception)response.getValue()).getMessage());
@@ -275,10 +271,10 @@ public class OzoneServlet extends XmppServlet {
                             }
                             else if (value instanceof VerbRef) {
                                 String verbId = ((VerbRef) value).getVerbId();
-                                result.addElement("ref","urn:xmpp:ozone:1").addAttribute("id", verbId);
-                                sendIqResult(request, result);
+                                DOMElement refElement = (DOMElement) DOMDocumentFactory.getInstance().createElement("ref","urn:xmpp:ozone:1").addAttribute("id", verbId);
+                                sendIqResult(request, refElement);
                             } else {
-                            	sendIqResult(callId, request, result);
+                            	sendIqResult(callId, request, null);
                             }
                         }
                     });

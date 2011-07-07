@@ -60,8 +60,8 @@ public class InternalGatewayServlet extends GatewayServlet
 			Element payload = (Element)presenceChildren.item(0);
 			if (payload.getNamespaceURI().startsWith("urn:xmpp:ozone"))
 			{
-				JID fromJid = getXmppFactory().createJID(presenceElement.getAttribute("from"));
-				JID toJid = getXmppFactory().createJID(presenceElement.getAttribute("to"));
+				JID fromJid = message.getFrom();
+				JID toJid = message.getTo();
 
 				if (null == toJid.getNode() && isMyInternalDomain(toJid))
 				{
@@ -113,14 +113,9 @@ public class InternalGatewayServlet extends GatewayServlet
 					JID toJidExternal = getXmppFactory().createJID(toJid.getResource());
 					JID fromJidExternal = getXmppFactory().createJID(fromJid.getNode() + "@" + getExternalDomain() + "/1");
 
-					Element presenceStanza = presenceElement.getOwnerDocument().createElement("presence");
-					presenceStanza.setAttribute("to", toJidExternal.toString());
-					presenceStanza.setAttribute("from", fromJidExternal.toString());
-					presenceStanza.appendChild(payload);
-
 					log.debug("Translating presence %s -> %s as %s -> %s", fromJid, toJid, fromJidExternal, toJidExternal);
 
-					PresenceMessage presenceMessage = getXmppFactory().createPresence(fromJidExternal, toJidExternal, presenceElement.getAttribute("type"), null, presenceStanza);
+					PresenceMessage presenceMessage = getXmppFactory().createPresence(fromJidExternal, toJidExternal, presenceElement.getAttribute("type"), null, payload);
 					presenceMessage.send();
 					if (getWireLogger().isDebugEnabled())
 					{
@@ -141,8 +136,7 @@ public class InternalGatewayServlet extends GatewayServlet
 
 		Element iqElement = request.getElement();
 		Element payload = (Element) iqElement.getChildNodes().item(0);
-
-		Element iqResponse = iqElement.getOwnerDocument().createElement("iq");
+		Element responsePayload = null;
 
 		if (payload.getNamespaceURI().startsWith("urn:xmpp:ozone"))
 		{
@@ -150,8 +144,8 @@ public class InternalGatewayServlet extends GatewayServlet
 			{
 				if ("set".equals(iqElement.getAttribute("type")))
 				{
-					JID toJidInternal = getXmppFactory().createJID(iqElement.getAttribute("to"));
-					JID fromJidInternal = getXmppFactory().createJID(iqElement.getAttribute("from"));
+					JID toJidInternal = request.getTo();
+					JID fromJidInternal = request.getFrom();
 
 					if (isMe(toJidInternal.getBareJID()))
 					{
@@ -167,43 +161,34 @@ public class InternalGatewayServlet extends GatewayServlet
 						{
 							JID fromJidExternal = getXmppFactory().createJID(fromJidInternal.getNode() + "@" + getExternalDomain() + "/1");
 
-							Element presenceStanza = iqElement.getOwnerDocument().createElement("presence");
-							presenceStanza.setAttribute("to", toJidExternal.toString());
-							presenceStanza.setAttribute("from", fromJidExternal.toString());
-							presenceStanza.appendChild(payload);
-
 							log.debug("Proxying offer %s -> %s as %s -> %s", fromJidInternal, toJidInternal, fromJidExternal, toJidExternal);
 
-							PresenceMessage presenceMessage = getXmppFactory().createPresence(fromJidExternal, toJidExternal, null, presenceStanza);
+							PresenceMessage presenceMessage = getXmppFactory().createPresence(fromJidExternal, toJidExternal, null, payload);
 							presenceMessage.send();
 							if (getWireLogger().isDebugEnabled())
 							{
 								getWireLogger().debug("%s :: %s", asXML(presenceMessage.getElement()), presenceMessage.getSession().getId());
 							}
 
-							iqResponse.setAttribute("type", "result");
-
-							Element resourceElement = iqElement.getOwnerDocument().createElementNS("urn:xmpp:ozone:1", "resource");
-							resourceElement.setAttribute("id", toJidExternal.getResource());
-							iqResponse.appendChild(resourceElement);
+							responsePayload = iqElement.getOwnerDocument().createElementNS("urn:xmpp:ozone:1", "resource");
+							responsePayload.setAttribute("id", toJidExternal.getResource());
 						}
 					}
 				}
 			}
 		}
+//
+//		if (null != iqResponse.getAttribute("type"))
+//		{
+//			iqResponse.setAttribute("type", "error");
+//			// getOzoneStatistics().iqError();
+//		}
+//		else
+//		{
+//			// getOzoneStatistics().iqResult();
+//		}
 
-		if (null != iqResponse.getAttribute("type"))
-		{
-			iqResponse.setAttribute("type", "error");
-			// getOzoneStatistics().iqError();
-		}
-		else
-		{
-			// getOzoneStatistics().iqResult();
-		}
-
-		IQResponse response = request.createResult(iqResponse);
-		response.setFrom(request.getTo());
+		IQResponse response = (responsePayload == null) ? request.createResult() : request.createResult(responsePayload);
 		response.send();
 
 		if (getWireLogger().isDebugEnabled())
@@ -225,24 +210,14 @@ public class InternalGatewayServlet extends GatewayServlet
 
 		if (payload.getNamespaceURI().startsWith("urn:xmpp:ozone"))
 		{
-			JID toJidInternal = getXmppFactory().createJID(iqElement.getAttribute("to"));
-			JID fromJidInternal = getXmppFactory().createJID(iqElement.getAttribute("from"));
+			JID toJidInternal = response.getTo();
+			JID fromJidInternal = response.getFrom();
 
 			if (isMe(toJidInternal.getBareJID()))
 			{
-				JID toJidExternal = toExternalJID(toJidInternal);
-				JID fromJidExternal = toExternalJID(fromJidInternal);
-
-				Element iqResponseStanza = iqElement.getOwnerDocument().createElement("iq");
-				iqResponseStanza.setAttribute("type", iqElement.getAttribute("type"));
-				iqResponseStanza.setAttribute("to", toJidExternal.toString());
-				iqResponseStanza.setAttribute("from", fromJidExternal.toString());
-				iqResponseStanza.appendChild(payload);
-
-				log.debug("Proxying offer %s -> %s as %s -> %s", fromJidInternal, toJidInternal, fromJidExternal, toJidExternal);
-
 				IQRequest originalRequest = (IQRequest)response.getRequest().getAttribute("com.tropo.ozone.gateway.originalRequest");
-				IQResponse nattedResponse = originalRequest.createResult(iqResponseStanza);
+				IQResponse nattedResponse = originalRequest.createResult(payload);
+				log.debug("Proxying offer %s -> %s as %s -> %s", fromJidInternal, toJidInternal, nattedResponse.getTo(), nattedResponse.getFrom());
 				nattedResponse.send();
 				if (getWireLogger().isDebugEnabled())
 				{

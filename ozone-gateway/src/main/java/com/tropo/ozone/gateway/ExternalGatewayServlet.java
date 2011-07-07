@@ -47,8 +47,8 @@ public class ExternalGatewayServlet extends GatewayServlet
 		{
 			Element payload = (Element)presenceChildren.item(0);
 			if (payload.getNamespaceURI().startsWith("urn:xmpp:ozone")) {
-				JID toJid = getXmppFactory().createJID(presenceElement.getAttribute("to"));
-				JID fromJid = getXmppFactory().createJID(presenceElement.getAttribute("from"));
+				JID toJid = message.getTo();
+				JID fromJid = message.getFrom();
 
 				String presence = presenceElement.getAttribute("type");
 				if (null == presence && isMyExternalDomain(toJid)) {
@@ -62,12 +62,7 @@ public class ExternalGatewayServlet extends GatewayServlet
 							getGatewayDatastore().addClient(fromJid, platformID);
 						}
 						catch (UnknownApplicationException ex) {
-							Element presenceStanza = presenceElement.getOwnerDocument().createElement("presence");
-							presenceStanza.setAttribute("from", toJid.toString());
-							presenceStanza.setAttribute("to", fromJid.toString());
-							presenceStanza.setAttribute("type", "error");
-							// TODO: to/from JIDs?
-							PresenceMessage errorPresence = getXmppFactory().createPresence(fromJid, toJid, "error", presenceStanza);
+							PresenceMessage errorPresence = getXmppFactory().createPresence(fromJid, toJid, "error", payload);
 							errorPresence.send();
 							if (getWireLogger().isDebugEnabled())
 							{
@@ -102,8 +97,8 @@ public class ExternalGatewayServlet extends GatewayServlet
 
 		boolean success = true;
 
-		JID toJidExternal = null;
-		JID fromJidExternal = null;
+		JID toJidExternal = request.getTo();
+		JID fromJidExternal = request.getFrom();
 		JID fromJidInternal = null;
 		JID toJidInternal = null;
 
@@ -112,8 +107,6 @@ public class ExternalGatewayServlet extends GatewayServlet
 
 		if (payload.getNamespaceURI().startsWith("urn:xmpp:ozone"))
 		{
-    		toJidExternal = getXmppFactory().createJID(iqElement.getAttribute("to"));
-    		fromJidExternal = getXmppFactory().createJID(iqElement.getAttribute("from"));
     		fromJidInternal = toInternalJID(fromJidExternal);
 
     		if (isMe(toJidExternal.getBareJID())) {
@@ -146,17 +139,10 @@ public class ExternalGatewayServlet extends GatewayServlet
         }
 
         if (success) {
-	        Element iqStanza = iqElement.getOwnerDocument().createElement("iq");
-	        iqStanza.setAttribute("type", iqElement.getAttribute("type"));
-	        iqStanza.setAttribute("to", toJidInternal.toString());
-	        iqStanza.setAttribute("from", fromJidInternal.toString());
-	        iqStanza.setAttribute("id", iqElement.getAttribute("id"));
-	        iqStanza.appendChild(payload);
-	        
 	        log.debug("Proxying IQ %s -> %s as %s -> %s", fromJidExternal, toJidExternal, fromJidInternal, toJidInternal);
 	        
 	        // Is the session inbound or outbound?
-	        IQRequest nattedRequest = getXmppFactory().createIQ(fromJidInternal, toJidInternal, iqElement.getAttribute("type"), iqStanza);
+	        IQRequest nattedRequest = getXmppFactory().createIQ(fromJidInternal, toJidInternal, iqElement.getAttribute("type"), payload);
 	        nattedRequest.setAttribute("com.tropo.ozone.gateway.originaRequest", request);
 	        nattedRequest.send();
 			if (getWireLogger().isDebugEnabled())
@@ -167,12 +153,8 @@ public class ExternalGatewayServlet extends GatewayServlet
         	// Note that the IQ response is NOT sent.  That response will be relayed by the InternalGatewayServlet
         }
         else {
-        	Element iqStanza = iqElement.getOwnerDocument().createElement("iq");
-        	iqStanza.setAttribute("type", "error");
 //        	getOzoneStatistics().iqError();
-        	iqStanza.appendChild(payload);
-            
-            IQResponse iqError = request.createResult(iqStanza);
+            IQResponse iqError = request.createResult(payload);
             iqError.setFrom(request.getTo());
             iqError.send();
 
