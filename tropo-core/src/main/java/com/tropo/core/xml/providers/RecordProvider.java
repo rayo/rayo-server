@@ -49,10 +49,7 @@ public class RecordProvider extends BaseProvider {
     	if (element.attribute("to") !=  null) {
     		record.setTo(toURI(element.attributeValue("to")));
     	}
-        Element promptElement = element.element("prompt");
-        if (promptElement != null) {
-            record.setPrompt(extractSsml(promptElement));
-        }
+
     	if (element.attribute("voice") !=  null) {
     		record.setVoice(element.attributeValue("voice"));
     	}
@@ -139,10 +136,6 @@ public class RecordProvider extends BaseProvider {
         Element root = document.addElement(new QName("record", NAMESPACE));
         if (record.getTo() != null) {
         	root.addAttribute("to", record.getTo().toString());
-        }
-        if (record.getPrompt() != null) {
-            Element prompt = root.addElement("prompt");
-            addSsml(record.getPrompt(), prompt);
         }
         if (record.getAppend() != null) {
         	root.addAttribute("append", record.getAppend().toString());

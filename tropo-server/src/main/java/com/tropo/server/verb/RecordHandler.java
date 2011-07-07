@@ -9,7 +9,6 @@ import com.tropo.core.verb.RecordCompleteEvent;
 import com.tropo.core.verb.RecordCompleteEvent.Reason;
 import com.tropo.core.verb.RecordPauseCommand;
 import com.tropo.core.verb.RecordResumeCommand;
-import com.tropo.core.verb.Ssml;
 import com.tropo.core.verb.VerbCommand;
 import com.tropo.core.verb.VerbCompleteEvent;
 import com.tropo.core.verb.VerbCompleteReason;
@@ -17,8 +16,6 @@ import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.Participant;
 import com.voxeo.moho.State;
 import com.voxeo.moho.media.Recording;
-import com.voxeo.moho.media.output.AudibleResource;
-import com.voxeo.moho.media.output.OutputCommand;
 import com.voxeo.moho.media.record.RecordCommand;
 
 public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant> {
@@ -40,14 +37,6 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
 		}
 		
 		RecordCommand command = new RecordCommand(model.getTo());
-        if (model.getPrompt() != null) {
-            Ssml prompt = model.getPrompt();
-            AudibleResource audibleResource = resolveAudio(prompt);
-        	OutputCommand output = new OutputCommand(audibleResource);
-        	output.setBargein(model.isBargein());
-        	output.setVoiceName(model.getVoice());
-        	command.setPrompt(output);
-        }
         if (model.getAppend() != null) {
         	command.setAppend(model.getAppend());
         }

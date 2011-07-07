@@ -19,8 +19,6 @@ public class Record extends BaseVerb {
 	private Boolean append;
 	
 	private Integer sampleRate;
-	
-	private Ssml prompt;
 		
 	@ValidCodec
 	private String codec;
@@ -70,14 +68,6 @@ public class Record extends BaseVerb {
 
 	public void setSampleRate(Integer sampleRate) {
 		this.sampleRate = sampleRate;
-	}
-
-	public Ssml getPrompt() {
-		return prompt;
-	}
-
-	public void setPrompt(Ssml prompt) {
-		this.prompt = prompt;
 	}
 
 	public String getCodec() {
@@ -200,7 +190,6 @@ public class Record extends BaseVerb {
 				.append("initial-timeout", getInitialTimeout())
 				.append("max-duration", getMaxDuration())
 				.append("min-duration", getMinDuration())
-				.append("prompt", getPrompt())
 				.append("sample-rate", getSampleRate())
 				.append("silence-terminate", getSilenceTerminate())
 				.append("start-beep", getStartBeep())
