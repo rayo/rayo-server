@@ -242,7 +242,11 @@
 		</property>
 	</bean>
 
-
+	<!-- Storage Service implementations -->
+	<bean id="storageServices"
+	      class="org.springframework.beans.factory.serviceloader.ServiceListFactoryBean"
+	      p:serviceType="com.tropo.core.recording.StorageService"/>
+      
 	<!-- Verb Handlers -->	
 	<bean id="sayHandler" class="com.tropo.server.verb.SayHandler" scope="prototype" />
 	<bean id="askHandler" class="com.tropo.server.verb.AskHandler" scope="prototype" />
@@ -256,7 +260,9 @@
 	<bean id="joinHandler" class="com.tropo.server.verb.JoinHandler" scope="prototype">
 		<property name="callRegistry" ref="callRegistry"/>
 	</bean>
-	<bean id="recordHandler" class="com.tropo.server.verb.RecordHandler" scope="prototype"/>
+	<bean id="recordHandler" class="com.tropo.server.verb.RecordHandler" scope="prototype">
+		<property name="storageServices" ref="storageServices"/>
+	</bean>
 
 	<!-- Admin Service -->
 	<bean id="adminService" class="com.tropo.server.AdminService"/>
