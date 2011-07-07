@@ -1,5 +1,47 @@
 # Changelog
 
+## Build 212 / Released 2011-06-19
+
+This build includes CDR creation and delivery over a number of transports, improves statistics, and allows applications to keep Tropo out of the media path. It also includes a number of bug fixes and minor API changes.
+
+### API
+
+* **New**
+
+    * Calls rejected because the server is quiesced now appear in statistics as rejected.
+
+    * Quiesce status is now reported through the admin MBean.
+
+    * Added initial support for CDR management with Spring hooks, CDR manager service, and file-based storage.
+
+    * Ozone Servlet and MohoDriver can now create and store CDRs.
+
+    * CDRs now include `timestamp`, `to`, `from`, `starting time`, `ending time`, and `call status`.
+
+    * CDRs can now be delivered by JMS, XMPP pubsub, AMQP or stored as files.
+
+    * Added ability to alter storage location of CDRs using JMX.
+
+    * Added `media` attribute to Transfer. Possible values are `bridged` (Tropo in media path) or `direct` (Tropo used for signaling only)
+
+* **Changed**
+
+    * If end event generates an error, the error is now handled.
+
+    * API now uses `<presence/>` instead of `<iq/>` for server to client events.
+
+* **Fixed**
+
+    * Transfer broke in last build.
+
+    * Timeouts were being parsed in 'PT' time format instead of milliseconds.
+
+    * Dial threw `java.lang.IllegalArgumentException: Call id cannot be null`; now it doesn't.
+
+    * Redirect caused an error/
+
+    * If verb encountered an error, the `complete` event wasn't getting set.
+
 ## Build 188 / Released 2011-06-10
 
 This release improves consistency between API elements, makes it easier to work with complete events, simplifies the API by reducing unnecessary element nesting, adds some future-proofing to naming and call IDs, and also adds management and monitoring of cluster status through HTTP and JMX APIs.
