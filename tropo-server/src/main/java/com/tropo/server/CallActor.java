@@ -146,9 +146,14 @@ public class CallActor extends AbstractActor<Call> {
     }
 
     @Message
-    public void redirect(RedirectCommand message) {
-        ApplicationContext applicationContext = participant.getApplicationContext();
+    public void redirect(RedirectCommand message) throws Exception {
+        
+    	ApplicationContext applicationContext = participant.getApplicationContext();
         Endpoint destination = applicationContext.createEndpoint(message.getTo().toString());
+        
+        if (participant.isProcessed()) {
+        	throw new IllegalAccessException("You can only redirect a call that has not been answered yet");
+        }
         participant.redirect(destination, message.getHeaders());
         callStatistics.callRedirected();
     }
