@@ -1,5 +1,6 @@
 package com.tropo.ozone.gateway;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -7,12 +8,7 @@ import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 
 import org.springframework.context.ApplicationContext;
-import org.springframework.web.context.WebApplicationContext;
-import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.context.support.XmlWebApplicationContext;
-import org.w3c.dom.Element;
-import org.w3c.dom.ls.DOMImplementationLS;
-import org.w3c.dom.ls.LSSerializer;
 
 import com.voxeo.logging.Loggerf;
 import com.voxeo.servlet.xmpp.JID;
@@ -36,9 +32,10 @@ public abstract class GatewayServlet extends XmppServlet
 	private ApplicationContext applicationContext;
 
 	private Set<JID> myJids = new HashSet<JID>();
-	private Set<String> myInternalDomains = new HashSet<String>();
-	private Set<String> myExternalDomains = new HashSet<String>();
+	private Set<String> myInternalDomains;
+	private Set<String> myExternalDomains;
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void init (ServletConfig config) throws ServletException
 	{
@@ -56,6 +53,12 @@ public abstract class GatewayServlet extends XmppServlet
         
         this.applicationContext = xmlWebApplicationContext;
         this.gatewayDatastore = (GatewayDatastore)applicationContext.getBean("gatewayDatastore");
+        this.myInternalDomains = new HashSet<String>((Collection<String>)applicationContext.getBean("internalDomains"));
+        this.myExternalDomains = new HashSet<String>((Collection<String>)applicationContext.getBean("externalDomains"));
+
+        log.debug("Application context loaded from /WEB-INF/ozone-gateway-xmpp.xml");
+        log.debug("internal domains: " + myInternalDomains);
+        log.debug("external domains: " + myExternalDomains);
 	}
 
 	protected XmppFactory getXmppFactory ()
@@ -150,11 +153,24 @@ public abstract class GatewayServlet extends XmppServlet
 	{
 		this.gatewayDatastore = gatewayDatastore;
 	}
-	
-	protected String asXML (Element element)
-	{
-		DOMImplementationLS impl = (DOMImplementationLS)element.getOwnerDocument().getImplementation();
-		LSSerializer serializer = impl.createLSSerializer();
-		return serializer.writeToString(element);
-	}
+//	
+//	protected String asXML (org.w3c.dom.Element element)
+//	{
+//		String xml = null;
+//		if (element == null)
+//		{
+//			xml = "<empty/>";
+//		}
+//		else if (element instanceof org.dom4j.Element)
+//		{
+//			xml = ((org.dom4j.Element)element).asXML();
+//		}
+//		else
+//		{
+//			DOMImplementationLS impl = (DOMImplementationLS)element.getOwnerDocument().getImplementation();
+//			LSSerializer serializer = impl.createLSSerializer();
+//			xml = serializer.writeToString(element);
+//		}
+//		return xml;
+//	}
 }

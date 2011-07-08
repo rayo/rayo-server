@@ -17,4 +17,12 @@
 		<property name="resource" value="classpath:META-INF/routes.properties"/>
 	</bean>
 	
+	<util:set id="internalDomains" set-class="java.util.HashSet">
+		<value>internal.tropo.local</value>
+	</util:set>
+
+	<util:set id="externalDomains" set-class="java.util.HashSet">
+		<value>gw.tropo.local</value>
+	</util:set>
+	
 </beans>
