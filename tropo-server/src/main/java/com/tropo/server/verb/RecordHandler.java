@@ -2,14 +2,14 @@ package com.tropo.server.verb;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
+import com.tropo.core.recording.StorageService;
 import com.tropo.core.verb.Output;
-import com.tropo.core.verb.PauseCommand;
 import com.tropo.core.verb.Record;
 import com.tropo.core.verb.RecordCompleteEvent;
-import com.tropo.core.verb.RecordCompleteEvent.Reason;
-import com.tropo.core.verb.ResumeCommand;
-import com.tropo.core.verb.Ssml;
+import com.tropo.core.verb.RecordPauseCommand;
+import com.tropo.core.verb.RecordResumeCommand;
 import com.tropo.core.verb.VerbCommand;
 import com.tropo.core.verb.VerbCompleteEvent;
 import com.tropo.core.verb.VerbCompleteReason;
@@ -17,8 +17,6 @@ import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.Participant;
 import com.voxeo.moho.State;
 import com.voxeo.moho.media.Recording;
-import com.voxeo.moho.media.output.AudibleResource;
-import com.voxeo.moho.media.output.OutputCommand;
 import com.voxeo.moho.media.record.RecordCommand;
 
 public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant> {
@@ -27,27 +25,22 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
 
 	private Recording recording;
 	
+	private List<StorageService> storageServices;
+
+	private File tempFile;
+	
 	@Override
 	public void start() {
 
 		if (model.getTo() == null) {
 			try {
-				File temp = File.createTempFile("ozone", ".mp3");
-				model.setTo(temp.toURI());
+				tempFile = File.createTempFile("ozone", ".mp3");
 			} catch (IOException e) {
 				log.error(e.getMessage(),e);
 			}
 		}
 		
 		RecordCommand command = new RecordCommand(model.getTo());
-        if (model.getPrompt() != null) {
-            Ssml prompt = model.getPrompt();
-            AudibleResource audibleResource = resolveAudio(prompt);
-        	OutputCommand output = new OutputCommand(audibleResource);
-        	output.setBargein(model.isBargein());
-        	output.setVoiceName(model.getVoice());
-        	command.setPrompt(output);
-        }
         if (model.getAppend() != null) {
         	command.setAppend(model.getAppend());
         }
@@ -100,7 +93,7 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
         if(hangup) {
             complete(new RecordCompleteEvent(model, VerbCompleteEvent.Reason.HANGUP));
         } else {
-        	complete(new RecordCompleteEvent(model, Reason.SUCCESS));
+        	//complete(new RecordCompleteEvent(model, Reason.SUCCESS));
         }
         
         //TODO: Complete recording
@@ -109,10 +102,10 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
     @Override
     public void onCommand(VerbCommand command) {
     	
-        if (command instanceof PauseCommand) {
-            pause();
-        } else if (command instanceof ResumeCommand) {
-            resume();
+        if (command instanceof RecordPauseCommand) {
+        	pause();
+        } else if (command instanceof RecordResumeCommand) {
+        	resume();
         }
     }
 	
@@ -131,18 +124,42 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
 		
 		switch(event.getCause()) {
 			case ERROR:
+			case TIMEOUT:
+			case UNKNOWN:
+			case INI_TIMEOUT:
 				log.error("Error while recording conversation");
 				complete(VerbCompleteEvent.Reason.ERROR);
 				break;
 			case DISCONNECT:
 				complete(VerbCompleteEvent.Reason.HANGUP);
 				break;
+			case CANCEL:
+			case SILENCE:
+				complete(VerbCompleteEvent.Reason.STOP);
+				break;				
 		}
 	}
 	
 	private void complete(VerbCompleteReason reason) {
 
-		RecordCompleteEvent event = new RecordCompleteEvent(model, reason);
+		RecordCompleteEvent event;
+		
+		//TODO: Should we change this and add multiple URIs? Right now only the last URI will make it to the xml
+		for (Object storageService: storageServices) {
+			StorageService ss = (StorageService)storageService;
+			try {
+				model.setTo(ss.store(tempFile));
+			} catch (IOException ioe) {
+				event = new RecordCompleteEvent(model, VerbCompleteEvent.Reason.ERROR);
+				event.setErrorText("Could not store the recording file");
+				return;
+			}
+		}
+		event = new RecordCompleteEvent(model, reason);		
 		complete(event);
+	}
+
+	public void setStorageServices(List<StorageService> storageServices) {
+		this.storageServices = storageServices;
 	}
 }

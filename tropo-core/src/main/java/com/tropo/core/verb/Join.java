@@ -10,6 +10,10 @@ import com.tropo.core.validation.ValidJoinType;
 
 public class Join extends BaseVerb {
 
+	public static final String MEDIA_TYPE = "MEDIA_TYPE";	
+	public static final String DIRECTION = "DIRECTION";
+	public static final String CALL_TO = "CALL_TO";
+	
 	@ValidDirection
 	private String direction;
 

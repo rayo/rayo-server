@@ -88,13 +88,18 @@ public class OzoneProvider extends BaseProvider {
     }
 
     private Object buildDialCommand(Element element) {
+    	
         DialCommand command = new DialCommand();
         command.setFrom(toURI(element.attributeValue("from")));
         command.setTo(toURI(element.attributeValue("to")));
         command.setHeaders(grabHeaders(element));
+        Element joinElement = element.element("join"); 
+        if (joinElement != null) {
+        	command.setJoin(new JoinProvider().buildJoin(joinElement));
+        }
         return command;
     }
-
+    
     private Object buildCallEnd(Element element) {
         throw new UnsupportedOperationException();
     }
@@ -219,9 +224,12 @@ public class OzoneProvider extends BaseProvider {
         	root.addAttribute("from", command.getFrom().toString());
         }
         addHeaders(command.getHeaders(), root);
+        if (command.getJoin() != null) {
+        	new JoinProvider().createJoin(command.getJoin(), root);
+        }
         return document;
     }
-
+    
     private void createAnswerEvent(Object object, Document document) {
         document.addElement(new QName("answered", OZONE_NAMESPACE));
     }

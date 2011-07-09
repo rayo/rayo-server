@@ -2,13 +2,17 @@ package com.tropo.server;
 
 import java.net.URI;
 
+import javax.media.mscontrol.join.Joinable.Direction;
+
 import com.tropo.core.CallRef;
 import com.tropo.core.DialCommand;
+import com.tropo.core.verb.Join;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.ApplicationContext;
 import com.voxeo.moho.Call;
 import com.voxeo.moho.CallableEndpoint;
 import com.voxeo.moho.Endpoint;
+import com.voxeo.moho.Participant.JoinType;
 import com.voxeo.moho.event.Observer;
 
 public class CallManager extends ReflectiveActor {
@@ -34,6 +38,20 @@ public class CallManager extends ReflectiveActor {
         }
         final Call mohoCall = toEndpoint.call(fromEndpoint, command.getHeaders(), (Observer[]) null);
         mohoCall.setSupervised(true);
+        if (command.getJoin() != null) {        	
+	        if (command.getJoin().getMedia() != null) {
+	        	mohoCall.setAttribute(Join.MEDIA_TYPE, JoinType.valueOf(command.getJoin().getMedia()));
+	        }
+	        if (command.getJoin().getDirection() != null) {
+	        	mohoCall.setAttribute(Join.DIRECTION, Direction.valueOf(command.getJoin().getDirection()));
+	        }
+	        if (command.getJoin().getTo() != null) {
+	        	CallActor actor = callRegistry.get(command.getJoin().getTo());
+	        	if (actor != null) {
+	        		mohoCall.setAttribute(Join.CALL_TO, actor.getCall());
+	        	}
+	        }
+        }
         startCallActor(mohoCall);
         
         return new CallRef(mohoCall.getId());

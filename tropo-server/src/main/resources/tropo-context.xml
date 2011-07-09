@@ -238,11 +238,33 @@
 					<property name="modelClass" value="com.tropo.core.verb.Record" />
 					<lookup-method name="createVerbHandler" bean="recordHandler" />
 				</bean>
+				<!-- Ask -->
+				<bean class="com.tropo.server.verb.AbstractVerbFactory">
+					<property name="xmlProvider" ref="askProvider" />
+					<property name="modelClass" value="com.tropo.core.verb.Ask" />
+					<lookup-method name="createVerbHandler" bean="askHandler" />
+				</bean>
+				<!-- Output -->
+				<bean class="com.tropo.server.verb.AbstractVerbFactory">
+					<property name="xmlProvider" ref="outputProvider" />
+					<property name="modelClass" value="com.tropo.core.verb.Output" />
+					<lookup-method name="createVerbHandler" bean="outputHandler" />
+				</bean>
+				<!-- Input -->
+				<bean class="com.tropo.server.verb.AbstractVerbFactory">
+					<property name="xmlProvider" ref="inputProvider" />
+					<property name="modelClass" value="com.tropo.core.verb.Input" />
+					<lookup-method name="createVerbHandler" bean="inputHandler" />
+				</bean>
 			</list>
 		</property>
 	</bean>
 
-
+	<!-- Storage Service implementations -->
+	<bean id="storageServices"
+	      class="org.springframework.beans.factory.serviceloader.ServiceListFactoryBean"
+	      p:serviceType="com.tropo.core.recording.StorageService"/>
+      
 	<!-- Verb Handlers -->	
 	<bean id="sayHandler" class="com.tropo.server.verb.SayHandler" scope="prototype" />
 	<bean id="askHandler" class="com.tropo.server.verb.AskHandler" scope="prototype" />
@@ -250,13 +272,16 @@
 	<bean id="conferenceHandler" class="com.tropo.server.verb.ConferenceHandler" scope="prototype">
 		<property name="mohoConferenceController" ref="conferenceController" />
 		<property name="mixerActoryFactory" ref="mixerActorFactory"/>
+		<property name="callManager" ref="callManager"/>
 	</bean>
 	<bean id="outputHandler" class="com.tropo.server.verb.OutputHandler" scope="prototype" />
 	<bean id="inputHandler" class="com.tropo.server.verb.InputHandler" scope="prototype" />
 	<bean id="joinHandler" class="com.tropo.server.verb.JoinHandler" scope="prototype">
 		<property name="callRegistry" ref="callRegistry"/>
 	</bean>
-	<bean id="recordHandler" class="com.tropo.server.verb.RecordHandler" scope="prototype"/>
+	<bean id="recordHandler" class="com.tropo.server.verb.RecordHandler" scope="prototype">
+		<property name="storageServices" ref="storageServices"/>
+	</bean>
 
 	<!-- Admin Service -->
 	<bean id="adminService" class="com.tropo.server.AdminService"/>

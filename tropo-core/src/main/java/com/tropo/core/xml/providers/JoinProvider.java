@@ -24,7 +24,7 @@ public class JoinProvider extends BaseProvider {
         return null;
     }
 
-    private Object buildJoin(Element element) {
+    Join buildJoin(Element element) {
         
     	Join join = new Join();
     	if (element.attribute("media") != null) {
@@ -50,7 +50,7 @@ public class JoinProvider extends BaseProvider {
     protected void generateDocument(Object object, Document document) throws Exception {
 
         if (object instanceof Join) {
-            createJoin((Join) object, document);
+            createJoin((Join) object, document.getRootElement());
         } else if (object instanceof JoinCompleteEvent) {
         	createJoinCompleteEvent((JoinCompleteEvent) object, document);
         }
@@ -61,9 +61,9 @@ public class JoinProvider extends BaseProvider {
 		addCompleteElement(document, event, COMPLETE_NAMESPACE);
 	}
     
-    private void createJoin(Join join, Document document) throws Exception {
+    void createJoin(Join join, Element element) {
     	
-        Element root = document.addElement(new QName("join", NAMESPACE));
+        Element root = element.addElement(new QName("join", NAMESPACE));
         
         if (join.getDirection() != null) {
         	root.addAttribute("direction", join.getDirection());        	

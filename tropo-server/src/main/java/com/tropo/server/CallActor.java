@@ -21,10 +21,12 @@ import com.tropo.core.OfferEvent;
 import com.tropo.core.RedirectCommand;
 import com.tropo.core.RejectCommand;
 import com.tropo.core.RingingEvent;
+import com.tropo.core.verb.Join;
 import com.voxeo.moho.ApplicationContext;
 import com.voxeo.moho.Call;
 import com.voxeo.moho.Call.State;
 import com.voxeo.moho.Endpoint;
+import com.voxeo.moho.Participant.JoinType;
 import com.voxeo.moho.event.AutowiredEventListener;
 import com.voxeo.moho.event.CallCompleteEvent;
 import com.voxeo.moho.event.DtmfRelayEvent;
@@ -72,8 +74,21 @@ public class CallActor extends AbstractActor<Call> {
             // Now we setup the moho handlers
             mohoListeners.add(new AutowiredEventListener(this));
             mohoCall.addObservers(new ActorEventListener(this));
-
-            mohoCall.join();
+            
+            Call destination = (Call)mohoCall.getAttribute(Join.CALL_TO);
+            javax.media.mscontrol.join.Joinable.Direction direction = mohoCall.getAttribute(Join.DIRECTION);
+            JoinType mediaType = mohoCall.getAttribute(Join.MEDIA_TYPE);
+            
+            if (destination != null) {
+            	mohoCall.join(destination,mediaType,direction);
+            } else {
+            	if (direction != null) {
+            		mohoCall.join(direction);
+            	} else {
+            		mohoCall.join();
+            	}
+            }
+            
             callStatistics.outgoingCall();
 
         } catch (Exception e) {
@@ -134,9 +149,14 @@ public class CallActor extends AbstractActor<Call> {
     }
 
     @Message
-    public void redirect(RedirectCommand message) {
-        ApplicationContext applicationContext = participant.getApplicationContext();
+    public void redirect(RedirectCommand message) throws Exception {
+        
+    	ApplicationContext applicationContext = participant.getApplicationContext();
         Endpoint destination = applicationContext.createEndpoint(message.getTo().toString());
+        
+        if (participant.isProcessed()) {
+        	throw new IllegalAccessException("You can only redirect a call that has not been answered yet");
+        }
         participant.redirect(destination, message.getHeaders());
         callStatistics.callRedirected();
     }
