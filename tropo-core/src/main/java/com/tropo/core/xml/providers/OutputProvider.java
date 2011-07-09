@@ -13,12 +13,11 @@ import com.tropo.core.verb.JumpCommand;
 import com.tropo.core.verb.MoveCommand;
 import com.tropo.core.verb.Output;
 import com.tropo.core.verb.OutputCompleteEvent;
-import com.tropo.core.verb.SayCompleteEvent;
-import com.tropo.core.verb.VolumeCommand;
 import com.tropo.core.verb.OutputCompleteEvent.Reason;
 import com.tropo.core.verb.PauseCommand;
 import com.tropo.core.verb.ResumeCommand;
 import com.tropo.core.verb.SpeedCommand;
+import com.tropo.core.verb.VolumeCommand;
 
 public class OutputProvider extends BaseProvider {
 

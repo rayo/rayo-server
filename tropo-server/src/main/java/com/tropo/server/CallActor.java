@@ -12,6 +12,7 @@ import org.apache.commons.lang.builder.ToStringStyle;
 import com.tropo.core.AcceptCommand;
 import com.tropo.core.AnswerCommand;
 import com.tropo.core.AnsweredEvent;
+import com.tropo.core.DtmfEvent;
 import com.tropo.core.EndCommand;
 import com.tropo.core.EndEvent;
 import com.tropo.core.EndEvent.Reason;
@@ -26,6 +27,8 @@ import com.voxeo.moho.Call.State;
 import com.voxeo.moho.Endpoint;
 import com.voxeo.moho.event.AutowiredEventListener;
 import com.voxeo.moho.event.CallCompleteEvent;
+import com.voxeo.moho.event.DtmfRelayEvent;
+import com.voxeo.moho.event.InputDetectedEvent;
 import com.voxeo.moho.event.JoinCompleteEvent;
 import com.voxeo.moho.event.SignalEvent;
 
@@ -243,6 +246,11 @@ public class CallActor extends AbstractActor<Call> {
                 end(reason);
             }            
         }
+    }
+
+    @com.voxeo.moho.State
+    public void onDtmf(InputDetectedEvent event) throws Exception {
+        fire(new DtmfEvent(getParticipantId(), event.getInput()));
     }
 
     // Properties

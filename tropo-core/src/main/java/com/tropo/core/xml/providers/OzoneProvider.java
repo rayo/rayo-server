@@ -12,6 +12,7 @@ import com.tropo.core.AnswerCommand;
 import com.tropo.core.AnsweredEvent;
 import com.tropo.core.CallRejectReason;
 import com.tropo.core.DialCommand;
+import com.tropo.core.DtmfEvent;
 import com.tropo.core.EndEvent;
 import com.tropo.core.HangupCommand;
 import com.tropo.core.OfferEvent;
@@ -55,6 +56,8 @@ public class OzoneProvider extends BaseProvider {
             return buildStopCommand(element);
         } else if (element.getName().equals("complete")) {
             return buildCompleteEvent(element);
+        } else if (element.getName().equals("dtmf")) {
+            return buildDtmfEvent(element);
         }
         
         return null;
@@ -112,6 +115,10 @@ public class OzoneProvider extends BaseProvider {
         offer.setHeaders(grabHeaders(element));
 
         return offer;
+    }
+
+    private Object buildDtmfEvent(Element element) {
+        return new DtmfEvent(null, element.attributeValue("signal"));
     }
 
     private Object buildAcceptCommand(Element element) throws URISyntaxException {
@@ -194,7 +201,13 @@ public class OzoneProvider extends BaseProvider {
             createDialCommand(object, document);
         } else if (object instanceof StopCommand) {
             createStopCommand((StopCommand)object, document);
+        } else if (object instanceof DtmfEvent) {
+            createDtmfEvent((DtmfEvent)object, document);
         }
+    }
+
+    private void createDtmfEvent(DtmfEvent event, Document document) {
+        document.addElement(new QName("dtmf", OZONE_NAMESPACE)).addAttribute("signal", event.getSignal());
     }
 
     private Document createDialCommand(Object object, Document document) {
@@ -305,6 +318,7 @@ public class OzoneProvider extends BaseProvider {
 			   clazz == RejectCommand.class ||
 			   clazz == RedirectCommand.class ||
 	           clazz == StopCommand.class  ||
-			   clazz == DialCommand.class;
+			   clazz == DialCommand.class ||
+		       clazz == DtmfEvent.class;
 	}
 }

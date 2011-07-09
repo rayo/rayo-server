@@ -21,6 +21,7 @@ import com.tropo.core.AcceptCommand
 import com.tropo.core.AnswerCommand
 import com.tropo.core.CallRejectReason
 import com.tropo.core.DialCommand
+import com.tropo.core.DtmfEvent;
 import com.tropo.core.HangupCommand
 import com.tropo.core.OfferEvent
 import com.tropo.core.RedirectCommand
@@ -187,6 +188,21 @@ public class OzoneProviderTest {
         ])
     }
 
+    // Dtmf
+    // ====================================================================================
+
+    @Test
+    public void dtmfToXml() {
+        DtmfEvent event = new DtmfEvent(null, "5");
+        assertEquals("""<dtmf xmlns="urn:xmpp:ozone:1" signal="5"/>""", toXml(event));
+    }
+    
+    @Test
+    public void dtmfFromXml() {
+        assertEquals "5", fromXml("""<dtmf xmlns="urn:xmpp:ozone:1" signal="5"></dtmf>""").signal
+    }
+
+    
     // Hangup
     // ====================================================================================
     

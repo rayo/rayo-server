@@ -25,6 +25,19 @@
     <!-- Ringing Event -->
     <element name="ringing" type="tns:empty" />
 
+    <!-- DTMF Event -->
+    <element name="dtmf" type="tns:dtmfType" />
+    <complexType name="dtmfType">
+        <attribute name="signal" type="string" />
+        <attribute name="duration" type="long">
+            <annotation>
+                <documentation>
+                    Duration is a in milleseconds
+                </documentation>
+            </annotation>
+        </attribute>
+    </complexType>
+
     <!-- End Event -->
     <element name="end" type="tns:endType" />
 	<complexType name="endType">
