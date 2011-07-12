@@ -131,6 +131,8 @@ public abstract class AbstractActor<T extends Participant> extends ReflectiveAct
     @Message
     public void verbCommand(VerbCommand command) {
 
+    	assertion(command.getVerbId() != null, "Verb id is null. Have you added the verb id to your \"to\" attribute?");
+    	
         VerbHandler<?,?> handler = verbs.get(command.getVerbId());
 
         assertion(handler != null, "Could not find verb [id=%s]", command.getVerbId());
