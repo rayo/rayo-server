@@ -145,15 +145,19 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
 
 		RecordCompleteEvent event;
 		
-		//TODO: Should we change this and add multiple URIs? Right now only the last URI will make it to the xml
-		for (Object storageService: storageServices) {
-			StorageService ss = (StorageService)storageService;
-			try {
-				model.setTo(ss.store(tempFile));
-			} catch (IOException ioe) {
-				event = new RecordCompleteEvent(model, VerbCompleteEvent.Reason.ERROR);
-				event.setErrorText("Could not store the recording file");
-				return;
+		// When temp file is null the user has provided a to URL (right now an undocumented feature). In such cases
+		// no storage service policies will be applied.
+		if (tempFile != null) {
+			//TODO: Should we change this and add multiple URIs? Right now only the last URI will make it to the xml
+			for (Object storageService: storageServices) {
+				StorageService ss = (StorageService)storageService;
+				try {
+					model.setTo(ss.store(tempFile));
+				} catch (IOException ioe) {
+					event = new RecordCompleteEvent(model, VerbCompleteEvent.Reason.ERROR);
+					event.setErrorText("Could not store the recording file");
+					return;
+				}
 			}
 		}
 		event = new RecordCompleteEvent(model, reason);		
