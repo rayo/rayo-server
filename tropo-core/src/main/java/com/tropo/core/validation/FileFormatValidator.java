@@ -17,6 +17,6 @@ public class FileFormatValidator implements ConstraintValidator<ValidFileFormat,
 
 		if (value == null || value.equals("")) return true;
 		
-		return Output.toCodecValue(value) != null;
+		return Output.toFileFormat(value) != null;
 	}
 }
