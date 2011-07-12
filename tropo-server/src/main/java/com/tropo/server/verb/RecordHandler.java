@@ -35,6 +35,7 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
 		if (model.getTo() == null) {
 			try {
 				tempFile = File.createTempFile("ozone", ".mp3");
+				model.setTo(tempFile.toURI());
 			} catch (IOException e) {
 				log.error(e.getMessage(),e);
 			}
