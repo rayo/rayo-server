@@ -258,7 +258,9 @@ public abstract class BaseProvider implements XmlProvider {
             String reasonValue = globalReason.name().toLowerCase();
             reasonElement = completeElement.addElement(new QName(reasonValue, OZONE_COMPLETE_NAMESPACE));
             if (globalReason == VerbCompleteEvent.Reason.ERROR) {
-                reasonElement.setText(event.getErrorText());
+            	if (event.getErrorText() != null) {
+            		reasonElement.setText(event.getErrorText());
+            	}
             }
         } else {
             Enum<?> reasonEnum = (Enum<?>) reason;
