@@ -136,6 +136,9 @@ public class Output extends BaseVerb {
 
 	public static Value toFileFormat(String format) {
 		
+		// Adapt the input value to FileFormatConstants' toString() format
+		format = "FORMAT_" + format;
+		
 		if (FileFormatConstants.FORMAT_3G2.toString().equalsIgnoreCase(format)) {
 			return FileFormatConstants.FORMAT_3G2;
 		} else if (FileFormatConstants.FORMAT_3GP.toString().equalsIgnoreCase(format)) {

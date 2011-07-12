@@ -36,6 +36,9 @@ import com.tropo.core.verb.InputMode
 import com.tropo.core.verb.KickCommand
 import com.tropo.core.verb.MediaType;
 import com.tropo.core.verb.PauseCommand
+import com.tropo.core.verb.Record;
+import com.tropo.core.verb.RecordPauseCommand;
+import com.tropo.core.verb.RecordResumeCommand;
 import com.tropo.core.verb.ResumeCommand
 import com.tropo.core.verb.Say
 import com.tropo.core.verb.SayCompleteEvent
@@ -48,6 +51,7 @@ import com.tropo.core.verb.VerbCompleteEvent;
 import com.tropo.core.xml.providers.AskProvider
 import com.tropo.core.xml.providers.ConferenceProvider
 import com.tropo.core.xml.providers.OzoneProvider
+import com.tropo.core.xml.providers.RecordProvider;
 import com.tropo.core.xml.providers.SayProvider
 import com.tropo.core.xml.providers.TransferProvider
 
@@ -68,7 +72,9 @@ public class OzoneProviderTest {
          new SayProvider(validator:validator,namespaces:['urn:xmpp:ozone:say:1', 'urn:xmpp:ozone:say:complete:1']),
          new AskProvider(validator:validator,namespaces:['urn:xmpp:ozone:ask:1', 'urn:xmpp:ozone:ask:complete:1']),
          new TransferProvider(validator:validator,namespaces:['urn:xmpp:ozone:transfer:1', 'urn:xmpp:ozone:transfer:complete:1']),
-         new ConferenceProvider(validator:validator,namespaces:['urn:xmpp:ozone:conference:1', 'urn:xmpp:ozone:conference:complete:1'])].each {
+         new ConferenceProvider(validator:validator,namespaces:['urn:xmpp:ozone:conference:1', 'urn:xmpp:ozone:conference:complete:1']),
+         new RecordProvider(validator:validator,namespaces:['urn:xmpp:ozone:record:1', 'urn:xmpp:ozone:record:complete:1'])
+		].each {
              provider.register it
          }
     }
@@ -199,10 +205,88 @@ public class OzoneProviderTest {
     
     @Test
     public void dtmfFromXml() {
-        assertEquals "5", fromXml("""<dtmf xmlns="urn:xmpp:ozone:1" signal="5"></dtmf>""").signal
+        assertNotNull "5", fromXml("""<dtmf xmlns="urn:xmpp:ozone:1" signal="5"></dtmf>""").signal
     }
 
-    
+	// Record
+	// ====================================================================================
+
+	@Test
+	public void recordToXml() {
+		
+		def record = new Record();
+		assertEquals("""<record xmlns="urn:xmpp:ozone:record:1" bargein=\"true\"/>""", toXml(record));
+	}
+	
+	@Test
+	public void recordFullToXml() {
+		
+		def record = new Record(to:new URI("file:/tmp/myrecording.mp3"), voice:"allison", bargein:true, append:true,
+								codec:"LINEAR_16BIT_256K", codecParameters:"bitrate=5.3;annexa=no", dtmfTruncate:true,
+								format:"INFERRED", initialTimeout:10000, finalTimeout:10000, minDuration:-1, 
+								maxDuration:500000, sampleRate:16000, silenceTerminate:false, startBeep:true,
+								startPauseMode:false);
+							
+		assertEquals("""<record xmlns="urn:xmpp:ozone:record:1" to="file:/tmp/myrecording.mp3" append="true" voice="allison" bargein="true" dtmf-truncate="true" silence-terminate="false" start-beep="true" start-pause-mode="false" codec="LINEAR_16BIT_256K" codec-params="bitrate=5.3;annexa=no" final-timeout="10000" format="INFERRED" initial-timeout="10000" max-length="500000" min-length="-1" sample-rate="16000"/>""", toXml(record));
+	}
+
+	@Test
+	public void recordFromXml() {
+		
+		assertNotNull fromXml("""<record xmlns="urn:xmpp:ozone:record:1"></record>""")
+	}
+	
+	@Test
+	public void recordFullFromXml() {
+		
+		def record = fromXml("""<record xmlns="urn:xmpp:ozone:record:1" to="file:/tmp/myrecording.mp3" append="true" voice="allison" bargein="true" dtmf-truncate="true" silence-terminate="false" start-beep="true" start-pause-mode="false" codec="LINEAR_16BIT_256K" codec-params="bitrate=5.3;annexa=no" final-timeout="10000" format="INFERRED" initial-timeout="10000" max-length="500000" min-length="-1" sample-rate="16000"/>""")
+		assertNotNull record
+		assertEquals record.to, new URI("file:/tmp/myrecording.mp3")
+		assertTrue record.append
+		assertEquals record.voice, "allison"
+		assertTrue record.bargein
+		assertEquals record.format, "INFERRED"
+		assertEquals record.initialTimeout,10000
+		assertEquals record.finalTimeout, 10000
+		assertEquals record.minDuration,-1
+		assertTrue record.dtmfTruncate
+		assertEquals record.codec, "LINEAR_16BIT_256K"
+		assertEquals record.codecParameters, "bitrate=5.3;annexa=no"
+		assertEquals record.maxDuration, 500000
+		assertEquals record.sampleRate, 16000
+		assertFalse record.silenceTerminate
+		assertTrue record.startBeep
+		assertFalse record.startPauseMode
+	}
+	
+	// Record Pause
+	// ====================================================================================
+	@Test
+	public void pauseRecordFromXml() {
+		assertNotNull fromXml("""<pause xmlns="urn:xmpp:ozone:record:1" />""")
+	}
+	
+	@Test
+	public void pauseRecordToXml() {
+		
+		RecordPauseCommand pause = new RecordPauseCommand();
+		assertEquals("""<pause xmlns="urn:xmpp:ozone:record:1"/>""", toXml(pause));
+	}
+	
+	// Record Resume
+	// ====================================================================================
+	@Test
+	public void resumeRecordFromXml() {
+		assertNotNull fromXml("""<resume xmlns="urn:xmpp:ozone:record:1" />""")
+	}
+	
+	@Test
+	public void resumeRecordToXml() {
+		
+		RecordResumeCommand resume = new RecordResumeCommand();
+		assertEquals("""<resume xmlns="urn:xmpp:ozone:record:1"/>""", toXml(resume));
+	}
+	    
     // Hangup
     // ====================================================================================
     

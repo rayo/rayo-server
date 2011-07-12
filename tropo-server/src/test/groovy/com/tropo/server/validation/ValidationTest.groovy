@@ -16,6 +16,7 @@ import com.tropo.core.xml.DefaultXmlProviderManager;
 import com.tropo.core.xml.providers.AskProvider
 import com.tropo.core.xml.providers.ConferenceProvider
 import com.tropo.core.xml.providers.OzoneProvider;
+import com.tropo.core.xml.providers.RecordProvider;
 import com.tropo.core.xml.providers.SayProvider
 import com.tropo.core.xml.providers.TransferProvider
 import com.tropo.server.exception.ExceptionMapper
@@ -35,7 +36,9 @@ class ValidationTest {
 					 new SayProvider(validator:validator,namespaces:['urn:xmpp:ozone:say:1']),
 					 new AskProvider(validator:validator,namespaces:['urn:xmpp:ozone:ask:1']),
 					 new TransferProvider(validator:validator,namespaces:['urn:xmpp:ozone:transfer:1']),
-					 new ConferenceProvider(validator:validator,namespaces:['urn:xmpp:ozone:conference:1'])]
+					 new ConferenceProvider(validator:validator,namespaces:['urn:xmpp:ozone:conference:1']),
+					 new RecordProvider(validator:validator,namespaces:['urn:xmpp:ozone:record:1']),
+					]
 		
 		manager = new DefaultXmlProviderManager();
 		providers.each {
@@ -482,6 +485,52 @@ class ValidationTest {
 		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
 		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
 		assertEquals errorMapping.text, Messages.INVALID_URI
+	}
+	
+	// Record
+	// ====================================================================================
+	
+	@Test
+	public void validateRecordValid() {
+				
+		def record = parseXml("""<record xmlns=\"urn:xmpp:ozone:record:1\"></record>""")
+		assertNotNull fromXML(record)
+	}
+	
+	@Test
+	public void validateRecordInvalidURI() {
+				
+		def record = parseXml("""<record xmlns="urn:xmpp:ozone:record:1" to="\$?\\.com"/>""")
+		
+		def errorMapping = assertValidationException(record)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.INVALID_URI
+	}
+	
+	@Test
+	public void validateRecordInvalidCodec() {
+				
+		def record = parseXml("""<record xmlns="urn:xmpp:ozone:record:1" codec="abcd"/>""")
+		
+		def errorMapping = assertValidationException(record)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.INVALID_CODEC
+	}
+	
+	@Test
+	public void validateRecordInvalidFileFormat() {
+				
+		def record = parseXml("""<record xmlns="urn:xmpp:ozone:record:1" format="abcd"/>""")
+		
+		def errorMapping = assertValidationException(record)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.INVALID_FILE_FORMAT
 	}
 	
 	// Mixed tests
