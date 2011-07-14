@@ -152,7 +152,7 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
 			for (Object storageService: storageServices) {
 				StorageService ss = (StorageService)storageService;
 				try {
-					model.setTo(ss.store(tempFile));
+					model.setTo(ss.store(tempFile, getParticipant()));
 				} catch (IOException ioe) {
 					event = new RecordCompleteEvent(model, VerbCompleteEvent.Reason.ERROR);
 					event.setErrorText("Could not store the recording file");

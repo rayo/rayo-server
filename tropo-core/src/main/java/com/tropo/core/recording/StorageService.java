@@ -4,6 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 
+import com.voxeo.moho.Call;
+import com.voxeo.moho.Participant;
+import com.voxeo.moho.conference.Conference;
+
 public interface StorageService {
 
 	/**
@@ -13,10 +17,13 @@ public interface StorageService {
 	 * Amazon S3, etc.</p>
 	 * 
 	 * @param file File that has the binary content that needs to be stored
+	 * @param participant The target of the record command. Commonly it should be either
+	 * an instance of {@link Call} or {@link Conference}. You can use this object to grab
+	 * useful information about the context of the recording. 
 	 * 
 	 * @return URI that can be used for accessing to the resource that has been created 
 	 * 
 	 * @throws IOException If there is any error while storing the file
 	 */
-	public URI store(File file) throws IOException;
+	public URI store(File file, Participant participant) throws IOException;
 }
