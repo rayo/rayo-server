@@ -23,6 +23,7 @@ import com.tropo.core.OfferEvent
 import com.tropo.core.RejectCommand
 import com.tropo.core.EndEvent.Reason
 import com.tropo.core.verb.PauseCommand
+import com.tropo.core.verb.Record;
 import com.tropo.core.verb.ResumeCommand
 import com.tropo.core.verb.Say
 import com.tropo.core.verb.SayCompleteEvent
@@ -37,8 +38,11 @@ import com.voxeo.moho.MediaService
 import com.voxeo.moho.event.CallCompleteEvent
 import com.voxeo.moho.event.OutputCompleteEvent
 import com.voxeo.moho.event.OutputCompleteEvent.Cause
+import com.voxeo.moho.event.RecordCompleteEvent;
 import com.voxeo.moho.media.Output
+import com.voxeo.moho.media.Recording;
 import com.voxeo.moho.media.output.OutputCommand
+import com.voxeo.moho.media.record.RecordCommand;
 
 
 
@@ -247,6 +251,7 @@ public class IntegrationTest {
                 return [
                     pause:{messageQueue.add "pause"},
                     resume:{messageQueue.add "resume"},
+					record:{messageQueue.add "record"},
                     stop:{ mohoCall.dispatch(new OutputCompleteEvent(mohoCall, Cause.CANCEL)) }
                 ] as Output
             }
@@ -293,6 +298,71 @@ public class IntegrationTest {
         
     }
     
+	/**
+	* This test ensures that verb commands are dispatched to the appropriate
+	* {@link VerbHandler} and that a stop command results in a controlled
+	* {@link VerbCompleteEvent}
+	*/
+   @Test
+   public void record() throws InterruptedException {
+	   
+	   // Mock MediaService
+	   mohoCall.mediaService = [
+		   record: { RecordCommand command ->
+			   return [
+				   pause:{messageQueue.add "pause"},
+				   resume:{messageQueue.add "resume"},
+				   stop:{ mohoCall.dispatch(new RecordCompleteEvent(mohoCall, com.voxeo.moho.event.RecordCompleteEvent.Cause.CANCEL, 1000)) }
+			   ] as Recording
+		   }
+	   ] as MediaService
+	   
+	   def record = new Record()
+	   
+	   // Start Say
+	   callActor.command(record, { messageQueue.add it } as ResponseHandler)
+
+	   // We should get a response from the record command
+	   Response response = poll()
+	   assertTrue response.success
+	   assertNotNull response.value
+	   
+	   // Get the Verb ID
+	   def verbId = response.value.verbId
+	   
+	   /*
+	   // Pause the audio
+	   callActor.command(new PauseCommand([verbId:verbId]), { messageQueue.add it } as ResponseHandler)
+	   assertEquals "pause", poll() // Pause should have been called
+	   assertTrue poll().success // Command callback
+
+	   // Resume the audio
+	   callActor.command(new ResumeCommand([verbId:verbId]), { messageQueue.add it } as ResponseHandler)
+	   assertEquals "resume", poll() // Resume should have been called
+	   assertTrue poll().success // Command callback
+   		*/
+	   
+	   // Stop the recording
+	   callActor.command(new StopCommand([verbId:verbId]), { messageQueue.add it } as ResponseHandler)
+	   assertTrue poll().success // Command callback
+
+	   // We should get a say complete event
+	   com.tropo.core.verb.RecordCompleteEvent recordComplete = poll()
+	   assertEquals VerbCompleteEvent.Reason.STOP, recordComplete.reason
+	   
+	   assertNotNull recordComplete.uri
+	   def file = new File(recordComplete.uri)
+	   assertTrue file.exists()
+	   //assertTrue file.size() != 0 // This would be coul but our mock does not write audio
+	   
+	   mohoCall.disconnect()
+			   
+	   // We should get an end event
+	   EndEvent end = poll()
+	   assertEquals Reason.HANGUP, end.reason
+	   
+   }
+	
     /**
     * Ensure that a hangup during verb execution results in a controlled
     * shutdown consisting of {@link VerbCompleteEvent}s followed by the
