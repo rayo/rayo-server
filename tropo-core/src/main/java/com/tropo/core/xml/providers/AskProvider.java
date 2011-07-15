@@ -26,7 +26,7 @@ public class AskProvider extends BaseProvider {
 	protected Object processElement(Element element) throws Exception {
 		if (element.getName().equals("ask")) {
             return buildAsk(element);
-        } else if (element.getNamespace().equals(COMPLETE_NAMESPACE)) {
+        } else if (element.getNamespace().equals(OZONE_COMPONENT_NAMESPACE)) {
             return buildCompleteCommand(element);
         }
         return null;
@@ -34,26 +34,27 @@ public class AskProvider extends BaseProvider {
 
     private Object buildCompleteCommand(Element element) throws URISyntaxException {
     	
+    	Element reasonElement = (Element)element.elements().get(0);
     	AskCompleteEvent event = new AskCompleteEvent();
 
-    	String reasonValue = element.getName().toUpperCase();
+    	String reasonValue = reasonElement.getName().toUpperCase();
         Reason reason = Reason.valueOf(reasonValue);
         event.setReason(reason);
 
-        if (element.attributeValue("confidence") != null) {
-            event.setConfidence(toFloatConfidence(element.attributeValue("confidence")));           
+        if (reasonElement.attributeValue("confidence") != null) {
+            event.setConfidence(toFloatConfidence(reasonElement.attributeValue("confidence")));           
         }
-        if (element.attributeValue("mode") != null) {
-            String modeValue = element.attributeValue("mode").toUpperCase();
+        if (reasonElement.attributeValue("mode") != null) {
+            String modeValue = reasonElement.attributeValue("mode").toUpperCase();
             InputMode mode = InputMode.valueOf(modeValue);
             event.setMode(mode);           
         }
 
-        if (element.element("interpretation") != null) {
-            event.setInterpretation(element.element("interpretation").getText());          
+        if (reasonElement.element("interpretation") != null) {
+            event.setInterpretation(reasonElement.element("interpretation").getText());          
         }
-        if (element.element("utterance") != null) {
-            event.setUtterance(element.element("utterance").getText());            
+        if (reasonElement.element("utterance") != null) {
+            event.setUtterance(reasonElement.element("utterance").getText());            
         }
     	
     	return event;

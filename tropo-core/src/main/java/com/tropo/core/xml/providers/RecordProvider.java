@@ -1,16 +1,22 @@
 package com.tropo.core.xml.providers;
 
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.Namespace;
 import org.dom4j.QName;
 
+import com.tropo.core.verb.RecordCompleteEvent.Reason;
 import com.tropo.core.verb.Record;
 import com.tropo.core.verb.RecordCompleteEvent;
 import com.tropo.core.verb.RecordPauseCommand;
 import com.tropo.core.verb.RecordResumeCommand;
+import com.tropo.core.verb.VerbCompleteEvent;
+import com.tropo.core.verb.VerbCompleteReason;
+
 
 public class RecordProvider extends BaseProvider {
 
@@ -26,11 +32,13 @@ public class RecordProvider extends BaseProvider {
     @Override
     protected Object processElement(Element element) throws Exception {
         if (element.getName().equals("record")) {
-            return buildJoin(element);
+            return buildRecord(element);
         } else if (PAUSE_QNAME.equals(element.getQName())) {
             return buildPauseCommand(element);
         } else if (RESUME_QNAME.equals(element.getQName())) {
             return buildResumeCommand(element);
+        } else if (OZONE_COMPONENT_NAMESPACE.equals(element.getNamespace())) {
+            return buildCompleteCommand(element);
         }
         return null;
     }
@@ -43,7 +51,7 @@ public class RecordProvider extends BaseProvider {
         return new RecordResumeCommand();
     }
     
-    private Object buildJoin(Element element) throws URISyntaxException {
+    private Object buildRecord(Element element) throws URISyntaxException {
         
     	Record record = new Record();
     	if (element.attribute("to") !=  null) {
@@ -98,6 +106,24 @@ public class RecordProvider extends BaseProvider {
         return record;
     }
     
+    private Object buildCompleteCommand(Element element) throws URISyntaxException {
+    	
+    	RecordCompleteEvent event = new RecordCompleteEvent();
+
+    	@SuppressWarnings("unchecked")
+        List<Element> children = (List<Element>)element.elements();
+    	for (Element child: children) {
+    		if (child.getName().equals("recording")) {
+    			event.setUri(new URI(child.attributeValue("uri")));
+    		} else {
+    	    	String reasonValue = child.getName().toUpperCase();
+    	        event.setReason(findReason(reasonValue));    			
+    		}
+    	}
+            	
+    	return event;
+    }
+    
     // Object -> XML
     // ================================================================================
 
@@ -127,7 +153,8 @@ public class RecordProvider extends BaseProvider {
 	    
 		Element complete = addCompleteElement(document, event, COMPLETE_NAMESPACE);
 		if (event.getUri() != null) {
-			complete.addAttribute("uri", event.getUri().toString());
+			Element completeElement = document.getRootElement().addElement("recording");
+			completeElement.addAttribute("uri", event.getUri().toString());
 		}
 	}
     
@@ -192,5 +219,15 @@ public class RecordProvider extends BaseProvider {
         	   clazz == RecordCompleteEvent.class ||
         	   clazz == RecordPauseCommand.class ||
         	   clazz == RecordResumeCommand.class;
+    }
+    
+    private VerbCompleteReason findReason(String reasonValue) {
+    	
+    	for (Reason reason: Reason.values()) {
+    		if (reason.toString().equals(reasonValue)) {
+    			return reason;
+    		}
+    	}
+    	return VerbCompleteEvent.Reason.valueOf(reasonValue);
     }
 }

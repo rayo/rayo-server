@@ -37,6 +37,7 @@ import com.tropo.core.verb.KickCommand
 import com.tropo.core.verb.MediaType;
 import com.tropo.core.verb.PauseCommand
 import com.tropo.core.verb.Record;
+import com.tropo.core.verb.RecordCompleteEvent;
 import com.tropo.core.verb.RecordPauseCommand;
 import com.tropo.core.verb.RecordResumeCommand;
 import com.tropo.core.verb.ResumeCommand
@@ -952,6 +953,49 @@ public class OzoneProviderTest {
         assertEquals("""<complete xmlns="urn:xmpp:ozone:ext:1"><error xmlns="urn:xmpp:ozone:ext:complete:1">this is an error</error></complete>""", toXml(complete));
     }
     
+	// Record Complete
+	// ====================================================================================
+	
+	@Test
+	public void recordCompleteFromXml() {
+		
+		def complete = fromXml("""
+			<complete xmlns="urn:xmpp:ozone:ext:1">
+				<stop xmlns="urn:xmpp:ozone:ext:complete:1"/>
+				<recording xmlns="urn:xmpp:ozone:record:complete:1" uri="file:///tmp/abc.mp3"/>
+			</complete>""")
+		assertNotNull complete
+		assertEquals complete.reason, VerbCompleteEvent.Reason.STOP
+		assertEquals complete.uri, new URI("file:///tmp/abc.mp3")
+	}
+	
+	@Test
+	public void recordCompleteWithErrorsFromXml() {
+		
+		def complete = fromXml("""<complete xmlns="urn:xmpp:ozone:ext:1"><error xmlns="urn:xmpp:ozone:ext:complete:1">this is an error</error></complete>""")
+		assertNotNull complete
+		assertEquals complete.reason, VerbCompleteEvent.Reason.ERROR
+		assertEquals complete.errorText, "this is an error"
+	}
+
+	@Test
+	public void recordCompleteToXml() {
+		
+		def complete = new RecordCompleteEvent(new Record(), RecordCompleteEvent.Reason.SUCCESS)
+		complete.uri = new URI("file:///tmp/abc.mp3")
+		
+		assertEquals("""<complete xmlns="urn:xmpp:ozone:ext:1"><success xmlns="urn:xmpp:ozone:record:complete:1"/><recording uri="file:///tmp/abc.mp3"/></complete>""", toXml(complete));
+	}
+	
+	@Test
+	public void recordCompleteWithErrorsToXml() {
+		
+		def complete = new RecordCompleteEvent(new Record(), VerbCompleteEvent.Reason.ERROR)
+		complete.errorText = "this is an error"
+		
+		assertEquals("""<complete xmlns="urn:xmpp:ozone:ext:1"><error xmlns="urn:xmpp:ozone:ext:complete:1">this is an error</error></complete>""", toXml(complete));
+	}
+	
     // Utility
     // ====================================================================================
     

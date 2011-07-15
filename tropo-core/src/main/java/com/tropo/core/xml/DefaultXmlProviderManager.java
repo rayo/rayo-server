@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.dom4j.Element;
+import org.dom4j.Namespace;
 
 import com.tropo.core.validation.Messages;
 import com.tropo.core.validation.ValidationException;
@@ -65,6 +66,23 @@ public class DefaultXmlProviderManager implements XmlProviderManager {
             }
         }
         return false;
+    }
+    
+    @Override
+    public boolean handles(Namespace namespace) {
+
+        return findProvider(namespace) != null;
+    }
+    
+    @Override
+    public XmlProvider findProvider(Namespace namespace) {
+
+        for (XmlProvider provider : providers) {
+            if (provider.handles(namespace)) {
+                return provider;
+            }
+        }
+        return null;
     }
 
     @Override

@@ -56,8 +56,8 @@ public abstract class BaseProvider implements XmlProvider {
         }
         validator.validate(returnValue);
         return returnValue;
-    }
-
+    }    
+    
     @Override
     public Element toXML(Object object) {
 
@@ -74,6 +74,17 @@ public abstract class BaseProvider implements XmlProvider {
 
     protected abstract void generateDocument(Object object, Document document) throws Exception;
 
+    protected VerbCompleteEvent toVerbCompleteEvent(Element element) {
+    	
+        String reasonValue = element.getName().toUpperCase();
+        Reason reason = VerbCompleteEvent.Reason.valueOf(reasonValue);
+        VerbCompleteEvent event = new VerbCompleteEvent(reason);
+        if(reason == Reason.ERROR) {
+            event.setErrorText(element.getText());
+        }
+        return event;
+    }
+    
     protected Map<String, String> grabHeaders(Element node) {
 
         Map<String, String> headers = new HashMap<String, String>();
@@ -280,8 +291,16 @@ public abstract class BaseProvider implements XmlProvider {
 
     @Override
     public boolean handles(Element element) {
+        
+    	return handles(element.getNamespace());
+    }
+    
+
+    @Override
+    public boolean handles(Namespace ns) {
+    	
         for (String namespace : namespaces) {
-            if (namespace.equals(element.getNamespace().getURI())) {
+            if (namespace.equals(ns.getURI())) {
                 return true;
             }
         }

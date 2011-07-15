@@ -1,6 +1,7 @@
 package com.tropo.core.xml;
 
 import org.dom4j.Element;
+import org.dom4j.Namespace;
 
 public interface XmlProvider {
 
@@ -13,6 +14,8 @@ public interface XmlProvider {
     public void setManager(XmlProviderManager manager);
 
     public boolean handles(Element element);
+    
+    public boolean handles(Namespace namespace);
 
     public boolean handles(Class<?> clazz);
 

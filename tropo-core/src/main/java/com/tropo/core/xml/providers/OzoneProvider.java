@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.dom4j.Document;
 import org.dom4j.Element;
+import org.dom4j.Namespace;
 import org.dom4j.QName;
 
 import com.tropo.core.AcceptCommand;
@@ -22,8 +23,7 @@ import com.tropo.core.RingingEvent;
 import com.tropo.core.validation.Messages;
 import com.tropo.core.validation.ValidationException;
 import com.tropo.core.verb.StopCommand;
-import com.tropo.core.verb.VerbCompleteEvent;
-import com.tropo.core.verb.VerbCompleteEvent.Reason;
+import com.tropo.core.xml.XmlProvider;
 
 public class OzoneProvider extends BaseProvider {
 	
@@ -65,25 +65,24 @@ public class OzoneProvider extends BaseProvider {
 	
     private Object buildCompleteEvent(Element element) {
         
+    	// Complete events may have multiple children that belong to 
+    	// a particular namespace. If that's the case then we need to 
+    	// find the appropriate provider to unmarshall this element
         @SuppressWarnings("unchecked")
         List<Element> children = (List<Element>)element.elements();
-        
-        if(children.size() == 1) {
-            Element reasonElement = children.get(0);
-            if(reasonElement.getNamespace().equals(OZONE_COMPLETE_NAMESPACE)) {
-                String reasonValue = reasonElement.getName().toUpperCase();
-                Reason reason = VerbCompleteEvent.Reason.valueOf(reasonValue);
-                VerbCompleteEvent event = new VerbCompleteEvent(reason);
-                if(reason == Reason.ERROR) {
-                    event.setErrorText(reasonElement.getText());
-                }
-                return event;
-            } else {
-                return getManager().fromXML(reasonElement);
-            }
+        Namespace namespace = OZONE_COMPLETE_NAMESPACE;
+        for(Element child:children) {
+        	if (!child.getNamespace().equals(namespace)) {
+        		namespace = child.getNamespace();
+        		break;
+        	}
         }
-        else {
-            throw new ValidationException("Verb Complete Event can only have one child");
+
+        if (namespace.equals(OZONE_COMPLETE_NAMESPACE)) {        
+        	return toVerbCompleteEvent(children.get(0));
+        } else {
+        	XmlProvider provider = getManager().findProvider(namespace); 
+        	return provider.fromXML(element);
         }
     }
 
