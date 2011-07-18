@@ -21,6 +21,7 @@ import com.tropo.core.CallRef;
 import com.tropo.core.DialCommand;
 import com.tropo.core.EndCommand;
 import com.tropo.core.EndEvent;
+import com.tropo.core.OfferEvent;
 import com.tropo.core.validation.ValidationException;
 import com.tropo.core.verb.Verb;
 import com.tropo.core.verb.VerbCommand;
@@ -64,6 +65,7 @@ public class OzoneServlet extends XmppServlet {
 
     private XmppFactory xmppFactory;
     private Map<String, XmppSession> clientSessions = new ConcurrentHashMap<String, XmppSession>();
+    private Map<String, XmppSession> callsMap = new ConcurrentHashMap<String, XmppSession>();
 
     // Setup
     // ================================================================================
@@ -149,38 +151,77 @@ public class OzoneServlet extends XmppServlet {
     		cdrManager.store(event.getCallId());
     	}
 
-        // Send event to all registered JIDs
-        // TODO: this should be pluggable
-        for (XmppSession session : clientSessions.values()) {
+    	if (event instanceof OfferEvent) {
+    		for (XmppSession session : clientSessions.values()) {
+    			JID jid = session.getRemoteJIDs().iterator().next();
+    			if (match(jid.getBareJID(),eventElement)) {
+    				callsMap.put(event.getCallId(),session);
+    			}
+    		}
+    	}            	
+    	
+    	XmppSession session = callsMap.get(event.getCallId());
+    	if (session != null) {
+    		sendToSession(event,eventElement,session);
+    	} else {
+    		for (XmppSession clientSession : clientSessions.values()) {
+    	        sendToSession(event, eventElement, clientSession);    			
+    		}
+    	}
 
-            JID jid = session.getRemoteJIDs().iterator().next();
-
-            try {
-
-                Element eventStanza = DocumentHelper.createElement("presence");
-
-                // Resolve IQ.from
-                JID from = xmppFactory.createJID(event.getCallId() + "@" + jid.getDomain());
-                if (event instanceof VerbEvent) {
-                    from.setResource(((VerbEvent) event).getVerbId());
-                }
-                eventStanza.addAttribute("from", from.toString());
-
-                eventStanza.add(eventElement);
-
-                // Send
-                session.createStanzaRequest(eventStanza, null, null, null, null, null).send();
-
-            }
-            catch (Exception e) {
-                // In the event of an error, continue dispatching to all remaining JIDs
-                log.error("Failed to dispatch event [jid=%s, event=%s]", jid, event, e);
-            }
+        if (event instanceof EndEvent) {
+        	callsMap.remove(event.getCallId());
         }
         ozoneStatistics.callEventProcessed();
     }
 
-    protected void doMessage(XmppServletStanzaRequest req) throws ServletException, IOException {
+	private void sendToSession(CallEvent event, Element eventElement,
+			XmppSession session) {
+		JID jid = session.getRemoteJIDs().iterator().next();
+        
+        try {
+
+            Element eventStanza = DocumentHelper.createElement("presence");
+
+            // Resolve IQ.from
+            JID from = xmppFactory.createJID(event.getCallId() + "@" + jid.getDomain());
+            if (event instanceof VerbEvent) {
+                from.setResource(((VerbEvent) event).getVerbId());
+            }
+            eventStanza.addAttribute("from", from.toString());
+
+            eventStanza.add(eventElement);
+
+            // Send
+            session.createStanzaRequest(eventStanza, null, null, null, null, null).send();
+
+        }
+        catch (Exception e) {
+            // In the event of an error, continue dispatching to all remaining JIDs
+            log.error("Failed to dispatch event [jid=%s, event=%s]", jid, event, e);
+        }
+	}
+
+    private boolean match(JID bareJID, Element element) {
+
+    	String to = element.attributeValue("to");
+    	if (to.startsWith("sip:")) {
+    		to = to.substring(4,to.length());
+    	}
+    	String jidTo = bareJID.toString();
+    	if (to.indexOf(":") == -1) {
+    		if (jidTo.indexOf(":") != -1) {
+    			to  = to+":5060";
+    		}
+    	} else {
+    		if (jidTo.indexOf(":") == -1) {
+    			jidTo  = jidTo+":5060";
+    		}    		
+    	}
+    	return to.equals(jidTo);
+	}
+
+	protected void doMessage(XmppServletStanzaRequest req) throws ServletException, IOException {
 
     	ozoneStatistics.messageStanzaReceived();
     }
@@ -463,9 +504,9 @@ public class OzoneServlet extends XmppServlet {
 	public void setAdminService(AdminService adminService) {
 		this.adminService = adminService;
 	}
-
+	
 	public void setCdrManager(CdrManager cdrManager) {
-
+		
 		this.cdrManager = cdrManager;
 	}
 }
