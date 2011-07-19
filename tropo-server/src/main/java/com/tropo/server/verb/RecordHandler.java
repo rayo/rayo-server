@@ -96,8 +96,7 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
         } else {
         	//complete(new RecordCompleteEvent(model, Reason.SUCCESS));
         }
-        
-        //TODO: Complete recording
+
 	}
 	
     @Override
