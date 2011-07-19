@@ -22,6 +22,7 @@ import com.tropo.core.RejectCommand;
 import com.tropo.core.RingingEvent;
 import com.tropo.core.validation.Messages;
 import com.tropo.core.validation.ValidationException;
+import com.tropo.core.verb.HoldCommand;
 import com.tropo.core.verb.StopCommand;
 import com.tropo.core.xml.XmlProvider;
 
@@ -36,6 +37,8 @@ public class OzoneProvider extends BaseProvider {
         	return buildOfferEvent(element);
         } else if (elementName.equals("accept")) {
             return buildAcceptCommand(element);
+        } else if (elementName.equals("hold")) {
+            return buildHoldCommand(element);
         } else if (elementName.equals("answer")) {
             return buildAnswerCommand(element);
         } else if (elementName.equals("hangup")) {
@@ -133,6 +136,21 @@ public class OzoneProvider extends BaseProvider {
         return accept;
     }
 
+    private Object buildHoldCommand(Element element) throws URISyntaxException {
+
+        HoldCommand hold = new HoldCommand();
+        String value = element.getText();
+        if (value == null) {
+            throw new ValidationException(String.format(Messages.INVALID_BOOLEAN, "hold"));
+        }
+        value = value.toLowerCase();
+        if (value.equals("false") || value.equals("true")) {
+        	hold.setState(Boolean.valueOf(value));
+            return hold;
+        }
+        throw new ValidationException(String.format(Messages.INVALID_BOOLEAN, "hold"));
+    }
+    
     private Object buildAnswerCommand(Element element) throws URISyntaxException {
 
         AnswerCommand answer = new AnswerCommand(null);
@@ -193,6 +211,8 @@ public class OzoneProvider extends BaseProvider {
             createAnswerEvent(object, document);
         } else if (object instanceof AcceptCommand) {
             createAcceptCommand(object, document);
+        } else if (object instanceof HoldCommand) {
+            createHoldCommand(object, document);            
         } else if (object instanceof AnswerCommand) {
             createAnswerCommand(object, document);
         } else if (object instanceof HangupCommand) {
@@ -252,6 +272,15 @@ public class OzoneProvider extends BaseProvider {
         AcceptCommand accept = (AcceptCommand) object;
         Element root = document.addElement(new QName("accept", OZONE_NAMESPACE));
         addHeaders(accept.getHeaders(), root);
+
+        return document;
+    }
+
+    private Document createHoldCommand(Object object, Document document) {
+
+    	HoldCommand hold = (HoldCommand) object;
+        Element root = document.addElement(new QName("hold", OZONE_NAMESPACE));
+        root.setText(String.valueOf(hold.isState()));
 
         return document;
     }

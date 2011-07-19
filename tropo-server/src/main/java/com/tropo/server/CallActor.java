@@ -21,6 +21,7 @@ import com.tropo.core.OfferEvent;
 import com.tropo.core.RedirectCommand;
 import com.tropo.core.RejectCommand;
 import com.tropo.core.RingingEvent;
+import com.tropo.core.verb.HoldCommand;
 import com.tropo.core.verb.Join;
 import com.voxeo.moho.ApplicationContext;
 import com.voxeo.moho.Call;
@@ -29,7 +30,6 @@ import com.voxeo.moho.Endpoint;
 import com.voxeo.moho.Participant.JoinType;
 import com.voxeo.moho.event.AutowiredEventListener;
 import com.voxeo.moho.event.CallCompleteEvent;
-import com.voxeo.moho.event.DtmfRelayEvent;
 import com.voxeo.moho.event.InputDetectedEvent;
 import com.voxeo.moho.event.JoinCompleteEvent;
 import com.voxeo.moho.event.SignalEvent;
@@ -146,6 +146,16 @@ public class CallActor extends AbstractActor<Call> {
         Map<String, String> headers = message.getHeaders();
         participant.acceptCall(headers);
         callStatistics.callAccepted();
+    }
+    
+    @Message
+    public void hold(HoldCommand message) {
+    	
+    	if (message.isState()) {
+    		participant.hold();
+    	} else {
+    		participant.unhold();
+    	}
     }
 
     @Message
