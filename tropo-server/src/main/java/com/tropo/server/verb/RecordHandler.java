@@ -125,11 +125,13 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
 		
 		switch(event.getCause()) {
 			case ERROR:
-			case TIMEOUT:
 			case UNKNOWN:
-			case INI_TIMEOUT:
 				log.error("Error while recording conversation");
 				complete(VerbCompleteEvent.Reason.ERROR);
+				break;
+			case TIMEOUT:
+			case INI_TIMEOUT:
+				complete(VerbCompleteEvent.Reason.STOP);
 				break;
 			case DISCONNECT:
 				complete(VerbCompleteEvent.Reason.HANGUP);
