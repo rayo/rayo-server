@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import javax.media.mscontrol.Value;
+import javax.media.mscontrol.mediagroup.FileFormatConstants;
+
 import com.tropo.core.recording.StorageService;
 import com.tropo.core.verb.Output;
 import com.tropo.core.verb.Record;
@@ -34,7 +37,7 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
 
 		if (model.getTo() == null) {
 			try {
-				tempFile = File.createTempFile("ozone", ".mp3");
+				tempFile = File.createTempFile("ozone", getExtensionFromFormat(model));
 				model.setTo(tempFile.toURI());
 			} catch (IOException e) {
 				log.error(e.getMessage(),e);
@@ -85,6 +88,27 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
         } 
         
 		recording = media.record(command);
+	}
+
+	private String getExtensionFromFormat(Record model) {
+
+		if (model.getFormat() != null) {
+			Value format = Output.toFileFormat(model.getFormat());
+			if (format.equals(FileFormatConstants.FORMAT_3G2)) {
+				return ".3g2";
+			} else if (format.equals(FileFormatConstants.FORMAT_3GP)) {
+				return ".3gp";
+			} else if (format.equals(FileFormatConstants.GSM)) {
+				return ".gsm";
+			} else if (format.equals(FileFormatConstants.INFERRED)) {
+				return ".mp3";
+			} else if (format.equals(FileFormatConstants.RAW)) {
+				return ".raw";
+			} else if (format.equals(FileFormatConstants.WAV)) {
+				return ".wav";
+			}
+		}
+		return ".mp3";
 	}
 
 	@Override
