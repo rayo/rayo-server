@@ -106,4 +106,13 @@ public class CdrManager {
 		
 		cdrs.clear();
 	}
+
+	public void setSpiStorageStrategies(List<CdrStorageStrategy> spiStorageStrategies) {
+		
+		// These are SPI storage strategies that the user has provided. 
+		// We just copy them to the standard storage strategies list
+		if (spiStorageStrategies != null) {
+			storageStrategies.addAll(spiStorageStrategies);
+		}
+	}
 }

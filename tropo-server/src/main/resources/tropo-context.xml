@@ -376,6 +376,11 @@
   	</bean>
   	-->
   	
+  	<!-- SPI defined CDR Storage Strategies implementations -->
+	<bean id="spiCdrStorageStrategies"
+	      class="org.springframework.beans.factory.serviceloader.ServiceListFactoryBean"
+	      p:serviceType="com.tropo.server.cdr.CdrStorageStrategy"/>
+  	
   	<bean id="cdrErrorHandler" class="com.tropo.server.cdr.DefaultErrorHandler"/>
   	<bean id="cdrManager" class="com.tropo.server.CdrManager">
   		<property name="errorHandler" ref="cdrErrorHandler"/>
@@ -387,5 +392,6 @@
   				<!-- <ref bean="amqpCdrStorageStrategy"/> -->
   			</list>
   		</property>
+  		<property name="spiStorageStrategies" ref="spiCdrStorageStrategies"/>
   	</bean> 
 </beans>
