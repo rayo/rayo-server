@@ -151,6 +151,11 @@ public class Output extends BaseVerb {
 			return FileFormatConstants.RAW;
 		} else if (FileFormatConstants.WAV.toString().equalsIgnoreCase(format)) {
 			return FileFormatConstants.WAV;
+		} else {
+			// Manual assignments as FileFormatConstants does not include all supported file types
+			if (format.equalsIgnoreCase("FORMAT_MP3")) {
+				return FileFormatConstants.INFERRED;
+			}
 		}
 		
 		return null;

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.List;
 
 import javax.media.mscontrol.Value;
+import javax.media.mscontrol.mediagroup.CodecConstants;
 import javax.media.mscontrol.mediagroup.FileFormatConstants;
 
 import com.tropo.core.recording.StorageService;
@@ -65,6 +66,7 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
         if (model.getCodec() != null) {
         	command.setAudioCODEC(Output.toCodecValue(model.getCodec()));
         }
+
         if (model.getCodecParameters() != null) {
         	command.setAudioFMTP(model.getCodecParameters());
         }
@@ -73,6 +75,11 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
         }
         if (model.getFormat() != null) {
         	command.setFileFormat(Output.toFileFormat(model.getFormat()));
+        	if (command.getFileFormat().equals(FileFormatConstants.RAW) && model.getCodec() == null) {
+        		command.setAudioCODEC(CodecConstants.LINEAR_16BIT_128K);
+        	}
+        } else {
+        	command.setFileFormat(FileFormatConstants.INFERRED);
         }
         if (model.getInitialTimeout() != null) {
         	command.setInitialTimeout(model.getInitialTimeout());
