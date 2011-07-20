@@ -216,19 +216,19 @@ public class OzoneProviderTest {
 	public void recordToXml() {
 		
 		def record = new Record();
-		assertEquals("""<record xmlns="urn:xmpp:ozone:record:1" bargein=\"true\"/>""", toXml(record));
+		assertEquals("""<record xmlns="urn:xmpp:ozone:record:1"/>""", toXml(record));
 	}
 	
 	@Test
 	public void recordFullToXml() {
 		
-		def record = new Record(to:new URI("file:/tmp/myrecording.mp3"), voice:"allison", bargein:true, append:true,
+		def record = new Record(to:new URI("file:/tmp/myrecording.mp3"), append:true,
 								codec:"LINEAR_16BIT_256K", codecParameters:"bitrate=5.3;annexa=no", dtmfTruncate:true,
 								format:"INFERRED", initialTimeout:10000, finalTimeout:10000, minDuration:-1, 
 								maxDuration:500000, sampleRate:16000, silenceTerminate:false, startBeep:true,
 								startPauseMode:false);
 							
-		assertEquals("""<record xmlns="urn:xmpp:ozone:record:1" to="file:/tmp/myrecording.mp3" append="true" voice="allison" bargein="true" dtmf-truncate="true" silence-terminate="false" start-beep="true" start-pause-mode="false" codec="LINEAR_16BIT_256K" codec-params="bitrate=5.3;annexa=no" final-timeout="10000" format="INFERRED" initial-timeout="10000" max-length="500000" min-length="-1" sample-rate="16000"/>""", toXml(record));
+		assertEquals("""<record xmlns="urn:xmpp:ozone:record:1" to="file:/tmp/myrecording.mp3" append="true" dtmf-truncate="true" silence-terminate="false" start-beep="true" start-pause-mode="false" codec="LINEAR_16BIT_256K" codec-params="bitrate=5.3;annexa=no" final-timeout="10000" format="INFERRED" initial-timeout="10000" max-length="500000" min-length="-1" sample-rate="16000"/>""", toXml(record));
 	}
 
 	@Test
@@ -244,8 +244,6 @@ public class OzoneProviderTest {
 		assertNotNull record
 		assertEquals record.to, new URI("file:/tmp/myrecording.mp3")
 		assertTrue record.append
-		assertEquals record.voice, "allison"
-		assertTrue record.bargein
 		assertEquals record.format, "INFERRED"
 		assertEquals record.initialTimeout,10000
 		assertEquals record.finalTimeout, 10000

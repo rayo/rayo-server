@@ -10,10 +10,6 @@ import com.tropo.core.validation.ValidFileFormat;
 
 public class Record extends BaseVerb {
 
-	private String voice;
-	
-	private Boolean bargein = Boolean.TRUE;
-	
 	private URI to;
 	
 	private Boolean append;
@@ -156,22 +152,6 @@ public class Record extends BaseVerb {
 
 	public void setFinalTimeout(Integer finalTimeout) {
 		this.finalTimeout = finalTimeout;
-	}
-	
-	public String getVoice() {
-		return voice;
-	}
-
-	public void setVoice(String voice) {
-		this.voice = voice;
-	}
-	
-	public Boolean isBargein() {
-		return bargein;
-	}
-
-	public void setBargein(Boolean bargein) {
-		this.bargein = bargein;
 	}
 
 	@Override

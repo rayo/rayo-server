@@ -58,12 +58,6 @@ public class RecordProvider extends BaseProvider {
     		record.setTo(toURI(element.attributeValue("to")));
     	}
 
-    	if (element.attribute("voice") !=  null) {
-    		record.setVoice(element.attributeValue("voice"));
-    	}
-    	if (element.attribute("bargein") !=  null) {
-    		record.setBargein(toBoolean("bargein",element));
-    	}
     	if (element.attribute("append") !=  null) {
     		record.setAppend(toBoolean("append",element));
     	}
@@ -151,7 +145,7 @@ public class RecordProvider extends BaseProvider {
     
 	private void createRecordCompleteEvent(RecordCompleteEvent event, Document document) throws Exception {
 	    
-		Element complete = addCompleteElement(document, event, COMPLETE_NAMESPACE);
+		addCompleteElement(document, event, COMPLETE_NAMESPACE);
 		if (event.getUri() != null) {
 			Element completeElement = document.getRootElement().addElement("recording");
 			completeElement.addAttribute("uri", event.getUri().toString());
@@ -167,12 +161,7 @@ public class RecordProvider extends BaseProvider {
         if (record.getAppend() != null) {
         	root.addAttribute("append", record.getAppend().toString());
         }
-        if (record.getVoice() != null) {
-        	root.addAttribute("voice", record.getVoice());
-        }
-        if (record.isBargein() != null) {
-        	root.addAttribute("bargein", record.isBargein().toString());
-        }
+
         if (record.getDtmfTruncate() != null) {
         	root.addAttribute("dtmf-truncate", record.getDtmfTruncate().toString());
         }
