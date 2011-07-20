@@ -355,6 +355,7 @@ public class OzoneProvider extends BaseProvider {
 			   clazz == RedirectCommand.class ||
 	           clazz == StopCommand.class  ||
 			   clazz == DialCommand.class ||
-		       clazz == DtmfEvent.class;
+		       clazz == DtmfEvent.class ||
+		       clazz == HoldCommand.class;
 	}
 }
