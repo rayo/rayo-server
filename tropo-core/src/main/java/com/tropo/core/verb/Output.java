@@ -193,7 +193,7 @@ public class Output extends BaseVerb {
     		return CodecConstants.H263_1998;
     	} else if (CodecConstants.H264.toString().equalsIgnoreCase(codec)) {
     		return CodecConstants.H264;
-    	} else if (CodecConstants.INFERRED.toString().equalsIgnoreCase(codec)) {
+    	} else if (CodecConstants.INFERRED.toString().equalsIgnoreCase("CODEC_" + codec)) {
     		return CodecConstants.INFERRED;
     	} else if (CodecConstants.LINEAR_16BIT_128K.toString().equalsIgnoreCase(codec)) {
     		return CodecConstants.LINEAR_16BIT_128K;
