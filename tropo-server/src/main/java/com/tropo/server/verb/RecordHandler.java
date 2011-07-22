@@ -18,6 +18,7 @@ import com.tropo.core.verb.VerbCommand;
 import com.tropo.core.verb.VerbCompleteEvent;
 import com.tropo.core.verb.VerbCompleteReason;
 import com.voxeo.logging.Loggerf;
+import com.voxeo.moho.MediaException;
 import com.voxeo.moho.Participant;
 import com.voxeo.moho.State;
 import com.voxeo.moho.media.Recording;
@@ -157,7 +158,14 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
 			case ERROR:
 			case UNKNOWN:
 				log.error("Error while recording conversation");
-				complete(VerbCompleteEvent.Reason.ERROR);
+				try {
+					recording.get();
+					complete(VerbCompleteEvent.Reason.ERROR);
+				} catch (Exception e) {
+					if (e.getCause() instanceof MediaException) {
+						complete(VerbCompleteEvent.Reason.ERROR,e.getCause().getMessage());
+					}
+				}
 				break;
 			case TIMEOUT:
 			case INI_TIMEOUT:
@@ -174,6 +182,11 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
 	}
 	
 	private void complete(VerbCompleteReason reason) {
+	
+		complete(reason,null);
+	}
+	
+	private void complete(VerbCompleteReason reason, String errorText) {
 
 		RecordCompleteEvent event;
 		
@@ -186,15 +199,31 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
 				try {
 					model.setTo(ss.store(tempFile, getParticipant()));
 				} catch (IOException ioe) {
-					event = new RecordCompleteEvent(model, VerbCompleteEvent.Reason.ERROR);
+					event = createRecordCompleteEvent(VerbCompleteEvent.Reason.ERROR);
 					event.setErrorText("Could not store the recording file");
 					return;
 				}
 			}
 		}
-		event = new RecordCompleteEvent(model, reason);		
+		event = createRecordCompleteEvent(reason, errorText);		
 		complete(event);
 	}
+
+	private RecordCompleteEvent createRecordCompleteEvent(VerbCompleteReason reason) {
+	
+		return createRecordCompleteEvent(reason);
+	}
+	
+	private RecordCompleteEvent createRecordCompleteEvent(VerbCompleteReason reason, String errorText) {
+		
+		if (errorText != null) {
+			return new RecordCompleteEvent(model, errorText);
+		} else {
+			return new RecordCompleteEvent(model, reason);
+		}
+	}
+	
+	
 
 	public void setStorageServices(List<StorageService> storageServices) {
 		this.storageServices = storageServices;
