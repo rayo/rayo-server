@@ -91,6 +91,16 @@ public class MockCall extends Call {
     }
 
     @Override
+    public boolean isHold() {
+    	return false;
+    }
+    
+    @Override
+    public boolean isMute() {
+    	return false;
+    }
+    
+    @Override
     public Participant[] getParticipants(Direction direction) {
         return new Participant[] {};
     }

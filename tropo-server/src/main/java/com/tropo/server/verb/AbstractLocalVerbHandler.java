@@ -141,6 +141,15 @@ public abstract class AbstractLocalVerbHandler<T extends Verb, S extends Partici
     	}
     	return false;
 	}
+    
+    boolean isOnHold(Participant participant) {
+    	
+    	if (participant instanceof Call) {
+    		Call call = (Call)participant;
+    		return call.isHold();
+    	}
+    	return false;
+    }
 
     public void setActor(Actor actor) {
         this.actor = actor;

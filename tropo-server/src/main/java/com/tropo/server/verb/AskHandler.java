@@ -74,6 +74,13 @@ public class AskHandler extends AbstractLocalVerbHandler<Ask,Participant> {
         			.addConstraintViolation();
         	return false;
         }
+        if (isOnHold(participant)) {
+        	context.buildConstraintViolationWithTemplate(
+				"Call is currently on hold.")
+				.addNode(XmppStanzaError.RESOURCE_CONSTRAINT_CONDITION)
+				.addConstraintViolation();
+        	return false;        	
+        }        
         return true;
     }
     
