@@ -982,7 +982,7 @@ public class OzoneProviderTest {
 		def complete = new RecordCompleteEvent(new Record(), RecordCompleteEvent.Reason.SUCCESS)
 		complete.uri = new URI("file:///tmp/abc.mp3")
 		
-		assertEquals("""<complete xmlns="urn:xmpp:ozone:ext:1"><success xmlns="urn:xmpp:ozone:record:complete:1"/><recording uri="file:///tmp/abc.mp3"/></complete>""", toXml(complete));
+		assertEquals("""<complete xmlns="urn:xmpp:ozone:ext:1"><success xmlns="urn:xmpp:ozone:record:complete:1"/><recording xmlns="urn:xmpp:ozone:record:complete:1" uri="file:///tmp/abc.mp3"/></complete>""", toXml(complete));
 	}
 	
 	@Test

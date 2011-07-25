@@ -147,7 +147,7 @@ public class RecordProvider extends BaseProvider {
 	    
 		addCompleteElement(document, event, COMPLETE_NAMESPACE);
 		if (event.getUri() != null) {
-			Element completeElement = document.getRootElement().addElement("recording");
+			Element completeElement = document.getRootElement().addElement("recording", RecordProvider.COMPLETE_NAMESPACE.getURI());
 			completeElement.addAttribute("uri", event.getUri().toString());
 		}
 	}
