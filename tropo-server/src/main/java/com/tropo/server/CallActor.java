@@ -23,6 +23,7 @@ import com.tropo.core.RejectCommand;
 import com.tropo.core.RingingEvent;
 import com.tropo.core.verb.HoldCommand;
 import com.tropo.core.verb.Join;
+import com.tropo.core.verb.UnholdCommand;
 import com.voxeo.moho.ApplicationContext;
 import com.voxeo.moho.Call;
 import com.voxeo.moho.Call.State;
@@ -151,13 +152,15 @@ public class CallActor extends AbstractActor<Call> {
     @Message
     public void hold(HoldCommand message) {
     	
-    	if (message.isState()) {
-    		participant.hold();
-    	} else {
-    		participant.unhold();
-    	}
+    	participant.unhold();
     }
-
+    
+    @Message
+    public void unhold(UnholdCommand message) {
+    	
+    	participant.unhold();
+    }
+    
     @Message
     public void redirect(RedirectCommand message) throws Exception {
         

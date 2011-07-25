@@ -32,6 +32,7 @@ import com.tropo.core.verb.AskCompleteEvent
 import com.tropo.core.verb.Choices
 import com.tropo.core.verb.Conference
 import com.tropo.core.verb.ConferenceCompleteEvent
+import com.tropo.core.verb.HoldCommand;
 import com.tropo.core.verb.InputMode
 import com.tropo.core.verb.KickCommand
 import com.tropo.core.verb.MediaType;
@@ -48,6 +49,7 @@ import com.tropo.core.verb.StopCommand
 import com.tropo.core.verb.Transfer
 import com.tropo.core.verb.TransferCompleteEvent
 import com.tropo.core.verb.AskCompleteEvent.Reason
+import com.tropo.core.verb.UnholdCommand;
 import com.tropo.core.verb.VerbCompleteEvent;
 import com.tropo.core.xml.providers.AskProvider
 import com.tropo.core.xml.providers.ConferenceProvider
@@ -993,6 +995,35 @@ public class OzoneProviderTest {
 		
 		assertEquals("""<complete xmlns="urn:xmpp:ozone:ext:1"><error xmlns="urn:xmpp:ozone:ext:complete:1">this is an error</error></complete>""", toXml(complete));
 	}
+	
+	// Hold 
+	// ====================================================================================
+
+    @Test
+    public void holdToXml() {
+        HoldCommand hold = new HoldCommand();
+        assertEquals("""<hold xmlns="urn:xmpp:ozone:1"/>""", toXml(hold));
+    }
+    
+    @Test
+    public void holdFromXml() {
+        assertNotNull fromXml("""<hold xmlns="urn:xmpp:ozone:1"></hold>""")
+    }
+
+	// Unhold
+	// ====================================================================================
+
+	@Test
+	public void unholdToXml() {
+		UnholdCommand unhold = new UnholdCommand();
+		assertEquals("""<unhold xmlns="urn:xmpp:ozone:1"/>""", toXml(unhold));
+	}
+	
+	@Test
+	public void unholdFromXml() {
+		assertNotNull fromXml("""<unhold xmlns="urn:xmpp:ozone:1"></unhold>""")
+	}
+
 	
     // Utility
     // ====================================================================================
