@@ -50,7 +50,7 @@ public class JoinProvider extends BaseProvider {
     protected void generateDocument(Object object, Document document) throws Exception {
 
         if (object instanceof Join) {
-            createJoin((Join) object, document.getRootElement());
+            createJoin((Join) object, document);
         } else if (object instanceof JoinCompleteEvent) {
         	createJoinCompleteEvent((JoinCompleteEvent) object, document);
         }
@@ -64,17 +64,27 @@ public class JoinProvider extends BaseProvider {
     void createJoin(Join join, Element element) {
     	
         Element root = element.addElement(new QName("join", NAMESPACE));
-        
+        internalCreateJoin(join, root);
+    }
+    
+    void createJoin(Join join, Document document) {
+    	
+        Element root = document.addElement(new QName("join", NAMESPACE));
+        internalCreateJoin(join, root);
+    }
+    
+    private void internalCreateJoin(Join join, Element joinElement) {
+    	
         if (join.getDirection() != null) {
-        	root.addAttribute("direction", join.getDirection());        	
+        	joinElement.addAttribute("direction", join.getDirection());        	
         }
         if (join.getMedia() != null) {
-        	root.addAttribute("media", join.getMedia());
+        	joinElement.addAttribute("media", join.getMedia());
         }
         if (join.getTo() != null) {
-        	root.addAttribute("to", join.getTo());
+        	joinElement.addAttribute("to", join.getTo());
         }
-        addHeaders(join.getHeaders(), root);
+        addHeaders(join.getHeaders(), joinElement);
     }
 
     @Override
