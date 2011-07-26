@@ -214,7 +214,7 @@ public class CallActor extends AbstractActor<Call> {
 
     @com.voxeo.moho.State
     public void onJoinComplete(JoinCompleteEvent event) throws Exception {
-
+    	
         // Very complicated. There should be an easier way to determine this.
         // Basically, we need to fire an AnswerEvent if
         //   - This is an outbound call 
@@ -222,7 +222,7 @@ public class CallActor extends AbstractActor<Call> {
         if (event.getSource().equals(participant) && 
             initialJoin == true && direction == Direction.OUT && 
             event.getCause() == JoinCompleteEvent.Cause.JOINED && 
-            event.getParticipant() == null) {
+            (event.getParticipant() == null || event.getParticipant() instanceof Call)) {
 
             initialJoin = false;
             fire(new AnsweredEvent(getParticipantId()));
