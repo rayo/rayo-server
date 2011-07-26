@@ -15,6 +15,7 @@ import com.tropo.core.validation.Validator
 import com.tropo.core.xml.DefaultXmlProviderManager;
 import com.tropo.core.xml.providers.AskProvider
 import com.tropo.core.xml.providers.ConferenceProvider
+import com.tropo.core.xml.providers.JoinProvider;
 import com.tropo.core.xml.providers.OzoneProvider;
 import com.tropo.core.xml.providers.RecordProvider;
 import com.tropo.core.xml.providers.SayProvider
@@ -38,6 +39,7 @@ class ValidationTest {
 					 new TransferProvider(validator:validator,namespaces:['urn:xmpp:ozone:transfer:1']),
 					 new ConferenceProvider(validator:validator,namespaces:['urn:xmpp:ozone:conference:1']),
 					 new RecordProvider(validator:validator,namespaces:['urn:xmpp:ozone:record:1']),
+					 new JoinProvider(validator:validator,namespaces:['urn:xmpp:ozone:join:1']),
 					]
 		
 		manager = new DefaultXmlProviderManager();
@@ -466,9 +468,9 @@ class ValidationTest {
 	@Test
 	public void validateDialInvalidToURI() {
 				
-		def ask = parseXml("""<dial xmlns=\"urn:xmpp:ozone:1\" to=\"tel:\$?\\.com\" from=\"tel:34637710708\"><header/></dial>""")
+		def dial = parseXml("""<dial xmlns=\"urn:xmpp:ozone:1\" to=\"tel:\$?\\.com\" from=\"tel:34637710708\"><header/></dial>""")
 		
-		def errorMapping = assertValidationException(ask)
+		def errorMapping = assertValidationException(dial)
 		assertNotNull errorMapping
 		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
 		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
@@ -478,13 +480,76 @@ class ValidationTest {
 	@Test
 	public void validateDialInvalidFromURI() {
 				
-		def ask = parseXml("""<dial xmlns=\"urn:xmpp:ozone:1\" to=\"tel:34637710708\" from=\"tel:\$?\\.com\"><header/></dial>""")
+		def dial = parseXml("""<dial xmlns=\"urn:xmpp:ozone:1\" to=\"tel:34637710708\" from=\"tel:\$?\\.com\"><header/></dial>""")
 		
-		def errorMapping = assertValidationException(ask)
+		def errorMapping = assertValidationException(dial)
 		assertNotNull errorMapping
 		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
 		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
 		assertEquals errorMapping.text, Messages.INVALID_URI
+	}
+	
+	
+	@Test
+	public void validateNestedJoinInvalidDirection() {
+				
+		def dial = parseXml("""<dial xmlns=\"urn:xmpp:ozone:1\" to="tel:34637710708" from="tel:34637710708"><join xmlns="urn:xmpp:ozone:join:1" direction="abcd"/></dial>""")
+		
+		def errorMapping = assertValidationException(dial)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.INVALID_MEDIA_DIRECTION
+	}
+	
+	
+	@Test
+	public void validateNestedJoinInvalidMedia() {
+				
+		def dial = parseXml("""<dial xmlns=\"urn:xmpp:ozone:1\" to=\"tel:34637710708\" from="tel:34637710708"><join xmlns="urn:xmpp:ozone:join:1" direction="duplex" media="abcd"/></dial>""")
+		
+		def errorMapping = assertValidationException(dial)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.INVALID_JOIN_TYPE
+	}
+	
+	
+	// Join
+	// ====================================================================================
+
+	
+	@Test
+	public void validateEmptyJoinIsOk() {
+				
+		def join = parseXml("""<join xmlns="urn:xmpp:ozone:join:1"></join>""")
+		assertNotNull fromXML(join)
+	}
+	
+	@Test
+	public void validateJoinInvalidDirection() {
+				
+		def join = parseXml("""<join xmlns="urn:xmpp:ozone:join:1" direction="abcd"/>""")
+		
+		def errorMapping = assertValidationException(join)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.INVALID_MEDIA_DIRECTION
+	}
+	
+	
+	@Test
+	public void validateJoinInvalidMedia() {
+				
+		def join = parseXml("""<join xmlns="urn:xmpp:ozone:join:1" direction="duplex" media="abcd"/>""")
+		
+		def errorMapping = assertValidationException(join)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.INVALID_JOIN_TYPE
 	}
 	
 	// Record
