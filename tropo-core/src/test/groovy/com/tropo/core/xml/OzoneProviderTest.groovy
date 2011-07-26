@@ -35,6 +35,7 @@ import com.tropo.core.verb.ConferenceCompleteEvent
 import com.tropo.core.verb.HoldCommand;
 import com.tropo.core.verb.InputMode
 import com.tropo.core.verb.Join;
+import com.tropo.core.verb.JoinCompleteEvent;
 import com.tropo.core.verb.KickCommand
 import com.tropo.core.verb.MediaType;
 import com.tropo.core.verb.PauseCommand
@@ -54,6 +55,7 @@ import com.tropo.core.verb.UnholdCommand;
 import com.tropo.core.verb.VerbCompleteEvent;
 import com.tropo.core.xml.providers.AskProvider
 import com.tropo.core.xml.providers.ConferenceProvider
+import com.tropo.core.xml.providers.JoinProvider;
 import com.tropo.core.xml.providers.OzoneProvider
 import com.tropo.core.xml.providers.RecordProvider;
 import com.tropo.core.xml.providers.SayProvider
@@ -77,7 +79,8 @@ public class OzoneProviderTest {
          new AskProvider(validator:validator,namespaces:['urn:xmpp:ozone:ask:1', 'urn:xmpp:ozone:ask:complete:1']),
          new TransferProvider(validator:validator,namespaces:['urn:xmpp:ozone:transfer:1', 'urn:xmpp:ozone:transfer:complete:1']),
          new ConferenceProvider(validator:validator,namespaces:['urn:xmpp:ozone:conference:1', 'urn:xmpp:ozone:conference:complete:1']),
-         new RecordProvider(validator:validator,namespaces:['urn:xmpp:ozone:record:1', 'urn:xmpp:ozone:record:complete:1'])
+         new RecordProvider(validator:validator,namespaces:['urn:xmpp:ozone:record:1', 'urn:xmpp:ozone:record:complete:1']),
+         new JoinProvider(validator:validator,namespaces:['urn:xmpp:ozone:join:1', 'urn:xmpp:ozone:join:complete:1'])
 		].each {
              provider.register it
          }
@@ -111,20 +114,80 @@ public class OzoneProviderTest {
 
     }
     
-    // DialCommand
+    // Join
     // ====================================================================================
 
     @Test
-    public void dialToXml() {
-        Map<String, String> headers = new HashMap<String, String>();
-        DialCommand command = new DialCommand();
-        command.setTo(new URI("tel:44477773333333"));
-        command.setFrom(new URI("tel:34637710708"));
-        headers.put("test","atest");
-        command.setHeaders(headers);
+    public void emptyJoinToXml() {
 
-        assertEquals("""<dial xmlns="urn:xmpp:ozone:1" to="tel:44477773333333" from="tel:34637710708"><header name="test" value="atest"/></dial>""", toXml(command));
+		def join = new Join()
+        assertEquals("""<join xmlns="urn:xmpp:ozone:join:1"/>""", toXml(join));
     }
+
+	@Test
+	public void fullJoinToXml() {
+		
+		def join = new Join(direction:"duplex", media:"bridge", to:"1234");
+		
+		assertEquals("""<join xmlns="urn:xmpp:ozone:join:1" direction="duplex" media="bridge" to="1234"/>""", toXml(join));
+	}
+	
+	@Test
+	public void emptyJoinFromXml() {
+
+		def join = fromXml("""<join xmlns="urn:xmpp:ozone:join:1"/>""")
+		assertProperties(join, [
+			direction: null,
+			media: null,
+			to:null
+		])
+	}
+	
+	@Test
+	public void fullJoinFromXml() {
+
+		def join = fromXml("""<join xmlns="urn:xmpp:ozone:join:1" direction="duplex" media="bridge" to="1234"/>""")
+		assertProperties(join, [
+			direction: "DUPLEX",
+			media: "BRIDGE",
+			to:"1234"
+		])
+	}
+
+	// Join Complete
+	// ====================================================================================
+
+	@Test
+	public void joinCompleteToXml() {
+		
+		def complete = new JoinCompleteEvent(new Join(), VerbCompleteEvent.Reason.HANGUP)
+		
+		assertEquals("""<complete xmlns="urn:xmpp:ozone:ext:1"><hangup xmlns="urn:xmpp:ozone:ext:complete:1"/></complete>""", toXml(complete));
+	}
+	
+	@Test
+	public void joinCompleteWithErrorsToXml() {
+		
+		def complete = new JoinCompleteEvent(new Join(), VerbCompleteEvent.Reason.ERROR)
+		complete.errorText = "this is an error"
+		
+		assertEquals("""<complete xmlns="urn:xmpp:ozone:ext:1"><error xmlns="urn:xmpp:ozone:ext:complete:1">this is an error</error></complete>""", toXml(complete));
+	}
+	
+	// Dial
+	// ====================================================================================
+
+	@Test
+	public void dialToXml() {
+		Map<String, String> headers = new HashMap<String, String>();
+		DialCommand command = new DialCommand();
+		command.setTo(new URI("tel:44477773333333"));
+		command.setFrom(new URI("tel:34637710708"));
+		headers.put("test","atest");
+		command.setHeaders(headers);
+
+		assertEquals("""<dial xmlns="urn:xmpp:ozone:1" to="tel:44477773333333" from="tel:34637710708"><header name="test" value="atest"/></dial>""", toXml(command));
+	}
 
 	@Test
 	public void dialWithNestedJoinToXml() {
@@ -151,18 +214,18 @@ public class OzoneProviderTest {
 		assertEquals("""<dial xmlns="urn:xmpp:ozone:1" to="tel:44477773333333" from="tel:34637710708"><join xmlns="urn:xmpp:ozone:join:1" direction="duplex" media="bridge" to="1234"/></dial>""", toXml(command));
 	}
 	
-    @Test
-    public void dialFromXml() {
+	@Test
+	public void dialFromXml() {
 
-        assertProperties(fromXml("""<dial xmlns="urn:xmpp:ozone:1" to="tel:44477773333333" from="tel:34637710708"><header name="test" value="atest"/></dial>"""), [
-            to: new URI("tel:44477773333333"),
-            from: new URI("tel:34637710708"),
-            headers: [
-                test: "atest"
-            ]
-        ])
+		assertProperties(fromXml("""<dial xmlns="urn:xmpp:ozone:1" to="tel:44477773333333" from="tel:34637710708"><header name="test" value="atest"/></dial>"""), [
+			to: new URI("tel:44477773333333"),
+			from: new URI("tel:34637710708"),
+			headers: [
+				test: "atest"
+			]
+		])
 
-    }
+	}
 	
 	@Test
 	public void dialWithNestedJoinFromXml() {
@@ -193,7 +256,8 @@ public class OzoneProviderTest {
 			to:"1234"
 		])
 	}
-	
+
+		
     // Accept
     // ====================================================================================
 
