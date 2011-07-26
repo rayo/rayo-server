@@ -34,6 +34,7 @@ import com.tropo.core.verb.Conference
 import com.tropo.core.verb.ConferenceCompleteEvent
 import com.tropo.core.verb.HoldCommand;
 import com.tropo.core.verb.InputMode
+import com.tropo.core.verb.Join;
 import com.tropo.core.verb.KickCommand
 import com.tropo.core.verb.MediaType;
 import com.tropo.core.verb.PauseCommand
@@ -124,7 +125,32 @@ public class OzoneProviderTest {
 
         assertEquals("""<dial xmlns="urn:xmpp:ozone:1" to="tel:44477773333333" from="tel:34637710708"><header name="test" value="atest"/></dial>""", toXml(command));
     }
-    
+
+	@Test
+	public void dialWithNestedJoinToXml() {
+		
+		DialCommand command = new DialCommand();
+		command.setTo(new URI("tel:44477773333333"));
+		command.setFrom(new URI("tel:34637710708"));
+		def join = new Join();
+		command.join = join
+		
+		assertEquals("""<dial xmlns="urn:xmpp:ozone:1" to="tel:44477773333333" from="tel:34637710708"><join xmlns="urn:xmpp:ozone:join:1"/></dial>""", toXml(command));
+	}
+	
+	
+	@Test
+	public void dialWithFullNestedJoinToXml() {
+		
+		DialCommand command = new DialCommand();
+		command.setTo(new URI("tel:44477773333333"));
+		command.setFrom(new URI("tel:34637710708"));
+		def join = new Join(direction:"duplex", media:"bridge", to:"1234");
+		command.join = join
+		
+		assertEquals("""<dial xmlns="urn:xmpp:ozone:1" to="tel:44477773333333" from="tel:34637710708"><join xmlns="urn:xmpp:ozone:join:1" direction="duplex" media="bridge" to="1234"/></dial>""", toXml(command));
+	}
+	
     @Test
     public void dialFromXml() {
 
@@ -137,8 +163,37 @@ public class OzoneProviderTest {
         ])
 
     }
-    
-    
+	
+	@Test
+	public void dialWithNestedJoinFromXml() {
+
+		def dial = fromXml("""<dial xmlns="urn:xmpp:ozone:1" to="tel:44477773333333" from="tel:34637710708"><join xmlns="urn:xmpp:ozone:join:1"/></dial>""")
+		assertProperties(dial, [
+			to: new URI("tel:44477773333333"),
+			from: new URI("tel:34637710708"),
+		])
+		assertProperties(dial.join, [
+			direction: null,
+			media: null,
+			to:null
+		])
+	}
+	
+	@Test
+	public void dialWithNestedJoinFullFromXml() {
+
+		def dial = fromXml("""<dial xmlns="urn:xmpp:ozone:1" to="tel:44477773333333" from="tel:34637710708"><join xmlns="urn:xmpp:ozone:join:1" direction="duplex" media="bridge" to="1234"/></dial>""")
+		assertProperties(dial, [
+			to: new URI("tel:44477773333333"),
+			from: new URI("tel:34637710708"),
+		])
+		assertProperties(dial.join, [
+			direction: "DUPLEX",
+			media: "BRIDGE",
+			to:"1234"
+		])
+	}
+	
     // Accept
     // ====================================================================================
 
