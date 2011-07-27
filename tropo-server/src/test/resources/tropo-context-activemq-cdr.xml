@@ -39,6 +39,7 @@
 	<bean id="callManager" class="com.tropo.server.CallManager">
 		<property name="callRegistry" ref="callRegistry" />
 		<property name="callActorFactory" ref="callActorFactory" />
+		<property name="cdrManager" ref="cdrManager" />
 	</bean>
 
 	<!-- Conference Manager -->	

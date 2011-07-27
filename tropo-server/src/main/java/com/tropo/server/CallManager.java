@@ -22,6 +22,7 @@ public class CallManager extends ReflectiveActor {
     private CallRegistry callRegistry;
     private CallActorFactory callActorFactory;
     private ApplicationContext applicationContext;
+    private CdrManager cdrManager;
     
     // Calls
     // ================================================================================
@@ -52,6 +53,10 @@ public class CallManager extends ReflectiveActor {
 	        	}
 	        }
         }
+        
+        // Store the CDR
+        cdrManager.create(mohoCall);
+        
         startCallActor(mohoCall);
         
         return new CallRef(mohoCall.getId());
@@ -122,5 +127,9 @@ public class CallManager extends ReflectiveActor {
     public CallActorFactory getCallActorFactory() {
         return callActorFactory;
     }
+
+	public void setCdrManager(CdrManager cdrManager) {
+		this.cdrManager = cdrManager;
+	}
 
 }
