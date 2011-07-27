@@ -330,18 +330,6 @@ public class IntegrationTest {
 	   // Get the Verb ID
 	   def verbId = response.value.verbId
 	   
-	   /*
-	   // Pause the audio
-	   callActor.command(new PauseCommand([verbId:verbId]), { messageQueue.add it } as ResponseHandler)
-	   assertEquals "pause", poll() // Pause should have been called
-	   assertTrue poll().success // Command callback
-
-	   // Resume the audio
-	   callActor.command(new ResumeCommand([verbId:verbId]), { messageQueue.add it } as ResponseHandler)
-	   assertEquals "resume", poll() // Resume should have been called
-	   assertTrue poll().success // Command callback
-   		*/
-	   
 	   // Stop the recording
 	   callActor.command(new StopCommand([verbId:verbId]), { messageQueue.add it } as ResponseHandler)
 	   assertTrue poll().success // Command callback
