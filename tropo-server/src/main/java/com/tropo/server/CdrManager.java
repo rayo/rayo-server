@@ -1,6 +1,9 @@
 package com.tropo.server;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,6 +23,14 @@ public class CdrManager {
 
 	private Map<String, Cdr> cdrs = new ConcurrentHashMap<String, Cdr>();
 
+	private Comparator<Cdr> comparator = new Comparator<Cdr>() {
+		
+		public int compare(Cdr cdr1, Cdr cdr2) {
+			
+			return (int)(cdr1.getStartTime() - cdr2.getStartTime());
+		};
+	};
+	
 	public Cdr create(Call call) {
 
 		Cdr cdr = new Cdr();
@@ -94,9 +105,16 @@ public class CdrManager {
 	
 	public List<Cdr> getActiveCdrs() {
 		
-		return new ArrayList<Cdr>(cdrs.values());
+		return sort(cdrs.values());
 	}
 	
+	private List<Cdr> sort(Collection<Cdr> values) {
+
+		List<Cdr> cdrs = new ArrayList<Cdr>(values);
+		Collections.sort(cdrs, comparator);
+		return cdrs;
+	}
+
 	public Cdr getCdr(String callId) {
 		
 		return cdrs.get(callId);
