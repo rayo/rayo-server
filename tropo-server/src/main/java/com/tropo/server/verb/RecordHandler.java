@@ -2,6 +2,7 @@ package com.tropo.server.verb;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 
 import javax.media.mscontrol.Value;
@@ -197,7 +198,10 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
 			for (Object storageService: storageServices) {
 				StorageService ss = (StorageService)storageService;
 				try {
-					model.setTo(ss.store(tempFile, getParticipant()));
+					URI result = ss.store(tempFile, getParticipant());
+					if (!result.equals(model.getTo())) {
+						model.setTo(result);
+					}
 				} catch (IOException ioe) {
 					event = createRecordCompleteEvent(VerbCompleteEvent.Reason.ERROR);
 					event.setErrorText("Could not store the recording file");
