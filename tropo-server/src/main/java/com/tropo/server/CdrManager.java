@@ -27,7 +27,8 @@ public class CdrManager {
 		
 		public int compare(Cdr cdr1, Cdr cdr2) {
 			
-			return (int)(cdr1.getStartTime() - cdr2.getStartTime());
+			// Note this comparator will show active cdrs from the most recent cdr to the oldest cdr
+			return (int)(cdr2.getStartTime() - cdr1.getStartTime());
 		};
 	};
 	
