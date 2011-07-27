@@ -200,6 +200,7 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
 				try {
 					URI result = ss.store(tempFile, getParticipant());
 					if (!result.equals(model.getTo())) {
+						log.debug("Setting record's URI to %s", result);
 						model.setTo(result);
 					}
 				} catch (IOException ioe) {
@@ -226,8 +227,6 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
 			return new RecordCompleteEvent(model, reason);
 		}
 	}
-	
-	
 
 	public void setStorageServices(List<StorageService> storageServices) {
 		this.storageServices = storageServices;
