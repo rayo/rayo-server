@@ -24,8 +24,8 @@ public class OutputProvider extends BaseProvider {
     // XML -> Object
     // ================================================================================
 
-    private static final Namespace NAMESPACE = new Namespace("", "urn:xmpp:ozone:output:1");
-    private static final Namespace COMPLETE_NAMESPACE = new Namespace("", "urn:xmpp:ozone:output:complete:1");
+    private static final Namespace NAMESPACE = new Namespace("", "urn:xmpp:rayo:output:1");
+    private static final Namespace COMPLETE_NAMESPACE = new Namespace("", "urn:xmpp:rayo:output:complete:1");
 
     private static final QName PAUSE_QNAME = new QName("pause", NAMESPACE);
     private static final QName RESUME_QNAME = new QName("resume", NAMESPACE);

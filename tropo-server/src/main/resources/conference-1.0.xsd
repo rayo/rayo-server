@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schema xmlns="http://www.w3.org/2001/XMLSchema" 
-    targetNamespace="urn:xmpp:ozone:conference:1" 
-    xmlns:tns="urn:xmpp:ozone:conference:1" 
-    xmlns:util="urn:xmpp:ozone:util:1"
+    targetNamespace="urn:xmpp:tropo:conference:1" 
+    xmlns:tns="urn:xmpp:tropo:conference:1" 
+    xmlns:util="urn:xmpp:rayo:util:1"
     elementFormDefault="qualified">
 
 	<!-- Import SSML Types -->
-	<import namespace="urn:xmpp:ozone:util:1" schemaLocation="ozone-util-1.0.xsd" />
+	<import namespace="urn:xmpp:rayo:util:1" schemaLocation="rayo-util-1.0.xsd" />
 
 	<!-- Main Component -->
 	<element name="conference" type="tns:conferenceType" />

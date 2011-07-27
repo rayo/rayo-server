@@ -16,8 +16,8 @@ import com.tropo.core.verb.Ssml;
 
 public class ConferenceProvider extends BaseProvider {
 
-    private static final Namespace NAMESPACE = new Namespace("", "urn:xmpp:ozone:conference:1");
-    private static final Namespace COMPLETE_NAMESPACE = new Namespace("", "urn:xmpp:ozone:conference:complete:1");
+    private static final Namespace NAMESPACE = new Namespace("", "urn:xmpp:tropo:conference:1");
+    private static final Namespace COMPLETE_NAMESPACE = new Namespace("", "urn:xmpp:tropo:conference:complete:1");
 
     // XML -> Object
     // ================================================================================
@@ -84,7 +84,7 @@ public class ConferenceProvider extends BaseProvider {
         return command;
     }
 
-    // This will eventually need to be called from the OzoneProvider since <complete>is now under the main ozone namespace
+    // This will eventually need to be called from the RayoProvider since <complete>is now under the main rayo namespace
 
     //private Object buildCompleteCommand(Element element) throws URISyntaxException {
     //

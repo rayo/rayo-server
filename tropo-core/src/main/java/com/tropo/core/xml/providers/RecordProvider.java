@@ -23,8 +23,8 @@ public class RecordProvider extends BaseProvider {
     // XML -> Object
     // ================================================================================
 
-    private static final Namespace NAMESPACE = new Namespace("", "urn:xmpp:ozone:record:1");
-    private static final Namespace COMPLETE_NAMESPACE = new Namespace("", "urn:xmpp:ozone:record:complete:1");
+    private static final Namespace NAMESPACE = new Namespace("", "urn:xmpp:rayo:record:1");
+    private static final Namespace COMPLETE_NAMESPACE = new Namespace("", "urn:xmpp:rayo:record:complete:1");
     
     private static final QName PAUSE_QNAME = new QName("pause", NAMESPACE);
     private static final QName RESUME_QNAME = new QName("resume", NAMESPACE);
@@ -37,7 +37,7 @@ public class RecordProvider extends BaseProvider {
             return buildPauseCommand(element);
         } else if (RESUME_QNAME.equals(element.getQName())) {
             return buildResumeCommand(element);
-        } else if (OZONE_COMPONENT_NAMESPACE.equals(element.getNamespace())) {
+        } else if (RAYO_COMPONENT_NAMESPACE.equals(element.getNamespace())) {
             return buildCompleteCommand(element);
         }
         return null;

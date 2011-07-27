@@ -8,10 +8,10 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
-import com.tropo.server.jmx.OzoneStatisticsMXBean;
+import com.tropo.server.jmx.RayoStatisticsMXBean;
 
-@ManagedResource(objectName="com.tropo:Type=Ozone", description="Ozone Statistics")
-public class OzoneStatistics implements OzoneStatisticsMXBean {
+@ManagedResource(objectName="com.tropo:Type=Rayo", description="Rayo Statistics")
+public class RayoStatistics implements RayoStatisticsMXBean {
 
 	private AtomicLong callsReceived = new AtomicLong(0);
 	private AtomicLong callEventsProcessed = new AtomicLong(0);

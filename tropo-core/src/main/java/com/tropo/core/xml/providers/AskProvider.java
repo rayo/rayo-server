@@ -19,14 +19,14 @@ import com.tropo.core.verb.Choices;
 
 public class AskProvider extends BaseProvider {
 
-    private static final Namespace NAMESPACE = new Namespace("", "urn:xmpp:ozone:ask:1");
-    private static final Namespace COMPLETE_NAMESPACE = new Namespace("", "urn:xmpp:ozone:ask:complete:1");
+    private static final Namespace NAMESPACE = new Namespace("", "urn:xmpp:tropo:ask:1");
+    private static final Namespace COMPLETE_NAMESPACE = new Namespace("", "urn:xmpp:tropo:ask:complete:1");
 
 	@Override
 	protected Object processElement(Element element) throws Exception {
 		if (element.getName().equals("ask")) {
             return buildAsk(element);
-        } else if (element.getNamespace().equals(OZONE_COMPONENT_NAMESPACE)) {
+        } else if (element.getNamespace().equals(RAYO_COMPONENT_NAMESPACE)) {
             return buildCompleteCommand(element);
         }
         return null;

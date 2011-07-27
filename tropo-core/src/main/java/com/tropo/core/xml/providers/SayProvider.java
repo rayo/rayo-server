@@ -18,8 +18,8 @@ public class SayProvider extends BaseProvider {
     // XML -> Object
     // ================================================================================
 
-    private static final Namespace NAMESPACE = new Namespace("", "urn:xmpp:ozone:say:1");
-    private static final Namespace COMPLETE_NAMESPACE = new Namespace("", "urn:xmpp:ozone:say:complete:1");
+    private static final Namespace NAMESPACE = new Namespace("", "urn:xmpp:tropo:say:1");
+    private static final Namespace COMPLETE_NAMESPACE = new Namespace("", "urn:xmpp:tropo:say:complete:1");
 
     private static final QName PAUSE_QNAME = new QName("pause", NAMESPACE);
     private static final QName RESUME_QNAME = new QName("resume", NAMESPACE);

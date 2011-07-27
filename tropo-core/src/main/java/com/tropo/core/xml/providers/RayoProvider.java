@@ -27,7 +27,7 @@ import com.tropo.core.verb.StopCommand;
 import com.tropo.core.verb.UnholdCommand;
 import com.tropo.core.xml.XmlProvider;
 
-public class OzoneProvider extends BaseProvider {
+public class RayoProvider extends BaseProvider {
 	
 	@Override
 	protected Object processElement(Element element) throws Exception {
@@ -76,7 +76,7 @@ public class OzoneProvider extends BaseProvider {
     	// find the appropriate provider to unmarshall this element
         @SuppressWarnings("unchecked")
         List<Element> children = (List<Element>)element.elements();
-        Namespace namespace = OZONE_COMPLETE_NAMESPACE;
+        Namespace namespace = RAYO_COMPLETE_NAMESPACE;
         for(Element child:children) {
         	if (!child.getNamespace().equals(namespace)) {
         		namespace = child.getNamespace();
@@ -84,7 +84,7 @@ public class OzoneProvider extends BaseProvider {
         	}
         }
 
-        if (namespace.equals(OZONE_COMPLETE_NAMESPACE)) {        
+        if (namespace.equals(RAYO_COMPLETE_NAMESPACE)) {        
         	return toVerbCompleteEvent(children.get(0));
         } else {
         	XmlProvider provider = getManager().findProvider(namespace); 
@@ -232,13 +232,13 @@ public class OzoneProvider extends BaseProvider {
     }
 
     private void createDtmfEvent(DtmfEvent event, Document document) {
-        document.addElement(new QName("dtmf", OZONE_NAMESPACE)).addAttribute("signal", event.getSignal());
+        document.addElement(new QName("dtmf", RAYO_NAMESPACE)).addAttribute("signal", event.getSignal());
     }
 
     private Document createDialCommand(Object object, Document document) {
         
     	DialCommand command = (DialCommand) object;
-        Element root = document.addElement(new QName("dial", OZONE_NAMESPACE));
+        Element root = document.addElement(new QName("dial", RAYO_NAMESPACE));
         root.addAttribute("to", command.getTo().toString());
         if (command.getFrom() != null) {
         	root.addAttribute("from", command.getFrom().toString());
@@ -251,16 +251,16 @@ public class OzoneProvider extends BaseProvider {
     }
     
     private void createAnswerEvent(Object object, Document document) {
-        document.addElement(new QName("answered", OZONE_NAMESPACE));
+        document.addElement(new QName("answered", RAYO_NAMESPACE));
     }
 
     private void createRingEvent(Object object, Document document) {
-        document.addElement(new QName("ringing", OZONE_NAMESPACE));
+        document.addElement(new QName("ringing", RAYO_NAMESPACE));
     }
 
     private void createEndEvent(Object object, Document document) {
         EndEvent event = (EndEvent)object;
-        Element root = document.addElement(new QName("end", OZONE_NAMESPACE));
+        Element root = document.addElement(new QName("end", RAYO_NAMESPACE));
         Element cause = root.addElement(event.getReason().name().toLowerCase());
         if (event.getErrorText() != null) {
         	cause.setText(event.getErrorText());
@@ -271,7 +271,7 @@ public class OzoneProvider extends BaseProvider {
     private Document createAcceptCommand(Object object, Document document) {
 
         AcceptCommand accept = (AcceptCommand) object;
-        Element root = document.addElement(new QName("accept", OZONE_NAMESPACE));
+        Element root = document.addElement(new QName("accept", RAYO_NAMESPACE));
         addHeaders(accept.getHeaders(), root);
 
         return document;
@@ -279,14 +279,14 @@ public class OzoneProvider extends BaseProvider {
 
     private Document createHoldCommand(Object object, Document document) {
 
-        document.addElement(new QName("hold", OZONE_NAMESPACE));
+        document.addElement(new QName("hold", RAYO_NAMESPACE));
 
         return document;
     }
 
     private Document createUnholdCommand(Object object, Document document) {
 
-        document.addElement(new QName("unhold", OZONE_NAMESPACE));
+        document.addElement(new QName("unhold", RAYO_NAMESPACE));
 
         return document;
     }
@@ -294,7 +294,7 @@ public class OzoneProvider extends BaseProvider {
     private Document createAnswerCommand(Object object, Document document) {
 
         AnswerCommand answer = (AnswerCommand) object;
-        Element root = document.addElement(new QName("answer", OZONE_NAMESPACE));
+        Element root = document.addElement(new QName("answer", RAYO_NAMESPACE));
         addHeaders(answer.getHeaders(), root);
 
         return document;
@@ -303,7 +303,7 @@ public class OzoneProvider extends BaseProvider {
     private Document createHangupCommand(Object object, Document document) {
 
         HangupCommand hangup = (HangupCommand) object;
-        Element root = document.addElement(new QName("hangup", OZONE_NAMESPACE));
+        Element root = document.addElement(new QName("hangup", RAYO_NAMESPACE));
         addHeaders(hangup.getHeaders(), root);
 
         return document;
@@ -312,7 +312,7 @@ public class OzoneProvider extends BaseProvider {
     private Document createRejectCommand(Object object, Document document) {
 
         RejectCommand reject = (RejectCommand) object;
-        Element root = document.addElement(new QName("reject", OZONE_NAMESPACE));
+        Element root = document.addElement(new QName("reject", RAYO_NAMESPACE));
         root.addElement(reject.getReason().name().toLowerCase());
         addHeaders(reject.getHeaders(), root);
 
@@ -322,7 +322,7 @@ public class OzoneProvider extends BaseProvider {
     private Document createRedirectCommand(Object object, Document document) {
 
         RedirectCommand redirect = (RedirectCommand) object;
-        Element root = document.addElement(new QName("redirect", OZONE_NAMESPACE));
+        Element root = document.addElement(new QName("redirect", RAYO_NAMESPACE));
         root.addAttribute("to", redirect.getTo().toString());
         addHeaders(redirect.getHeaders(), root);
 
@@ -330,14 +330,14 @@ public class OzoneProvider extends BaseProvider {
     }
     
     private void createStopCommand(StopCommand command, Document document) throws Exception {
-        document.addElement(new QName("stop", OZONE_COMPONENT_NAMESPACE));
+        document.addElement(new QName("stop", RAYO_COMPONENT_NAMESPACE));
     }
 
     private Document createOfferEvent(Object object, Document document) {
 
         OfferEvent offer = (OfferEvent) object;
 
-        Element root = document.addElement(new QName("offer", OZONE_NAMESPACE));
+        Element root = document.addElement(new QName("offer", RAYO_NAMESPACE));
         root.addAttribute("to", offer.getTo().toString());
         root.addAttribute("from", offer.getFrom().toString());
 

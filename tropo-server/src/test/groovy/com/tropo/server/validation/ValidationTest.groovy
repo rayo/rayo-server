@@ -16,7 +16,7 @@ import com.tropo.core.xml.DefaultXmlProviderManager;
 import com.tropo.core.xml.providers.AskProvider
 import com.tropo.core.xml.providers.ConferenceProvider
 import com.tropo.core.xml.providers.JoinProvider;
-import com.tropo.core.xml.providers.OzoneProvider;
+import com.tropo.core.xml.providers.RayoProvider;
 import com.tropo.core.xml.providers.RecordProvider;
 import com.tropo.core.xml.providers.SayProvider
 import com.tropo.core.xml.providers.TransferProvider
@@ -33,13 +33,13 @@ class ValidationTest {
 	public void init() {
 		
 		def validator = new Validator()
-		providers = [new OzoneProvider(validator:validator,namespaces:['urn:xmpp:ozone:1']),
-					 new SayProvider(validator:validator,namespaces:['urn:xmpp:ozone:say:1']),
-					 new AskProvider(validator:validator,namespaces:['urn:xmpp:ozone:ask:1']),
-					 new TransferProvider(validator:validator,namespaces:['urn:xmpp:ozone:transfer:1']),
-					 new ConferenceProvider(validator:validator,namespaces:['urn:xmpp:ozone:conference:1']),
-					 new RecordProvider(validator:validator,namespaces:['urn:xmpp:ozone:record:1']),
-					 new JoinProvider(validator:validator,namespaces:['urn:xmpp:ozone:join:1']),
+		providers = [new RayoProvider(validator:validator,namespaces:['urn:xmpp:rayo:1']),
+					 new SayProvider(validator:validator,namespaces:['urn:xmpp:tropo:say:1']),
+					 new AskProvider(validator:validator,namespaces:['urn:xmpp:tropo:ask:1']),
+					 new TransferProvider(validator:validator,namespaces:['urn:xmpp:tropo:transfer:1']),
+					 new ConferenceProvider(validator:validator,namespaces:['urn:xmpp:tropo:conference:1']),
+					 new RecordProvider(validator:validator,namespaces:['urn:xmpp:rayo:record:1']),
+					 new JoinProvider(validator:validator,namespaces:['urn:xmpp:rayo:join:1']),
 					]
 		
 		manager = new DefaultXmlProviderManager();
@@ -55,7 +55,7 @@ class ValidationTest {
 	@Test
 	public void validateSayEmptyPromptItems() {
 				
-		def say = parseXml("""<say xmlns=\"urn:xmpp:ozone:say:1\" voice=\"allison\"></say>""")
+		def say = parseXml("""<say xmlns=\"urn:xmpp:tropo:say:1\" voice=\"allison\"></say>""")
 		
 		def errorMapping = assertValidationException(say)
 		assertNotNull errorMapping
@@ -67,7 +67,7 @@ class ValidationTest {
 	@Test
 	public void validateSayValid() {
 				
-		def say = parseXml("""<say xmlns=\"urn:xmpp:ozone:say:1\" voice=\"allison\"><speak>Hello World</speak></say>""")
+		def say = parseXml("""<say xmlns=\"urn:xmpp:tropo:say:1\" voice=\"allison\"><speak>Hello World</speak></say>""")
 		assertNotNull fromXML(say)
 	}
 	
@@ -78,7 +78,7 @@ class ValidationTest {
 	@Test
 	public void validateAskChoicesNull() {
 				
-		def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" voice=\"allison\"><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
+		def ask = parseXml("""<ask xmlns=\"urn:xmpp:tropo:ask:1\" voice=\"allison\"><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
 		
 		def errorMapping = assertValidationException(ask)
 		assertNotNull errorMapping
@@ -90,7 +90,7 @@ class ValidationTest {
 	@Test
 	public void validateAskMissingChoice() {
 				
-		def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" voice=\"allison\"><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
+		def ask = parseXml("""<ask xmlns=\"urn:xmpp:tropo:ask:1\" voice=\"allison\"><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
 		
 		def errorMapping = assertValidationException(ask)
 		assertNotNull errorMapping
@@ -102,7 +102,7 @@ class ValidationTest {
     @Test
     public void validateAskInvalidChoice() {
                 
-        def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" voice=\"allison\"><choices/><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
+        def ask = parseXml("""<ask xmlns=\"urn:xmpp:tropo:ask:1\" voice=\"allison\"><choices/><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
         
         def errorMapping = assertValidationException(ask)
         assertNotNull errorMapping
@@ -114,7 +114,7 @@ class ValidationTest {
     @Test
     public void validateAskMissingContentType() {
                 
-        def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" voice=\"allison\"><choices>bling</choices><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
+        def ask = parseXml("""<ask xmlns=\"urn:xmpp:tropo:ask:1\" voice=\"allison\"><choices>bling</choices><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
         
         def errorMapping = assertValidationException(ask)
         assertNotNull errorMapping
@@ -126,7 +126,7 @@ class ValidationTest {
 	@Test
 	public void validateAskInvalidChoicesURI() {
 				
-		def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" recognizer="ar-oo" voice=\"allison\"><choices url="\$?\\.com">sales,support</choices><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
+		def ask = parseXml("""<ask xmlns=\"urn:xmpp:tropo:ask:1\" recognizer="ar-oo" voice=\"allison\"><choices url="\$?\\.com">sales,support</choices><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
 		
 		def errorMapping = assertValidationException(ask)
 		assertNotNull errorMapping
@@ -138,7 +138,7 @@ class ValidationTest {
 	@Test
 	public void validateAskInvalidInputMode() {
 				
-		def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" mode="aaaa" voice=\"allison\"><choices>sales,support</choices><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
+		def ask = parseXml("""<ask xmlns=\"urn:xmpp:tropo:ask:1\" mode="aaaa" voice=\"allison\"><choices>sales,support</choices><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
 		
 		def errorMapping = assertValidationException(ask)
 		assertNotNull errorMapping
@@ -150,7 +150,7 @@ class ValidationTest {
 	@Test
 	public void validateAskInvalidTimeout() {
 				
-		def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" mode="any" timeout="aaaa" voice=\"allison\"><choices>sales,support</choices><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
+		def ask = parseXml("""<ask xmlns=\"urn:xmpp:tropo:ask:1\" mode="any" timeout="aaaa" voice=\"allison\"><choices>sales,support</choices><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
 		
 		def errorMapping = assertValidationException(ask)
 		assertNotNull errorMapping
@@ -162,7 +162,7 @@ class ValidationTest {
 	@Test
 	public void validateAskInvalidConfidence() {
 				
-		def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" min-confidence="aaa" voice=\"allison\"><choices>sales,support</choices><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
+		def ask = parseXml("""<ask xmlns=\"urn:xmpp:tropo:ask:1\" min-confidence="aaa" voice=\"allison\"><choices>sales,support</choices><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
 		
 		def errorMapping = assertValidationException(ask)
 		assertNotNull errorMapping
@@ -174,7 +174,7 @@ class ValidationTest {
 	@Test
 	public void validateAskInvalidConfidenceRange() {
 				
-		def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" min-confidence="1.2" voice=\"allison\"><choices content-type="application/grammar+voxeo">sales,support</choices><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
+		def ask = parseXml("""<ask xmlns=\"urn:xmpp:tropo:ask:1\" min-confidence="1.2" voice=\"allison\"><choices content-type="application/grammar+voxeo">sales,support</choices><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
 		
 		def errorMapping = assertValidationException(ask)
 		assertNotNull errorMapping
@@ -186,7 +186,7 @@ class ValidationTest {
 	@Test
 	public void validateAskInvalidConfidenceNegative() {
 				
-		def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" min-confidence="-1.0" voice=\"allison\"><choices content-type="application/grammar+voxeo">sales,support</choices><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
+		def ask = parseXml("""<ask xmlns=\"urn:xmpp:tropo:ask:1\" min-confidence="-1.0" voice=\"allison\"><choices content-type="application/grammar+voxeo">sales,support</choices><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
 		
 		def errorMapping = assertValidationException(ask)
 		assertNotNull errorMapping
@@ -198,7 +198,7 @@ class ValidationTest {
 	@Test
 	public void validateAskInvalidTerminator() {
 				
-		def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" terminator="abcd" voice=\"allison\"><choices content-type="application/grammar+voxeo">sales,support</choices><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
+		def ask = parseXml("""<ask xmlns=\"urn:xmpp:tropo:ask:1\" terminator="abcd" voice=\"allison\"><choices content-type="application/grammar+voxeo">sales,support</choices><prompt><speak xmlns=\"\">Hello World.</speak></prompt></ask>""")
 		
 		def errorMapping = assertValidationException(ask)
 		assertNotNull errorMapping
@@ -210,7 +210,7 @@ class ValidationTest {
 	@Test
 	public void validateAskValid() {
 				
-		def ask = parseXml("""<ask xmlns=\"urn:xmpp:ozone:ask:1\" recognizer="en-us" voice=\"allison\"><choices content-type="application/grammar+voxeo">sales,support</choices><prompt><speak xmlns=\"\">Choose your department.</speak></prompt></ask>""")		
+		def ask = parseXml("""<ask xmlns=\"urn:xmpp:tropo:ask:1\" recognizer="en-us" voice=\"allison\"><choices content-type="application/grammar+voxeo">sales,support</choices><prompt><speak xmlns=\"\">Choose your department.</speak></prompt></ask>""")		
 		assertNotNull fromXML(ask)
 	}
 	
@@ -220,7 +220,7 @@ class ValidationTest {
 	@Test
 	public void validateTransferNullTo() {
 				
-		def transfer = parseXml("""<transfer xmlns=\"urn:xmpp:ozone:transfer:1\"></transfer>""")
+		def transfer = parseXml("""<transfer xmlns=\"urn:xmpp:tropo:transfer:1\"></transfer>""")
 		
 		def errorMapping = assertValidationException(transfer)
 		assertNotNull errorMapping
@@ -232,7 +232,7 @@ class ValidationTest {
 	@Test
 	public void validateTransferEmptyTo() {
 				
-		def transfer = parseXml("""<transfer xmlns=\"urn:xmpp:ozone:transfer:1\"><to/></transfer>""")
+		def transfer = parseXml("""<transfer xmlns=\"urn:xmpp:tropo:transfer:1\"><to/></transfer>""")
 		
 		def errorMapping = assertValidationException(transfer)
 		assertNotNull errorMapping
@@ -244,7 +244,7 @@ class ValidationTest {
 	@Test
 	public void validateTransferEmptyToAttribute() {
 				
-		def transfer = parseXml("""<transfer xmlns=\"urn:xmpp:ozone:transfer:1\" to=""></transfer>""")
+		def transfer = parseXml("""<transfer xmlns=\"urn:xmpp:tropo:transfer:1\" to=""></transfer>""")
 		
 		def errorMapping = assertValidationException(transfer)
 		assertNotNull errorMapping
@@ -256,14 +256,14 @@ class ValidationTest {
 	@Test
 	public void validateTransferEmptyElementButNotEmptyToAttribute() {
 				
-		def transfer = parseXml("""<transfer xmlns=\"urn:xmpp:ozone:transfer:1\" to="tel:123456"><to/></transfer>""")
+		def transfer = parseXml("""<transfer xmlns=\"urn:xmpp:tropo:transfer:1\" to="tel:123456"><to/></transfer>""")
 		assertNotNull fromXML(transfer)
 	}
 	
 	@Test
 	public void validateTransferInvalidToURI() {
 				
-		def transfer = parseXml("""<transfer xmlns=\"urn:xmpp:ozone:transfer:1\"><to>\$?\\.com</to></transfer>""")
+		def transfer = parseXml("""<transfer xmlns=\"urn:xmpp:tropo:transfer:1\"><to>\$?\\.com</to></transfer>""")
 		
 		def errorMapping = assertValidationException(transfer)
 		assertNotNull errorMapping
@@ -275,7 +275,7 @@ class ValidationTest {
 	@Test
 	public void validateTransferInvalidFromURI() {
 				
-		def transfer = parseXml("""<transfer xmlns=\"urn:xmpp:ozone:transfer:1\" from="\$?\\.com"><to>tel:123456789</to></transfer>""")
+		def transfer = parseXml("""<transfer xmlns=\"urn:xmpp:tropo:transfer:1\" from="\$?\\.com"><to>tel:123456789</to></transfer>""")
 		
 		def errorMapping = assertValidationException(transfer)
 		assertNotNull errorMapping
@@ -287,7 +287,7 @@ class ValidationTest {
 	@Test
 	public void validateTransferInvalidAnswerOnMedia() {
 				
-		def transfer = parseXml("""<transfer xmlns=\"urn:xmpp:ozone:transfer:1\" from="tel:12345666" answer-on-media="111"><to>tel:123456789</to></transfer>""")
+		def transfer = parseXml("""<transfer xmlns=\"urn:xmpp:tropo:transfer:1\" from="tel:12345666" answer-on-media="111"><to>tel:123456789</to></transfer>""")
 		
 		def errorMapping = assertValidationException(transfer)
 		assertNotNull errorMapping
@@ -299,7 +299,7 @@ class ValidationTest {
 	@Test
 	public void validateTransferInvalidTimeout() {
 				
-		def transfer = parseXml("""<transfer xmlns=\"urn:xmpp:ozone:transfer:1\" from="tel:12345666" timeout="abc"><to>tel:123456789</to></transfer>""")
+		def transfer = parseXml("""<transfer xmlns=\"urn:xmpp:tropo:transfer:1\" from="tel:12345666" timeout="abc"><to>tel:123456789</to></transfer>""")
 		
 		def errorMapping = assertValidationException(transfer)
 		assertNotNull errorMapping
@@ -311,7 +311,7 @@ class ValidationTest {
 	@Test
 	public void validateTransferInvalidTerminator() {
 				
-		def transfer = parseXml("""<transfer xmlns=\"urn:xmpp:ozone:transfer:1\" from="tel:12345666" terminator="abc"><to>tel:123456789</to></transfer>""")
+		def transfer = parseXml("""<transfer xmlns=\"urn:xmpp:tropo:transfer:1\" from="tel:12345666" terminator="abc"><to>tel:123456789</to></transfer>""")
 		
 		def errorMapping = assertValidationException(transfer)
 		assertNotNull errorMapping
@@ -323,7 +323,7 @@ class ValidationTest {
 	@Test
 	public void validateTransferInvalidMedia() {
 				
-		def transfer = parseXml("""<transfer xmlns=\"urn:xmpp:ozone:transfer:1\" from="tel:12345666" media="aaa" terminator="#"><to>tel:123456789</to></transfer>""")
+		def transfer = parseXml("""<transfer xmlns=\"urn:xmpp:tropo:transfer:1\" from="tel:12345666" media="aaa" terminator="#"><to>tel:123456789</to></transfer>""")
 		
 		def errorMapping = assertValidationException(transfer)
 		assertNotNull errorMapping
@@ -335,7 +335,7 @@ class ValidationTest {
 	@Test
 	public void validateTransferValid() {
 				
-		def transfer = parseXml("""<transfer xmlns=\"urn:xmpp:ozone:transfer:1\" from="tel:12345666"><to>tel:123456789</to></transfer>""")
+		def transfer = parseXml("""<transfer xmlns=\"urn:xmpp:tropo:transfer:1\" from="tel:12345666"><to>tel:123456789</to></transfer>""")
 		assertNotNull fromXML(transfer)
 	}
 	
@@ -345,7 +345,7 @@ class ValidationTest {
 	@Test
 	public void validateConferenceNullRoomName() {
 				
-		def conference = parseXml("""<conference xmlns=\"urn:xmpp:ozone:conference:1\"></conference>""")
+		def conference = parseXml("""<conference xmlns=\"urn:xmpp:tropo:conference:1\"></conference>""")
 		
 		def errorMapping = assertValidationException(conference)
 		assertNotNull errorMapping
@@ -357,7 +357,7 @@ class ValidationTest {
 	@Test
 	public void validateConferenceInvalidBeep() {
 				
-		def conference = parseXml("""<conference xmlns=\"urn:xmpp:ozone:conference:1\" name="1" beep="123"></conference>""")
+		def conference = parseXml("""<conference xmlns=\"urn:xmpp:tropo:conference:1\" name="1" beep="123"></conference>""")
 		
 		def errorMapping = assertValidationException(conference)
 		assertNotNull errorMapping
@@ -369,7 +369,7 @@ class ValidationTest {
 	@Test
 	public void validateConferenceInvalidMute() {
 				
-		def conference = parseXml("""<conference xmlns=\"urn:xmpp:ozone:conference:1\" name="1" mute="123"></conference>""")
+		def conference = parseXml("""<conference xmlns=\"urn:xmpp:tropo:conference:1\" name="1" mute="123"></conference>""")
 		
 		def errorMapping = assertValidationException(conference)
 		assertNotNull errorMapping
@@ -381,7 +381,7 @@ class ValidationTest {
 	@Test
 	public void validateConferenceInvalidTonePassThrough() {
 				
-		def conference = parseXml("""<conference xmlns=\"urn:xmpp:ozone:conference:1\" name="1" tone-passthrough="123"></conference>""")
+		def conference = parseXml("""<conference xmlns=\"urn:xmpp:tropo:conference:1\" name="1" tone-passthrough="123"></conference>""")
 		
 		def errorMapping = assertValidationException(conference)
 		assertNotNull errorMapping
@@ -393,7 +393,7 @@ class ValidationTest {
 	@Test
 	public void validateConferenceInvalidTerminator() {
 				
-		def conference = parseXml("""<conference xmlns=\"urn:xmpp:ozone:conference:1\" name="1" terminator="123"></conference>""")
+		def conference = parseXml("""<conference xmlns=\"urn:xmpp:tropo:conference:1\" name="1" terminator="123"></conference>""")
 		
 		def errorMapping = assertValidationException(conference)
 		assertNotNull errorMapping
@@ -405,7 +405,7 @@ class ValidationTest {
 	@Test
 	public void validateConferenceValid() {
 				
-		def conference = parseXml("""<conference xmlns=\"urn:xmpp:ozone:conference:1\" mute="false" beep="false" tone-passthrough="true" name="123456"/>""")
+		def conference = parseXml("""<conference xmlns=\"urn:xmpp:tropo:conference:1\" mute="false" beep="false" tone-passthrough="true" name="123456"/>""")
 		assertNotNull fromXML(conference)
 	}
 
@@ -415,7 +415,7 @@ class ValidationTest {
 	@Test
 	public void validateRedirectMissingDestination() {
 				
-		def conference = parseXml("""<redirect xmlns="urn:xmpp:ozone:1"/>""")
+		def conference = parseXml("""<redirect xmlns="urn:xmpp:rayo:1"/>""")
 		
 		def errorMapping = assertValidationException(conference)
 		assertNotNull errorMapping
@@ -427,7 +427,7 @@ class ValidationTest {
 	@Test
 	public void validateRedirectInvalidURI() {
 				
-		def conference = parseXml("""<redirect xmlns="urn:xmpp:ozone:1" to="\$?\\.com"/>""")
+		def conference = parseXml("""<redirect xmlns="urn:xmpp:rayo:1" to="\$?\\.com"/>""")
 		
 		def errorMapping = assertValidationException(conference)
 		assertNotNull errorMapping
@@ -442,7 +442,7 @@ class ValidationTest {
 	@Test
 	public void validateDialMissingTo() {
 				
-		def dial = parseXml("""<dial xmlns=\"urn:xmpp:ozone:1\" from=\"tel:34637710708\"><header name=\"test\" value=\"atest\"/></dial>""")
+		def dial = parseXml("""<dial xmlns=\"urn:xmpp:rayo:1\" from=\"tel:34637710708\"><header name=\"test\" value=\"atest\"/></dial>""")
 		
 		def errorMapping = assertValidationException(dial)
 		assertNotNull errorMapping
@@ -454,21 +454,21 @@ class ValidationTest {
 	@Test
 	public void validateEmptyDialIsOk() {
 				
-		def dial = parseXml("""<dial xmlns=\"urn:xmpp:ozone:1\" to=\"tel:34637710701\" from=\"tel:34637710708\"></dial>""")
+		def dial = parseXml("""<dial xmlns=\"urn:xmpp:rayo:1\" to=\"tel:34637710701\" from=\"tel:34637710708\"></dial>""")
 		assertNotNull fromXML(dial)
 	}
 	
 	@Test
 	public void validateEmptyDialEmptyHeaderIsOk() {
 				
-		def dial = parseXml("""<dial xmlns=\"urn:xmpp:ozone:1\" to=\"tel:34637710701\" from=\"tel:34637710708\"><header/></dial>""")
+		def dial = parseXml("""<dial xmlns=\"urn:xmpp:rayo:1\" to=\"tel:34637710701\" from=\"tel:34637710708\"><header/></dial>""")
 		assertNotNull fromXML(dial)
 	}
 	
 	@Test
 	public void validateDialInvalidToURI() {
 				
-		def dial = parseXml("""<dial xmlns=\"urn:xmpp:ozone:1\" to=\"tel:\$?\\.com\" from=\"tel:34637710708\"><header/></dial>""")
+		def dial = parseXml("""<dial xmlns=\"urn:xmpp:rayo:1\" to=\"tel:\$?\\.com\" from=\"tel:34637710708\"><header/></dial>""")
 		
 		def errorMapping = assertValidationException(dial)
 		assertNotNull errorMapping
@@ -480,7 +480,7 @@ class ValidationTest {
 	@Test
 	public void validateDialInvalidFromURI() {
 				
-		def dial = parseXml("""<dial xmlns=\"urn:xmpp:ozone:1\" to=\"tel:34637710708\" from=\"tel:\$?\\.com\"><header/></dial>""")
+		def dial = parseXml("""<dial xmlns=\"urn:xmpp:rayo:1\" to=\"tel:34637710708\" from=\"tel:\$?\\.com\"><header/></dial>""")
 		
 		def errorMapping = assertValidationException(dial)
 		assertNotNull errorMapping
@@ -493,7 +493,7 @@ class ValidationTest {
 	@Test
 	public void validateNestedJoinInvalidDirection() {
 				
-		def dial = parseXml("""<dial xmlns=\"urn:xmpp:ozone:1\" to="tel:34637710708" from="tel:34637710708"><join xmlns="urn:xmpp:ozone:join:1" direction="abcd"/></dial>""")
+		def dial = parseXml("""<dial xmlns=\"urn:xmpp:rayo:1\" to="tel:34637710708" from="tel:34637710708"><join xmlns="urn:xmpp:rayo:join:1" direction="abcd"/></dial>""")
 		
 		def errorMapping = assertValidationException(dial)
 		assertNotNull errorMapping
@@ -506,7 +506,7 @@ class ValidationTest {
 	@Test
 	public void validateNestedJoinInvalidMedia() {
 				
-		def dial = parseXml("""<dial xmlns=\"urn:xmpp:ozone:1\" to=\"tel:34637710708\" from="tel:34637710708"><join xmlns="urn:xmpp:ozone:join:1" direction="duplex" media="abcd"/></dial>""")
+		def dial = parseXml("""<dial xmlns=\"urn:xmpp:rayo:1\" to=\"tel:34637710708\" from="tel:34637710708"><join xmlns="urn:xmpp:rayo:join:1" direction="duplex" media="abcd"/></dial>""")
 		
 		def errorMapping = assertValidationException(dial)
 		assertNotNull errorMapping
@@ -523,14 +523,14 @@ class ValidationTest {
 	@Test
 	public void validateEmptyJoinIsOk() {
 				
-		def join = parseXml("""<join xmlns="urn:xmpp:ozone:join:1"></join>""")
+		def join = parseXml("""<join xmlns="urn:xmpp:rayo:join:1"></join>""")
 		assertNotNull fromXML(join)
 	}
 	
 	@Test
 	public void validateJoinInvalidDirection() {
 				
-		def join = parseXml("""<join xmlns="urn:xmpp:ozone:join:1" direction="abcd"/>""")
+		def join = parseXml("""<join xmlns="urn:xmpp:rayo:join:1" direction="abcd"/>""")
 		
 		def errorMapping = assertValidationException(join)
 		assertNotNull errorMapping
@@ -543,7 +543,7 @@ class ValidationTest {
 	@Test
 	public void validateJoinInvalidMedia() {
 				
-		def join = parseXml("""<join xmlns="urn:xmpp:ozone:join:1" direction="duplex" media="abcd"/>""")
+		def join = parseXml("""<join xmlns="urn:xmpp:rayo:join:1" direction="duplex" media="abcd"/>""")
 		
 		def errorMapping = assertValidationException(join)
 		assertNotNull errorMapping
@@ -558,14 +558,14 @@ class ValidationTest {
 	@Test
 	public void validateRecordValid() {
 				
-		def record = parseXml("""<record xmlns=\"urn:xmpp:ozone:record:1\"></record>""")
+		def record = parseXml("""<record xmlns=\"urn:xmpp:rayo:record:1\"></record>""")
 		assertNotNull fromXML(record)
 	}
 	
 	@Test
 	public void validateRecordInvalidURI() {
 				
-		def record = parseXml("""<record xmlns="urn:xmpp:ozone:record:1" to="\$?\\.com"/>""")
+		def record = parseXml("""<record xmlns="urn:xmpp:rayo:record:1" to="\$?\\.com"/>""")
 		
 		def errorMapping = assertValidationException(record)
 		assertNotNull errorMapping
@@ -577,7 +577,7 @@ class ValidationTest {
 	@Test
 	public void validateRecordInvalidCodec() {
 				
-		def record = parseXml("""<record xmlns="urn:xmpp:ozone:record:1" codec="abcd"/>""")
+		def record = parseXml("""<record xmlns="urn:xmpp:rayo:record:1" codec="abcd"/>""")
 		
 		def errorMapping = assertValidationException(record)
 		assertNotNull errorMapping
@@ -589,7 +589,7 @@ class ValidationTest {
 	@Test
 	public void validateRecordInvalidFileFormat() {
 				
-		def record = parseXml("""<record xmlns="urn:xmpp:ozone:record:1" format="abcd"/>""")
+		def record = parseXml("""<record xmlns="urn:xmpp:rayo:record:1" format="abcd"/>""")
 		
 		def errorMapping = assertValidationException(record)
 		assertNotNull errorMapping
@@ -604,7 +604,7 @@ class ValidationTest {
 	@Test
 	public void validateInvalidNamespace() {
 				
-		def say = parseXml("""<say xmlns=\"urn:xmpp:ozone:conference:1\" voice=\"allison\"><speak>Hello World</speak></say>""")
+		def say = parseXml("""<say xmlns=\"urn:xmpp:tropo:conference:1\" voice=\"allison\"><speak>Hello World</speak></say>""")
 		
 		def errorMapping = assertValidationException(say)
 		assertNotNull errorMapping

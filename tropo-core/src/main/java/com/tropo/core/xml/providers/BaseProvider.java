@@ -30,9 +30,9 @@ import com.voxeo.utils.Enums;
 
 public abstract class BaseProvider implements XmlProvider {
 
-    protected static final Namespace OZONE_NAMESPACE = new Namespace("", "urn:xmpp:ozone:1");
-    protected static final Namespace OZONE_COMPONENT_NAMESPACE = new Namespace("", "urn:xmpp:ozone:ext:1");
-    protected static final Namespace OZONE_COMPLETE_NAMESPACE = new Namespace("", "urn:xmpp:ozone:ext:complete:1");
+    protected static final Namespace RAYO_NAMESPACE = new Namespace("", "urn:xmpp:rayo:1");
+    protected static final Namespace RAYO_COMPONENT_NAMESPACE = new Namespace("", "urn:xmpp:rayo:ext:1");
+    protected static final Namespace RAYO_COMPLETE_NAMESPACE = new Namespace("", "urn:xmpp:rayo:ext:complete:1");
 
     private Validator validator;
     private XmlProviderManager manager;
@@ -262,12 +262,12 @@ public abstract class BaseProvider implements XmlProvider {
 
     protected Element addCompleteElement(Document document, VerbCompleteEvent event, Namespace completeNamespace) {
         Element reasonElement = null;
-        Element completeElement = document.addElement(new QName("complete", OZONE_COMPONENT_NAMESPACE));
+        Element completeElement = document.addElement(new QName("complete", RAYO_COMPONENT_NAMESPACE));
         VerbCompleteReason reason = event.getReason();
         if (reason instanceof VerbCompleteEvent.Reason) {
             Reason globalReason = (VerbCompleteEvent.Reason) reason;
             String reasonValue = globalReason.name().toLowerCase();
-            reasonElement = completeElement.addElement(new QName(reasonValue, OZONE_COMPLETE_NAMESPACE));
+            reasonElement = completeElement.addElement(new QName(reasonValue, RAYO_COMPLETE_NAMESPACE));
             if (globalReason == VerbCompleteEvent.Reason.ERROR) {
             	if (event.getErrorText() != null) {
             		reasonElement.setText(event.getErrorText());

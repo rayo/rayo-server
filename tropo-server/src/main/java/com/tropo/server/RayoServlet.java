@@ -45,10 +45,10 @@ import com.voxeo.servlet.xmpp.XmppSession.SessionType;
 import com.voxeo.servlet.xmpp.XmppStanzaError;
 
 @SuppressWarnings("serial")
-public class OzoneServlet extends XmppServlet {
+public class RayoServlet extends XmppServlet {
 
-    private static final Loggerf log = Loggerf.getLogger(OzoneServlet.class);
-    private static final Loggerf WIRE = Loggerf.getLogger("com.tropo.ozone.wire");
+    private static final Loggerf log = Loggerf.getLogger(RayoServlet.class);
+    private static final Loggerf WIRE = Loggerf.getLogger("com.tropo.rayo.wire");
 
     private static final QName BIND_QNAME = new QName("bind", new Namespace("", "urn:ietf:params:xml:ns:xmpp-bind"));
     private static final QName SESSION_QNAME = new QName("session", new Namespace("", "urn:ietf:params:xml:ns:xmpp-session"));
@@ -59,7 +59,7 @@ public class OzoneServlet extends XmppServlet {
     private CallRegistry callRegistry;
     private MixerRegistry mixerRegistry;
     private ExceptionMapper exceptionMapper;
-    private OzoneStatistics ozoneStatistics;
+    private RayoStatistics rayoStatistics;
     private AdminService adminService;
     private CdrManager cdrManager;
 
@@ -87,13 +87,13 @@ public class OzoneServlet extends XmppServlet {
      */
     public void start() {
 
-        log.info("Registering Ozone Event Handler");
+        log.info("Registering Rayo Event Handler");
 
         callManager.addEventHandler(new EventHandler() {
 
             public void handle(Object event) throws Exception {
                 if (event instanceof CallEvent) {
-                	ozoneStatistics.callReceived();
+                	rayoStatistics.callReceived();
                     CallEvent callEvent = (CallEvent) event;
                     try {
                         event(callEvent);
@@ -172,7 +172,7 @@ public class OzoneServlet extends XmppServlet {
         if (event instanceof EndEvent) {
         	callsMap.remove(event.getCallId());
         }
-        ozoneStatistics.callEventProcessed();
+        rayoStatistics.callEventProcessed();
     }
 
 	private void sendToSession(CallEvent event, Element eventElement,
@@ -223,12 +223,12 @@ public class OzoneServlet extends XmppServlet {
 
 	protected void doMessage(XmppServletStanzaRequest req) throws ServletException, IOException {
 
-    	ozoneStatistics.messageStanzaReceived();
+    	rayoStatistics.messageStanzaReceived();
     }
 
     protected void doPresence(XmppServletStanzaRequest req) throws ServletException, IOException {
 
-    	ozoneStatistics.presenceStanzaReceived();
+    	rayoStatistics.presenceStanzaReceived();
     }
 
     // Commands: Client -> Server
@@ -238,7 +238,7 @@ public class OzoneServlet extends XmppServlet {
     protected void doIQRequest(final XmppServletIQRequest request) throws ServletException, IOException {
 
         WIRE.debug("%s :: %s", request.getElement().asXML(), request.getSession().getId());
-    	ozoneStatistics.iqReceived();
+    	rayoStatistics.iqReceived();
 
     	try {
             if (request.getSession().getSessionType() == XmppSession.SessionType.CLIENT) {
@@ -264,12 +264,12 @@ public class OzoneServlet extends XmppServlet {
                     result.addElement(SESSION_QNAME);
                     sendIqResult(request, result);
 
-                    // Ozone Command
+                    // Rayo Command
                 }
-                else if (qname.getNamespaceURI().startsWith("urn:xmpp:ozone")) {
+                else if (isSupportedNamespace(qname)) {
 
                     Object command = provider.fromXML(payload);
-                    ozoneStatistics.commandReceived(command);
+                    rayoStatistics.commandReceived(command);
 
                     // Handle outbound 'dial' command
                     if (command instanceof DialCommand) {
@@ -283,7 +283,7 @@ public class OzoneServlet extends XmppServlet {
                             public void handle(Response response) throws Exception {
                                 if (response.isSuccess()) {
                                     CallRef callRef = (CallRef) response.getValue();
-                                    result.addElement("ref","urn:xmpp:ozone:1").addAttribute("id", callRef.getCallId());
+                                    result.addElement("ref","urn:xmpp:rayo:1").addAttribute("id", callRef.getCallId());
                                     sendIqResult(request, result);
                                 }
                                 else {
@@ -333,7 +333,7 @@ public class OzoneServlet extends XmppServlet {
                             }
                             else if (value instanceof VerbRef) {
                                 String verbId = ((VerbRef) value).getVerbId();
-                                result.addElement("ref","urn:xmpp:ozone:1").addAttribute("id", verbId);
+                                result.addElement("ref","urn:xmpp:rayo:1").addAttribute("id", verbId);
                                 sendIqResult(request, result);
                             } else {
                                 sendIqResult(callId, request, result);
@@ -352,13 +352,19 @@ public class OzoneServlet extends XmppServlet {
         }
         catch (Exception e) {
             if(e instanceof ValidationException) {
-                ozoneStatistics.validationError();
+                rayoStatistics.validationError();
             }
             log.error("Exception processing IQ request", e);
             sendIqError(request, e);
         }
 
     }
+
+	private boolean isSupportedNamespace(QName qname) {
+		
+		return qname.getNamespaceURI().startsWith("urn:xmpp:rayo") ||
+			   qname.getNamespaceURI().startsWith("urn:xmpp:tropo");
+	}
 
     // Util
     // ================================================================================
@@ -397,7 +403,7 @@ public class OzoneServlet extends XmppServlet {
 
     private void sendIqError(XmppServletIQRequest request, XmppServletIQResponse response) throws IOException {
     	
-    	ozoneStatistics.iqError();
+    	rayoStatistics.iqError();
     	generateErrorCdr(request,response);
         response.setFrom(request.getTo());
         response.send();
@@ -407,7 +413,7 @@ public class OzoneServlet extends XmppServlet {
     	
     	Element payload = (Element) request.getElement().elementIterator().next();
         QName qname = payload.getQName();
-        if (qname.getNamespaceURI().startsWith("urn:xmpp:ozone")) {
+        if (isSupportedNamespace(qname)) {
         	final String callId = request.getTo().getNode();
             if (callId != null) {
 	        	Element responsePayload = (Element) request.getElement().elementIterator().next();	        	
@@ -429,7 +435,7 @@ public class OzoneServlet extends XmppServlet {
     
     private void sendIqResult(XmppServletIQRequest request, Element result) throws IOException {
     	
-    	ozoneStatistics.iqResult();
+    	rayoStatistics.iqResult();
     	
         XmppServletIQResponse response = request.createIQResultResponse(result);
         response.setFrom(request.getTo());
@@ -497,8 +503,8 @@ public class OzoneServlet extends XmppServlet {
         this.exceptionMapper = exceptionMapper;
     }
 
-	public void setOzoneStatistics(OzoneStatistics ozoneStatistics) {
-		this.ozoneStatistics = ozoneStatistics;
+	public void setRayoStatistics(RayoStatistics rayoStatistics) {
+		this.rayoStatistics = rayoStatistics;
 	}
 
 	public void setAdminService(AdminService adminService) {

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="urn:xmpp:ozone:ext:complete:1" xmlns:tns="urn:xmpp:ozone:ext:complete:1" elementFormDefault="qualified">
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="urn:xmpp:rayo:ext:complete:1" xmlns:tns="urn:xmpp:rayo:ext:complete:1" elementFormDefault="qualified">
 
 	<!-- Complete due to a <stop/> command -->
 	<element name="stop" type="tns:empty" />

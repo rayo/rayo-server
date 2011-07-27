@@ -3,7 +3,7 @@ package com.tropo.server.jmx;
 import java.util.Map;
 
 
-public interface OzoneStatisticsMXBean {
+public interface RayoStatisticsMXBean {
 
 	public long getCallsReceived();
 	public long getCallEventsProcessed();

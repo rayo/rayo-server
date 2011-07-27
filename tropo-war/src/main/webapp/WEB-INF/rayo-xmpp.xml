@@ -11,14 +11,14 @@
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd"
     default-autowire="byName">
 	
-	<bean id="ozone" class="com.tropo.server.OzoneServlet" init-method="start">
+	<bean id="rayo" class="com.tropo.server.RayoServlet" init-method="start">
 		<!-- These dependencies come from the parent: tropo-context.xml -->
 		<property name="provider" ref="xmlProviderManager" />
 		<property name="callManager" ref="callManager" />
 		<property name="callRegistry" ref="callRegistry" />
 		<property name="mixerRegistry" ref="mixerRegistry" />
 		<property name="exceptionMapper" ref="exceptionMapper" />
-		<property name="ozoneStatistics" ref="ozoneStatistics" />
+		<property name="rayoStatistics" ref="rayoStatistics" />
 		<property name="adminService" ref="adminService" />
 		<property name="cdrManager" ref="cdrManager" />
 	</bean>

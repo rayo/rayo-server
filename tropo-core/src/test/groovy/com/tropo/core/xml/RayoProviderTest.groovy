@@ -56,12 +56,12 @@ import com.tropo.core.verb.VerbCompleteEvent;
 import com.tropo.core.xml.providers.AskProvider
 import com.tropo.core.xml.providers.ConferenceProvider
 import com.tropo.core.xml.providers.JoinProvider;
-import com.tropo.core.xml.providers.OzoneProvider
+import com.tropo.core.xml.providers.RayoProvider
 import com.tropo.core.xml.providers.RecordProvider;
 import com.tropo.core.xml.providers.SayProvider
 import com.tropo.core.xml.providers.TransferProvider
 
-public class OzoneProviderTest {
+public class RayoProviderTest {
 
     XmlProviderManager provider
 
@@ -74,13 +74,13 @@ public class OzoneProviderTest {
         
         provider = new DefaultXmlProviderManager()
         
-        [new OzoneProvider(validator:validator,namespaces:['urn:xmpp:ozone:1', 'urn:xmpp:ozone:ext:1', 'urn:xmpp:ozone:ext:complete:1']),
-         new SayProvider(validator:validator,namespaces:['urn:xmpp:ozone:say:1', 'urn:xmpp:ozone:say:complete:1']),
-         new AskProvider(validator:validator,namespaces:['urn:xmpp:ozone:ask:1', 'urn:xmpp:ozone:ask:complete:1']),
-         new TransferProvider(validator:validator,namespaces:['urn:xmpp:ozone:transfer:1', 'urn:xmpp:ozone:transfer:complete:1']),
-         new ConferenceProvider(validator:validator,namespaces:['urn:xmpp:ozone:conference:1', 'urn:xmpp:ozone:conference:complete:1']),
-         new RecordProvider(validator:validator,namespaces:['urn:xmpp:ozone:record:1', 'urn:xmpp:ozone:record:complete:1']),
-         new JoinProvider(validator:validator,namespaces:['urn:xmpp:ozone:join:1', 'urn:xmpp:ozone:join:complete:1'])
+        [new RayoProvider(validator:validator,namespaces:['urn:xmpp:rayo:1', 'urn:xmpp:rayo:ext:1', 'urn:xmpp:rayo:ext:complete:1']),
+         new SayProvider(validator:validator,namespaces:['urn:xmpp:tropo:say:1', 'urn:xmpp:tropo:say:complete:1']),
+         new AskProvider(validator:validator,namespaces:['urn:xmpp:tropo:ask:1', 'urn:xmpp:tropo:ask:complete:1']),
+         new TransferProvider(validator:validator,namespaces:['urn:xmpp:tropo:transfer:1', 'urn:xmpp:tropo:transfer:complete:1']),
+         new ConferenceProvider(validator:validator,namespaces:['urn:xmpp:tropo:conference:1', 'urn:xmpp:tropo:conference:complete:1']),
+         new RecordProvider(validator:validator,namespaces:['urn:xmpp:rayo:record:1', 'urn:xmpp:rayo:record:complete:1']),
+         new JoinProvider(validator:validator,namespaces:['urn:xmpp:rayo:join:1', 'urn:xmpp:rayo:join:complete:1'])
 		].each {
              provider.register it
          }
@@ -98,13 +98,13 @@ public class OzoneProviderTest {
         headers.put("test","atest");
         offer.setHeaders(headers);
 
-        assertEquals("""<offer xmlns="urn:xmpp:ozone:1" to="tel:44477773333333" from="tel:34637710708"><header name="test" value="atest"/></offer>""", toXml(offer));
+        assertEquals("""<offer xmlns="urn:xmpp:rayo:1" to="tel:44477773333333" from="tel:34637710708"><header name="test" value="atest"/></offer>""", toXml(offer));
     }
     
     @Test
     public void offerFromXml() {
 
-        assertProperties(fromXml("""<offer xmlns="urn:xmpp:ozone:1" to="tel:44477773333333" from="tel:34637710708"><header name="test" value="atest"/></offer>"""), [
+        assertProperties(fromXml("""<offer xmlns="urn:xmpp:rayo:1" to="tel:44477773333333" from="tel:34637710708"><header name="test" value="atest"/></offer>"""), [
             to: new URI("tel:44477773333333"),
             from: new URI("tel:34637710708"),
             headers: [
@@ -121,7 +121,7 @@ public class OzoneProviderTest {
     public void emptyJoinToXml() {
 
 		def join = new Join()
-        assertEquals("""<join xmlns="urn:xmpp:ozone:join:1"/>""", toXml(join));
+        assertEquals("""<join xmlns="urn:xmpp:rayo:join:1"/>""", toXml(join));
     }
 
 	@Test
@@ -129,13 +129,13 @@ public class OzoneProviderTest {
 		
 		def join = new Join(direction:"duplex", media:"bridge", to:"1234");
 		
-		assertEquals("""<join xmlns="urn:xmpp:ozone:join:1" direction="duplex" media="bridge" to="1234"/>""", toXml(join));
+		assertEquals("""<join xmlns="urn:xmpp:rayo:join:1" direction="duplex" media="bridge" to="1234"/>""", toXml(join));
 	}
 	
 	@Test
 	public void emptyJoinFromXml() {
 
-		def join = fromXml("""<join xmlns="urn:xmpp:ozone:join:1"/>""")
+		def join = fromXml("""<join xmlns="urn:xmpp:rayo:join:1"/>""")
 		assertProperties(join, [
 			direction: null,
 			media: null,
@@ -146,7 +146,7 @@ public class OzoneProviderTest {
 	@Test
 	public void fullJoinFromXml() {
 
-		def join = fromXml("""<join xmlns="urn:xmpp:ozone:join:1" direction="duplex" media="bridge" to="1234"/>""")
+		def join = fromXml("""<join xmlns="urn:xmpp:rayo:join:1" direction="duplex" media="bridge" to="1234"/>""")
 		assertProperties(join, [
 			direction: "DUPLEX",
 			media: "BRIDGE",
@@ -162,7 +162,7 @@ public class OzoneProviderTest {
 		
 		def complete = new JoinCompleteEvent(new Join(), VerbCompleteEvent.Reason.HANGUP)
 		
-		assertEquals("""<complete xmlns="urn:xmpp:ozone:ext:1"><hangup xmlns="urn:xmpp:ozone:ext:complete:1"/></complete>""", toXml(complete));
+		assertEquals("""<complete xmlns="urn:xmpp:rayo:ext:1"><hangup xmlns="urn:xmpp:rayo:ext:complete:1"/></complete>""", toXml(complete));
 	}
 	
 	@Test
@@ -171,7 +171,7 @@ public class OzoneProviderTest {
 		def complete = new JoinCompleteEvent(new Join(), VerbCompleteEvent.Reason.ERROR)
 		complete.errorText = "this is an error"
 		
-		assertEquals("""<complete xmlns="urn:xmpp:ozone:ext:1"><error xmlns="urn:xmpp:ozone:ext:complete:1">this is an error</error></complete>""", toXml(complete));
+		assertEquals("""<complete xmlns="urn:xmpp:rayo:ext:1"><error xmlns="urn:xmpp:rayo:ext:complete:1">this is an error</error></complete>""", toXml(complete));
 	}
 	
 	// Dial
@@ -186,7 +186,7 @@ public class OzoneProviderTest {
 		headers.put("test","atest");
 		command.setHeaders(headers);
 
-		assertEquals("""<dial xmlns="urn:xmpp:ozone:1" to="tel:44477773333333" from="tel:34637710708"><header name="test" value="atest"/></dial>""", toXml(command));
+		assertEquals("""<dial xmlns="urn:xmpp:rayo:1" to="tel:44477773333333" from="tel:34637710708"><header name="test" value="atest"/></dial>""", toXml(command));
 	}
 
 	@Test
@@ -198,7 +198,7 @@ public class OzoneProviderTest {
 		def join = new Join();
 		command.join = join
 		
-		assertEquals("""<dial xmlns="urn:xmpp:ozone:1" to="tel:44477773333333" from="tel:34637710708"><join xmlns="urn:xmpp:ozone:join:1"/></dial>""", toXml(command));
+		assertEquals("""<dial xmlns="urn:xmpp:rayo:1" to="tel:44477773333333" from="tel:34637710708"><join xmlns="urn:xmpp:rayo:join:1"/></dial>""", toXml(command));
 	}
 	
 	
@@ -211,13 +211,13 @@ public class OzoneProviderTest {
 		def join = new Join(direction:"duplex", media:"bridge", to:"1234");
 		command.join = join
 		
-		assertEquals("""<dial xmlns="urn:xmpp:ozone:1" to="tel:44477773333333" from="tel:34637710708"><join xmlns="urn:xmpp:ozone:join:1" direction="duplex" media="bridge" to="1234"/></dial>""", toXml(command));
+		assertEquals("""<dial xmlns="urn:xmpp:rayo:1" to="tel:44477773333333" from="tel:34637710708"><join xmlns="urn:xmpp:rayo:join:1" direction="duplex" media="bridge" to="1234"/></dial>""", toXml(command));
 	}
 	
 	@Test
 	public void dialFromXml() {
 
-		assertProperties(fromXml("""<dial xmlns="urn:xmpp:ozone:1" to="tel:44477773333333" from="tel:34637710708"><header name="test" value="atest"/></dial>"""), [
+		assertProperties(fromXml("""<dial xmlns="urn:xmpp:rayo:1" to="tel:44477773333333" from="tel:34637710708"><header name="test" value="atest"/></dial>"""), [
 			to: new URI("tel:44477773333333"),
 			from: new URI("tel:34637710708"),
 			headers: [
@@ -230,7 +230,7 @@ public class OzoneProviderTest {
 	@Test
 	public void dialWithNestedJoinFromXml() {
 
-		def dial = fromXml("""<dial xmlns="urn:xmpp:ozone:1" to="tel:44477773333333" from="tel:34637710708"><join xmlns="urn:xmpp:ozone:join:1"/></dial>""")
+		def dial = fromXml("""<dial xmlns="urn:xmpp:rayo:1" to="tel:44477773333333" from="tel:34637710708"><join xmlns="urn:xmpp:rayo:join:1"/></dial>""")
 		assertProperties(dial, [
 			to: new URI("tel:44477773333333"),
 			from: new URI("tel:34637710708"),
@@ -245,7 +245,7 @@ public class OzoneProviderTest {
 	@Test
 	public void dialWithNestedJoinFullFromXml() {
 
-		def dial = fromXml("""<dial xmlns="urn:xmpp:ozone:1" to="tel:44477773333333" from="tel:34637710708"><join xmlns="urn:xmpp:ozone:join:1" direction="duplex" media="bridge" to="1234"/></dial>""")
+		def dial = fromXml("""<dial xmlns="urn:xmpp:rayo:1" to="tel:44477773333333" from="tel:34637710708"><join xmlns="urn:xmpp:rayo:join:1" direction="duplex" media="bridge" to="1234"/></dial>""")
 		assertProperties(dial, [
 			to: new URI("tel:44477773333333"),
 			from: new URI("tel:34637710708"),
@@ -264,7 +264,7 @@ public class OzoneProviderTest {
     @Test
     public void acceptToXml() {
         AcceptCommand accept = new AcceptCommand();
-        assertEquals("""<accept xmlns="urn:xmpp:ozone:1"/>""", toXml(accept));
+        assertEquals("""<accept xmlns="urn:xmpp:rayo:1"/>""", toXml(accept));
     }
 
     @Test
@@ -272,17 +272,17 @@ public class OzoneProviderTest {
         AcceptCommand accept = new AcceptCommand([
             headers: ["test":"atest"]
         ]);
-        assertEquals("""<accept xmlns="urn:xmpp:ozone:1"><header name="test" value="atest"/></accept>""", toXml(accept));
+        assertEquals("""<accept xmlns="urn:xmpp:rayo:1"><header name="test" value="atest"/></accept>""", toXml(accept));
     }
     
     @Test
     public void acceptFromXml() {
-        assertNotNull fromXml("""<accept xmlns="urn:xmpp:ozone:1"></accept>""")
+        assertNotNull fromXml("""<accept xmlns="urn:xmpp:rayo:1"></accept>""")
     }
 
     @Test
     public void acceptWithHeadersFromXml() {
-        assertProperties(fromXml("""<accept xmlns="urn:xmpp:ozone:1"><header name="test" value="atest"/></accept>"""), [
+        assertProperties(fromXml("""<accept xmlns="urn:xmpp:rayo:1"><header name="test" value="atest"/></accept>"""), [
             headers: [test:"atest"]
         ])
     }
@@ -293,7 +293,7 @@ public class OzoneProviderTest {
     @Test
     public void answerToXml() {
         AnswerCommand answer = new AnswerCommand();
-        assertEquals("""<answer xmlns="urn:xmpp:ozone:1"/>""", toXml(answer));
+        assertEquals("""<answer xmlns="urn:xmpp:rayo:1"/>""", toXml(answer));
     }
     
     @Test
@@ -301,17 +301,17 @@ public class OzoneProviderTest {
         AnswerCommand answer = new AnswerCommand([
             headers: ["test":"atest"]
         ]);
-        assertEquals("""<answer xmlns="urn:xmpp:ozone:1"><header name="test" value="atest"/></answer>""", toXml(answer));
+        assertEquals("""<answer xmlns="urn:xmpp:rayo:1"><header name="test" value="atest"/></answer>""", toXml(answer));
     }
     
     @Test
     public void answerFromXml() {
-        assertNotNull fromXml("""<answer xmlns="urn:xmpp:ozone:1"></answer>""")
+        assertNotNull fromXml("""<answer xmlns="urn:xmpp:rayo:1"></answer>""")
     }
     
     @Test
     public void answerWithHeadersFromXml() {
-        assertProperties(fromXml("""<answer xmlns="urn:xmpp:ozone:1"><header name="test" value="atest"/></answer>"""), [
+        assertProperties(fromXml("""<answer xmlns="urn:xmpp:rayo:1"><header name="test" value="atest"/></answer>"""), [
             headers: [test:"atest"]
         ])
     }
@@ -322,12 +322,12 @@ public class OzoneProviderTest {
     @Test
     public void dtmfToXml() {
         DtmfEvent event = new DtmfEvent(null, "5");
-        assertEquals("""<dtmf xmlns="urn:xmpp:ozone:1" signal="5"/>""", toXml(event));
+        assertEquals("""<dtmf xmlns="urn:xmpp:rayo:1" signal="5"/>""", toXml(event));
     }
     
     @Test
     public void dtmfFromXml() {
-        assertNotNull "5", fromXml("""<dtmf xmlns="urn:xmpp:ozone:1" signal="5"></dtmf>""").signal
+        assertNotNull "5", fromXml("""<dtmf xmlns="urn:xmpp:rayo:1" signal="5"></dtmf>""").signal
     }
 
 	// Record
@@ -337,7 +337,7 @@ public class OzoneProviderTest {
 	public void recordToXml() {
 		
 		def record = new Record();
-		assertEquals("""<record xmlns="urn:xmpp:ozone:record:1"/>""", toXml(record));
+		assertEquals("""<record xmlns="urn:xmpp:rayo:record:1"/>""", toXml(record));
 	}
 	
 	@Test
@@ -349,19 +349,19 @@ public class OzoneProviderTest {
 								maxDuration:500000, sampleRate:16000, silenceTerminate:false, startBeep:true,
 								startPauseMode:false);
 							
-		assertEquals("""<record xmlns="urn:xmpp:ozone:record:1" to="file:/tmp/myrecording.mp3" append="true" dtmf-truncate="true" silence-terminate="false" start-beep="true" start-pause-mode="false" codec="LINEAR_16BIT_256K" codec-params="bitrate=5.3;annexa=no" final-timeout="10000" format="INFERRED" initial-timeout="10000" max-length="500000" min-length="-1" sample-rate="16000"/>""", toXml(record));
+		assertEquals("""<record xmlns="urn:xmpp:rayo:record:1" to="file:/tmp/myrecording.mp3" append="true" dtmf-truncate="true" silence-terminate="false" start-beep="true" start-pause-mode="false" codec="LINEAR_16BIT_256K" codec-params="bitrate=5.3;annexa=no" final-timeout="10000" format="INFERRED" initial-timeout="10000" max-length="500000" min-length="-1" sample-rate="16000"/>""", toXml(record));
 	}
 
 	@Test
 	public void recordFromXml() {
 		
-		assertNotNull fromXml("""<record xmlns="urn:xmpp:ozone:record:1"></record>""")
+		assertNotNull fromXml("""<record xmlns="urn:xmpp:rayo:record:1"></record>""")
 	}
 	
 	@Test
 	public void recordFullFromXml() {
 		
-		def record = fromXml("""<record xmlns="urn:xmpp:ozone:record:1" to="file:/tmp/myrecording.mp3" append="true" voice="allison" bargein="true" dtmf-truncate="true" silence-terminate="false" start-beep="true" start-pause-mode="false" codec="LINEAR_16BIT_256K" codec-params="bitrate=5.3;annexa=no" final-timeout="10000" format="INFERRED" initial-timeout="10000" max-length="500000" min-length="-1" sample-rate="16000"/>""")
+		def record = fromXml("""<record xmlns="urn:xmpp:rayo:record:1" to="file:/tmp/myrecording.mp3" append="true" voice="allison" bargein="true" dtmf-truncate="true" silence-terminate="false" start-beep="true" start-pause-mode="false" codec="LINEAR_16BIT_256K" codec-params="bitrate=5.3;annexa=no" final-timeout="10000" format="INFERRED" initial-timeout="10000" max-length="500000" min-length="-1" sample-rate="16000"/>""")
 		assertNotNull record
 		assertEquals record.to, new URI("file:/tmp/myrecording.mp3")
 		assertTrue record.append
@@ -383,28 +383,28 @@ public class OzoneProviderTest {
 	// ====================================================================================
 	@Test
 	public void pauseRecordFromXml() {
-		assertNotNull fromXml("""<pause xmlns="urn:xmpp:ozone:record:1" />""")
+		assertNotNull fromXml("""<pause xmlns="urn:xmpp:rayo:record:1" />""")
 	}
 	
 	@Test
 	public void pauseRecordToXml() {
 		
 		RecordPauseCommand pause = new RecordPauseCommand();
-		assertEquals("""<pause xmlns="urn:xmpp:ozone:record:1"/>""", toXml(pause));
+		assertEquals("""<pause xmlns="urn:xmpp:rayo:record:1"/>""", toXml(pause));
 	}
 	
 	// Record Resume
 	// ====================================================================================
 	@Test
 	public void resumeRecordFromXml() {
-		assertNotNull fromXml("""<resume xmlns="urn:xmpp:ozone:record:1" />""")
+		assertNotNull fromXml("""<resume xmlns="urn:xmpp:rayo:record:1" />""")
 	}
 	
 	@Test
 	public void resumeRecordToXml() {
 		
 		RecordResumeCommand resume = new RecordResumeCommand();
-		assertEquals("""<resume xmlns="urn:xmpp:ozone:record:1"/>""", toXml(resume));
+		assertEquals("""<resume xmlns="urn:xmpp:rayo:record:1"/>""", toXml(resume));
 	}
 	    
     // Hangup
@@ -413,7 +413,7 @@ public class OzoneProviderTest {
     @Test
     public void hangupToXml() {
         HangupCommand hangup = new HangupCommand();
-        assertEquals("""<hangup xmlns="urn:xmpp:ozone:1"/>""", toXml(hangup));
+        assertEquals("""<hangup xmlns="urn:xmpp:rayo:1"/>""", toXml(hangup));
     }
     
     @Test
@@ -421,17 +421,17 @@ public class OzoneProviderTest {
         HangupCommand hangup = new HangupCommand([
             headers: ["test":"atest"]
         ]);
-        assertEquals("""<hangup xmlns="urn:xmpp:ozone:1"><header name="test" value="atest"/></hangup>""", toXml(hangup));
+        assertEquals("""<hangup xmlns="urn:xmpp:rayo:1"><header name="test" value="atest"/></hangup>""", toXml(hangup));
     }
     
     @Test
     public void hangupFromXml() {
-        assertNotNull fromXml("""<hangup xmlns="urn:xmpp:ozone:1"></hangup>""")
+        assertNotNull fromXml("""<hangup xmlns="urn:xmpp:rayo:1"></hangup>""")
     }
     
     @Test
     public void hangupWithHeadersFromXml() {
-        assertProperties(fromXml("""<hangup xmlns="urn:xmpp:ozone:1"><header name="test" value="atest"/></hangup>"""), [
+        assertProperties(fromXml("""<hangup xmlns="urn:xmpp:rayo:1"><header name="test" value="atest"/></hangup>"""), [
             headers: [test:"atest"]
         ])
     }
@@ -442,7 +442,7 @@ public class OzoneProviderTest {
     @Test
     public void rejectToXml() {
         RejectCommand reject = new RejectCommand([reason: CallRejectReason.BUSY]);
-        assertEquals("""<reject xmlns="urn:xmpp:ozone:1"><busy/></reject>""", toXml(reject));
+        assertEquals("""<reject xmlns="urn:xmpp:rayo:1"><busy/></reject>""", toXml(reject));
     }
     
     @Test
@@ -451,23 +451,23 @@ public class OzoneProviderTest {
             reason: CallRejectReason.BUSY,
             headers: ["test":"atest"]
         ]);
-        assertEquals("""<reject xmlns="urn:xmpp:ozone:1"><busy/><header name="test" value="atest"/></reject>""", toXml(reject));
+        assertEquals("""<reject xmlns="urn:xmpp:rayo:1"><busy/><header name="test" value="atest"/></reject>""", toXml(reject));
     }
     
     @Test
     public void rejectFromXml() {
-        assertNotNull fromXml("""<reject xmlns="urn:xmpp:ozone:1"><busy/></reject>""")
+        assertNotNull fromXml("""<reject xmlns="urn:xmpp:rayo:1"><busy/></reject>""")
     }
 
     @Test
     public void rejectFromXmlDefaultReason() {
-        RejectCommand command = fromXml("""<reject xmlns="urn:xmpp:ozone:1"></reject>""")
+        RejectCommand command = fromXml("""<reject xmlns="urn:xmpp:rayo:1"></reject>""")
         assertEquals CallRejectReason.DECLINE, command.reason
     }
 
     @Test
     public void rejectWithHeadersFromXml() {
-        assertProperties(fromXml("""<reject xmlns="urn:xmpp:ozone:1"><busy/><header name="test" value="atest"/></reject>"""), [
+        assertProperties(fromXml("""<reject xmlns="urn:xmpp:rayo:1"><busy/><header name="test" value="atest"/></reject>"""), [
             headers: [test:"atest"]
         ])
     }
@@ -480,7 +480,7 @@ public class OzoneProviderTest {
         RedirectCommand redirect = new RedirectCommand([
             to: new URI("tel:+14075551212")
         ]);
-        assertEquals("""<redirect xmlns="urn:xmpp:ozone:1" to="tel:+14075551212"/>""", toXml(redirect));
+        assertEquals("""<redirect xmlns="urn:xmpp:rayo:1" to="tel:+14075551212"/>""", toXml(redirect));
     }
     
     @Test
@@ -489,17 +489,17 @@ public class OzoneProviderTest {
             to: new URI("tel:+14075551212"),
             headers: ["test":"atest"]
         ]);
-        assertEquals("""<redirect xmlns="urn:xmpp:ozone:1" to="tel:+14075551212"><header name="test" value="atest"/></redirect>""", toXml(redirect));
+        assertEquals("""<redirect xmlns="urn:xmpp:rayo:1" to="tel:+14075551212"><header name="test" value="atest"/></redirect>""", toXml(redirect));
     }
     
     @Test
     public void redirectFromXml() {
-        assertNotNull fromXml("""<redirect xmlns="urn:xmpp:ozone:1" to="tel:+14075551212" />""")
+        assertNotNull fromXml("""<redirect xmlns="urn:xmpp:rayo:1" to="tel:+14075551212" />""")
     }
     
     @Test
     public void redirectWithHeadersFromXml() {
-        assertProperties(fromXml("""<redirect xmlns="urn:xmpp:ozone:1" to="tel:+14075551212"><header name="test" value="atest"/></redirect>"""), [
+        assertProperties(fromXml("""<redirect xmlns="urn:xmpp:rayo:1" to="tel:+14075551212"><header name="test" value="atest"/></redirect>"""), [
             to: new URI("tel:+14075551212"),
             headers: [test:"atest"]
         ])
@@ -509,55 +509,55 @@ public class OzoneProviderTest {
     // ====================================================================================
     @Test
     public void kickFromXml() {
-        assertNotNull fromXml("""<kick xmlns="urn:xmpp:ozone:conference:1" />""")
+        assertNotNull fromXml("""<kick xmlns="urn:xmpp:tropo:conference:1" />""")
     }
     
     @Test
     public void kickToXml() {
         KickCommand kick = new KickCommand();
-        assertEquals("""<kick xmlns="urn:xmpp:ozone:conference:1"/>""", toXml(kick));
+        assertEquals("""<kick xmlns="urn:xmpp:tropo:conference:1"/>""", toXml(kick));
     }
     
     // Pause
     // ====================================================================================
     @Test
     public void pauseFromXml() {
-        assertNotNull fromXml("""<pause xmlns="urn:xmpp:ozone:say:1" />""")
+        assertNotNull fromXml("""<pause xmlns="urn:xmpp:tropo:say:1" />""")
     }
     
     @Test
     public void pauseToXml() {
         
         PauseCommand pause = new PauseCommand();
-        assertEquals("""<pause xmlns="urn:xmpp:ozone:say:1"/>""", toXml(pause));
+        assertEquals("""<pause xmlns="urn:xmpp:tropo:say:1"/>""", toXml(pause));
     }
     
     // Resume
     // ====================================================================================
     @Test
     public void resumeFromXml() {
-        assertNotNull fromXml("""<resume xmlns="urn:xmpp:ozone:say:1" />""")
+        assertNotNull fromXml("""<resume xmlns="urn:xmpp:tropo:say:1" />""")
     }
     
     @Test
     public void resumeToXml() {
         
         ResumeCommand resume = new ResumeCommand();
-        assertEquals("""<resume xmlns="urn:xmpp:ozone:say:1"/>""", toXml(resume));
+        assertEquals("""<resume xmlns="urn:xmpp:tropo:say:1"/>""", toXml(resume));
     }
     
     // Stop
     // ====================================================================================
     @Test
     public void stopFromXml() {
-        assertNotNull fromXml("""<stop xmlns="urn:xmpp:ozone:ext:1" />""")
+        assertNotNull fromXml("""<stop xmlns="urn:xmpp:rayo:ext:1" />""")
     }
     
     @Test
     public void stopToXml() {
         
         StopCommand stop = new StopCommand();
-        assertEquals("""<stop xmlns="urn:xmpp:ozone:ext:1"/>""", toXml(stop));
+        assertEquals("""<stop xmlns="urn:xmpp:rayo:ext:1"/>""", toXml(stop));
     }
 
     // Say
@@ -566,7 +566,7 @@ public class OzoneProviderTest {
     @Test
     public void audioSayFromXml() {
         
-        def say = fromXml("""<say xmlns="urn:xmpp:ozone:say:1" voice="allison"><audio src="http://ccmixter.org/content/DoKashiteru/DoKashiteru_-_you_(na-na-na-na).mp3"/></say>""")
+        def say = fromXml("""<say xmlns="urn:xmpp:tropo:say:1" voice="allison"><audio src="http://ccmixter.org/content/DoKashiteru/DoKashiteru_-_you_(na-na-na-na).mp3"/></say>""")
         assertNotNull say
         assertNotNull say.prompt
         assertEquals say.prompt.text, """<audio src="http://ccmixter.org/content/DoKashiteru/DoKashiteru_-_you_(na-na-na-na).mp3"/>"""
@@ -575,7 +575,7 @@ public class OzoneProviderTest {
     @Test
     public void ssmlSayFromXml() {
         
-        def say = fromXml("""<say xmlns="urn:xmpp:ozone:say:1" voice="allison">Hello World</say>""")
+        def say = fromXml("""<say xmlns="urn:xmpp:tropo:say:1" voice="allison">Hello World</say>""")
         assertNotNull say
         assertNotNull say.prompt
         assertEquals say.prompt.text,"Hello World"
@@ -585,7 +585,7 @@ public class OzoneProviderTest {
     @Test
     public void ssmlSayWithMultipleElementsFromXml() {
         
-        def say = fromXml("""<say xmlns="urn:xmpp:ozone:say:1" voice="allison"><audio src="a.mp3"/><audio src="a.mp3"/></say>""")
+        def say = fromXml("""<say xmlns="urn:xmpp:tropo:say:1" voice="allison"><audio src="a.mp3"/><audio src="a.mp3"/></say>""")
         assertNotNull say
         assertNotNull say.prompt
         assertEquals say.prompt.text,"""<audio src="a.mp3"/><audio src="a.mp3"/>"""
@@ -596,7 +596,7 @@ public class OzoneProviderTest {
     public void emptySayToXml() {
         
         Say say = new Say();
-        assertEquals("""<say xmlns="urn:xmpp:ozone:say:1"/>""", toXml(say));
+        assertEquals("""<say xmlns="urn:xmpp:tropo:say:1"/>""", toXml(say));
     }
     
     @Test
@@ -606,7 +606,7 @@ public class OzoneProviderTest {
         say.prompt = new Ssml("""<audio src="http://ccmixter.org/content/DoKashiteru/DoKashiteru_-_you_(na-na-na-na).mp3"/>""")
         say.prompt.voice = "allison"
 
-        assertEquals("""<say xmlns="urn:xmpp:ozone:say:1" voice="allison"><audio xmlns="" src="http://ccmixter.org/content/DoKashiteru/DoKashiteru_-_you_(na-na-na-na).mp3"/></say>""", toXml(say));
+        assertEquals("""<say xmlns="urn:xmpp:tropo:say:1" voice="allison"><audio xmlns="" src="http://ccmixter.org/content/DoKashiteru/DoKashiteru_-_you_(na-na-na-na).mp3"/></say>""", toXml(say));
     }
     
     @Test
@@ -616,7 +616,7 @@ public class OzoneProviderTest {
         say.prompt = new Ssml("Hello World.")
         say.prompt.voice = "allison"
 
-        assertEquals("""<say xmlns="urn:xmpp:ozone:say:1" voice="allison">Hello World.</say>""", toXml(say));
+        assertEquals("""<say xmlns="urn:xmpp:tropo:say:1" voice="allison">Hello World.</say>""", toXml(say));
     }
 
     @Test
@@ -626,7 +626,7 @@ public class OzoneProviderTest {
         say.prompt = new Ssml("""<audio src="a.mp3"/><audio src="b.mp3"/>""")
         say.prompt.voice = "allison"
 
-        assertEquals("""<say xmlns="urn:xmpp:ozone:say:1" voice="allison"><audio xmlns="" src="a.mp3"/><audio xmlns="" src="b.mp3"/></say>""", toXml(say));
+        assertEquals("""<say xmlns="urn:xmpp:tropo:say:1" voice="allison"><audio xmlns="" src="a.mp3"/><audio xmlns="" src="b.mp3"/></say>""", toXml(say));
     }
 
     // Ask
@@ -634,7 +634,7 @@ public class OzoneProviderTest {
     @Test
     public void askFromXml() {
         
-        def ask = fromXml("""<ask xmlns="urn:xmpp:ozone:ask:1" min-confidence="0.8" mode="dtmf" recognizer="en-us" terminator="#" timeout="3000" bargein="true"><choices content-type="application/grammar+voxeo">a,b</choices><prompt voice="allison">hello world</prompt></ask>""")
+        def ask = fromXml("""<ask xmlns="urn:xmpp:tropo:ask:1" min-confidence="0.8" mode="dtmf" recognizer="en-us" terminator="#" timeout="3000" bargein="true"><choices content-type="application/grammar+voxeo">a,b</choices><prompt voice="allison">hello world</prompt></ask>""")
         assertNotNull ask
         assertEquals ask.prompt.voice, "allison"
         assertTrue ask.minConfidence == 0.8f
@@ -647,7 +647,7 @@ public class OzoneProviderTest {
     @Test
     public void audioAskFromXml() {
         
-        Ask ask = fromXml("""<ask xmlns="urn:xmpp:ozone:ask:1" voice="allison" min-confidence="0.8" mode="dtmf" recognizer="en-us" terminator="#" timeout="3000" bargein="true"><prompt><audio src="http://ccmixter.org/content/DoKashiteru/DoKashiteru_-_you_(na-na-na-na).mp3"/></prompt><choices content-type="application/grammar+voxeo">a,b</choices></ask>""")
+        Ask ask = fromXml("""<ask xmlns="urn:xmpp:tropo:ask:1" voice="allison" min-confidence="0.8" mode="dtmf" recognizer="en-us" terminator="#" timeout="3000" bargein="true"><prompt><audio src="http://ccmixter.org/content/DoKashiteru/DoKashiteru_-_you_(na-na-na-na).mp3"/></prompt><choices content-type="application/grammar+voxeo">a,b</choices></ask>""")
         assertNotNull ask
         assertNotNull ask.prompt
         assertEquals ask.prompt.text,"""<audio src="http://ccmixter.org/content/DoKashiteru/DoKashiteru_-_you_(na-na-na-na).mp3"/>"""
@@ -656,7 +656,7 @@ public class OzoneProviderTest {
     @Test
     public void ssmlAskFromXml() {
         
-        Ask ask = fromXml("""<ask xmlns="urn:xmpp:ozone:ask:1" voice="allison" min-confidence="0.8" mode="dtmf" recognizer="en-us" terminator="#" timeout="3000" bargein="true"><prompt>Hello World.</prompt><choices content-type="application/grammar+voxeo">a,b</choices></ask>""")
+        Ask ask = fromXml("""<ask xmlns="urn:xmpp:tropo:ask:1" voice="allison" min-confidence="0.8" mode="dtmf" recognizer="en-us" terminator="#" timeout="3000" bargein="true"><prompt>Hello World.</prompt><choices content-type="application/grammar+voxeo">a,b</choices></ask>""")
         assertNotNull ask
         assertNotNull ask.prompt
         assertEquals ask.prompt.text,"Hello World."
@@ -665,7 +665,7 @@ public class OzoneProviderTest {
     @Test
     public void choicesAskFromXml() {
         
-        def ask = fromXml("""<ask xmlns="urn:xmpp:ozone:ask:1" voice="allison" min-confidence="0.8" mode="dtmf" recognizer="en-us" terminator="#" timeout="3000" bargein="true"><prompt>Hello World.</prompt><choices url="http://test" content-type="grxml" /></ask>""")
+        def ask = fromXml("""<ask xmlns="urn:xmpp:tropo:ask:1" voice="allison" min-confidence="0.8" mode="dtmf" recognizer="en-us" terminator="#" timeout="3000" bargein="true"><prompt>Hello World.</prompt><choices url="http://test" content-type="grxml" /></ask>""")
         assertNotNull ask
         assertNotNull ask.choices
         assertEquals ask.choices.size(),1
@@ -678,7 +678,7 @@ public class OzoneProviderTest {
     public void emptyAskToXml() {
         
         def ask = new Ask()
-        assertEquals("""<ask xmlns="urn:xmpp:ozone:ask:1" min-confidence="0.3" mode="any" timeout="30000" bargein="true"/>""", toXml(ask));
+        assertEquals("""<ask xmlns="urn:xmpp:tropo:ask:1" min-confidence="0.3" mode="any" timeout="30000" bargein="true"/>""", toXml(ask));
     }
     
     @Test
@@ -692,7 +692,7 @@ public class OzoneProviderTest {
         ask.terminator = '#' as char
         ask.timeout = new Duration(3000)
 
-        assertEquals("""<ask xmlns="urn:xmpp:ozone:ask:1" voice="allison" min-confidence="0.8" mode="dtmf" recognizer="test" terminator="#" timeout="3000" bargein="true"/>""", toXml(ask));
+        assertEquals("""<ask xmlns="urn:xmpp:tropo:ask:1" voice="allison" min-confidence="0.8" mode="dtmf" recognizer="test" terminator="#" timeout="3000" bargein="true"/>""", toXml(ask));
     }
     
     @Test
@@ -707,7 +707,7 @@ public class OzoneProviderTest {
         ask.timeout = new Duration(3000)
         ask.prompt = new Ssml("""<audio src='http://ccmixter.org/content/DoKashiteru/DoKashiteru_-_you_(na-na-na-na).mp3' />""")
 
-        assertEquals("""<ask xmlns="urn:xmpp:ozone:ask:1" voice="allison" min-confidence="0.8" mode="dtmf" recognizer="test" terminator="#" timeout="3000" bargein="true"><prompt><audio xmlns="" src="http://ccmixter.org/content/DoKashiteru/DoKashiteru_-_you_(na-na-na-na).mp3"/></prompt></ask>""", toXml(ask));
+        assertEquals("""<ask xmlns="urn:xmpp:tropo:ask:1" voice="allison" min-confidence="0.8" mode="dtmf" recognizer="test" terminator="#" timeout="3000" bargein="true"><prompt><audio xmlns="" src="http://ccmixter.org/content/DoKashiteru/DoKashiteru_-_you_(na-na-na-na).mp3"/></prompt></ask>""", toXml(ask));
     }
     
     @Test
@@ -722,7 +722,7 @@ public class OzoneProviderTest {
         ask.timeout = new Duration(3000)
         ask.prompt = new Ssml("Hello World.")
 
-        assertEquals("""<ask xmlns="urn:xmpp:ozone:ask:1" voice="allison" min-confidence="0.8" mode="dtmf" recognizer="test" terminator="#" timeout="3000" bargein="true"><prompt>Hello World.</prompt></ask>""", toXml(ask));
+        assertEquals("""<ask xmlns="urn:xmpp:tropo:ask:1" voice="allison" min-confidence="0.8" mode="dtmf" recognizer="test" terminator="#" timeout="3000" bargein="true"><prompt>Hello World.</prompt></ask>""", toXml(ask));
     }
     
     @Test
@@ -739,7 +739,7 @@ public class OzoneProviderTest {
         ask.choices = []
         ask.choices.add new Choices(uri:new URI("http://test"), contentType:"vxml", content:"sales,support")
 
-        assertEquals("""<ask xmlns="urn:xmpp:ozone:ask:1" voice="allison" min-confidence="0.8" mode="dtmf" recognizer="en-us" terminator="#" timeout="3000" bargein="true"><prompt>Hello World.</prompt><choices content-type="vxml" url="http://test">sales,support</choices></ask>""", toXml(ask));
+        assertEquals("""<ask xmlns="urn:xmpp:tropo:ask:1" voice="allison" min-confidence="0.8" mode="dtmf" recognizer="en-us" terminator="#" timeout="3000" bargein="true"><prompt>Hello World.</prompt><choices content-type="vxml" url="http://test">sales,support</choices></ask>""", toXml(ask));
     }
     
     // Conference
@@ -748,7 +748,7 @@ public class OzoneProviderTest {
     @Test
     public void conferenceFromXml() {
         
-        def conference = fromXml("""<conference xmlns="urn:xmpp:ozone:conference:1" terminator="#" name="123456" beep="true" mute="true" tone-passthrough="true" moderator="false"><announcement>hello</announcement><music>music</music></conference>""")
+        def conference = fromXml("""<conference xmlns="urn:xmpp:tropo:conference:1" terminator="#" name="123456" beep="true" mute="true" tone-passthrough="true" moderator="false"><announcement>hello</announcement><music>music</music></conference>""")
         assertNotNull conference
         assertEquals conference.terminator, '#' as char
         assertTrue conference.beep
@@ -766,7 +766,7 @@ public class OzoneProviderTest {
         def conference = new Conference([
             roomName: "1234"
         ])
-        assertEquals("""<conference xmlns="urn:xmpp:ozone:conference:1" name="1234" mute="false" terminator="#" tone-passthrough="true" beep="true" moderator="true"/>""", toXml(conference));
+        assertEquals("""<conference xmlns="urn:xmpp:tropo:conference:1" name="1234" mute="false" terminator="#" tone-passthrough="true" beep="true" moderator="true"/>""", toXml(conference));
     }
     
     @Test
@@ -782,7 +782,7 @@ public class OzoneProviderTest {
         conference.announcement = new Ssml("hello")
         conference.holdMusic = new Ssml("music")
         
-        assertEquals("""<conference xmlns="urn:xmpp:ozone:conference:1" name="1234" mute="true" terminator="#" tone-passthrough="true" beep="true" moderator="false"><announcement>hello</announcement><music>music</music></conference>""", toXml(conference));
+        assertEquals("""<conference xmlns="urn:xmpp:tropo:conference:1" name="1234" mute="true" terminator="#" tone-passthrough="true" beep="true" moderator="false"><announcement>hello</announcement><music>music</music></conference>""", toXml(conference));
     }
 
     // Transfer
@@ -790,7 +790,7 @@ public class OzoneProviderTest {
     @Test
     public void transferFromXml() {
         
-        def transfer = fromXml("""<transfer xmlns="urn:xmpp:ozone:transfer:1" terminator="#" timeout="20000"><to>sip:martin@127.0.0.1:6089</to></transfer>""")
+        def transfer = fromXml("""<transfer xmlns="urn:xmpp:tropo:transfer:1" terminator="#" timeout="20000"><to>sip:martin@127.0.0.1:6089</to></transfer>""")
         assertNotNull transfer
         assertEquals transfer.terminator, '#' as char
         assertEquals transfer.timeout, new Duration(20000)
@@ -799,7 +799,7 @@ public class OzoneProviderTest {
     @Test
     public void transferToItemsFromXml() {
         
-        def transfer = fromXml("""<transfer xmlns="urn:xmpp:ozone:transfer:1" terminator="#" timeout="20000"><to>sip:martin@127.0.0.1:6089</to><to>sip:jose@127.0.0.1:6088</to></transfer>""")
+        def transfer = fromXml("""<transfer xmlns="urn:xmpp:tropo:transfer:1" terminator="#" timeout="20000"><to>sip:martin@127.0.0.1:6089</to><to>sip:jose@127.0.0.1:6088</to></transfer>""")
         assertNotNull transfer
         assertEquals transfer.to.size(),2
         assertEquals transfer.to[0].toString(),"sip:martin@127.0.0.1:6089"
@@ -810,7 +810,7 @@ public class OzoneProviderTest {
     @Test
     public void transferToAttributeFromXml() {
         
-        def transfer = fromXml("""<transfer xmlns="urn:xmpp:ozone:transfer:1" terminator="#" timeout="20000" to="sip:martin@127.0.0.1:6089"></transfer>""")
+        def transfer = fromXml("""<transfer xmlns="urn:xmpp:tropo:transfer:1" terminator="#" timeout="20000" to="sip:martin@127.0.0.1:6089"></transfer>""")
         assertNotNull transfer
         assertEquals transfer.to.size(),1
         assertEquals transfer.to[0].toString(),"sip:martin@127.0.0.1:6089"
@@ -819,7 +819,7 @@ public class OzoneProviderTest {
     @Test
     public void transferMixedToItemsFromXml() {
         
-        def transfer = fromXml("""<transfer xmlns="urn:xmpp:ozone:transfer:1" terminator="#" timeout="20000" to="sip:martin@127.0.0.1:6089"><to>sip:jose@127.0.0.1:6088</to></transfer>""")
+        def transfer = fromXml("""<transfer xmlns="urn:xmpp:tropo:transfer:1" terminator="#" timeout="20000" to="sip:martin@127.0.0.1:6089"><to>sip:jose@127.0.0.1:6088</to></transfer>""")
         assertNotNull transfer
         assertEquals transfer.to.size(),2
         assertEquals transfer.to[0].toString(),"sip:martin@127.0.0.1:6089"
@@ -829,7 +829,7 @@ public class OzoneProviderTest {
 	@Test
 	public void directMediaTransferFromXml() {
 		
-		def transfer = fromXml("""<transfer xmlns="urn:xmpp:ozone:transfer:1" terminator="#" timeout="20000" media="direct" to="sip:martin@127.0.0.1:6089"><to>sip:jose@127.0.0.1:6088</to></transfer>""")
+		def transfer = fromXml("""<transfer xmlns="urn:xmpp:tropo:transfer:1" terminator="#" timeout="20000" media="direct" to="sip:martin@127.0.0.1:6089"><to>sip:jose@127.0.0.1:6088</to></transfer>""")
 		assertNotNull transfer
 		assertEquals transfer.media, MediaType.DIRECT
 	}
@@ -837,7 +837,7 @@ public class OzoneProviderTest {
     @Test
     public void audioTransferFromXml() {
         
-        Transfer transfer = fromXml("""<transfer xmlns="urn:xmpp:ozone:transfer:1" terminator="#" timeout="20000"><ring><audio url="http://ccmixter.org/content/DoKashiteru/DoKashiteru_-_you_(na-na-na-na).mp3"/></ring><to>sip:martin@127.0.0.1:6089</to></transfer>""")
+        Transfer transfer = fromXml("""<transfer xmlns="urn:xmpp:tropo:transfer:1" terminator="#" timeout="20000"><ring><audio url="http://ccmixter.org/content/DoKashiteru/DoKashiteru_-_you_(na-na-na-na).mp3"/></ring><to>sip:martin@127.0.0.1:6089</to></transfer>""")
         assertNotNull transfer
         assertNotNull transfer.ringbackTone
         assertEquals transfer.ringbackTone.text,"""<audio url="http://ccmixter.org/content/DoKashiteru/DoKashiteru_-_you_(na-na-na-na).mp3"/>"""
@@ -846,7 +846,7 @@ public class OzoneProviderTest {
     @Test
     public void ssmlTransferFromXml() {
         
-        Transfer transfer = fromXml("""<transfer xmlns="urn:xmpp:ozone:transfer:1" voice="allison" terminator="#" timeout="20000"><ring>We are going to transfer your call. Wait a couple of seconds.</ring><to>sip:martin@127.0.0.1:6089</to></transfer>""")
+        Transfer transfer = fromXml("""<transfer xmlns="urn:xmpp:tropo:transfer:1" voice="allison" terminator="#" timeout="20000"><ring>We are going to transfer your call. Wait a couple of seconds.</ring><to>sip:martin@127.0.0.1:6089</to></transfer>""")
         assertNotNull transfer
         assertNotNull transfer.ringbackTone
         assertEquals transfer.ringbackTone.text,"We are going to transfer your call. Wait a couple of seconds."
@@ -856,7 +856,7 @@ public class OzoneProviderTest {
     public void emptyTransferToXml() {
         
         def transfer = new Transfer()
-        assertEquals("""<transfer xmlns="urn:xmpp:ozone:transfer:1" terminator="#" timeout="30000" media="bridge" answer-on-media="false"/>""", toXml(transfer));
+        assertEquals("""<transfer xmlns="urn:xmpp:tropo:transfer:1" terminator="#" timeout="30000" media="bridge" answer-on-media="false"/>""", toXml(transfer));
     }
     
     @Test
@@ -867,7 +867,7 @@ public class OzoneProviderTest {
         transfer.terminator = '#' as char
         transfer.to = [new URI("sip:martin@127.0.0.1:6089")]
 
-        assertEquals("""<transfer xmlns="urn:xmpp:ozone:transfer:1" terminator="#" timeout="20000" media="bridge" to="sip:martin@127.0.0.1:6089" answer-on-media="false"/>""", toXml(transfer));
+        assertEquals("""<transfer xmlns="urn:xmpp:tropo:transfer:1" terminator="#" timeout="20000" media="bridge" to="sip:martin@127.0.0.1:6089" answer-on-media="false"/>""", toXml(transfer));
     }
         
     @Test
@@ -879,7 +879,7 @@ public class OzoneProviderTest {
         transfer.to = [new URI("sip:martin@127.0.0.1:6089")]
         transfer.ringbackTone = new Ssml("""<audio src="http://ccmixter.org/content/DoKashiteru/DoKashiteru_-_you_(na-na-na-na).mp3" />""")
 
-        assertEquals("""<transfer xmlns="urn:xmpp:ozone:transfer:1" terminator="#" timeout="20000" media="bridge" to="sip:martin@127.0.0.1:6089" answer-on-media="false"><audio xmlns="" src="http://ccmixter.org/content/DoKashiteru/DoKashiteru_-_you_(na-na-na-na).mp3"/></transfer>""", toXml(transfer));
+        assertEquals("""<transfer xmlns="urn:xmpp:tropo:transfer:1" terminator="#" timeout="20000" media="bridge" to="sip:martin@127.0.0.1:6089" answer-on-media="false"><audio xmlns="" src="http://ccmixter.org/content/DoKashiteru/DoKashiteru_-_you_(na-na-na-na).mp3"/></transfer>""", toXml(transfer));
     }
     
     @Test
@@ -891,7 +891,7 @@ public class OzoneProviderTest {
         transfer.to = [new URI("sip:martin@127.0.0.1:6089")]
         transfer.ringbackTone = new Ssml("We are going to transfer your call. Wait a couple of seconds.")
 
-        assertEquals("""<transfer xmlns="urn:xmpp:ozone:transfer:1" terminator="#" timeout="20000" media="bridge" to="sip:martin@127.0.0.1:6089" answer-on-media="false">We are going to transfer your call. Wait a couple of seconds.</transfer>""", toXml(transfer));
+        assertEquals("""<transfer xmlns="urn:xmpp:tropo:transfer:1" terminator="#" timeout="20000" media="bridge" to="sip:martin@127.0.0.1:6089" answer-on-media="false">We are going to transfer your call. Wait a couple of seconds.</transfer>""", toXml(transfer));
     }
     
     @Test
@@ -903,7 +903,7 @@ public class OzoneProviderTest {
         transfer.to = [new URI("sip:martin@127.0.0.1:6089"),new URI("sip:jose@127.0.0.1:6088")]
         transfer.ringbackTone = new Ssml("We are going to transfer your call. Wait a couple of seconds.")
 
-        assertEquals("""<transfer xmlns="urn:xmpp:ozone:transfer:1" terminator="#" timeout="20000" media="bridge" answer-on-media="false">We are going to transfer your call. Wait a couple of seconds.<to>sip:martin@127.0.0.1:6089</to><to>sip:jose@127.0.0.1:6088</to></transfer>""", toXml(transfer));
+        assertEquals("""<transfer xmlns="urn:xmpp:tropo:transfer:1" terminator="#" timeout="20000" media="bridge" answer-on-media="false">We are going to transfer your call. Wait a couple of seconds.<to>sip:martin@127.0.0.1:6089</to><to>sip:jose@127.0.0.1:6088</to></transfer>""", toXml(transfer));
     }
     
     // Ask Complete
@@ -913,8 +913,8 @@ public class OzoneProviderTest {
     public void askCompleteFromXml() {
         
         def complete = fromXml("""
-            <complete xmlns="urn:xmpp:ozone:ext:1">
-                <success confidence="0.7" mode="voice" xmlns="urn:xmpp:ozone:ask:complete:1">
+            <complete xmlns="urn:xmpp:rayo:ext:1">
+                <success confidence="0.7" mode="voice" xmlns="urn:xmpp:tropo:ask:complete:1">
                     <interpretation>aninterpretation</interpretation>
                     <utterance>anutterance</utterance>
                 </success>
@@ -930,7 +930,7 @@ public class OzoneProviderTest {
     @Test
     public void askCompleteWithErrorsFromXml() {
         
-        def complete = fromXml("""<complete xmlns="urn:xmpp:ozone:ext:1"><error xmlns="urn:xmpp:ozone:ext:complete:1">this is an error</error></complete>""")
+        def complete = fromXml("""<complete xmlns="urn:xmpp:rayo:ext:1"><error xmlns="urn:xmpp:rayo:ext:complete:1">this is an error</error></complete>""")
         assertNotNull complete
         assertEquals complete.reason, VerbCompleteEvent.Reason.ERROR
         assertEquals complete.errorText, "this is an error"
@@ -940,7 +940,7 @@ public class OzoneProviderTest {
     public void emptyAskCompleteToXml() {
         
         def complete = new AskCompleteEvent(new Ask(), VerbCompleteEvent.Reason.HANGUP)
-        assertEquals("""<complete xmlns="urn:xmpp:ozone:ext:1"><hangup xmlns="urn:xmpp:ozone:ext:complete:1"/></complete>""", toXml(complete));
+        assertEquals("""<complete xmlns="urn:xmpp:rayo:ext:1"><hangup xmlns="urn:xmpp:rayo:ext:complete:1"/></complete>""", toXml(complete));
     }
 
     @Test
@@ -952,7 +952,7 @@ public class OzoneProviderTest {
         complete.interpretation = "aninterpretation"
         complete.utterance = "anutterance"
         
-        assertEquals("""<complete xmlns="urn:xmpp:ozone:ext:1"><success xmlns="urn:xmpp:ozone:ask:complete:1" confidence="0.7" mode="voice"><interpretation>aninterpretation</interpretation><utterance>anutterance</utterance></success></complete>""", toXml(complete));
+        assertEquals("""<complete xmlns="urn:xmpp:rayo:ext:1"><success xmlns="urn:xmpp:tropo:ask:complete:1" confidence="0.7" mode="voice"><interpretation>aninterpretation</interpretation><utterance>anutterance</utterance></success></complete>""", toXml(complete));
     }
     
     @Test
@@ -961,7 +961,7 @@ public class OzoneProviderTest {
         def complete = new AskCompleteEvent(new Ask(), VerbCompleteEvent.Reason.ERROR)
         complete.errorText = "this is an error"
         
-        assertEquals("""<complete xmlns="urn:xmpp:ozone:ext:1"><error xmlns="urn:xmpp:ozone:ext:complete:1">this is an error</error></complete>""", toXml(complete));
+        assertEquals("""<complete xmlns="urn:xmpp:rayo:ext:1"><error xmlns="urn:xmpp:rayo:ext:complete:1">this is an error</error></complete>""", toXml(complete));
     }
     
     // Say Complete
@@ -969,7 +969,7 @@ public class OzoneProviderTest {
     @Test
     public void sayCompleteFromXml() {
         
-        def complete = fromXml("""<complete xmlns="urn:xmpp:ozone:ext:complete:1"><hangup/></complete>""")
+        def complete = fromXml("""<complete xmlns="urn:xmpp:rayo:ext:complete:1"><hangup/></complete>""")
         assertNotNull complete
         assertEquals complete.reason, VerbCompleteEvent.Reason.HANGUP
     }
@@ -977,7 +977,7 @@ public class OzoneProviderTest {
     @Test
     public void sayCompleteWithErrorsFromXml() {
         
-        def complete = fromXml("""<complete xmlns="urn:xmpp:ozone:ext:1"><error xmlns="urn:xmpp:ozone:ext:complete:1">this is an error</error></complete>""")
+        def complete = fromXml("""<complete xmlns="urn:xmpp:rayo:ext:1"><error xmlns="urn:xmpp:rayo:ext:complete:1">this is an error</error></complete>""")
         assertNotNull complete
         assertEquals complete.reason, VerbCompleteEvent.Reason.ERROR
         assertEquals complete.errorText, "this is an error"
@@ -988,7 +988,7 @@ public class OzoneProviderTest {
         
         def complete = new SayCompleteEvent(new Say(), VerbCompleteEvent.Reason.HANGUP)
         
-        assertEquals("""<complete xmlns="urn:xmpp:ozone:ext:1"><hangup xmlns="urn:xmpp:ozone:ext:complete:1"/></complete>""", toXml(complete));
+        assertEquals("""<complete xmlns="urn:xmpp:rayo:ext:1"><hangup xmlns="urn:xmpp:rayo:ext:complete:1"/></complete>""", toXml(complete));
     }
     
     @Test
@@ -997,7 +997,7 @@ public class OzoneProviderTest {
         def complete = new SayCompleteEvent(new Say(), VerbCompleteEvent.Reason.ERROR)
         complete.errorText = "this is an error"
         
-        assertEquals("""<complete xmlns="urn:xmpp:ozone:ext:1"><error xmlns="urn:xmpp:ozone:ext:complete:1">this is an error</error></complete>""", toXml(complete));
+        assertEquals("""<complete xmlns="urn:xmpp:rayo:ext:1"><error xmlns="urn:xmpp:rayo:ext:complete:1">this is an error</error></complete>""", toXml(complete));
     }
     
     // Transfer Complete
@@ -1005,7 +1005,7 @@ public class OzoneProviderTest {
     @Test
     public void transferCompleteFromXml() {
         
-        def complete = fromXml("""<complete xmlns="urn:xmpp:ozone:ext:1"><hangup xmlns="urn:xmpp:ozone:ext:complete:1"/></complete>""")
+        def complete = fromXml("""<complete xmlns="urn:xmpp:rayo:ext:1"><hangup xmlns="urn:xmpp:rayo:ext:complete:1"/></complete>""")
         assertNotNull complete
         assertEquals complete.reason, VerbCompleteEvent.Reason.HANGUP
     }
@@ -1013,7 +1013,7 @@ public class OzoneProviderTest {
     @Test
     public void transferCompleteWithErrorsFromXml() {
         
-        def complete = fromXml("""<complete xmlns="urn:xmpp:ozone:ext:1"><error xmlns="urn:xmpp:ozone:ext:complete:1">this is an error</error></complete>""")
+        def complete = fromXml("""<complete xmlns="urn:xmpp:rayo:ext:1"><error xmlns="urn:xmpp:rayo:ext:complete:1">this is an error</error></complete>""")
         assertNotNull complete
         assertEquals complete.reason, VerbCompleteEvent.Reason.ERROR
         assertEquals complete.errorText, "this is an error"
@@ -1024,7 +1024,7 @@ public class OzoneProviderTest {
         
         def complete = new TransferCompleteEvent(new Transfer(), VerbCompleteEvent.Reason.HANGUP)
         
-        assertEquals("""<complete xmlns="urn:xmpp:ozone:ext:1"><hangup xmlns="urn:xmpp:ozone:ext:complete:1"/></complete>""", toXml(complete));
+        assertEquals("""<complete xmlns="urn:xmpp:rayo:ext:1"><hangup xmlns="urn:xmpp:rayo:ext:complete:1"/></complete>""", toXml(complete));
     }
     
     @Test
@@ -1033,7 +1033,7 @@ public class OzoneProviderTest {
         def complete = new TransferCompleteEvent(new Transfer(), VerbCompleteEvent.Reason.ERROR)
         complete.errorText = "this is an error"
         
-        assertEquals("""<complete xmlns="urn:xmpp:ozone:ext:1"><error xmlns="urn:xmpp:ozone:ext:complete:1">this is an error</error></complete>""", toXml(complete));
+        assertEquals("""<complete xmlns="urn:xmpp:rayo:ext:1"><error xmlns="urn:xmpp:rayo:ext:complete:1">this is an error</error></complete>""", toXml(complete));
     }
     
     // Conference Complete
@@ -1041,7 +1041,7 @@ public class OzoneProviderTest {
     @Test
     public void conferenceCompleteFromXml() {
         
-        def complete = fromXml("""<complete xmlns="urn:xmpp:ozone:ext:1"><hangup xmlns="urn:xmpp:ozone:ext:complete:1"/></complete>""")
+        def complete = fromXml("""<complete xmlns="urn:xmpp:rayo:ext:1"><hangup xmlns="urn:xmpp:rayo:ext:complete:1"/></complete>""")
         assertNotNull complete
         assertEquals complete.reason, VerbCompleteEvent.Reason.HANGUP
     }
@@ -1049,7 +1049,7 @@ public class OzoneProviderTest {
     @Test
     public void conferenceCompleteWithErrorsFromXml() {
         
-        def complete = fromXml("""<complete xmlns="urn:xmpp:ozone:ext:1"><error xmlns="urn:xmpp:ozone:ext:complete:1">this is an error</error></complete>""")
+        def complete = fromXml("""<complete xmlns="urn:xmpp:rayo:ext:1"><error xmlns="urn:xmpp:rayo:ext:complete:1">this is an error</error></complete>""")
         assertNotNull complete
         assertEquals complete.reason, VerbCompleteEvent.Reason.ERROR
         assertEquals complete.errorText, "this is an error"
@@ -1060,7 +1060,7 @@ public class OzoneProviderTest {
         
         def complete = new ConferenceCompleteEvent(new Conference(), VerbCompleteEvent.Reason.HANGUP)
         
-        assertEquals("""<complete xmlns="urn:xmpp:ozone:ext:1"><hangup xmlns="urn:xmpp:ozone:ext:complete:1"/></complete>""", toXml(complete));
+        assertEquals("""<complete xmlns="urn:xmpp:rayo:ext:1"><hangup xmlns="urn:xmpp:rayo:ext:complete:1"/></complete>""", toXml(complete));
     }
     
     @Test
@@ -1069,7 +1069,7 @@ public class OzoneProviderTest {
         def complete = new ConferenceCompleteEvent(new Conference(), VerbCompleteEvent.Reason.ERROR)
         complete.errorText = "this is an error"
         
-        assertEquals("""<complete xmlns="urn:xmpp:ozone:ext:1"><error xmlns="urn:xmpp:ozone:ext:complete:1">this is an error</error></complete>""", toXml(complete));
+        assertEquals("""<complete xmlns="urn:xmpp:rayo:ext:1"><error xmlns="urn:xmpp:rayo:ext:complete:1">this is an error</error></complete>""", toXml(complete));
     }
     
 	// Record Complete
@@ -1079,9 +1079,9 @@ public class OzoneProviderTest {
 	public void recordCompleteFromXml() {
 		
 		def complete = fromXml("""
-			<complete xmlns="urn:xmpp:ozone:ext:1">
-				<stop xmlns="urn:xmpp:ozone:ext:complete:1"/>
-				<recording xmlns="urn:xmpp:ozone:record:complete:1" uri="file:///tmp/abc.mp3"/>
+			<complete xmlns="urn:xmpp:rayo:ext:1">
+				<stop xmlns="urn:xmpp:rayo:ext:complete:1"/>
+				<recording xmlns="urn:xmpp:rayo:record:complete:1" uri="file:///tmp/abc.mp3"/>
 			</complete>""")
 		assertNotNull complete
 		assertEquals complete.reason, VerbCompleteEvent.Reason.STOP
@@ -1091,7 +1091,7 @@ public class OzoneProviderTest {
 	@Test
 	public void recordCompleteWithErrorsFromXml() {
 		
-		def complete = fromXml("""<complete xmlns="urn:xmpp:ozone:ext:1"><error xmlns="urn:xmpp:ozone:ext:complete:1">this is an error</error></complete>""")
+		def complete = fromXml("""<complete xmlns="urn:xmpp:rayo:ext:1"><error xmlns="urn:xmpp:rayo:ext:complete:1">this is an error</error></complete>""")
 		assertNotNull complete
 		assertEquals complete.reason, VerbCompleteEvent.Reason.ERROR
 		assertEquals complete.errorText, "this is an error"
@@ -1103,7 +1103,7 @@ public class OzoneProviderTest {
 		def complete = new RecordCompleteEvent(new Record(), RecordCompleteEvent.Reason.SUCCESS)
 		complete.uri = new URI("file:///tmp/abc.mp3")
 		
-		assertEquals("""<complete xmlns="urn:xmpp:ozone:ext:1"><success xmlns="urn:xmpp:ozone:record:complete:1"/><recording xmlns="urn:xmpp:ozone:record:complete:1" uri="file:///tmp/abc.mp3"/></complete>""", toXml(complete));
+		assertEquals("""<complete xmlns="urn:xmpp:rayo:ext:1"><success xmlns="urn:xmpp:rayo:record:complete:1"/><recording xmlns="urn:xmpp:rayo:record:complete:1" uri="file:///tmp/abc.mp3"/></complete>""", toXml(complete));
 	}
 	
 	@Test
@@ -1112,7 +1112,7 @@ public class OzoneProviderTest {
 		def complete = new RecordCompleteEvent(new Record(), VerbCompleteEvent.Reason.ERROR)
 		complete.errorText = "this is an error"
 		
-		assertEquals("""<complete xmlns="urn:xmpp:ozone:ext:1"><error xmlns="urn:xmpp:ozone:ext:complete:1">this is an error</error></complete>""", toXml(complete));
+		assertEquals("""<complete xmlns="urn:xmpp:rayo:ext:1"><error xmlns="urn:xmpp:rayo:ext:complete:1">this is an error</error></complete>""", toXml(complete));
 	}
 	
 	// Hold 
@@ -1121,12 +1121,12 @@ public class OzoneProviderTest {
     @Test
     public void holdToXml() {
         HoldCommand hold = new HoldCommand();
-        assertEquals("""<hold xmlns="urn:xmpp:ozone:1"/>""", toXml(hold));
+        assertEquals("""<hold xmlns="urn:xmpp:rayo:1"/>""", toXml(hold));
     }
     
     @Test
     public void holdFromXml() {
-        assertNotNull fromXml("""<hold xmlns="urn:xmpp:ozone:1"></hold>""")
+        assertNotNull fromXml("""<hold xmlns="urn:xmpp:rayo:1"></hold>""")
     }
 
 	// Unhold
@@ -1135,12 +1135,12 @@ public class OzoneProviderTest {
 	@Test
 	public void unholdToXml() {
 		UnholdCommand unhold = new UnholdCommand();
-		assertEquals("""<unhold xmlns="urn:xmpp:ozone:1"/>""", toXml(unhold));
+		assertEquals("""<unhold xmlns="urn:xmpp:rayo:1"/>""", toXml(unhold));
 	}
 	
 	@Test
 	public void unholdFromXml() {
-		assertNotNull fromXml("""<unhold xmlns="urn:xmpp:ozone:1"></unhold>""")
+		assertNotNull fromXml("""<unhold xmlns="urn:xmpp:rayo:1"></unhold>""")
 	}
 
 	

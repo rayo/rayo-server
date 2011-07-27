@@ -5,7 +5,7 @@
 	version="1.1">
 
 	<xmpp:servlet>
-		<javaee:servlet-name>ozone</javaee:servlet-name>
+		<javaee:servlet-name>rayo</javaee:servlet-name>
 		<javaee:servlet-class>
 			com.tropo.server.SpringXmppServlet
 		</javaee:servlet-class>
@@ -17,7 +17,7 @@
 	</xmpp:serv-domains>
 
 	<xmpp:servlet-selection>
-		<xmpp:main-servlet>ozone</xmpp:main-servlet>
+		<xmpp:main-servlet>rayo</xmpp:main-servlet>
 	</xmpp:servlet-selection>
 
 	<!-- the following is the main different part with SIP and HTTP descriptor -->

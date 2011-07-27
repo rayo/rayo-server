@@ -13,8 +13,8 @@ public class JoinProvider extends BaseProvider {
     // XML -> Object
     // ================================================================================
 
-    private static final Namespace NAMESPACE = new Namespace("", "urn:xmpp:ozone:join:1");
-    private static final Namespace COMPLETE_NAMESPACE = new Namespace("", "urn:xmpp:ozone:join:complete:1");
+    private static final Namespace NAMESPACE = new Namespace("", "urn:xmpp:rayo:join:1");
+    private static final Namespace COMPLETE_NAMESPACE = new Namespace("", "urn:xmpp:rayo:join:complete:1");
     
     @Override
     protected Object processElement(Element element) throws Exception {

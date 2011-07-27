@@ -22,8 +22,8 @@ public class InputProvider extends BaseProvider {
     // XML -> Object
     // ================================================================================
 
-    private static final Namespace NAMESPACE = new Namespace("", "urn:xmpp:ozone:input:1");
-    private static final Namespace COMPLETE_NAMESPACE = new Namespace("", "urn:xmpp:ozone:input:complete:1");
+    private static final Namespace NAMESPACE = new Namespace("", "urn:xmpp:rayo:input:1");
+    private static final Namespace COMPLETE_NAMESPACE = new Namespace("", "urn:xmpp:rayo:input:complete:1");
     
     @Override
     protected Object processElement(Element element) throws Exception {

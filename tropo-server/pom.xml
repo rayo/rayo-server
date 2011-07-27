@@ -3,7 +3,7 @@
 	<artifactId>tropo-server</artifactId>
 	<packaging>jar</packaging>
 	
-	<name>Tropo2/Ozone Server</name>
+	<name>Tropo2/Rayo Server</name>
   
 	<parent>
 		<groupId>com.tropo</groupId>
