@@ -42,6 +42,12 @@
 		<property name="cdrManager" ref="cdrManager" />
 	</bean>
 
+	<!-- Mixer Actor Factory -->
+	<bean id="mixerActorFactory" class="com.tropo.server.DefaultMixerActorFactory">
+		<property name="fiberFactory" ref="fiberFactory" />
+		<property name="verbManager" ref="mixerVerbManager" />
+	</bean>	
+
 	<!-- Conference Manager -->	
 	<bean id="conferenceController" class="com.tropo.server.conference.MohoConferenceController" />
 
@@ -194,6 +200,49 @@
 					<property name="modelClass" value="com.tropo.core.verb.Record" />
 					<lookup-method name="createVerbHandler" bean="recordHandler" />
 				</bean>								
+			</list>
+		</property>
+	</bean>
+
+	<!-- Mixer verb manager. Handles verbs that can be processed by a mixer -->
+	<bean id="mixerVerbManager" class="com.tropo.server.verb.DefaultVerbManagerFactoryBean">
+		<property name="verbManager">
+			<bean class="com.tropo.server.verb.DefaultVerbManager">
+				<property name="xmlProviderManager" ref="xmlProviderManager" />
+			</bean>
+		</property>
+		<property name="verbFactoryList">
+			<list>
+				<!-- Say -->
+				<bean class="com.tropo.server.verb.AbstractVerbFactory">
+					<property name="xmlProvider" ref="sayProvider" />
+					<property name="modelClass" value="com.tropo.core.verb.Say" />
+					<lookup-method name="createVerbHandler" bean="sayHandler" />
+				</bean>
+				<!-- Record -->
+				<bean class="com.tropo.server.verb.AbstractVerbFactory">
+					<property name="xmlProvider" ref="recordProvider" />
+					<property name="modelClass" value="com.tropo.core.verb.Record" />
+					<lookup-method name="createVerbHandler" bean="recordHandler" />
+				</bean>
+				<!-- Ask -->
+				<bean class="com.tropo.server.verb.AbstractVerbFactory">
+					<property name="xmlProvider" ref="askProvider" />
+					<property name="modelClass" value="com.tropo.core.verb.Ask" />
+					<lookup-method name="createVerbHandler" bean="askHandler" />
+				</bean>
+				<!-- Output -->
+				<bean class="com.tropo.server.verb.AbstractVerbFactory">
+					<property name="xmlProvider" ref="outputProvider" />
+					<property name="modelClass" value="com.tropo.core.verb.Output" />
+					<lookup-method name="createVerbHandler" bean="outputHandler" />
+				</bean>
+				<!-- Input -->
+				<bean class="com.tropo.server.verb.AbstractVerbFactory">
+					<property name="xmlProvider" ref="inputProvider" />
+					<property name="modelClass" value="com.tropo.core.verb.Input" />
+					<lookup-method name="createVerbHandler" bean="inputHandler" />
+				</bean>
 			</list>
 		</property>
 	</bean>

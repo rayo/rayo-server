@@ -22,6 +22,7 @@ import com.tropo.core.EndEvent
 import com.tropo.core.OfferEvent
 import com.tropo.core.RejectCommand
 import com.tropo.core.EndEvent.Reason
+import com.tropo.core.recording.StorageService;
 import com.tropo.core.verb.PauseCommand
 import com.tropo.core.verb.Record;
 import com.tropo.core.verb.ResumeCommand
@@ -55,7 +56,10 @@ public class IntegrationTest {
     
     @Autowired
     private CallRegistry callRegistry
-    
+
+	@Autowired
+	def storageServices
+
     private OfferEvent offer
     private Call mohoCall
     private CallActor callActor
@@ -351,6 +355,63 @@ public class IntegrationTest {
 	   
    }
 	
+   /**
+   * This test ensures that a provided recording storage service will override the
+   * default recording storage service
+   */
+  @Test
+  public void recordAndCustomStore() throws InterruptedException {
+	  
+	  // Mock MediaService
+	  mohoCall.mediaService = [
+		  record: { RecordCommand command ->
+			  return [
+				  pause:{messageQueue.add "pause"},
+				  resume:{messageQueue.add "resume"},
+				  stop:{ mohoCall.dispatch(new RecordCompleteEvent(mohoCall, com.voxeo.moho.event.RecordCompleteEvent.Cause.CANCEL, 1000)) }
+			  ] as Recording
+		  }
+	  ] as MediaService
+  
+	  def storageService = [store: {participand, file -> new URI("a.mp3")}] as StorageService
+		  
+	  // We add the new storage service at the beginning. The default storage service will be
+	  // the last one to be executed, but its output should be ignored.
+	  storageServices.add(0,storageService)
+	  
+	  def record = new Record()
+	  
+	  // Start Say
+	  callActor.command(record, { messageQueue.add it } as ResponseHandler)
+
+	  // We should get a response from the record command
+	  Response response = poll()
+	  assertTrue response.success
+	  assertNotNull response.value
+	  
+	  // Get the Verb ID
+	  def verbId = response.value.verbId
+	  
+	  // Stop the recording
+	  callActor.command(new StopCommand([verbId:verbId]), { messageQueue.add it } as ResponseHandler)
+	  assertTrue poll().success // Command callback
+
+	  // We should get a say complete event
+	  com.tropo.core.verb.RecordCompleteEvent recordComplete = poll()
+	  assertEquals VerbCompleteEvent.Reason.STOP, recordComplete.reason
+	  
+	  assertNotNull recordComplete.uri
+	  assertEquals recordComplete.uri, new URI("a.mp3")
+	  
+	  mohoCall.disconnect()
+			  
+	  // We should get an end event
+	  EndEvent end = poll()
+	  assertEquals Reason.HANGUP, end.reason
+	  
+	  storageServices.remove(0)
+  }
+  
     /**
     * Ensure that a hangup during verb execution results in a controlled
     * shutdown consisting of {@link VerbCompleteEvent}s followed by the

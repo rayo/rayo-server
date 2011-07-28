@@ -194,12 +194,13 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
 		// When temp file is null the user has provided a to URL (right now an undocumented feature). In such cases
 		// no storage service policies will be applied.
 		if (tempFile != null) {
+			URI fileUri = tempFile.toURI();
 			//TODO: Should we change this and add multiple URIs? Right now only the last URI will make it to the xml
 			for (Object storageService: storageServices) {
 				StorageService ss = (StorageService)storageService;
 				try {
 					URI result = ss.store(tempFile, getParticipant());
-					if (!result.equals(model.getTo())) {
+					if (!result.equals(fileUri)) {
 						log.debug("Setting record's URI to %s", result);
 						model.setTo(result);
 					}
