@@ -16,10 +16,12 @@ import com.tropo.core.DialCommand;
 import com.tropo.core.DtmfEvent;
 import com.tropo.core.EndEvent;
 import com.tropo.core.HangupCommand;
+import com.tropo.core.JoinedEvent;
 import com.tropo.core.OfferEvent;
 import com.tropo.core.RedirectCommand;
 import com.tropo.core.RejectCommand;
 import com.tropo.core.RingingEvent;
+import com.tropo.core.UnjoinedEvent;
 import com.tropo.core.validation.Messages;
 import com.tropo.core.validation.ValidationException;
 import com.tropo.core.verb.HoldCommand;
@@ -42,6 +44,10 @@ public class RayoProvider extends BaseProvider {
             return buildHoldCommand(element);
         } else if (elementName.equals("unhold")) {
             return buildUnholdCommand(element);            
+        } else if (elementName.equals("joined")) {
+            return buildJoinedEvent(element);            
+        } else if (elementName.equals("unjoined")) {
+            return buildUnjoinedEvent(element);            
         } else if (elementName.equals("answer")) {
             return buildAnswerCommand(element);
         } else if (elementName.equals("hangup")) {
@@ -149,6 +155,16 @@ public class RayoProvider extends BaseProvider {
 
         return new UnholdCommand();
     }
+
+    private Object buildJoinedEvent(Element element) {
+
+        return new JoinedEvent(null,element.attributeValue("call-id"));
+    }
+
+    private Object buildUnjoinedEvent(Element element) {
+
+        return new UnjoinedEvent(null,element.attributeValue("call-id"));
+    }
     
     private Object buildAnswerCommand(Element element) throws URISyntaxException {
 
@@ -214,6 +230,10 @@ public class RayoProvider extends BaseProvider {
             createHoldCommand(object, document);            
         } else if (object instanceof UnholdCommand) {
             createUnholdCommand(object, document);            
+        } else if (object instanceof JoinedEvent) {
+            createJoinedEvent(object, document);            
+        } else if (object instanceof UnjoinedEvent) {
+            createUnjoinedEvent(object, document);            
         } else if (object instanceof AnswerCommand) {
             createAnswerCommand(object, document);
         } else if (object instanceof HangupCommand) {
@@ -290,6 +310,24 @@ public class RayoProvider extends BaseProvider {
 
         return document;
     }
+
+    private Document createUnjoinedEvent(Object object, Document document) {
+
+    	UnjoinedEvent event = (UnjoinedEvent)object;
+        Element unjoined = document.addElement(new QName("unjoined", RAYO_NAMESPACE));
+        unjoined.addAttribute("call-id", event.getFrom());
+
+        return document;
+    }
+
+    private Document createJoinedEvent(Object object, Document document) {
+
+    	JoinedEvent event = (JoinedEvent)object;
+        Element unjoined = document.addElement(new QName("joined", RAYO_NAMESPACE));
+        unjoined.addAttribute("call-id", event.getTo());
+
+        return document;
+    }
     
     private Document createAnswerCommand(Object object, Document document) {
 
@@ -363,6 +401,8 @@ public class RayoProvider extends BaseProvider {
 			   clazz == DialCommand.class ||
 		       clazz == DtmfEvent.class ||
 		       clazz == HoldCommand.class ||
-		       clazz == UnholdCommand.class;
+		       clazz == UnholdCommand.class ||
+		       clazz == JoinedEvent.class ||
+		       clazz == UnjoinedEvent.class;
 	}
 }

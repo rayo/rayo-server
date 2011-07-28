@@ -23,9 +23,11 @@ import com.tropo.core.CallRejectReason
 import com.tropo.core.DialCommand
 import com.tropo.core.DtmfEvent;
 import com.tropo.core.HangupCommand
+import com.tropo.core.JoinedEvent;
 import com.tropo.core.OfferEvent
 import com.tropo.core.RedirectCommand
 import com.tropo.core.RejectCommand
+import com.tropo.core.UnjoinedEvent;
 import com.tropo.core.validation.Validator
 import com.tropo.core.verb.Ask
 import com.tropo.core.verb.AskCompleteEvent
@@ -172,6 +174,44 @@ public class RayoProviderTest {
 		complete.errorText = "this is an error"
 		
 		assertEquals("""<complete xmlns="urn:xmpp:rayo:ext:1"><error xmlns="urn:xmpp:rayo:ext:complete:1">this is an error</error></complete>""", toXml(complete));
+	}
+	
+	// Unjoined Event
+	// ====================================================================================
+
+	@Test
+	public void unjoinedToXml() {
+
+		def unjoined = new UnjoinedEvent(null, 'abcd')
+		assertEquals("""<unjoined xmlns="urn:xmpp:rayo:1" call-id="abcd"/>""", toXml(unjoined));
+	}
+	
+	@Test
+	public void unjoinedFromXml() {
+
+		def unjoined = fromXml("""<unjoined xmlns="urn:xmpp:rayo:1" call-id="abcd"/>""")
+		assertProperties(unjoined, [
+			from: "abcd"
+		])
+	}
+	
+	// Joined Event
+	// ====================================================================================
+
+	@Test
+	public void joinedToXml() {
+
+		def joined = new JoinedEvent(null, 'abcd')
+		assertEquals("""<joined xmlns="urn:xmpp:rayo:1" call-id="abcd"/>""", toXml(joined));
+	}
+	
+	@Test
+	public void joinedFromXml() {
+
+		def joined = fromXml("""<joined xmlns="urn:xmpp:rayo:1" call-id="abcd"/>""")
+		assertProperties(joined, [
+			to: "abcd"
+		])
 	}
 	
 	// Dial

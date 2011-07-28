@@ -516,6 +516,30 @@ class ValidationTest {
 	}
 	
 	
+	@Test
+	public void validateJoinedEmptyTo() {
+				
+		def joined = parseXml("""<joined xmlns="urn:xmpp:rayo:1"/> """)
+		
+		def errorMapping = assertValidationException(joined)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.MISSING_TO
+	}
+	
+	@Test
+	public void validateUnjoinedEmptyFrom() {
+				
+		def unjoined = parseXml("""<unjoined xmlns="urn:xmpp:rayo:1"/> """)
+		
+		def errorMapping = assertValidationException(unjoined)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.MISSING_FROM
+	}
+	
 	// Join
 	// ====================================================================================
 
