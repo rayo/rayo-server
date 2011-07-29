@@ -99,11 +99,11 @@ public class CallActor extends AbstractActor<Call> {
 	            JoinType mediaType = participant.getAttribute(JoinCommand.MEDIA_TYPE);                        
 	            Participant destination = getDestinationParticipant(dest, type);
                         
-        		waitForJoin(participant.join(destination, mediaType, direction));
+        		participant.join(destination, mediaType, direction);
         		fire(new JoinedEvent(participant.getId(), destination.getId(), type));
         		fire(new JoinedEvent(destination.getId(), participant.getId(), type));
             } else {
-            	waitForJoin(participant.join());
+            	participant.join();
             }
             
             callStatistics.outgoingCall();
