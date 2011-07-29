@@ -139,7 +139,7 @@
 	</bean>
 
 	<!-- Verb Manager: Used to create VerbHandler instances and read/write XML -->
-	<bean id="verbManager" class="com.tropo.server.verb.DefaultVerbManagerFactoryBean">
+	<bean id="callVerbManager" class="com.tropo.server.verb.DefaultVerbManagerFactoryBean">
 		<property name="verbManager">
 			<bean class="com.tropo.server.verb.DefaultVerbManager">
 				<property name="xmlProviderManager" ref="xmlProviderManager" />
