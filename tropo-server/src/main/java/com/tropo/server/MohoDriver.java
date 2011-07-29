@@ -52,6 +52,7 @@ public class MohoDriver implements Application {
             callStatistics.callBusy();
             call.reject(Reason.BUSY);
             cdrManager.end(call);
+            cdrManager.store(call.getId());
             return;
     	}                    	
 
