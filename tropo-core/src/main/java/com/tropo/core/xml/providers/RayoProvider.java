@@ -16,11 +16,14 @@ import com.tropo.core.DialCommand;
 import com.tropo.core.DtmfEvent;
 import com.tropo.core.EndEvent;
 import com.tropo.core.HangupCommand;
+import com.tropo.core.JoinCommand;
+import com.tropo.core.JoinDestinationType;
 import com.tropo.core.JoinedEvent;
 import com.tropo.core.OfferEvent;
 import com.tropo.core.RedirectCommand;
 import com.tropo.core.RejectCommand;
 import com.tropo.core.RingingEvent;
+import com.tropo.core.UnjoinCommand;
 import com.tropo.core.UnjoinedEvent;
 import com.tropo.core.validation.Messages;
 import com.tropo.core.validation.ValidationException;
@@ -44,6 +47,10 @@ public class RayoProvider extends BaseProvider {
             return buildHoldCommand(element);
         } else if (elementName.equals("unhold")) {
             return buildUnholdCommand(element);            
+        } else if (elementName.equals("join")) {
+            return buildJoinCommand(element);            
+        } else if (elementName.equals("unjoin")) {
+            return buildUnjoinCommand(element);            
         } else if (elementName.equals("joined")) {
             return buildJoinedEvent(element);            
         } else if (elementName.equals("unjoined")) {
@@ -106,7 +113,7 @@ public class RayoProvider extends BaseProvider {
         command.setHeaders(grabHeaders(element));
         Element joinElement = element.element("join"); 
         if (joinElement != null) {
-        	command.setJoin(new JoinProvider().buildJoin(joinElement));
+        	command.setJoin(buildJoinCommand(joinElement));
         }
         return command;
     }
@@ -156,14 +163,58 @@ public class RayoProvider extends BaseProvider {
         return new UnholdCommand();
     }
 
+    JoinCommand buildJoinCommand(Element element) {
+        
+    	JoinCommand join = new JoinCommand();
+    	if (element.attribute("media") != null) {
+    		join.setMedia(element.attributeValue("media").toUpperCase());
+    	}
+    	
+    	if (element.attribute("direction") != null) {
+    		join.setDirection(element.attributeValue("direction").toUpperCase());
+    	}
+    	
+    	if (element.attribute("call-id") != null) {
+    		join.setTo(element.attributeValue("call-id"));
+    		join.setType(JoinDestinationType.CALL);
+    	} else if (element.attribute("mixer-id") != null) {
+    		join.setTo(element.attributeValue("mixer-id"));
+    		join.setType(JoinDestinationType.MIXER);    		
+    	} 
+
+        return join;
+    }
+
+    private UnjoinCommand buildUnjoinCommand(Element element) {
+        
+    	UnjoinCommand unjoin = new UnjoinCommand();
+
+    	if (element.attribute("call-id") != null) {
+    		unjoin.setFrom(element.attributeValue("call-id"));
+    		unjoin.setType(JoinDestinationType.CALL);
+    	} else if (element.attribute("mixer-id") != null) {
+    		unjoin.setFrom(element.attributeValue("mixer-id"));
+    		unjoin.setType(JoinDestinationType.MIXER);    		
+    	}
+        return unjoin;
+    }
+    
     private Object buildJoinedEvent(Element element) {
 
-        return new JoinedEvent(null,element.attributeValue("call-id"));
+    	if (element.attribute("call-id") != null) {
+    		return new JoinedEvent(null,element.attributeValue("call-id"), JoinDestinationType.CALL);
+    	} else if (element.attribute("mixer-id") != null) {
+    		return new JoinedEvent(null,element.attributeValue("mixer-id"), JoinDestinationType.MIXER);
+    	} else return new JoinedEvent(null,null,null);
     }
 
     private Object buildUnjoinedEvent(Element element) {
 
-        return new UnjoinedEvent(null,element.attributeValue("call-id"));
+    	if (element.attribute("call-id") != null) {
+    		return new UnjoinedEvent(null,element.attributeValue("call-id"), JoinDestinationType.CALL);
+    	} else if (element.attribute("mixer-id") != null) {
+    		return new UnjoinedEvent(null,element.attributeValue("mixer-id"), JoinDestinationType.MIXER);
+    	} else return new JoinedEvent(null,null,null);
     }
     
     private Object buildAnswerCommand(Element element) throws URISyntaxException {
@@ -230,6 +281,10 @@ public class RayoProvider extends BaseProvider {
             createHoldCommand(object, document);            
         } else if (object instanceof UnholdCommand) {
             createUnholdCommand(object, document);            
+        } else if (object instanceof JoinCommand) {
+            createJoinCommand(object, document);            
+        } else if (object instanceof UnjoinCommand) {
+            createUnjoinCommand(object, document);            
         } else if (object instanceof JoinedEvent) {
             createJoinedEvent(object, document);            
         } else if (object instanceof UnjoinedEvent) {
@@ -265,7 +320,7 @@ public class RayoProvider extends BaseProvider {
         }
         addHeaders(command.getHeaders(), root);
         if (command.getJoin() != null) {
-        	new JoinProvider().createJoin(command.getJoin(), root);
+        	createJoinCommand(command.getJoin(), root);
         }
         return document;
     }
@@ -311,11 +366,61 @@ public class RayoProvider extends BaseProvider {
         return document;
     }
 
+    void createJoinCommand(JoinCommand join, Element element) {
+    	
+        Element root = element.addElement(new QName("join", RAYO_NAMESPACE));
+        internalCreateJoinCommand(join, root);
+    }
+    
+    void createJoinCommand(Object join, Document document) {
+    	
+        Element root = document.addElement(new QName("join", RAYO_NAMESPACE));
+        internalCreateJoinCommand((JoinCommand)join, root);
+    }
+    
+    private void internalCreateJoinCommand(JoinCommand join, Element joinElement) {
+    	
+        if (join.getDirection() != null) {
+        	joinElement.addAttribute("direction", join.getDirection());        	
+        }
+        if (join.getMedia() != null) {
+        	joinElement.addAttribute("media", join.getMedia());
+        }
+        if (join.getTo() != null) {
+        	if (join.getType() == JoinDestinationType.CALL) {
+        		joinElement.addAttribute("call-id", join.getTo());
+        	} else {
+        		joinElement.addAttribute("mixer-id", join.getTo());        		
+        	}
+        }
+    }
+   
+    private Document createUnjoinCommand(Object object, Document document) {
+
+    	UnjoinCommand unjoin = (UnjoinCommand)object;
+        Element unjoinElement = document.addElement(new QName("unjoin", RAYO_NAMESPACE));
+        if (unjoin.getFrom() != null) {
+        	if (unjoin.getType() == JoinDestinationType.CALL) {
+        		unjoinElement.addAttribute("call-id", unjoin.getFrom());
+        	} else {
+        		unjoinElement.addAttribute("mixer-id", unjoin.getFrom());        		
+        	}
+        }
+
+        return document;
+    }
+    
     private Document createUnjoinedEvent(Object object, Document document) {
 
     	UnjoinedEvent event = (UnjoinedEvent)object;
         Element unjoined = document.addElement(new QName("unjoined", RAYO_NAMESPACE));
-        unjoined.addAttribute("call-id", event.getFrom());
+        if (event.getFrom() != null) {
+        	if (event.getType() == JoinDestinationType.CALL) {
+        		unjoined.addAttribute("call-id", event.getFrom());
+        	} else {
+        		unjoined.addAttribute("mixer-id", event.getFrom());        		
+        	}
+        }
 
         return document;
     }
@@ -323,8 +428,14 @@ public class RayoProvider extends BaseProvider {
     private Document createJoinedEvent(Object object, Document document) {
 
     	JoinedEvent event = (JoinedEvent)object;
-        Element unjoined = document.addElement(new QName("joined", RAYO_NAMESPACE));
-        unjoined.addAttribute("call-id", event.getTo());
+        Element joined = document.addElement(new QName("joined", RAYO_NAMESPACE));
+        if (event.getTo() != null) {
+        	if (event.getType() == JoinDestinationType.CALL) {
+        		joined.addAttribute("call-id", event.getTo());
+        	} else {
+        		joined.addAttribute("mixer-id", event.getTo());        		
+        	}
+        }
 
         return document;
     }
@@ -402,6 +513,8 @@ public class RayoProvider extends BaseProvider {
 		       clazz == DtmfEvent.class ||
 		       clazz == HoldCommand.class ||
 		       clazz == UnholdCommand.class ||
+		       clazz == JoinCommand.class ||
+		       clazz == UnjoinCommand.class ||
 		       clazz == JoinedEvent.class ||
 		       clazz == UnjoinedEvent.class;
 	}

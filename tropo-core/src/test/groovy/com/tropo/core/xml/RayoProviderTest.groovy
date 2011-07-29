@@ -23,10 +23,13 @@ import com.tropo.core.CallRejectReason
 import com.tropo.core.DialCommand
 import com.tropo.core.DtmfEvent;
 import com.tropo.core.HangupCommand
+import com.tropo.core.JoinCommand;
+import com.tropo.core.JoinDestinationType;
 import com.tropo.core.JoinedEvent;
 import com.tropo.core.OfferEvent
 import com.tropo.core.RedirectCommand
 import com.tropo.core.RejectCommand
+import com.tropo.core.UnjoinCommand;
 import com.tropo.core.UnjoinedEvent;
 import com.tropo.core.validation.Validator
 import com.tropo.core.verb.Ask
@@ -36,8 +39,6 @@ import com.tropo.core.verb.Conference
 import com.tropo.core.verb.ConferenceCompleteEvent
 import com.tropo.core.verb.HoldCommand;
 import com.tropo.core.verb.InputMode
-import com.tropo.core.verb.Join;
-import com.tropo.core.verb.JoinCompleteEvent;
 import com.tropo.core.verb.KickCommand
 import com.tropo.core.verb.MediaType;
 import com.tropo.core.verb.PauseCommand
@@ -57,7 +58,6 @@ import com.tropo.core.verb.UnholdCommand;
 import com.tropo.core.verb.VerbCompleteEvent;
 import com.tropo.core.xml.providers.AskProvider
 import com.tropo.core.xml.providers.ConferenceProvider
-import com.tropo.core.xml.providers.JoinProvider;
 import com.tropo.core.xml.providers.RayoProvider
 import com.tropo.core.xml.providers.RecordProvider;
 import com.tropo.core.xml.providers.SayProvider
@@ -81,8 +81,7 @@ public class RayoProviderTest {
          new AskProvider(validator:validator,namespaces:['urn:xmpp:tropo:ask:1', 'urn:xmpp:tropo:ask:complete:1']),
          new TransferProvider(validator:validator,namespaces:['urn:xmpp:tropo:transfer:1', 'urn:xmpp:tropo:transfer:complete:1']),
          new ConferenceProvider(validator:validator,namespaces:['urn:xmpp:tropo:conference:1', 'urn:xmpp:tropo:conference:complete:1']),
-         new RecordProvider(validator:validator,namespaces:['urn:xmpp:rayo:record:1', 'urn:xmpp:rayo:record:complete:1']),
-         new JoinProvider(validator:validator,namespaces:['urn:xmpp:rayo:join:1', 'urn:xmpp:rayo:join:complete:1'])
+         new RecordProvider(validator:validator,namespaces:['urn:xmpp:rayo:record:1', 'urn:xmpp:rayo:record:complete:1'])
 		].each {
              provider.register it
          }
@@ -119,79 +118,99 @@ public class RayoProviderTest {
     // Join
     // ====================================================================================
 
-    @Test
-    public void emptyJoinToXml() {
-
-		def join = new Join()
-        assertEquals("""<join xmlns="urn:xmpp:rayo:join:1"/>""", toXml(join));
-    }
-
 	@Test
-	public void fullJoinToXml() {
+	public void joinToXmlWithCallId() {
 		
-		def join = new Join(direction:"duplex", media:"bridge", to:"1234");
+		def join = new JoinCommand(direction:"duplex", media:"bridge", to:"1234", type: JoinDestinationType.CALL);
 		
-		assertEquals("""<join xmlns="urn:xmpp:rayo:join:1" direction="duplex" media="bridge" to="1234"/>""", toXml(join));
+		assertEquals("""<join xmlns="urn:xmpp:rayo:1" direction="duplex" media="bridge" call-id="1234"/>""", toXml(join));
 	}
 	
 	@Test
-	public void emptyJoinFromXml() {
-
-		def join = fromXml("""<join xmlns="urn:xmpp:rayo:join:1"/>""")
-		assertProperties(join, [
-			direction: null,
-			media: null,
-			to:null
-		])
+	public void joinToXmlWithMixerId() {
+		
+		def join = new JoinCommand(direction:"duplex", media:"bridge", to:"1234", type: JoinDestinationType.MIXER);
+		
+		assertEquals("""<join xmlns="urn:xmpp:rayo:1" direction="duplex" media="bridge" mixer-id="1234"/>""", toXml(join));
 	}
-	
+		
 	@Test
-	public void fullJoinFromXml() {
+	public void joinCallIdFromXml() {
 
-		def join = fromXml("""<join xmlns="urn:xmpp:rayo:join:1" direction="duplex" media="bridge" to="1234"/>""")
+		def join = fromXml("""<join xmlns="urn:xmpp:rayo:1" direction="duplex" media="bridge" call-id="1234"/>""")
 		assertProperties(join, [
 			direction: "DUPLEX",
 			media: "BRIDGE",
-			to:"1234"
+			to:"1234",
+			type: JoinDestinationType.CALL
 		])
-	}
-
-	// Join Complete
-	// ====================================================================================
-
-	@Test
-	public void joinCompleteToXml() {
-		
-		def complete = new JoinCompleteEvent(new Join(), VerbCompleteEvent.Reason.HANGUP)
-		
-		assertEquals("""<complete xmlns="urn:xmpp:rayo:ext:1"><hangup xmlns="urn:xmpp:rayo:ext:complete:1"/></complete>""", toXml(complete));
 	}
 	
 	@Test
-	public void joinCompleteWithErrorsToXml() {
+	public void joinMixerIdFromXml() {
+
+		def join = fromXml("""<join xmlns="urn:xmpp:rayo:1" direction="duplex" media="bridge" mixer-id="1234"/>""")
+		assertProperties(join, [
+			direction: "DUPLEX",
+			media: "BRIDGE",
+			to:"1234",
+			type: JoinDestinationType.MIXER
+		])
+	}
+	
+	// Unjoin
+	// ====================================================================================
+
+	@Test
+	public void unjoinCallIdToXml() {
 		
-		def complete = new JoinCompleteEvent(new Join(), VerbCompleteEvent.Reason.ERROR)
-		complete.errorText = "this is an error"
+		def unjoin = new UnjoinCommand(from:"1234", type:JoinDestinationType.CALL);
 		
-		assertEquals("""<complete xmlns="urn:xmpp:rayo:ext:1"><error xmlns="urn:xmpp:rayo:ext:complete:1">this is an error</error></complete>""", toXml(complete));
+		assertEquals("""<unjoin xmlns="urn:xmpp:rayo:1" call-id="1234"/>""", toXml(unjoin));
+	}
+	
+	@Test
+	public void unjoinMixerIdToXml() {
+		
+		def unjoin = new UnjoinCommand(from:"1234", type:JoinDestinationType.MIXER);
+		
+		assertEquals("""<unjoin xmlns="urn:xmpp:rayo:1" mixer-id="1234"/>""", toXml(unjoin));
 	}
 	
 	// Unjoined Event
 	// ====================================================================================
 
 	@Test
-	public void unjoinedToXml() {
+	public void unjoinedCallToXml() {
 
-		def unjoined = new UnjoinedEvent(null, 'abcd')
+		def unjoined = new UnjoinedEvent(null, 'abcd', JoinDestinationType.CALL)
 		assertEquals("""<unjoined xmlns="urn:xmpp:rayo:1" call-id="abcd"/>""", toXml(unjoined));
 	}
 	
 	@Test
-	public void unjoinedFromXml() {
+	public void unjoinedMixerToXml() {
+
+		def unjoined = new UnjoinedEvent(null, 'abcd', JoinDestinationType.MIXER)
+		assertEquals("""<unjoined xmlns="urn:xmpp:rayo:1" mixer-id="abcd"/>""", toXml(unjoined));
+	}
+	
+	@Test
+	public void unjoinedCallFromXml() {
 
 		def unjoined = fromXml("""<unjoined xmlns="urn:xmpp:rayo:1" call-id="abcd"/>""")
 		assertProperties(unjoined, [
-			from: "abcd"
+			from: "abcd",
+			type: JoinDestinationType.CALL
+		])
+	}
+	
+	@Test
+	public void unjoinedMixerFromXml() {
+
+		def unjoined = fromXml("""<unjoined xmlns="urn:xmpp:rayo:1" mixer-id="abcd"/>""")
+		assertProperties(unjoined, [
+			from: "abcd",
+			type: JoinDestinationType.MIXER
 		])
 	}
 	
@@ -199,18 +218,36 @@ public class RayoProviderTest {
 	// ====================================================================================
 
 	@Test
-	public void joinedToXml() {
+	public void joinedCallToXml() {
 
-		def joined = new JoinedEvent(null, 'abcd')
+		def joined = new JoinedEvent(null, 'abcd', JoinDestinationType.CALL)
 		assertEquals("""<joined xmlns="urn:xmpp:rayo:1" call-id="abcd"/>""", toXml(joined));
 	}
 	
 	@Test
-	public void joinedFromXml() {
+	public void joinedMixerToXml() {
+
+		def joined = new JoinedEvent(null, 'abcd', JoinDestinationType.MIXER)
+		assertEquals("""<joined xmlns="urn:xmpp:rayo:1" mixer-id="abcd"/>""", toXml(joined));
+	}
+	
+	@Test
+	public void joinedCallFromXml() {
 
 		def joined = fromXml("""<joined xmlns="urn:xmpp:rayo:1" call-id="abcd"/>""")
 		assertProperties(joined, [
-			to: "abcd"
+			to: "abcd",
+			type: JoinDestinationType.CALL
+		])
+	}
+	
+	@Test
+	public void joinedMixerFromXml() {
+
+		def joined = fromXml("""<joined xmlns="urn:xmpp:rayo:1" mixer-id="abcd"/>""")
+		assertProperties(joined, [
+			to: "abcd",
+			type: JoinDestinationType.MIXER
 		])
 	}
 	
@@ -230,28 +267,41 @@ public class RayoProviderTest {
 	}
 
 	@Test
+	//TODO Is this valid?
 	public void dialWithNestedJoinToXml() {
 		
 		DialCommand command = new DialCommand();
 		command.setTo(new URI("tel:44477773333333"));
 		command.setFrom(new URI("tel:34637710708"));
-		def join = new Join();
+		def join = new JoinCommand();
 		command.join = join
 		
-		assertEquals("""<dial xmlns="urn:xmpp:rayo:1" to="tel:44477773333333" from="tel:34637710708"><join xmlns="urn:xmpp:rayo:join:1"/></dial>""", toXml(command));
+		assertEquals("""<dial xmlns="urn:xmpp:rayo:1" to="tel:44477773333333" from="tel:34637710708"><join/></dial>""", toXml(command));
 	}
 	
 	
 	@Test
-	public void dialWithFullNestedJoinToXml() {
+	public void dialWithFullNestedCallJoinToXml() {
 		
 		DialCommand command = new DialCommand();
 		command.setTo(new URI("tel:44477773333333"));
 		command.setFrom(new URI("tel:34637710708"));
-		def join = new Join(direction:"duplex", media:"bridge", to:"1234");
+		def join = new JoinCommand(direction:"duplex", media:"bridge", to:"1234", type:JoinDestinationType.CALL);
 		command.join = join
 		
-		assertEquals("""<dial xmlns="urn:xmpp:rayo:1" to="tel:44477773333333" from="tel:34637710708"><join xmlns="urn:xmpp:rayo:join:1" direction="duplex" media="bridge" to="1234"/></dial>""", toXml(command));
+		assertEquals("""<dial xmlns="urn:xmpp:rayo:1" to="tel:44477773333333" from="tel:34637710708"><join direction="duplex" media="bridge" call-id="1234"/></dial>""", toXml(command));
+	}
+	
+	@Test
+	public void dialWithFullNestedMixerJoinToXml() {
+		
+		DialCommand command = new DialCommand();
+		command.setTo(new URI("tel:44477773333333"));
+		command.setFrom(new URI("tel:34637710708"));
+		def join = new JoinCommand(direction:"duplex", media:"bridge", to:"1234", type:JoinDestinationType.MIXER);
+		command.join = join
+		
+		assertEquals("""<dial xmlns="urn:xmpp:rayo:1" to="tel:44477773333333" from="tel:34637710708"><join direction="duplex" media="bridge" mixer-id="1234"/></dial>""", toXml(command));
 	}
 	
 	@Test
@@ -268,9 +318,9 @@ public class RayoProviderTest {
 	}
 	
 	@Test
-	public void dialWithNestedJoinFromXml() {
+	public void dialWithNestedCallFromXml() {
 
-		def dial = fromXml("""<dial xmlns="urn:xmpp:rayo:1" to="tel:44477773333333" from="tel:34637710708"><join xmlns="urn:xmpp:rayo:join:1"/></dial>""")
+		def dial = fromXml("""<dial xmlns="urn:xmpp:rayo:1" to="tel:44477773333333" from="tel:34637710708"><join xmlns="urn:xmpp:rayo:join:1" call-id="abcd"/></dial>""")
 		assertProperties(dial, [
 			to: new URI("tel:44477773333333"),
 			from: new URI("tel:34637710708"),
@@ -278,14 +328,31 @@ public class RayoProviderTest {
 		assertProperties(dial.join, [
 			direction: null,
 			media: null,
-			to:null
+			to:"abcd",
+			type: JoinDestinationType.CALL
+		])
+	}
+	
+	@Test
+	public void dialWithNestedMixerFromXml() {
+
+		def dial = fromXml("""<dial xmlns="urn:xmpp:rayo:1" to="tel:44477773333333" from="tel:34637710708"><join xmlns="urn:xmpp:rayo:join:1" mixer-id="abcd"/></dial>""")
+		assertProperties(dial, [
+			to: new URI("tel:44477773333333"),
+			from: new URI("tel:34637710708"),
+		])
+		assertProperties(dial.join, [
+			direction: null,
+			media: null,
+			to:"abcd",
+			type: JoinDestinationType.MIXER
 		])
 	}
 	
 	@Test
 	public void dialWithNestedJoinFullFromXml() {
 
-		def dial = fromXml("""<dial xmlns="urn:xmpp:rayo:1" to="tel:44477773333333" from="tel:34637710708"><join xmlns="urn:xmpp:rayo:join:1" direction="duplex" media="bridge" to="1234"/></dial>""")
+		def dial = fromXml("""<dial xmlns="urn:xmpp:rayo:1" to="tel:44477773333333" from="tel:34637710708"><join direction="duplex" media="bridge" call-id="1234"/></dial>""")
 		assertProperties(dial, [
 			to: new URI("tel:44477773333333"),
 			from: new URI("tel:34637710708"),
@@ -293,10 +360,26 @@ public class RayoProviderTest {
 		assertProperties(dial.join, [
 			direction: "DUPLEX",
 			media: "BRIDGE",
-			to:"1234"
+			to:"1234",
+			type:JoinDestinationType.CALL
 		])
 	}
+	
+	@Test
+	public void dialWithNestedJoinMixerFullFromXml() {
 
+		def dial = fromXml("""<dial xmlns="urn:xmpp:rayo:1" to="tel:44477773333333" from="tel:34637710708"><join direction="duplex" media="bridge" mixer-id="1234"/></dial>""")
+		assertProperties(dial, [
+			to: new URI("tel:44477773333333"),
+			from: new URI("tel:34637710708"),
+		])
+		assertProperties(dial.join, [
+			direction: "DUPLEX",
+			media: "BRIDGE",
+			to:"1234",
+			type:JoinDestinationType.MIXER
+		])
+	}
 		
     // Accept
     // ====================================================================================

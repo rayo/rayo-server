@@ -14,6 +14,7 @@ public class Messages {
 	public static final String MISSING_SSML = "Missing SSML content.";
 	public static final String MISSING_DESTINATION = "Missing destination.";
     public static final String MISSING_COMPLETE_REASON = "Complete event with no reason!";
+    public static final String MISSING_JOIN_ID = "Missing Join id. You need to specify either a valid call-id or mixer-id";
 
     public static final String INVALID_INPUT_MODE = "Invalid input mode.";
 	public static final String INVALID_URI = "You have submitted an invalid URI.";

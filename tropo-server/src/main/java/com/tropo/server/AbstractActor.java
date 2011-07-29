@@ -194,9 +194,15 @@ public abstract class AbstractActor<T extends Participant> extends ReflectiveAct
     // ================================================================================
 
     protected void end(Reason reason) {
-        end(new EndEvent(getParticipantId(), reason));
+        
+    	end(new EndEvent(getParticipantId(), reason));
     }
 
+    protected void end(Reason reason, String errorMessage) {
+    	
+        end(new EndEvent(getParticipantId(), reason, errorMessage));
+    }
+    
     protected void end(Reason reason, Exception exception) {
 
         String errorMessage = null;

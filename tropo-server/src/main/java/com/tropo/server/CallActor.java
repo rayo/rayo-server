@@ -5,6 +5,8 @@ import static com.voxeo.utils.Objects.iterable;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
@@ -17,32 +19,46 @@ import com.tropo.core.EndCommand;
 import com.tropo.core.EndEvent;
 import com.tropo.core.EndEvent.Reason;
 import com.tropo.core.HangupCommand;
+import com.tropo.core.JoinCommand;
+import com.tropo.core.JoinDestinationType;
+import com.tropo.core.JoinedEvent;
 import com.tropo.core.OfferEvent;
 import com.tropo.core.RedirectCommand;
 import com.tropo.core.RejectCommand;
 import com.tropo.core.RingingEvent;
+import com.tropo.core.UnjoinCommand;
+import com.tropo.core.UnjoinedEvent;
 import com.tropo.core.verb.HoldCommand;
-import com.tropo.core.verb.Join;
 import com.tropo.core.verb.UnholdCommand;
 import com.voxeo.moho.ApplicationContext;
 import com.voxeo.moho.Call;
 import com.voxeo.moho.Call.State;
 import com.voxeo.moho.Endpoint;
+import com.voxeo.moho.Joint;
+import com.voxeo.moho.Participant;
 import com.voxeo.moho.Participant.JoinType;
+import com.voxeo.moho.conference.ConferenceManager;
 import com.voxeo.moho.event.AutowiredEventListener;
 import com.voxeo.moho.event.CallCompleteEvent;
 import com.voxeo.moho.event.InputDetectedEvent;
 import com.voxeo.moho.event.JoinCompleteEvent;
 import com.voxeo.moho.event.SignalEvent;
 
+//TODO: 
+// https://evolution.voxeo.com/ticket/1500180
+// https://evolution.voxeo.com/ticket/1500185
 public class CallActor extends AbstractActor<Call> {
 
     private enum Direction {
         IN, OUT
     }
 
+    //TODO: Move this to Spring configuration
+    private int JOIN_TIMEOUT = 30000;
+    
     private CallStatistics callStatistics;
     private CdrManager cdrManager;
+    private CallRegistry callRegistry;
 
     // TODO: replace with Moho Call inspection when it becomes available
     private Direction direction;
@@ -74,28 +90,27 @@ public class CallActor extends AbstractActor<Call> {
 
             // Now we setup the moho handlers
             mohoListeners.add(new AutowiredEventListener(this));
-            mohoCall.addObservers(new ActorEventListener(this));
-            
-            Call destination = (Call)mohoCall.getAttribute(Join.CALL_TO);
-            javax.media.mscontrol.join.Joinable.Direction direction = mohoCall.getAttribute(Join.DIRECTION);
-            JoinType mediaType = mohoCall.getAttribute(Join.MEDIA_TYPE);
-            
-            if (destination != null) {
-            	mohoCall.join(destination,mediaType,direction);
+            participant.addObservers(new ActorEventListener(this));
+
+            String dest = (String)participant.getAttribute(JoinCommand.TO);            
+            if (dest != null) {            
+	            JoinDestinationType type = (JoinDestinationType)participant.getAttribute(JoinCommand.TYPE);
+	            javax.media.mscontrol.join.Joinable.Direction direction = participant.getAttribute(JoinCommand.DIRECTION);
+	            JoinType mediaType = participant.getAttribute(JoinCommand.MEDIA_TYPE);                        
+	            Participant destination = getDestinationParticipant(dest, type);
+                        
+        		waitForJoin(participant.join(destination, mediaType, direction));
+        		fire(new JoinedEvent(participant.getId(), destination.getId(), type));
+        		fire(new JoinedEvent(destination.getId(), participant.getId(), type));
             } else {
-            	if (direction != null) {
-            		mohoCall.join(direction);
-            	} else {
-            		mohoCall.join();
-            	}
+            	waitForJoin(participant.join());
             }
             
             callStatistics.outgoingCall();
 
         } catch (Exception e) {
-            end(Reason.ERROR);
+            end(Reason.ERROR, e.getMessage());
         }
-
     }
 
     public void onIncomingCall(Call mohoCall) throws Exception {
@@ -160,6 +175,45 @@ public class CallActor extends AbstractActor<Call> {
     	
     	participant.unhold();
     }
+    
+    @Message
+    public void join(JoinCommand message) throws Exception {
+
+    	Participant destination = getDestinationParticipant(message.getTo(), message.getType());
+		waitForJoin(participant.join(destination, JoinType.valueOf(message.getMedia()), 
+				javax.media.mscontrol.join.Joinable.Direction.valueOf(message.getDirection())));
+		fire(new JoinedEvent(participant.getId(), destination.getId(), message.getType()));    	
+		fire(new JoinedEvent(destination.getId(), participant.getId(), message.getType()));    	
+    }
+
+	private void waitForJoin(Joint join) throws Exception {
+		
+		try {
+			join.get(JOIN_TIMEOUT, TimeUnit.MILLISECONDS);
+		} catch (TimeoutException te) {
+			throw new TimeoutException("Timed out while trying to join.");
+		}
+	}
+
+	@Message
+    public void unjoin(UnjoinCommand message) {
+
+    	Participant destination = getDestinationParticipant(message.getFrom(), message.getType());
+    	participant.unjoin(destination);
+		fire(new UnjoinedEvent(participant.getId(), destination.getId(), message.getType()));    		
+		fire(new UnjoinedEvent(destination.getId(), participant.getId(), message.getType()));
+    }
+    
+    private Participant getDestinationParticipant(String destination, JoinDestinationType type) {
+
+    	if (type == JoinDestinationType.CALL) {
+    		return callRegistry.get(destination).getCall();
+    	} else if (type == JoinDestinationType.MIXER) {
+			ConferenceManager conferenceManager = participant.getApplicationContext().getConferenceManager();
+    		return conferenceManager.getConference(destination);
+    	}
+    	throw new IllegalStateException("Call or Mixer could not be found");
+	}
     
     @Message
     public void redirect(RedirectCommand message) throws Exception {
@@ -309,5 +363,9 @@ public class CallActor extends AbstractActor<Call> {
 
 	public void setCdrManager(CdrManager cdrManager) {
 		this.cdrManager = cdrManager;
+	}
+
+	public void setCallRegistry(CallRegistry callRegistry) {
+		this.callRegistry = callRegistry;
 	}
 }

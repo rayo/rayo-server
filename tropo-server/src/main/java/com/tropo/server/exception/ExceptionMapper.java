@@ -6,6 +6,7 @@ import com.tropo.core.validation.ValidationException;
 import com.tropo.server.validation.ValidHandlerState;
 import com.voxeo.exceptions.NotFoundException;
 import com.voxeo.logging.Loggerf;
+import com.voxeo.moho.BusyException;
 import com.voxeo.moho.MediaException;
 import com.voxeo.servlet.xmpp.XmppStanzaError;
 
@@ -50,8 +51,12 @@ public class ExceptionMapper {
 			if (e.getMessage().contains("Response code of 407")) {
 				// This is a grammar compilation issue
 				errorCondition = XmppStanzaError.BAD_REQUEST_CONDITION;
-				errorMessage = "There is an error in the grammar. It could not be compiled";
+				errorMessage = "There is an error in the grammar. It could not be compiled.";
 			}
+		} else if (e instanceof BusyException) {
+			errorCondition = XmppStanzaError.RESOURCE_CONSTRAINT_CONDITION;
+			errorMessage = "The requested resource is busy.";
+			errorType = XmppStanzaError.Type_WAIT;
 		}
 		
 		log.debug("Mapping unknown exception [type=%s, message=%s]",e.getClass(), e.getMessage());

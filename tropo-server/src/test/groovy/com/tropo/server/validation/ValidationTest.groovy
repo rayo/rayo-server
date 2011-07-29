@@ -15,7 +15,6 @@ import com.tropo.core.validation.Validator
 import com.tropo.core.xml.DefaultXmlProviderManager;
 import com.tropo.core.xml.providers.AskProvider
 import com.tropo.core.xml.providers.ConferenceProvider
-import com.tropo.core.xml.providers.JoinProvider;
 import com.tropo.core.xml.providers.RayoProvider;
 import com.tropo.core.xml.providers.RecordProvider;
 import com.tropo.core.xml.providers.SayProvider
@@ -38,8 +37,7 @@ class ValidationTest {
 					 new AskProvider(validator:validator,namespaces:['urn:xmpp:tropo:ask:1']),
 					 new TransferProvider(validator:validator,namespaces:['urn:xmpp:tropo:transfer:1']),
 					 new ConferenceProvider(validator:validator,namespaces:['urn:xmpp:tropo:conference:1']),
-					 new RecordProvider(validator:validator,namespaces:['urn:xmpp:rayo:record:1']),
-					 new JoinProvider(validator:validator,namespaces:['urn:xmpp:rayo:join:1']),
+					 new RecordProvider(validator:validator,namespaces:['urn:xmpp:rayo:record:1'])
 					]
 		
 		manager = new DefaultXmlProviderManager();
@@ -493,7 +491,7 @@ class ValidationTest {
 	@Test
 	public void validateNestedJoinInvalidDirection() {
 				
-		def dial = parseXml("""<dial xmlns=\"urn:xmpp:rayo:1\" to="tel:34637710708" from="tel:34637710708"><join xmlns="urn:xmpp:rayo:join:1" direction="abcd"/></dial>""")
+		def dial = parseXml("""<dial xmlns=\"urn:xmpp:rayo:1\" to="tel:34637710708" from="tel:34637710708"><join xmlns="urn:xmpp:rayo:join:1" call-id="abcd" direction="abcd"/></dial>""")
 		
 		def errorMapping = assertValidationException(dial)
 		assertNotNull errorMapping
@@ -506,7 +504,7 @@ class ValidationTest {
 	@Test
 	public void validateNestedJoinInvalidMedia() {
 				
-		def dial = parseXml("""<dial xmlns=\"urn:xmpp:rayo:1\" to=\"tel:34637710708\" from="tel:34637710708"><join xmlns="urn:xmpp:rayo:join:1" direction="duplex" media="abcd"/></dial>""")
+		def dial = parseXml("""<dial xmlns=\"urn:xmpp:rayo:1\" to=\"tel:34637710708\" from="tel:34637710708"><join xmlns="urn:xmpp:rayo:join:1" call-id="abcd" direction="duplex" media="abcd"/></dial>""")
 		
 		def errorMapping = assertValidationException(dial)
 		assertNotNull errorMapping
@@ -515,6 +513,17 @@ class ValidationTest {
 		assertEquals errorMapping.text, Messages.INVALID_JOIN_TYPE
 	}
 	
+	@Test
+	public void validateNestedJoinMissingId() {
+				
+		def dial = parseXml("""<dial xmlns=\"urn:xmpp:rayo:1\" to=\"tel:34637710708\" from="tel:34637710708"><join xmlns="urn:xmpp:rayo:join:1" direction="duplex" media="bridge"/></dial>""")
+		
+		def errorMapping = assertValidationException(dial)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.MISSING_JOIN_ID
+	}
 	
 	@Test
 	public void validateJoinedEmptyTo() {
@@ -525,7 +534,7 @@ class ValidationTest {
 		assertNotNull errorMapping
 		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
 		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
-		assertEquals errorMapping.text, Messages.MISSING_TO
+		assertEquals errorMapping.text, Messages.MISSING_JOIN_ID
 	}
 	
 	@Test
@@ -537,24 +546,16 @@ class ValidationTest {
 		assertNotNull errorMapping
 		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
 		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
-		assertEquals errorMapping.text, Messages.MISSING_FROM
+		assertEquals errorMapping.text, Messages.MISSING_JOIN_ID
 	}
-	
+
 	// Join
 	// ====================================================================================
-
-	
-	@Test
-	public void validateEmptyJoinIsOk() {
-				
-		def join = parseXml("""<join xmlns="urn:xmpp:rayo:join:1"></join>""")
-		assertNotNull fromXML(join)
-	}
 	
 	@Test
 	public void validateJoinInvalidDirection() {
 				
-		def join = parseXml("""<join xmlns="urn:xmpp:rayo:join:1" direction="abcd"/>""")
+		def join = parseXml("""<join xmlns="urn:xmpp:rayo:1" call-id="abcd" direction="abcd"/>""")
 		
 		def errorMapping = assertValidationException(join)
 		assertNotNull errorMapping
@@ -567,13 +568,25 @@ class ValidationTest {
 	@Test
 	public void validateJoinInvalidMedia() {
 				
-		def join = parseXml("""<join xmlns="urn:xmpp:rayo:join:1" direction="duplex" media="abcd"/>""")
+		def join = parseXml("""<join xmlns="urn:xmpp:rayo:1" call-id="abcd" direction="duplex" media="abcd"/>""")
 		
 		def errorMapping = assertValidationException(join)
 		assertNotNull errorMapping
 		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
 		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
 		assertEquals errorMapping.text, Messages.INVALID_JOIN_TYPE
+	}
+	
+	@Test
+	public void validateJoinMissingId() {
+				
+		def join = parseXml("""<join xmlns="urn:xmpp:rayo:1" direction="duplex" media="bridge"/>""")
+		
+		def errorMapping = assertValidationException(join)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.MISSING_JOIN_ID
 	}
 	
 	// Record

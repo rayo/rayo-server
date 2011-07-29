@@ -11,6 +11,7 @@ public class DefaultCallActorFactory implements CallActorFactory {
     private PoolFiberFactory fiberFactory;
     private CallStatistics callStatistics;
     private CdrManager cdrManager;
+    private CallRegistry callRegistry;
 
     @Override
     public CallActor create(Call call) {
@@ -19,6 +20,7 @@ public class DefaultCallActorFactory implements CallActorFactory {
         actor.setVerbManager(verbManager);
         actor.setCallStatistics(callStatistics);
         actor.setCdrManager(cdrManager);
+        actor.setCallRegistry(callRegistry);
         return actor;
     }
 
@@ -50,4 +52,8 @@ public class DefaultCallActorFactory implements CallActorFactory {
 		this.cdrManager = cdrManager;
 	}
 
+	public void setCallRegistry(CallRegistry callRegistry) {
+		this.callRegistry = callRegistry;
+	}
+	
 }

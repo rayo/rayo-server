@@ -10,7 +10,6 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
 import com.tropo.core.validation.Messages;
-import com.tropo.core.verb.Join;
 
 public class DialCommand implements ServerCommand {
 
@@ -23,7 +22,7 @@ public class DialCommand implements ServerCommand {
     private Map<String, String> headers;
 
     @Valid
-    private Join join;
+    private JoinCommand join;
     
     public URI getTo() {
         return to;
@@ -49,11 +48,11 @@ public class DialCommand implements ServerCommand {
         this.headers = headers;
     }
 
-	public Join getJoin() {
+	public JoinCommand getJoin() {
 		return join;
 	}
 
-	public void setJoin(Join join) {
+	public void setJoin(JoinCommand join) {
 		this.join = join;
 	}
 
