@@ -16,11 +16,12 @@ import com.voxeo.moho.event.OutputCompleteEvent;
 import com.voxeo.moho.media.Output;
 import com.voxeo.moho.media.output.AudibleResource;
 import com.voxeo.moho.media.output.OutputCommand;
+import com.voxeo.moho.media.output.OutputCommand.BargeinType;
 import com.voxeo.servlet.xmpp.XmppStanzaError;
 
 public class SayHandler extends AbstractLocalVerbHandler<Say, Participant> {
 
-    private Output output;
+    private Output<Participant> output;
 
     // Verb Lifecycle
     // ================================================================================
@@ -31,10 +32,10 @@ public class SayHandler extends AbstractLocalVerbHandler<Say, Participant> {
         Ssml prompt = model.getPrompt();
         AudibleResource audibleResource = resolveAudio(prompt);
         OutputCommand outcommand = new OutputCommand(audibleResource);
-        outcommand.setBargein(false);
+        outcommand.setBargeinType(BargeinType.NONE);
         outcommand.setVoiceName(prompt.getVoice());
         
-        output = media.output(outcommand);
+        output = getMediaService().output(outcommand);
         
     }
 
@@ -93,7 +94,7 @@ public class SayHandler extends AbstractLocalVerbHandler<Say, Participant> {
     // ================================================================================
 
     @State
-    public void onSpeakComplete(OutputCompleteEvent event) {
+    public void onSpeakComplete(OutputCompleteEvent<Participant> event) {
         switch(event.getCause()) {
         case BARGEIN:
         case END:

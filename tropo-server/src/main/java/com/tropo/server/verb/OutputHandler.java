@@ -18,11 +18,12 @@ import com.voxeo.moho.Participant;
 import com.voxeo.moho.State;
 import com.voxeo.moho.media.output.AudibleResource;
 import com.voxeo.moho.media.output.OutputCommand;
+import com.voxeo.moho.media.output.OutputCommand.BargeinType;
 import com.voxeo.servlet.xmpp.XmppStanzaError;
 
 public class OutputHandler extends AbstractLocalVerbHandler<Output, Participant> {
 
-    private com.voxeo.moho.media.Output output;
+    private com.voxeo.moho.media.Output<Participant> output;
 
     // Verb Lifecycle
     // ================================================================================
@@ -34,7 +35,7 @@ public class OutputHandler extends AbstractLocalVerbHandler<Output, Participant>
         AudibleResource audibleResource = resolveAudio(prompt);
         OutputCommand outcommand = new OutputCommand(audibleResource);
         if (model.isBargein() != null) {
-        	outcommand.setBargein(model.isBargein());
+            outcommand.setBargeinType(model.isBargein() ? BargeinType.ANY : BargeinType.NONE);
         }
         if (model.getCodec() != null) {
         	outcommand.setCodec(Output.toCodecValue(model.getCodec()));
@@ -45,17 +46,14 @@ public class OutputHandler extends AbstractLocalVerbHandler<Output, Participant>
         if (model.getJumpPlaylistIncrement() != null) {
         	outcommand.setJumpPlaylistIncrement(model.getJumpPlaylistIncrement());
         }
-        if (model.getJumpTime() != null) {
-        	outcommand.setJumpTime(model.getJumpTime());
-        }
         if (model.getOffset() != null) {
-        	outcommand.setOffset(model.getOffset());
+        	outcommand.setStartingOffset(model.getOffset());
         }
         if (model.getRepeatTimes() != null) {
         	outcommand.setRepeatTimes(model.getRepeatTimes());
         }
         if (model.getTimeout() != null) {
-        	outcommand.setTimeout(model.getTimeout());
+        	outcommand.setMaxtime(model.getTimeout());
         }
         if (model.getVolumeUnit() != null) {
         	outcommand.setVolumeUnit(model.getVolumeUnit());
@@ -68,7 +66,7 @@ public class OutputHandler extends AbstractLocalVerbHandler<Output, Participant>
         	outcommand.setVoiceName(prompt.getVoice());
         }
         
-        output = media.output(outcommand);    	
+        output = getMediaService().output(outcommand);    	
     }
 
 	@Override
@@ -154,7 +152,7 @@ public class OutputHandler extends AbstractLocalVerbHandler<Output, Participant>
     // ================================================================================
 
     @State
-    public void onSpeakComplete(com.voxeo.moho.event.OutputCompleteEvent event) {
+    public void onSpeakComplete(com.voxeo.moho.event.OutputCompleteEvent<Participant> event) {
         switch(event.getCause()) {
         case BARGEIN:
         case END:

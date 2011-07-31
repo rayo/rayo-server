@@ -17,11 +17,12 @@ import com.voxeo.moho.media.Prompt;
 import com.voxeo.moho.media.input.Grammar;
 import com.voxeo.moho.media.input.InputCommand;
 import com.voxeo.moho.media.output.OutputCommand;
+import com.voxeo.moho.media.output.OutputCommand.BargeinType;
 import com.voxeo.servlet.xmpp.XmppStanzaError;
 
 public class AskHandler extends AbstractLocalVerbHandler<Ask,Participant> {
 
-    private Prompt prompt;
+    private Prompt<Participant> prompt;
     
     @Override
     public void start() {
@@ -31,7 +32,7 @@ public class AskHandler extends AbstractLocalVerbHandler<Ask,Participant> {
         
         if (ssml != null) {
             outCommand = new OutputCommand(resolveAudio(ssml));
-            outCommand.setBargein(model.isBargein());
+            outCommand.setBargeinType(model.isBargein() ? BargeinType.ANY : BargeinType.NONE);
             outCommand.setVoiceName(model.getVoice());
         }
 
@@ -54,13 +55,13 @@ public class AskHandler extends AbstractLocalVerbHandler<Ask,Participant> {
         
         long timeout = model.getTimeout().getMillis();
         inputCommand.setInitialTimeout(timeout);
-        inputCommand.setInterSigTimeout(timeout);
-        inputCommand.setSpeechLanguage(model.getRecognizer());
+        inputCommand.setInterDigitsTimeout(timeout);
+        inputCommand.setRecognizer(model.getRecognizer());
         inputCommand.setInputMode(getMohoMode(model.getMode()));
-        inputCommand.setTermChar(model.getTerminator());
-        inputCommand.setConfidence(model.getMinConfidence());
+        inputCommand.setTerminator(model.getTerminator());
+        inputCommand.setMinConfidence(model.getMinConfidence());
 
-        prompt = media.prompt(outCommand, inputCommand, 0);
+        prompt = getMediaService().prompt(outCommand, inputCommand, 0);
         
     }
     
@@ -101,7 +102,7 @@ public class AskHandler extends AbstractLocalVerbHandler<Ask,Participant> {
     // ================================================================================
 
     @State
-    public void onAskComplete(InputCompleteEvent event) {
+    public void onAskComplete(InputCompleteEvent<Participant> event) {
         
         AskCompleteEvent completeEvent = null;
         

@@ -310,7 +310,7 @@ public class RayoServlet extends XmppServlet {
                     cdrManager.append(callId, payload.asXML());
                     
                     // Find the call actor
-                    AbstractActor actor = findActor(callCommand.getCallId());
+                    AbstractActor<?> actor = findActor(callCommand.getCallId());
 
                     if (callCommand instanceof VerbCommand) {
                         VerbCommand verbCommand = (VerbCommand) callCommand;
@@ -446,9 +446,9 @@ public class RayoServlet extends XmppServlet {
         findActor(callId).publish(new EndCommand(callId, EndEvent.Reason.ERROR));
     }
 
-    private AbstractActor findActor(String callId) throws NotFoundException {
+    private AbstractActor<?> findActor(String callId) throws NotFoundException {
     	
-        CallActor callActor = callRegistry.get(callId);
+        CallActor<?> callActor = callRegistry.get(callId);
         if (callActor != null) {
             return callActor;
         }

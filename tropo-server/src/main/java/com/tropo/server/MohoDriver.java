@@ -6,8 +6,9 @@ import org.springframework.web.context.support.XmlWebApplicationContext;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.Application;
 import com.voxeo.moho.ApplicationContext;
+import com.voxeo.moho.IncomingCall;
 import com.voxeo.moho.State;
-import com.voxeo.moho.event.SignalEvent.Reason;
+import com.voxeo.moho.event.AcceptableEvent.Reason;
 
 public class MohoDriver implements Application {
 
@@ -38,7 +39,7 @@ public class MohoDriver implements Application {
     }
 
     @State
-    public void onIncomingCall(final com.voxeo.moho.Call call) throws Exception {
+    public void onIncomingCall(final IncomingCall call) throws Exception {
 
     	if (log.isDebugEnabled()) {
     		log.debug("Received incoming call");
@@ -56,7 +57,6 @@ public class MohoDriver implements Application {
             return;
     	}                    	
 
-        call.setSupervised(true);
         callManager.publish(call);
     }
 }

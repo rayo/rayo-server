@@ -4,20 +4,21 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import com.voxeo.moho.Participant;
 import com.voxeo.moho.event.OutputCompleteEvent;
 import com.voxeo.moho.media.Output;
 
-public class MockOutput implements Output {
+public class MockOutput implements Output<Participant> {
 
-    private OutputCompleteEvent result;
+    private OutputCompleteEvent<Participant> result;
 
-    public MockOutput(OutputCompleteEvent result) {
+    public MockOutput(OutputCompleteEvent<Participant> result) {
         this.result = result;
     }
 
     @Override
     public void stop() {
-        result.source.dispatch(result);
+        result.getSource().dispatch(result);
     }
 
     @Override
@@ -36,17 +37,14 @@ public class MockOutput implements Output {
     }
 
     @Override
-    public OutputCompleteEvent get() throws InterruptedException, ExecutionException {
+    public OutputCompleteEvent<Participant> get() throws InterruptedException, ExecutionException {
         return null;
     }
 
     @Override
-    public OutputCompleteEvent get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+    public OutputCompleteEvent<Participant> get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
         return result;
     }
-
-    @Override
-    public void move(boolean direction, int time) {}
 
     @Override
     public void jump(int index) {}
@@ -62,5 +60,8 @@ public class MockOutput implements Output {
 
     @Override
     public void resume() {}
+
+    @Override
+    public void move(boolean direction, long time) {}
 
 }

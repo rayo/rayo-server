@@ -7,10 +7,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class DefaultCallRegistry implements CallRegistry {
 
-    private Map<String, CallActor> calls = new ConcurrentHashMap<String, CallActor>();
+    private Map<String, CallActor<?>> calls = new ConcurrentHashMap<String, CallActor<?>>();
 
     @Override
-    public void add(CallActor actor) {
+    public void add(CallActor<?> actor) {
         calls.put(actor.getCall().getId(), actor);
     }
 
@@ -20,7 +20,7 @@ public class DefaultCallRegistry implements CallRegistry {
     }
 
     @Override
-    public CallActor get(String id) {
+    public CallActor<?> get(String id) {
         return calls.get(id);
     }
     
@@ -35,8 +35,7 @@ public class DefaultCallRegistry implements CallRegistry {
     }
 
     @Override
-    public Collection<CallActor> getActiveCalls() {
-
-    	return new ArrayList<CallActor>(calls.values());
+    public Collection<CallActor<?>> getActiveCalls() {
+    	return new ArrayList<CallActor<?>>(calls.values());
     }
 }

@@ -15,8 +15,6 @@ import com.tropo.server.verb.VerbHandler;
 
 public class Call {
 
-	private static final long serialVersionUID = -7637717188369158628L;
-
 	private transient com.voxeo.moho.Call call;
 	private transient CallRegistry callRegistry;
 	private transient CdrManager cdrManager;
@@ -35,34 +33,6 @@ public class Call {
 	public String getCallId() {
 		
 		return call.getId();
-	}
-	
-	public Boolean isSupervised() {
-		
-		return call.isSupervised();
-	}
-	
-	
-	public Boolean isAccepted() {
-		
-		return call.isAccepted();
-	}
-	
-	
-	public Boolean isProcessed() {
-		
-		return call.isProcessed();
-	}
-	
-	
-	public Boolean isRedirected() {
-		
-		return call.isRedirected();
-	}
-	
-	public Boolean isRejected() {
-		
-		return call.isRejected();
 	}
 	
 	public String getAddress() {
@@ -152,7 +122,7 @@ public class Call {
 	public List<Verb> getVerbs() {
 		
 		List<Verb> verbs = new ArrayList<Verb>();
-		CallActor actor = callRegistry.get(call.getId());
+		CallActor<?> actor = callRegistry.get(call.getId());
 		if (actor != null) {
 			Collection<VerbHandler<?,?>> verbHandlers = actor.getVerbs();
 			for (VerbHandler<?,?> handler: verbHandlers) {

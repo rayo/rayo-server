@@ -1,6 +1,5 @@
 package com.tropo.server
 
-
 import static org.junit.Assert.*
 
 import java.util.concurrent.BlockingQueue
@@ -17,33 +16,36 @@ import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 
 import com.tropo.core.CallRejectReason
-import com.tropo.core.EndCommand;
+import com.tropo.core.EndCommand
 import com.tropo.core.EndEvent
 import com.tropo.core.OfferEvent
 import com.tropo.core.RejectCommand
 import com.tropo.core.EndEvent.Reason
 import com.tropo.core.recording.StorageService;
 import com.tropo.core.verb.PauseCommand
-import com.tropo.core.verb.Record;
+import com.tropo.core.verb.Record
 import com.tropo.core.verb.ResumeCommand
 import com.tropo.core.verb.Say
 import com.tropo.core.verb.SayCompleteEvent
 import com.tropo.core.verb.Ssml
 import com.tropo.core.verb.StopCommand
-import com.tropo.core.verb.VerbCompleteEvent;
+import com.tropo.core.verb.VerbCompleteEvent
 import com.tropo.server.test.MockCall
 import com.tropo.server.test.MockMediaService
 import com.voxeo.exceptions.NotFoundException
 import com.voxeo.moho.Call
 import com.voxeo.moho.MediaService
 import com.voxeo.moho.event.CallCompleteEvent
+import com.voxeo.moho.event.MohoCallCompleteEvent
+import com.voxeo.moho.event.MohoOutputCompleteEvent
+import com.voxeo.moho.event.MohoRecordCompleteEvent
 import com.voxeo.moho.event.OutputCompleteEvent
+import com.voxeo.moho.event.RecordCompleteEvent
 import com.voxeo.moho.event.OutputCompleteEvent.Cause
-import com.voxeo.moho.event.RecordCompleteEvent;
 import com.voxeo.moho.media.Output
-import com.voxeo.moho.media.Recording;
+import com.voxeo.moho.media.Recording
 import com.voxeo.moho.media.output.OutputCommand
-import com.voxeo.moho.media.record.RecordCommand;
+import com.voxeo.moho.media.record.RecordCommand
 
 
 
@@ -137,8 +139,7 @@ public class IntegrationTest {
         callActor.command(say, { messageQueue.add it } as ResponseHandler)
 
         // We should get a response from the say command
-        Response response = poll()
-        assertTrue response.success
+        assertTrue poll().success
 
         // We should get a say complete event
         SayCompleteEvent sayComplete = poll()
@@ -256,7 +257,7 @@ public class IntegrationTest {
                     pause:{messageQueue.add "pause"},
                     resume:{messageQueue.add "resume"},
 					record:{messageQueue.add "record"},
-                    stop:{ mohoCall.dispatch(new OutputCompleteEvent(mohoCall, Cause.CANCEL)) }
+                    stop:{ mohoCall.dispatch(new MohoOutputCompleteEvent(mohoCall, Cause.CANCEL)) }
                 ] as Output
             }
         ] as MediaService
@@ -316,7 +317,7 @@ public class IntegrationTest {
 			   return [
 				   pause:{messageQueue.add "pause"},
 				   resume:{messageQueue.add "resume"},
-				   stop:{ mohoCall.dispatch(new RecordCompleteEvent(mohoCall, com.voxeo.moho.event.RecordCompleteEvent.Cause.CANCEL, 1000)) }
+				   stop:{ mohoCall.dispatch(new MohoRecordCompleteEvent(mohoCall, com.voxeo.moho.event.RecordCompleteEvent.Cause.CANCEL, 1000)) }
 			   ] as Recording
 		   }
 	   ] as MediaService
@@ -368,7 +369,7 @@ public class IntegrationTest {
 			  return [
 				  pause:{messageQueue.add "pause"},
 				  resume:{messageQueue.add "resume"},
-				  stop:{ mohoCall.dispatch(new RecordCompleteEvent(mohoCall, com.voxeo.moho.event.RecordCompleteEvent.Cause.CANCEL, 1000)) }
+				  stop:{ mohoCall.dispatch(new MohoRecordCompleteEvent(mohoCall, com.voxeo.moho.event.RecordCompleteEvent.Cause.CANCEL, 1000)) }
 			  ] as Recording
 		  }
 	  ] as MediaService
@@ -424,7 +425,7 @@ public class IntegrationTest {
        mohoCall.mediaService = [
            output: { OutputCommand command ->
                return [
-                   stop:{ mohoCall.dispatch(new OutputCompleteEvent(mohoCall, Cause.CANCEL)) }
+                   stop:{ mohoCall.dispatch(new MohoOutputCompleteEvent(mohoCall, Cause.CANCEL)) }
                ] as Output
            }
        ] as MediaService
@@ -462,8 +463,8 @@ public class IntegrationTest {
       // Mock MediaService
       mohoCall.mediaService = [
           output: { OutputCommand command ->
-              mohoCall.dispatch(new OutputCompleteEvent(mohoCall, Cause.END))
-              mohoCall.dispatch(new OutputCompleteEvent(mohoCall, Cause.END))
+              mohoCall.dispatch(new MohoOutputCompleteEvent(mohoCall, Cause.END))
+              mohoCall.dispatch(new MohoOutputCompleteEvent(mohoCall, Cause.END))
               return null
           }
       ] as MediaService
@@ -506,7 +507,7 @@ public class IntegrationTest {
       mohoCall.mediaService = [
           output: { OutputCommand command ->
               return [
-                  stop:{ mohoCall.dispatch(new OutputCompleteEvent(mohoCall, Cause.CANCEL)) }
+                  stop:{ mohoCall.dispatch(new MohoOutputCompleteEvent(mohoCall, Cause.CANCEL)) }
               ] as Output
           }
       ] as MediaService
@@ -522,7 +523,7 @@ public class IntegrationTest {
       Response response = poll()
       assertTrue response.success
 
-      mohoCall.dispatch(new CallCompleteEvent(mohoCall, CallCompleteEvent.Cause.ERROR))
+      mohoCall.dispatch(new MohoCallCompleteEvent(mohoCall, CallCompleteEvent.Cause.ERROR))
 
       // We should get an end event
       EndEvent end = poll()
@@ -555,7 +556,7 @@ public class IntegrationTest {
     }
    
     def poll = {
-        messageQueue.poll(10, TimeUnit.SECONDS);
+        messageQueue.poll(100, TimeUnit.SECONDS);
     }
     
     def makeMohoCall = {

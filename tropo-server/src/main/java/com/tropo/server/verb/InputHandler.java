@@ -15,7 +15,7 @@ import com.voxeo.moho.media.input.InputCommand;
 
 public class InputHandler extends AbstractLocalVerbHandler<Input, Participant> {
 
-	private com.voxeo.moho.media.Input input;
+	private com.voxeo.moho.media.Input<Participant> input;
 	
 	@Override
 	public void start() {
@@ -46,7 +46,7 @@ public class InputHandler extends AbstractLocalVerbHandler<Input, Participant> {
         	inputCommand.setMaxTimeout(model.getInterSigTimeout());
         }
         if (model.getRecognizer() != null) {
-        	inputCommand.setSpeechLanguage(model.getRecognizer());
+        	inputCommand.setRecognizer(model.getRecognizer());
         }
         if (model.getDtmfHotword() != null) {
         	inputCommand.setDtmfHotword(model.getDtmfHotword());
@@ -58,7 +58,7 @@ public class InputHandler extends AbstractLocalVerbHandler<Input, Participant> {
         	inputCommand.setSupervised(model.getSupervised());
         }
         if (model.getConfidence() != null) {
-        	inputCommand.setConfidence(model.getConfidence());
+        	inputCommand.setMinConfidence(model.getConfidence());
         }
         if (model.getInputMode() != null) {
         	inputCommand.setInputMode(getMohoMode(model.getInputMode()));
@@ -67,10 +67,10 @@ public class InputHandler extends AbstractLocalVerbHandler<Input, Participant> {
         	inputCommand.setSensitivity(model.getSensitivity());
         }
         if (model.getTerminator() != null) {
-        	inputCommand.setTermChar(model.getTerminator());
+        	inputCommand.setTerminator(model.getTerminator());
         }
 
-        input = media.input(inputCommand);		
+        input = getMediaService().input(inputCommand);		
 	}
 	
 	@Override
@@ -86,7 +86,7 @@ public class InputHandler extends AbstractLocalVerbHandler<Input, Participant> {
 	
 
     @State
-    public void onInputComplete(com.voxeo.moho.event.InputCompleteEvent event) {
+    public void onInputComplete(com.voxeo.moho.event.InputCompleteEvent<Participant> event) {
         
         InputCompleteEvent completeEvent = null;
         
@@ -126,7 +126,7 @@ public class InputHandler extends AbstractLocalVerbHandler<Input, Participant> {
         complete(completeEvent);
     }
     
-    public void onInputDetected(InputDetectedEvent event) {
+    public void onInputDetected(InputDetectedEvent<Participant> event) {
     	
     	System.out.println(String.format("Event: ", event));
     }

@@ -105,24 +105,27 @@ public abstract class ReflectiveActor implements Actor, Callback<Object> {
     }
 
     private Method findMethod(Object message) {
+        
         Method method = null;
-
-        Class<?> clz = message.getClass();
-        outer: do {
+        
+        Queue<Class<?>> queue = new LinkedList<Class<?>>();
+        queue.add(message.getClass());
+        
+        while(!queue.isEmpty()) {
+            Class<?> clz = queue.poll();
             method = targets.get(clz);
             if (method != null) {
                 break;
             }
-            Class<?>[] interfaces = clz.getInterfaces();
-            for (Class<?> iface : interfaces) {
-                method = targets.get(iface);
-                if (method != null) {
-                    break outer;
-                }
+            for (Class<?> iface : clz.getInterfaces()) {
+                queue.add(iface);
             }
-            clz = clz.getSuperclass();
-        } while (!clz.equals(Object.class));
-
+            Class<?> superclz = clz.getSuperclass();
+            if(superclz != null && !superclz.equals(Object.class)) {
+                queue.add(superclz);
+            }
+        }
+        
         return method;
     }
 

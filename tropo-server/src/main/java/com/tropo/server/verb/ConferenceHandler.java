@@ -50,8 +50,8 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference, Call
 
     private boolean hold;
     private boolean joined;
-    private Output holdMusic;
-    private Input hotwordListener;
+    private Output<Participant> holdMusic;
+    private Input<Participant> hotwordListener;
     private com.voxeo.moho.conference.Conference mohoConference;
 
     // Represent the current state of the participant
@@ -324,8 +324,6 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference, Call
     private void stopMixing() {
         if (joined) {
         	participant.unjoin(mohoConference);
-            // Rejoin the media server
-        	participant.getMediaService(true);
             joined = false;
         }
     }
@@ -336,7 +334,7 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference, Call
             if (terminator != null) {
                 DigitInputCommand inputCommand = new DigitInputCommand(terminator);
                 inputCommand.setDtmfHotword(true);
-                hotwordListener = media.input(inputCommand);
+                hotwordListener = getMediaService().input(inputCommand);
             }
         }
     }
@@ -352,7 +350,7 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference, Call
         if (holdMusicPrompt != null) {
             OutputCommand outputCommand = MohoUtil.output(holdMusicPrompt);
             outputCommand.setRepeatTimes(1000);
-            holdMusic = media.output(outputCommand);
+            holdMusic = getMediaService().output(outputCommand);
         }
     }
 
@@ -361,7 +359,7 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference, Call
         if (announcementPrompt != null) {
             OutputCommand outputCommand = MohoUtil.output(announcementPrompt);
             outputCommand.setBahavior(BehaviorIfBusy.QUEUE);
-            mohoConference.getMediaService().output(outputCommand);
+            mohoConference.output(outputCommand);
         }
     }
 
@@ -403,9 +401,9 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference, Call
     // ================================================================================
 
     @State
-    public void onTermChar(InputCompleteEvent event) {
+    public void onTermChar(InputCompleteEvent<Participant> event) {
         // This event can come from another verb so we first check that
-        if(hotwordListener != null && event.hasMatch() && event.source == participant) {
+        if(hotwordListener != null && event.hasMatch() && event.getSource() == participant) {
             complete(Reason.TERMINATOR);
         }
     }

@@ -8,7 +8,6 @@ import com.voxeo.moho.CallableEndpoint;
 import com.voxeo.moho.Endpoint;
 import com.voxeo.moho.Subscription;
 import com.voxeo.moho.Subscription.Type;
-import com.voxeo.moho.event.Observer;
 
 public class SimpleEndpoint implements CallableEndpoint {
 
@@ -29,7 +28,7 @@ public class SimpleEndpoint implements CallableEndpoint {
     }
 
     @Override
-    public Call call(Endpoint caller, Map<String, String> headers, Observer... observers) {
+    public Call call(Endpoint caller, Map<String, String> headers) {
         throw new UnsupportedOperationException();
     }
 
@@ -44,17 +43,12 @@ public class SimpleEndpoint implements CallableEndpoint {
     }
 
     @Override
-    public Call call(Endpoint caller, Observer... observers) {
+    public Subscription subscribe(Endpoint caller, Type type, int expiration) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Call call(String caller, Observer... observers) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Subscription subscribe(Endpoint caller, Type type, int expiration, Observer... observers) {
+    public Call call(String caller, Map<String, String> headers) {
         throw new UnsupportedOperationException();
     }
 

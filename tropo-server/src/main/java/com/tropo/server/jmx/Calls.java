@@ -29,8 +29,8 @@ public class Calls implements Serializable, CallsMXBean {
 	public long getActiveVerbsCount() {
 		
 		long size = 0;
-		Collection<CallActor> actors = callRegistry.getActiveCalls();
-		for (CallActor actor: actors) {
+		Collection<CallActor<?>> actors = callRegistry.getActiveCalls();
+		for (CallActor<?> actor: actors) {
 			size+= actor.getVerbs().size();
 		}
 		
@@ -41,8 +41,8 @@ public class Calls implements Serializable, CallsMXBean {
 	public Map<String, Long> getActiveVerbs() {
 		
 		Map<String,Long> verbsCount = new HashMap<String, Long>();
-		Collection<CallActor> actors = callRegistry.getActiveCalls();
-		for (CallActor actor: actors) {
+		Collection<CallActor<?>> actors = callRegistry.getActiveCalls();
+		for (CallActor<?> actor: actors) {
 			Collection<VerbHandler<?,?>> handlers = actor.getVerbs();
 			for (VerbHandler<?,?> handler: handlers) {
 				String verbName = handler.getModel().getClass().getName();
@@ -67,9 +67,9 @@ public class Calls implements Serializable, CallsMXBean {
 	@ManagedAttribute(description="Active Calls")
 	public List<Call> getActiveCalls() {
 		
-		Collection<CallActor> actors = callRegistry.getActiveCalls();
+		Collection<CallActor<?>> actors = callRegistry.getActiveCalls();
 		List<Call> calls = new ArrayList<Call>();
-		for (CallActor actor: actors) {
+		for (CallActor<?> actor: actors) {
 			calls.add(new Call(actor.getCall(), callRegistry, cdrManager));
 		}
 		return calls;

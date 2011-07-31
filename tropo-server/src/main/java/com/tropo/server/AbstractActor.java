@@ -29,9 +29,9 @@ import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.NegotiateException;
 import com.voxeo.moho.Participant;
 import com.voxeo.moho.event.AutowiredEventListener;
+import com.voxeo.moho.event.Event;
 import com.voxeo.moho.event.EventSource;
 import com.voxeo.moho.event.Observer;
-import com.voxeo.moho.utils.Event;
 
 public abstract class AbstractActor<T extends Participant> extends ReflectiveActor implements Observer {
 
@@ -44,9 +44,7 @@ public abstract class AbstractActor<T extends Participant> extends ReflectiveAct
 	protected T participant;
     private Validator validator = new Validator();
 
-
     public AbstractActor(T t) {
-    	
         this.participant = t;
     }
     

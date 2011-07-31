@@ -13,7 +13,6 @@ import com.voxeo.moho.Call;
 import com.voxeo.moho.CallableEndpoint;
 import com.voxeo.moho.Endpoint;
 import com.voxeo.moho.Participant.JoinType;
-import com.voxeo.moho.event.Observer;
 
 public class CallManager extends ReflectiveActor {
 
@@ -37,8 +36,9 @@ public class CallManager extends ReflectiveActor {
         if(from != null) {
             fromEndpoint = applicationContext.createEndpoint(from.toString());
         }
-        final Call mohoCall = toEndpoint.call(fromEndpoint, command.getHeaders(), (Observer[]) null);
-        mohoCall.setSupervised(true);
+        
+        final Call mohoCall = toEndpoint.call(fromEndpoint, command.getHeaders());
+
         if (command.getJoin() != null) {        	
 	        if (command.getJoin().getMedia() != null) {
 	        	mohoCall.setAttribute(JoinCommand.MEDIA_TYPE, JoinType.valueOf(command.getJoin().getMedia()));
@@ -74,7 +74,7 @@ public class CallManager extends ReflectiveActor {
         }
         
         // Construct Actor
-        CallActor callActor = callActorFactory.create(call);
+        CallActor<?> callActor = callActorFactory.create(call);
         callActor.start();
 
         // Wire up default call handlers

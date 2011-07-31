@@ -1,18 +1,11 @@
 package com.tropo.server;
 
-import static com.voxeo.utils.Objects.iterable;
-
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
-import com.tropo.core.AcceptCommand;
-import com.tropo.core.AnswerCommand;
 import com.tropo.core.AnsweredEvent;
 import com.tropo.core.DtmfEvent;
 import com.tropo.core.EndCommand;
@@ -22,18 +15,12 @@ import com.tropo.core.HangupCommand;
 import com.tropo.core.JoinCommand;
 import com.tropo.core.JoinDestinationType;
 import com.tropo.core.JoinedEvent;
-import com.tropo.core.OfferEvent;
-import com.tropo.core.RedirectCommand;
-import com.tropo.core.RejectCommand;
 import com.tropo.core.RingingEvent;
 import com.tropo.core.UnjoinCommand;
 import com.tropo.core.UnjoinedEvent;
 import com.tropo.core.verb.HoldCommand;
 import com.tropo.core.verb.UnholdCommand;
-import com.voxeo.moho.ApplicationContext;
 import com.voxeo.moho.Call;
-import com.voxeo.moho.Call.State;
-import com.voxeo.moho.Endpoint;
 import com.voxeo.moho.Joint;
 import com.voxeo.moho.Participant;
 import com.voxeo.moho.Participant.JoinType;
@@ -41,17 +28,11 @@ import com.voxeo.moho.conference.ConferenceManager;
 import com.voxeo.moho.event.AutowiredEventListener;
 import com.voxeo.moho.event.CallCompleteEvent;
 import com.voxeo.moho.event.InputDetectedEvent;
-import com.voxeo.moho.event.JoinCompleteEvent;
-import com.voxeo.moho.event.SignalEvent;
 
 //TODO: 
 // https://evolution.voxeo.com/ticket/1500180
 // https://evolution.voxeo.com/ticket/1500185
-public class CallActor extends AbstractActor<Call> {
-
-    private enum Direction {
-        IN, OUT
-    }
+public class CallActor <T extends Call> extends AbstractActor<T> {
 
     //TODO: Move this to Spring configuration
     private int JOIN_TIMEOUT = 30000;
@@ -60,12 +41,7 @@ public class CallActor extends AbstractActor<Call> {
     private CdrManager cdrManager;
     private CallRegistry callRegistry;
 
-    // TODO: replace with Moho Call inspection when it becomes available
-    private Direction direction;
-    private boolean initialJoin = true;
-    
-    public CallActor(Call call) {
-
+    public CallActor(T call) {
     	super(call);
     }
 
@@ -74,23 +50,11 @@ public class CallActor extends AbstractActor<Call> {
 
     @Message
     public void onCall(Call call) throws Exception {
-        if (call.getCallState() == State.INITIALIZED) {
-            onOutgoingCall(call);
-        } else {
-            onIncomingCall(call);
-        }
-    }
-
-    public void onOutgoingCall(Call mohoCall) throws Exception {
-
-        this.participant = mohoCall;
-        this.direction = Direction.OUT;
-
         try {
 
             // Now we setup the moho handlers
             mohoListeners.add(new AutowiredEventListener(this));
-            participant.addObservers(new ActorEventListener(this));
+            participant.addObserver(new ActorEventListener(this));
 
             String dest = (String)participant.getAttribute(JoinCommand.TO);            
             if (dest != null) {            
@@ -113,44 +77,8 @@ public class CallActor extends AbstractActor<Call> {
         }
     }
 
-    public void onIncomingCall(Call mohoCall) throws Exception {
-
-        this.participant = mohoCall;
-        this.direction = Direction.IN;
-
-        OfferEvent offer = new OfferEvent(getParticipantId());
-        offer.setFrom(mohoCall.getInvitor().getURI());
-        offer.setTo(mohoCall.getInvitee().getURI());
-
-        Iterator<String> headerNames = mohoCall.getHeaderNames();
-        Map<String, String> headers = new HashMap<String, String>();
-        for (String headerName : iterable(headerNames)) {
-            headers.put(headerName, mohoCall.getHeader(headerName));
-        }
-
-        offer.setHeaders(headers);
-
-        // Send the OfferEvent
-        fire(offer);
-
-        // Now we setup the moho handlers
-        mohoListeners.add(new AutowiredEventListener(this));
-        mohoCall.addObservers(new ActorEventListener(this));
-        
-        callStatistics.incomingCall();
-
-        // There is a tiny chance that the call ended before we could registered
-        // the Moho handler. We need to check that the call is still active and
-        // if it's not raise an EndEvent and dispose of the fiber.
-        if (mohoCall.getCallState() != Call.State.ACCEPTED) {
-            // TODO: There should be a way to tell why the call ended if we missed the event
-            end(Reason.HANGUP);
-        }
-    }
-
     @Override
     protected void verbCreated() {
-    	
         callStatistics.verbCreated();
     }
     
@@ -158,21 +86,12 @@ public class CallActor extends AbstractActor<Call> {
     // ================================================================================
 
     @Message
-    public void accept(AcceptCommand message) {
-        Map<String, String> headers = message.getHeaders();
-        participant.acceptCall(headers);
-        callStatistics.callAccepted();
-    }
-    
-    @Message
     public void hold(HoldCommand message) {
-    	
     	participant.unhold();
     }
     
     @Message
     public void unhold(UnholdCommand message) {
-    	
     	participant.unhold();
     }
     
@@ -216,45 +135,8 @@ public class CallActor extends AbstractActor<Call> {
 	}
     
     @Message
-    public void redirect(RedirectCommand message) throws Exception {
-        
-    	ApplicationContext applicationContext = participant.getApplicationContext();
-        Endpoint destination = applicationContext.createEndpoint(message.getTo().toString());
-        
-        if (participant.isProcessed()) {
-        	throw new IllegalAccessException("You can only redirect a call that has not been answered yet");
-        }
-        participant.redirect(destination, message.getHeaders());
-        callStatistics.callRedirected();
-    }
-
-    @Message
-    public void answer(AnswerCommand message) {
-        Map<String, String> headers = message.getHeaders();
-        participant.answer(headers);
-        callStatistics.callAnswered();
-    }
-
-    @Message
-    public void reject(RejectCommand message) {
-        switch (message.getReason()) {
-        case BUSY:
-        	participant.reject(SignalEvent.Reason.BUSY, message.getHeaders());
-            break;
-        case DECLINE:
-        	participant.reject(SignalEvent.Reason.DECLINE, message.getHeaders());
-            break;
-        case ERROR:
-        	participant.reject(SignalEvent.Reason.ERROR, message.getHeaders());
-            break;
-        default:
-            throw new UnsupportedOperationException("Reason not handled: " + message.getReason());
-        }
-    }
-
-    @Message
     public void hangup(HangupCommand message) {
-    	participant.disconnect(message.getHeaders());
+    	participant.hangup(message.getHeaders());
     }
 
     @Message
@@ -262,25 +144,12 @@ public class CallActor extends AbstractActor<Call> {
         end(new EndEvent(getParticipantId(), command.getReason()));
     }
 
-
     // Moho Events
     // ================================================================================
 
     @com.voxeo.moho.State
-    public void onJoinComplete(JoinCompleteEvent event) throws Exception {
-    	
-        // Very complicated. There should be an easier way to determine this.
-        // Basically, we need to fire an AnswerEvent if
-        //   - This is an outbound call 
-        //   - This is the first time we're successfully joined to the media server
-        if (event.getSource().equals(participant) && 
-            initialJoin == true && direction == Direction.OUT && 
-            event.getCause() == JoinCompleteEvent.Cause.JOINED && 
-            (event.getParticipant() == null || event.getParticipant() instanceof Call)) {
-
-            initialJoin = false;
-            fire(new AnsweredEvent(getParticipantId()));
-        }
+    public void onAnswered(com.voxeo.moho.event.AnsweredEvent<Participant> event) throws Exception {
+        fire(new AnsweredEvent(getParticipantId()));
     }
 
     @com.voxeo.moho.State
@@ -336,7 +205,7 @@ public class CallActor extends AbstractActor<Call> {
     }
 
     @com.voxeo.moho.State
-    public void onDtmf(InputDetectedEvent event) throws Exception {
+    public void onDtmf(InputDetectedEvent<Call> event) throws Exception {
         fire(new DtmfEvent(getParticipantId(), event.getInput()));
     }
 

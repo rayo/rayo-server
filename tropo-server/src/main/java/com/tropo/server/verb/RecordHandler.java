@@ -29,7 +29,7 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
 
 	private static final Loggerf log = Loggerf.getLogger(RecordHandler.class);
 
-	private Recording recording;
+	private Recording<Participant> recording;
 	
 	private List<StorageService> storageServices;
 
@@ -96,7 +96,7 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
         	command.setAudioClockRate(model.getSampleRate());
         } 
         
-		recording = media.record(command);
+		recording = getMediaService().record(command);
 	}
 
 	private String getExtensionFromFormat(Record model) {
@@ -153,7 +153,7 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
     }
     
 	@State
-	public synchronized void onRecordComplete(com.voxeo.moho.event.RecordCompleteEvent event) {
+	public synchronized void onRecordComplete(com.voxeo.moho.event.RecordCompleteEvent<Participant> event) {
 		
 		switch(event.getCause()) {
 			case ERROR:

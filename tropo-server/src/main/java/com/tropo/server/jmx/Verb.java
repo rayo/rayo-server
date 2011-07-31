@@ -5,8 +5,6 @@ import com.tropo.server.verb.VerbHandler;
 
 public class Verb implements VerbMXBean {
 
-	private static final long serialVersionUID = -7637717188369158628L;
-
 	private transient final com.tropo.core.verb.Verb verb;
 	private transient final VerbHandler<?,?> verbHandler;
 	

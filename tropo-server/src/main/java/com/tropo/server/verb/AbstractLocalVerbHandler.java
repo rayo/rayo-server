@@ -14,7 +14,6 @@ import com.tropo.server.Actor;
 import com.tropo.server.validation.ValidHandlerState;
 import com.voxeo.moho.Call;
 import com.voxeo.moho.MediaService;
-import com.voxeo.moho.Mixer;
 import com.voxeo.moho.Participant;
 import com.voxeo.moho.media.output.AudibleResource;
 import com.voxeo.moho.media.output.OutputCommand;
@@ -25,7 +24,6 @@ public abstract class AbstractLocalVerbHandler<T extends Verb, S extends Partici
     protected T model;
     protected S participant;
     protected Actor actor;
-    protected MediaService media;
     private EventDispatcher eventDispatcher;
 
     private volatile boolean complete = false;
@@ -52,12 +50,6 @@ public abstract class AbstractLocalVerbHandler<T extends Verb, S extends Partici
     @Override
     public void setParticipant(S participant) {
         this.participant = participant;
-        //TODO: Participant should probably have a getMediaService definition
-        if (participant instanceof Call) {
-        	this.media = ((Call)participant).getMediaService();
-        } else if (participant instanceof Mixer) {
-        	this.media = ((Mixer)participant).getMediaService();        	
-        }
     }
 
     protected AudibleResource resolveAudio(final Ssml item) {
@@ -71,11 +63,11 @@ public abstract class AbstractLocalVerbHandler<T extends Verb, S extends Partici
     protected com.voxeo.moho.media.InputMode getMohoMode(InputMode mode) {
         switch(mode) {
             case ANY:
-                return com.voxeo.moho.media.InputMode.both;
+                return com.voxeo.moho.media.InputMode.ANY;
             case DTMF:
-                return com.voxeo.moho.media.InputMode.dtmf;
+                return com.voxeo.moho.media.InputMode.DTMF;
             case VOICE:
-                return com.voxeo.moho.media.InputMode.voice;
+                return com.voxeo.moho.media.InputMode.SPEECH;
             default:
                 throw new UnsupportedOperationException("Mode not supported: " + mode);
         }
@@ -83,11 +75,11 @@ public abstract class AbstractLocalVerbHandler<T extends Verb, S extends Partici
     
     protected InputMode getTropoMode(com.voxeo.moho.media.InputMode mode) {
         switch(mode) {
-            case both:
+            case ANY:
                 return InputMode.ANY;
-            case dtmf:
+            case DTMF:
                 return InputMode.DTMF;
-            case voice:
+            case SPEECH:
                 return InputMode.VOICE;
             default:
                 throw new UnsupportedOperationException("Mode not supported: " + mode);
@@ -125,8 +117,12 @@ public abstract class AbstractLocalVerbHandler<T extends Verb, S extends Partici
     
     @Override
     public boolean isStateValid(ConstraintValidatorContext context) {
-
     	return true;
+    }
+    
+    @SuppressWarnings("unchecked")
+    protected MediaService<Participant> getMediaService() {
+        return (MediaService<Participant>) participant;
     }
     
     boolean isOnConference(Participant participant) {

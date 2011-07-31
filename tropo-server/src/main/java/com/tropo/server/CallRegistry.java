@@ -4,7 +4,7 @@ import java.util.Collection;
 
 public interface CallRegistry {
 
-    public void add(CallActor actor);
+    public void add(CallActor<?> actor);
 
     public void remove(String id);
     
@@ -12,7 +12,7 @@ public interface CallRegistry {
 
     public boolean isEmpty();
     
-    public CallActor get(String id);
+    public CallActor<?> get(String id);
 
-    public Collection<CallActor> getActiveCalls();
+    public Collection<CallActor<?>> getActiveCalls();
 }

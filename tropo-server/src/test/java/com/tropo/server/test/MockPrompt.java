@@ -1,27 +1,28 @@
 package com.tropo.server.test;
 
 import com.voxeo.moho.MediaException;
+import com.voxeo.moho.Participant;
 import com.voxeo.moho.media.Input;
 import com.voxeo.moho.media.Output;
 import com.voxeo.moho.media.Prompt;
 
-public class MockPrompt implements Prompt {
+public class MockPrompt implements Prompt<Participant> {
 
-    Input input;
-    Output output;
+    Input<Participant> input;
+    Output<Participant> output;
 
-    public MockPrompt(Input input, Output output) {
+    public MockPrompt(Input<Participant> input, Output<Participant> output) {
         this.input = input;
         this.output = output;
     }
 
     @Override
-    public Input getInput() throws MediaException {
+    public Input<Participant> getInput() throws MediaException {
         return null;
     }
 
     @Override
-    public Output getOutput() throws MediaException {
+    public Output<Participant> getOutput() throws MediaException {
         return null;
     }
 

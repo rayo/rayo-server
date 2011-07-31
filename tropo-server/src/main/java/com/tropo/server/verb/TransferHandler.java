@@ -22,11 +22,10 @@ import com.voxeo.moho.Call;
 import com.voxeo.moho.CallableEndpoint;
 import com.voxeo.moho.Endpoint;
 import com.voxeo.moho.Joint;
-import com.voxeo.moho.MediaService;
 import com.voxeo.moho.Participant;
 import com.voxeo.moho.RedirectException;
 import com.voxeo.moho.State;
-import com.voxeo.moho.event.DisconnectEvent;
+import com.voxeo.moho.event.HangupEvent;
 import com.voxeo.moho.event.InputCompleteEvent;
 import com.voxeo.moho.event.JoinCompleteEvent;
 import com.voxeo.moho.event.Observer;
@@ -35,6 +34,7 @@ import com.voxeo.moho.media.Prompt;
 import com.voxeo.moho.media.input.DigitInputCommand;
 import com.voxeo.moho.media.input.InputCommand;
 import com.voxeo.moho.media.output.OutputCommand;
+import com.voxeo.moho.media.output.OutputCommand.BargeinType;
 
 public class TransferHandler extends AbstractLocalVerbHandler<Transfer, Call> implements Observer {
 
@@ -42,8 +42,8 @@ public class TransferHandler extends AbstractLocalVerbHandler<Transfer, Call> im
 
     private boolean running;
 
-    private Input input;
-    private Prompt ringBack;
+    private Input<Participant> input;
+    private Prompt<Participant> ringBack;
     private Timer timer = new Timer();
     private Map<Call, Joint> joints = new HashMap<Call, Joint>();
 
@@ -59,9 +59,9 @@ public class TransferHandler extends AbstractLocalVerbHandler<Transfer, Call> im
         Ssml ringbackSsml = model.getRingbackTone();
         if(ringbackSsml != null) {
             OutputCommand outputCommand = output(ringbackSsml);
-            outputCommand.setBargein(false);
+            outputCommand.setBargeinType(BargeinType.NONE);
             outputCommand.setVoiceName(ringbackSsml.getVoice());
-            ringBack = media.prompt(outputCommand, null, 30);
+            ringBack = getMediaService().prompt(outputCommand, null, 30);
         }
 
         running = true;
@@ -85,8 +85,7 @@ public class TransferHandler extends AbstractLocalVerbHandler<Transfer, Call> im
         Character terminator = model.getTerminator();
         if(terminator != null) {
             InputCommand inputCommand = new DigitInputCommand(terminator);
-            MediaService mediaService = participant.getMediaService(true);
-            input = mediaService.input(inputCommand);
+            input = getMediaService().input(inputCommand);
         }
 
     }
@@ -137,8 +136,8 @@ public class TransferHandler extends AbstractLocalVerbHandler<Transfer, Call> im
     // ================================================================================
 
     @State
-    public synchronized void onDisconnect(DisconnectEvent event) {
-        if(event.source == peer) {
+    public synchronized void onDisconnect(HangupEvent event) {
+        if(event.getSource() == peer) {
             complete(Reason.SUCCESS);
         }
     }
@@ -146,7 +145,7 @@ public class TransferHandler extends AbstractLocalVerbHandler<Transfer, Call> im
     @State
     public synchronized void onJoinComplete(JoinCompleteEvent event) {
         
-        if (event.source != participant) {
+        if (event.getSource() != participant) {
 
             // Make sure we're running or still interested in joining someone
             if(!isRunning() || peer != null) {
@@ -160,7 +159,6 @@ public class TransferHandler extends AbstractLocalVerbHandler<Transfer, Call> im
             switch (event.getCause()) {
             case JOINED:
                 peer = (Call)event.getSource();
-                peer.setSupervised(true);
                 participant.join(peer, resolveJoinType(), Direction.DUPLEX);
                 stopDialing();
                 break;
@@ -203,8 +201,8 @@ public class TransferHandler extends AbstractLocalVerbHandler<Transfer, Call> im
     }
 
     @State
-    public synchronized void onTermChar(InputCompleteEvent event) {
-        if (event.source == participant) {
+    public synchronized void onTermChar(InputCompleteEvent<Participant> event) {
+        if (event.getSource() == participant) {
             switch (event.getCause()) {
             case MATCH:
                 if (isRunning()) {
@@ -236,7 +234,8 @@ public class TransferHandler extends AbstractLocalVerbHandler<Transfer, Call> im
     }
 
     private void dial(CallableEndpoint to) {
-        Call destination = to.call(resolveFrom(), model.getHeaders(), new ActorEventListener(actor));
+        Call destination = to.call(resolveFrom(), model.getHeaders());
+        destination.addObserver(new ActorEventListener(actor));
         Joint joint = destination.join();
         joints.put(destination, joint);
     }

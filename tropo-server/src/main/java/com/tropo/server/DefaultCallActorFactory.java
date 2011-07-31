@@ -4,6 +4,7 @@ import org.jetlang.fibers.PoolFiberFactory;
 
 import com.tropo.server.verb.VerbManager;
 import com.voxeo.moho.Call;
+import com.voxeo.moho.IncomingCall;
 
 public class DefaultCallActorFactory implements CallActorFactory {
 
@@ -14,8 +15,14 @@ public class DefaultCallActorFactory implements CallActorFactory {
     private CallRegistry callRegistry;
 
     @Override
-    public CallActor create(Call call) {
-        CallActor actor = new CallActor(call);
+    public CallActor<?> create(Call call) {
+        CallActor<?> actor = null;
+        if(call instanceof IncomingCall) {
+            actor = new IncomingCallActor((IncomingCall)call);
+        }
+        else {
+            actor = new CallActor<Call>(call);
+        }
         actor.setFiberFactory(fiberFactory);
         actor.setVerbManager(verbManager);
         actor.setCallStatistics(callStatistics);

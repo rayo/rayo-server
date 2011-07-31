@@ -1,7 +1,7 @@
 package com.tropo.server;
 
+import com.voxeo.moho.event.Event;
 import com.voxeo.moho.event.EventSource;
-import com.voxeo.moho.utils.Event;
 import com.voxeo.moho.utils.EventListener;
 
 public class ActorEventListener implements EventListener<Event<EventSource>> {

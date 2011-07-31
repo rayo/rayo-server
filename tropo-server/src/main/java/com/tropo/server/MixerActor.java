@@ -18,7 +18,7 @@ public class MixerActor extends AbstractActor<Mixer> {
     	
         // Now we setup the moho handlers
         mohoListeners.add(new AutowiredEventListener(this));
-        mohoConference.addObservers(new ActorEventListener(this));
+        mohoConference.addObserver(new ActorEventListener(this));
     }
     
     public Mixer getMixer() {
