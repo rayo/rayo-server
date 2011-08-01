@@ -31,6 +31,10 @@ public class AskCompleteEvent extends VerbCompleteEvent {
     public AskCompleteEvent(Ask verb, VerbCompleteReason reason) {
         super(verb, reason);
     }
+
+    public AskCompleteEvent(Ask verb, VerbCompleteReason reason, String errorText) {
+        super(verb, reason, errorText);
+    }
     
     public AskCompleteEvent(Ask verb, String errorText) {
         super(verb, errorText);

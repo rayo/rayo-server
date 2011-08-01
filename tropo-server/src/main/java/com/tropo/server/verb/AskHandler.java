@@ -4,12 +4,14 @@ import java.util.List;
 
 import javax.validation.ConstraintValidatorContext;
 
+import com.tropo.core.validation.ValidationException;
 import com.tropo.core.verb.Ask;
 import com.tropo.core.verb.AskCompleteEvent;
 import com.tropo.core.verb.AskCompleteEvent.Reason;
 import com.tropo.core.verb.Choices;
 import com.tropo.core.verb.Ssml;
 import com.tropo.core.verb.VerbCompleteEvent;
+import com.tropo.server.validation.SsmlValidator;
 import com.voxeo.moho.Participant;
 import com.voxeo.moho.State;
 import com.voxeo.moho.event.InputCompleteEvent;
@@ -23,6 +25,8 @@ import com.voxeo.servlet.xmpp.XmppStanzaError;
 public class AskHandler extends AbstractLocalVerbHandler<Ask,Participant> {
 
     private Prompt<Participant> prompt;
+    
+    private SsmlValidator ssmlValidator;
     
     @Override
     public void start() {
@@ -136,10 +140,23 @@ public class AskHandler extends AbstractLocalVerbHandler<Ask,Participant> {
         case ERROR:
         case UNKNOWN:
         default:
-            completeEvent = new AskCompleteEvent(model, "Internal Server Error");
+        	complete(new AskCompleteEvent(model, VerbCompleteEvent.Reason.ERROR, findErrorCause(event)));
         }
         
         complete(completeEvent);
     }
+    
+	private String findErrorCause(com.voxeo.moho.event.InputCompleteEvent<Participant> event) {
 
+		try {
+			ssmlValidator.validateSsml(model.getPrompt().getText());
+		} catch (ValidationException ve) {
+			return ve.getMessage();
+		}
+		return "Internal Server Error";
+	}
+
+	public void setSsmlValidator(SsmlValidator ssmlValidator) {
+		this.ssmlValidator = ssmlValidator;
+	}
 }
