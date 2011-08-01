@@ -2,6 +2,7 @@ package com.tropo.server.verb;
 
 import javax.validation.ConstraintValidatorContext;
 
+import com.tropo.core.validation.ValidationException;
 import com.tropo.core.verb.JumpCommand;
 import com.tropo.core.verb.MoveCommand;
 import com.tropo.core.verb.Output;
@@ -14,6 +15,7 @@ import com.tropo.core.verb.Ssml;
 import com.tropo.core.verb.VerbCommand;
 import com.tropo.core.verb.VerbCompleteEvent;
 import com.tropo.core.verb.VolumeCommand;
+import com.tropo.server.validation.SsmlValidator;
 import com.voxeo.moho.Participant;
 import com.voxeo.moho.State;
 import com.voxeo.moho.media.output.AudibleResource;
@@ -23,6 +25,7 @@ import com.voxeo.servlet.xmpp.XmppStanzaError;
 public class OutputHandler extends AbstractLocalVerbHandler<Output, Participant> {
 
     private com.voxeo.moho.media.Output<Participant> output;
+    private SsmlValidator ssmlValidator;
 
     // Verb Lifecycle
     // ================================================================================
@@ -149,10 +152,24 @@ public class OutputHandler extends AbstractLocalVerbHandler<Output, Participant>
             break;
         case ERROR:
         case UNKNOWN:
+        	complete(new OutputCompleteEvent(model, VerbCompleteEvent.Reason.ERROR, findErrorCause(event)));
         case TIMEOUT:
-            complete(new OutputCompleteEvent(model, VerbCompleteEvent.Reason.ERROR));
+            complete(new OutputCompleteEvent(model, VerbCompleteEvent.Reason.ERROR, "Timeout"));
             break;
         }
     }
 
+	private String findErrorCause(com.voxeo.moho.event.OutputCompleteEvent<Participant> event) {
+
+		try {
+			ssmlValidator.validateSsml(model.getPrompt().getText());
+		} catch (ValidationException ve) {
+			return ve.getMessage();
+		}
+		return "Unknown cause";
+	}
+
+	public void setSsmlValidator(SsmlValidator ssmlValidator) {
+		this.ssmlValidator = ssmlValidator;
+	}
 }

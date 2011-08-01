@@ -20,6 +20,11 @@ public class OutputCompleteEvent extends VerbCompleteEvent {
         super(verb, reason);
     }
 
+    public OutputCompleteEvent(Output verb, VerbCompleteReason reason, String errorText) {
+        
+    	super(verb, reason, errorText);
+    }
+
     public OutputCompleteEvent(Output verb, String errorText) {
         super(verb, errorText);
     }

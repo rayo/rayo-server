@@ -15,6 +15,7 @@ import com.tropo.core.validation.Validator
 import com.tropo.core.xml.DefaultXmlProviderManager;
 import com.tropo.core.xml.providers.AskProvider
 import com.tropo.core.xml.providers.ConferenceProvider
+import com.tropo.core.xml.providers.OutputProvider;
 import com.tropo.core.xml.providers.RayoProvider;
 import com.tropo.core.xml.providers.RecordProvider;
 import com.tropo.core.xml.providers.SayProvider
@@ -37,7 +38,8 @@ class ValidationTest {
 					 new AskProvider(validator:validator,namespaces:['urn:xmpp:tropo:ask:1']),
 					 new TransferProvider(validator:validator,namespaces:['urn:xmpp:tropo:transfer:1']),
 					 new ConferenceProvider(validator:validator,namespaces:['urn:xmpp:tropo:conference:1']),
-					 new RecordProvider(validator:validator,namespaces:['urn:xmpp:rayo:record:1'])
+					 new RecordProvider(validator:validator,namespaces:['urn:xmpp:rayo:record:1']),
+					 new OutputProvider(validator:validator,namespaces:['urn:xmpp:rayo:output:1'])
 					]
 		
 		manager = new DefaultXmlProviderManager();
@@ -649,6 +651,95 @@ class ValidationTest {
 		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
 		assertEquals errorMapping.text, Messages.UNKNOWN_NAMESPACE_ELEMENT
 	}
+	
+	// Output
+	// ====================================================================================
+	
+	@Test
+	public void validateOutputInvalidInterrupt() {
+				
+		def output = parseXml("""<output xmlns="urn:xmpp:rayo:output:1" interrupt-on="aaaa">say hello</output>""")
+		
+		def errorMapping = assertValidationException(output)
+		assertNotNull errorMapping
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.INVALID_BARGEIN_TYPE
+	}
+	
+	@Test
+	public void validateOutputInvalidStartOffset() {
+				
+		def output = parseXml("""<output xmlns="urn:xmpp:rayo:output:1" start-offset="aaaa">say hello</output>""")
+		
+		def errorMapping = assertValidationException(output)
+		assertNotNull errorMapping
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, String.format(Messages.INVALID_DURATION, 'start-offset')
+	}
+	
+	@Test
+	public void validateOutputInvalidRepeatInterval() {
+				
+		def output = parseXml("""<output xmlns="urn:xmpp:rayo:output:1" repeat-interval="aaaa">say hello</output>""")
+		
+		def errorMapping = assertValidationException(output)
+		assertNotNull errorMapping
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, String.format(Messages.INVALID_DURATION, 'repeat-interval')
+	}
+	
+	@Test
+	public void validateOutputInvalidMaxTime() {
+				
+		def output = parseXml("""<output xmlns="urn:xmpp:rayo:output:1" max-time="aaaa">say hello</output>""")
+		
+		def errorMapping = assertValidationException(output)
+		assertNotNull errorMapping
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, String.format(Messages.INVALID_DURATION, 'max-time')
+	}
+	
+	@Test
+	public void validateOutputInvalidStartPaused() {
+				
+		def output = parseXml("""<output xmlns="urn:xmpp:rayo:output:1" start-paused="aaaa">say hello</output>""")
+		
+		def errorMapping = assertValidationException(output)
+		assertNotNull errorMapping
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, String.format(Messages.INVALID_BOOLEAN, 'start-paused')
+	}
+	
+	@Test
+	public void validateOutputInvalidRepeatTimes() {
+				
+		def output = parseXml("""<output xmlns="urn:xmpp:rayo:output:1" repeat-times="aaaa">say hello</output>""")
+		
+		def errorMapping = assertValidationException(output)
+		assertNotNull errorMapping
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, String.format(Messages.INVALID_INTEGER, 'repeat-times')
+	}
+	
+	@Test
+	public void validateOutputEmptyPromptItems() {
+				
+		def output = parseXml("""<output xmlns=\"urn:xmpp:rayo:output:1\" voice=\"allison\"></output>""")
+		
+		def errorMapping = assertValidationException(output)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.MISSING_SSML
+	}
+	
+	@Test
+	public void validateOutputValid() {
+				
+		def output = parseXml("""<output xmlns=\"urn:xmpp:rayo:output:1\" voice=\"allison\"><speak>Hello World</speak></output>""")
+		assertNotNull fromXML(output)
+	}
+
 	
 	// Invalid jids
 	// ====================================================================================

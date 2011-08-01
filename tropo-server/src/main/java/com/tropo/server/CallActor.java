@@ -19,8 +19,10 @@ import com.tropo.core.RingingEvent;
 import com.tropo.core.UnjoinCommand;
 import com.tropo.core.UnjoinedEvent;
 import com.tropo.core.verb.HoldCommand;
+import com.tropo.core.verb.MuteCommand;
 import com.tropo.core.verb.UnholdCommand;
 import com.voxeo.logging.Loggerf;
+import com.tropo.core.verb.UnmuteCommand;
 import com.voxeo.moho.Call;
 import com.voxeo.moho.Joint;
 import com.voxeo.moho.Participant;
@@ -91,12 +93,22 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 
     @Message
     public void hold(HoldCommand message) {
-    	participant.unhold();
+    	participant.hold();
     }
     
     @Message
     public void unhold(UnholdCommand message) {
     	participant.unhold();
+    }
+
+    @Message
+    public void mute(MuteCommand message) {
+    	participant.mute();
+    }
+    
+    @Message
+    public void unmute(UnmuteCommand message) {
+    	participant.unmute();
     }
     
     @Message

@@ -71,7 +71,7 @@ public class OutputProvider extends BaseProvider {
         output.setPrompt(extractSsml(element));
         output.setVoice(element.attributeValue("voice"));
 
-        if (element.attribute("bargein") != null) {
+        if (element.attribute("interrupt-on") != null) {
         	output.setBargeinType(loadBargeinType(element));
         }
         if (element.attribute("start-offset") != null) {

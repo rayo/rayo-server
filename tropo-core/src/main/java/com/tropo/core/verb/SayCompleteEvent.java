@@ -20,6 +20,11 @@ public class SayCompleteEvent extends VerbCompleteEvent {
         super(verb, reason);
     }
 
+    public SayCompleteEvent(Say verb, VerbCompleteReason reason, String errorText) {
+    	
+        super(verb, reason, errorText);
+    }
+    
     public SayCompleteEvent(Say verb, String errorText) {
         super(verb, errorText);
     }
