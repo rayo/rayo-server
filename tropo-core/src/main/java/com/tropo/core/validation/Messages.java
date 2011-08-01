@@ -16,6 +16,7 @@ public class Messages {
     public static final String MISSING_COMPLETE_REASON = "Complete event with no reason!";
     public static final String MISSING_JOIN_ID = "Missing Join id. You need to specify either a valid call-id or mixer-id";
 
+    public static final String INVALID_DURATION = "Invalid duration for '%s'";
     public static final String INVALID_INPUT_MODE = "Invalid input mode.";
 	public static final String INVALID_URI = "You have submitted an invalid URI.";
 	public static final String INVALID_BOOLEAN = "You have submitted an invalid boolean value for '%s'";
@@ -36,6 +37,7 @@ public class Messages {
     public static final String INVALID_FILE_FORMAT = "Invalid file format.";
     public static final String INVALID_MEDIA_DIRECTION = "Invalid direction. It should be one of DUPLEX|RECV|SEND.";
     public static final String INVALID_JOIN_TYPE = "Invalid join type. It should be one of BRIDGE|DIRECT.";
+    public static final String INVALID_BARGEIN_TYPE = "Invalid 'interrupt-on'.";
 
 	public static final String UNKNOWN_NAMESPACE_ELEMENT = "Could not find the element on namespace.";
 

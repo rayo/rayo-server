@@ -8,30 +8,21 @@ import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
+import org.joda.time.Duration;
 
-import com.tropo.core.validation.ValidCodec;
-import com.tropo.core.validation.ValidFileFormat;
+import com.voxeo.moho.media.output.OutputCommand.BargeinType;
 
 public class Output extends BaseVerb {
 	
     public static final String MISSING_PROMPT = "Nothing to do";
     
-    private Boolean bargein;
-    private String voice;
-    private Integer timeout;
-    private Integer volumeUnit;
-    private Integer offset;
-    
-    @ValidCodec
-    private String codec;
-    
-    @ValidFileFormat
-    private String format;
-    
+    private BargeinType bargeinType;
+    private Duration startOffset;
+    private Boolean startPaused;
+    private Duration repeatInterval;
     private Integer repeatTimes;
-    private Integer jumpPlaylistIncrement;
-    private Integer jumpTime;
-    private Boolean startInPauseMode;
+    private Duration maxTime;
+    private String voice;
     
 	@Valid
     @NotNull(message=Output.MISSING_PROMPT)
@@ -46,12 +37,12 @@ public class Output extends BaseVerb {
 		this.prompt = prompt;
 	}
 
-	public Boolean isBargein() {
-		return bargein;
+	public BargeinType getBargeinType() {
+		return bargeinType;
 	}
 
-	public void setBargein(Boolean bargein) {
-		this.bargein = bargein;
+	public void setBargeinType(BargeinType type) {
+		this.bargeinType = type;
 	}
 
 	public String getVoice() {
@@ -62,44 +53,12 @@ public class Output extends BaseVerb {
 		this.voice = voice;
 	}
 
-	public Integer getTimeout() {
-		return timeout;
+	public Duration getStartOffset() {
+		return startOffset;
 	}
 
-	public void setTimeout(Integer timeout) {
-		this.timeout = timeout;
-	}
-
-	public Integer getVolumeUnit() {
-		return volumeUnit;
-	}
-
-	public void setVolumeUnit(Integer volumeUnit) {
-		this.volumeUnit = volumeUnit;
-	}
-
-	public Integer getOffset() {
-		return offset;
-	}
-
-	public void setOffset(Integer offset) {
-		this.offset = offset;
-	}
-
-	public String getCodec() {
-		return codec;
-	}
-
-	public void setCodec(String codec) {
-		this.codec = codec;
-	}
-
-	public String getFormat() {
-		return format;
-	}
-
-	public void setFormat(String format) {
-		this.format = format;
+	public void setStartOffset(Duration offset) {
+		this.startOffset = offset;
 	}
 
 	public Integer getRepeatTimes() {
@@ -110,28 +69,12 @@ public class Output extends BaseVerb {
 		this.repeatTimes = repeatTimes;
 	}
 
-	public Integer getJumpPlaylistIncrement() {
-		return jumpPlaylistIncrement;
+	public Boolean isStartPaused() {
+		return startPaused;
 	}
 
-	public void setJumpPlaylistIncrement(Integer jumpPlaylistIncrement) {
-		this.jumpPlaylistIncrement = jumpPlaylistIncrement;
-	}
-
-	public Integer getJumpTime() {
-		return jumpTime;
-	}
-
-	public void setJumpTime(Integer jumpTime) {
-		this.jumpTime = jumpTime;
-	}
-
-	public Boolean isStartInPauseMode() {
-		return startInPauseMode;
-	}
-
-	public void setStartInPauseMode(Boolean startInPauseMode) {
-		this.startInPauseMode = startInPauseMode;
+	public void setStartPaused(Boolean startInPauseMode) {
+		this.startPaused = startInPauseMode;
 	}
 
 	public static Value toFileFormat(String format) {
@@ -209,22 +152,39 @@ public class Output extends BaseVerb {
     	return null;
 	}
 	
+    public Duration getRepeatInterval() {
+        return repeatInterval;
+    }
+
+    public void setRepeatInterval(Duration repeatInterval) {
+        this.repeatInterval = repeatInterval;
+    }
+    
+    public Duration getMaxTime() {
+        return maxTime;
+    }
+
+    public void setMaxTime(Duration maxTime) {
+        this.maxTime = maxTime;
+    }
+
 	@Override
     public String toString() {
 
     	return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)    		
     		.append("callId", getCallId())
     		.append("verbId", getVerbId())
-    		.append("prompt", getPrompt())
-    		.append("jumpTime", getJumpTime())
-    		.append("jumpPlaylistIncrement", getJumpPlaylistIncrement())
-    		.append("offset", getOffset())
+    		.append("interrupt-on", getBargeinType())
+    		.append("start-offset", getStartOffset().getMillis())
+    		.append("start-paused", isStartPaused())
+            .append("repeatInterval", getRepeatInterval().getMillis())
     		.append("repeatTimes", getRepeatTimes())
-    		.append("timeout", getTimeout())
-    		.append("volumeUnit", getVolumeUnit())
-    		.append("codec", getCodec())
-    		.append("format", getFormat())
-    		.append("voice", getVoice())
+            .append("maxTime", getMaxTime().getMillis())
+            .append("voice", getVoice())
+    		.append("prompt", getPrompt())
     		.toString();
     }
+
+
+
 }

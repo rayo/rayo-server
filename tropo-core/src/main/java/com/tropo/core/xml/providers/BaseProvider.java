@@ -148,7 +148,6 @@ public abstract class BaseProvider implements XmlProvider {
     }
 
     protected InputMode loadInputMode(Element element) {
-
         try {
             return InputMode.valueOf(element.attributeValue("mode").toUpperCase());
         } catch (Exception e) {
@@ -209,9 +208,16 @@ public abstract class BaseProvider implements XmlProvider {
         	throw new ValidationException(String.format(Messages.INVALID_FLOAT, attribute));
         }
     }
-    
-    protected Duration toTimeout(String value) {
 
+    protected Duration toDuration(String name, Element element) {
+        try {
+            return new Duration(Long.parseLong(element.attributeValue(name)));
+        } catch (IllegalArgumentException iae) {
+            throw new ValidationException(String.format(Messages.INVALID_DURATION, name));
+        }
+    }
+
+    protected Duration toTimeout(String value) {
         try {
             return new Duration(Long.parseLong(value));
         } catch (IllegalArgumentException iae) {

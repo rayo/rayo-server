@@ -41,6 +41,7 @@ import com.tropo.core.verb.HoldCommand;
 import com.tropo.core.verb.InputMode
 import com.tropo.core.verb.KickCommand
 import com.tropo.core.verb.MediaType;
+import com.tropo.core.verb.Output;
 import com.tropo.core.verb.PauseCommand
 import com.tropo.core.verb.Record;
 import com.tropo.core.verb.RecordCompleteEvent;
@@ -58,10 +59,12 @@ import com.tropo.core.verb.UnholdCommand;
 import com.tropo.core.verb.VerbCompleteEvent;
 import com.tropo.core.xml.providers.AskProvider
 import com.tropo.core.xml.providers.ConferenceProvider
+import com.tropo.core.xml.providers.OutputProvider;
 import com.tropo.core.xml.providers.RayoProvider
 import com.tropo.core.xml.providers.RecordProvider;
 import com.tropo.core.xml.providers.SayProvider
 import com.tropo.core.xml.providers.TransferProvider
+import com.voxeo.moho.media.output.OutputCommand.BargeinType;
 
 public class RayoProviderTest {
 
@@ -81,7 +84,8 @@ public class RayoProviderTest {
          new AskProvider(validator:validator,namespaces:['urn:xmpp:tropo:ask:1', 'urn:xmpp:tropo:ask:complete:1']),
          new TransferProvider(validator:validator,namespaces:['urn:xmpp:tropo:transfer:1', 'urn:xmpp:tropo:transfer:complete:1']),
          new ConferenceProvider(validator:validator,namespaces:['urn:xmpp:tropo:conference:1', 'urn:xmpp:tropo:conference:complete:1']),
-         new RecordProvider(validator:validator,namespaces:['urn:xmpp:rayo:record:1', 'urn:xmpp:rayo:record:complete:1'])
+         new RecordProvider(validator:validator,namespaces:['urn:xmpp:rayo:record:1', 'urn:xmpp:rayo:record:complete:1']),
+         new OutputProvider(validator:validator,namespaces:['urn:xmpp:rayo:output:1', 'urn:xmpp:rayo:output:complete:1'])
 		].each {
              provider.register it
          }
@@ -1238,6 +1242,27 @@ public class RayoProviderTest {
 		assertEquals("""<complete xmlns="urn:xmpp:rayo:ext:1"><error xmlns="urn:xmpp:rayo:ext:complete:1">this is an error</error></complete>""", toXml(complete));
 	}
 	
+    // Output
+    // ====================================================================================
+    
+    @Test
+    public void output() {
+        
+        def output = new Output([
+            bargeinType: BargeinType.ANY,
+            startOffset: new Duration(2000),
+            startPaused: true,
+            repeatInterval : new Duration(2000),
+            repeatTimes: 10,
+            maxTime: new Duration(2000),
+            voice: "bling",
+            prompt: new Ssml("hello world")
+        ])
+
+        assertEquals("""<output xmlns="urn:xmpp:rayo:output:1" interrupt-on="any" start-offset="2000" start-paused="true" repeat-interval="2000" repeat-times="10" max-time="2000" voice="bling">hello world</output>""", toXml(output));
+    }
+
+
 	// Hold 
 	// ====================================================================================
 

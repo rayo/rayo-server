@@ -18,6 +18,7 @@ import com.tropo.core.verb.PauseCommand;
 import com.tropo.core.verb.ResumeCommand;
 import com.tropo.core.verb.SpeedCommand;
 import com.tropo.core.verb.VolumeCommand;
+import com.voxeo.moho.media.output.OutputCommand.BargeinType;
 
 public class OutputProvider extends BaseProvider {
 
@@ -68,37 +69,27 @@ public class OutputProvider extends BaseProvider {
         
     	Output output = new Output();
         output.setPrompt(extractSsml(element));
-        
+        output.setVoice(element.attributeValue("voice"));
+
         if (element.attribute("bargein") != null) {
-        	output.setBargein(toBoolean("bargein", element));
+        	output.setBargeinType(loadBargeinType(element));
         }
-        if (element.attribute("codec") != null) {
-        	output.setCodec(element.attributeValue("codec"));
+        if (element.attribute("start-offset") != null) {
+            output.setStartOffset(toDuration("start-offset", element));
         }
-        if (element.attribute("format") != null) {
-        	output.setFormat(element.attributeValue("format"));
+        if (element.attribute("start-paused") != null) {
+            output.setStartPaused(toBoolean("start-paused", element));
         }
-        if (element.attribute("jump-playlist-increment") != null) {
-        	output.setJumpPlaylistIncrement(toInteger("jump-playlist-increment",element));
-        }
-        if (element.attribute("jump-time") != null) {
-        	output.setJumpTime(toInteger("jump-time",element));
-        }
-        if (element.attribute("offset") != null) {
-        	output.setOffset(toInteger("offset", element));
+        if (element.attribute("repeat-interval") != null) {
+            output.setRepeatInterval(toDuration("repeat-interval", element));
         }
         if (element.attribute("repeat-times") != null) {
-        	output.setRepeatTimes(toInteger("repeat-times", element));
+            output.setRepeatTimes(toInteger("repeat-times", element));
         }
-        if (element.attribute("start-in-pause-mode") != null) {
-        	output.setStartInPauseMode(toBoolean("start-in-pause-mode", element));
+        if (element.attribute("max-time") != null) {
+            output.setMaxTime(toDuration("max-time", element));
         }
-        if (element.attribute("timeout") != null) {
-        	output.setTimeout(toInteger("timeout", element));
-        }
-        if (element.attribute("volume-unit") != null) {
-        	output.setVolumeUnit(toInteger("volume-unit", element));
-        }
+
         return output;
     }
 
@@ -199,41 +190,30 @@ public class OutputProvider extends BaseProvider {
     private void createOutput(Output output, Document document) throws Exception {
     	
         Element root = document.addElement(new QName("output", NAMESPACE));
-        if (output.getPrompt() != null) {
-            addSsml(output.getPrompt(), root);
+        
+        if (output.getBargeinType() != null ) {
+            root.addAttribute("interrupt-on", output.getBargeinType().name().toLowerCase());        	
         }
-        if (output.getCodec() != null ) {
-        	root.addAttribute("codec", output.getCodec());        	
+        if (output.getStartOffset() != null ) {
+            root.addAttribute("start-offset", String.valueOf(output.getStartOffset().getMillis()));        	
         }
-        if (output.getFormat() != null ) {
-        	root.addAttribute("format", output.getFormat());        	
+        if (output.isStartPaused() != null ) {
+            root.addAttribute("start-paused", String.valueOf(output.isStartPaused()));          
         }
-        if (output.getJumpPlaylistIncrement() != null ) {
-        	root.addAttribute("jump-playlist-increment", String.valueOf(output.getJumpPlaylistIncrement()));        	
-        }
-        if (output.getJumpTime() != null ) {
-        	root.addAttribute("jump-time", String.valueOf(output.getJumpTime()));        	
-        }
-        if (output.getOffset() != null ) {
-        	root.addAttribute("offset", String.valueOf(output.getOffset()));        	
+        if (output.getRepeatInterval() != null ) {
+            root.addAttribute("repeat-interval", String.valueOf(output.getRepeatInterval().getMillis()));         
         }
         if (output.getRepeatTimes() != null ) {
-        	root.addAttribute("repeat-times", String.valueOf(output.getRepeatTimes()));        	
+            root.addAttribute("repeat-times", String.valueOf(output.getRepeatTimes()));         
         }
-        if (output.getTimeout() != null ) {
-        	root.addAttribute("timeout", String.valueOf(output.getTimeout()));        	
+        if (output.getMaxTime() != null ) {
+            root.addAttribute("max-time", String.valueOf(output.getMaxTime().getMillis()));         
         }
         if (output.getVoice() != null ) {
-        	root.addAttribute("voice", output.getVoice());        	
+            root.addAttribute("voice", output.getVoice());        	
         }
-        if (output.getVolumeUnit() != null ) {
-        	root.addAttribute("volume-unit", String.valueOf(output.getVolumeUnit()));        	
-        }
-        if (output.isBargein() != null ) {
-        	root.addAttribute("bargein", String.valueOf(output.isBargein()));        	
-        }
-        if (output.isStartInPauseMode() != null ) {
-        	root.addAttribute("start-in-pause-mode", String.valueOf(output.isStartInPauseMode()));        	
+        if (output.getPrompt() != null) {
+            addSsml(output.getPrompt(), root);
         }
     }
 
@@ -272,6 +252,14 @@ public class OutputProvider extends BaseProvider {
     
     private void createOutputCompleteEvent(OutputCompleteEvent event, Document document) throws Exception {
         addCompleteElement(document, event, COMPLETE_NAMESPACE);
+    }
+
+    protected BargeinType loadBargeinType(Element element) {
+        try {
+            return BargeinType.valueOf(element.attributeValue("interrupt-on").toUpperCase());
+        } catch (Exception e) {
+            throw new ValidationException(Messages.INVALID_BARGEIN_TYPE);
+        }
     }
 
     @Override

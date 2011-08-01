@@ -18,7 +18,6 @@ import com.voxeo.moho.Participant;
 import com.voxeo.moho.State;
 import com.voxeo.moho.media.output.AudibleResource;
 import com.voxeo.moho.media.output.OutputCommand;
-import com.voxeo.moho.media.output.OutputCommand.BargeinType;
 import com.voxeo.servlet.xmpp.XmppStanzaError;
 
 public class OutputHandler extends AbstractLocalVerbHandler<Output, Participant> {
@@ -34,69 +33,53 @@ public class OutputHandler extends AbstractLocalVerbHandler<Output, Participant>
         Ssml prompt = model.getPrompt();
         AudibleResource audibleResource = resolveAudio(prompt);
         OutputCommand outcommand = new OutputCommand(audibleResource);
-        if (model.isBargein() != null) {
-            outcommand.setBargeinType(model.isBargein() ? BargeinType.ANY : BargeinType.NONE);
+
+        if (model.getBargeinType() != null) {
+            outcommand.setBargeinType(model.getBargeinType());
         }
-        if (model.getCodec() != null) {
-        	outcommand.setCodec(Output.toCodecValue(model.getCodec()));
+        if (model.getStartOffset() != null) {
+            outcommand.setStartingOffset(model.getStartOffset().getMillis());
         }
-        if (model.getFormat() != null) {
-        	outcommand.setFormat(Output.toFileFormat(model.getFormat()));
+        if (model.isStartPaused() != null) {
+            outcommand.setStartInPausedMode(model.isStartPaused());
         }
-        if (model.getJumpPlaylistIncrement() != null) {
-        	outcommand.setJumpPlaylistIncrement(model.getJumpPlaylistIncrement());
-        }
-        if (model.getOffset() != null) {
-        	outcommand.setStartingOffset(model.getOffset());
+        if (model.getRepeatInterval() != null) {
+            outcommand.setRepeatInterval(model.getRepeatInterval().getMillis());
         }
         if (model.getRepeatTimes() != null) {
-        	outcommand.setRepeatTimes(model.getRepeatTimes());
+            outcommand.setRepeatTimes(model.getRepeatTimes());
         }
-        if (model.getTimeout() != null) {
-        	outcommand.setMaxtime(model.getTimeout());
+        if (model.getMaxTime() != null) {
+            outcommand.setMaxtime(model.getMaxTime().getMillis());
         }
-        if (model.getVolumeUnit() != null) {
-        	outcommand.setVolumeUnit(model.getVolumeUnit());
-        }
-        if (model.isStartInPauseMode() != null) {
-        	outcommand.setStartInPausedMode(model.isStartInPauseMode());
-        }
-        
         if (prompt.getVoice() != null) {
-        	outcommand.setVoiceName(prompt.getVoice());
+            outcommand.setVoiceName(prompt.getVoice());
         }
-        
-        output = getMediaService().output(outcommand);    	
+
+        output = getMediaService().output(outcommand);
     }
 
-	@Override
+    @Override
     public boolean isStateValid(ConstraintValidatorContext context) {
 
         if (isOnConference(participant)) {
-        	context.buildConstraintViolationWithTemplate(
-        			"Call is joined to a conference.")
-        			.addNode(XmppStanzaError.RESOURCE_CONSTRAINT_CONDITION)
-        			.addConstraintViolation();
-        	return false;
+            context.buildConstraintViolationWithTemplate("Call is joined to a conference.").addNode(XmppStanzaError.RESOURCE_CONSTRAINT_CONDITION).addConstraintViolation();
+            return false;
         }
         if (isOnHold(participant)) {
-        	context.buildConstraintViolationWithTemplate(
-				"Call is currently on hold.")
-				.addNode(XmppStanzaError.RESOURCE_CONSTRAINT_CONDITION)
-				.addConstraintViolation();
-        	return false;        	
+            context.buildConstraintViolationWithTemplate("Call is currently on hold.").addNode(XmppStanzaError.RESOURCE_CONSTRAINT_CONDITION).addConstraintViolation();
+            return false;
         }
         return true;
     }
-    
+
     // Commands
     // ================================================================================
 
     public void stop(boolean hangup) {
-        if(hangup) {
+        if (hangup) {
             complete(new OutputCompleteEvent(model, VerbCompleteEvent.Reason.HANGUP));
-        }
-        else {
+        } else {
             output.stop();
         }
     }
@@ -108,13 +91,13 @@ public class OutputHandler extends AbstractLocalVerbHandler<Output, Participant>
         } else if (command instanceof ResumeCommand) {
             resume();
         } else if (command instanceof JumpCommand) {
-            jump(((JumpCommand)command));
+            jump(((JumpCommand) command));
         } else if (command instanceof MoveCommand) {
-            move((MoveCommand)command);
+            move((MoveCommand) command);
         } else if (command instanceof SpeedCommand) {
-            speed((SpeedCommand)command);
+            speed((SpeedCommand) command);
         } else if (command instanceof VolumeCommand) {
-            volume((VolumeCommand)command);
+            volume((VolumeCommand) command);
         }
     }
 
@@ -129,31 +112,31 @@ public class OutputHandler extends AbstractLocalVerbHandler<Output, Participant>
     }
 
     public void jump(JumpCommand command) {
-    	
-    	output.jump(command.getPosition());
+
+        output.jump(command.getPosition());
     }
-    
+
     public void move(MoveCommand command) {
-    	
-    	output.move(command.isDirection(), command.getTime());
+
+        output.move(command.isDirection(), command.getTime());
     }
-    
+
     public void speed(SpeedCommand command) {
-    	
-    	output.speed(command.isUp());
+
+        output.speed(command.isUp());
     }
-    
+
     public void volume(VolumeCommand command) {
-    	
-    	output.volume(command.isUp());
+
+        output.volume(command.isUp());
     }
-    
+
     // Moho Events
     // ================================================================================
 
     @State
     public void onSpeakComplete(com.voxeo.moho.event.OutputCompleteEvent<Participant> event) {
-        switch(event.getCause()) {
+        switch (event.getCause()) {
         case BARGEIN:
         case END:
             complete(new OutputCompleteEvent(model, Reason.SUCCESS));
