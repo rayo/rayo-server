@@ -41,6 +41,7 @@ import com.tropo.core.verb.HoldCommand;
 import com.tropo.core.verb.InputMode
 import com.tropo.core.verb.KickCommand
 import com.tropo.core.verb.MediaType;
+import com.tropo.core.verb.MuteCommand;
 import com.tropo.core.verb.Output;
 import com.tropo.core.verb.PauseCommand
 import com.tropo.core.verb.Record;
@@ -56,6 +57,7 @@ import com.tropo.core.verb.Transfer
 import com.tropo.core.verb.TransferCompleteEvent
 import com.tropo.core.verb.AskCompleteEvent.Reason
 import com.tropo.core.verb.UnholdCommand;
+import com.tropo.core.verb.UnmuteCommand;
 import com.tropo.core.verb.VerbCompleteEvent;
 import com.tropo.core.xml.providers.AskProvider
 import com.tropo.core.xml.providers.ConferenceProvider
@@ -1366,6 +1368,34 @@ public class RayoProviderTest {
 	@Test
 	public void unholdFromXml() {
 		assertNotNull fromXml("""<unhold xmlns="urn:xmpp:rayo:1"></unhold>""")
+	}
+
+	// Mute
+	// ====================================================================================
+
+	@Test
+	public void muteToXml() {
+		MuteCommand mute = new MuteCommand();
+		assertEquals("""<mute xmlns="urn:xmpp:rayo:1"/>""", toXml(mute));
+	}
+	
+	@Test
+	public void muteFromXml() {
+		assertNotNull fromXml("""<mute xmlns="urn:xmpp:rayo:1"></mute>""")
+	}
+
+	// Unhold
+	// ====================================================================================
+
+	@Test
+	public void unmuteToXml() {
+		UnmuteCommand unmute = new UnmuteCommand();
+		assertEquals("""<unmute xmlns="urn:xmpp:rayo:1"/>""", toXml(unmute));
+	}
+	
+	@Test
+	public void unmuteFromXml() {
+		assertNotNull fromXml("""<unmute xmlns="urn:xmpp:rayo:1"></unmute>""")
 	}
 
 	
