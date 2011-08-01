@@ -97,10 +97,9 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     
     @Message
     public void join(JoinCommand message) throws Exception {
-
     	Participant destination = getDestinationParticipant(message.getTo(), message.getType());
-		waitForJoin(participant.join(destination, JoinType.valueOf(message.getMedia()), 
-				javax.media.mscontrol.join.Joinable.Direction.valueOf(message.getDirection())));
+		Joint joint = participant.join(destination, message.getMedia(), message.getDirection());
+        waitForJoin(joint);
 		fire(new JoinedEvent(participant.getId(), destination.getId(), message.getType()));    	
 		fire(new JoinedEvent(destination.getId(), participant.getId(), message.getType()));    	
     }

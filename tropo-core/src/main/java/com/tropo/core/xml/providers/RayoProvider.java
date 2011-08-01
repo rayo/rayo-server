@@ -3,10 +3,13 @@ package com.tropo.core.xml.providers;
 import java.net.URISyntaxException;
 import java.util.List;
 
+import javax.media.mscontrol.join.Joinable.Direction;
+
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.Namespace;
 import org.dom4j.QName;
+import org.joda.time.Duration;
 
 import com.tropo.core.AcceptCommand;
 import com.tropo.core.AnswerCommand;
@@ -31,6 +34,7 @@ import com.tropo.core.verb.HoldCommand;
 import com.tropo.core.verb.StopCommand;
 import com.tropo.core.verb.UnholdCommand;
 import com.tropo.core.xml.XmlProvider;
+import com.voxeo.moho.Participant.JoinType;
 
 public class RayoProvider extends BaseProvider {
 	
@@ -167,11 +171,11 @@ public class RayoProvider extends BaseProvider {
         
     	JoinCommand join = new JoinCommand();
     	if (element.attribute("media") != null) {
-    		join.setMedia(element.attributeValue("media").toUpperCase());
+    		join.setMedia(toEnum(JoinType.class, "media", element));
     	}
     	
     	if (element.attribute("direction") != null) {
-    		join.setDirection(element.attributeValue("direction").toUpperCase());
+    		join.setDirection(toEnum(Direction.class, "direction", element));
     	}
     	
     	if (element.attribute("call-id") != null) {
@@ -381,10 +385,10 @@ public class RayoProvider extends BaseProvider {
     private void internalCreateJoinCommand(JoinCommand join, Element joinElement) {
     	
         if (join.getDirection() != null) {
-        	joinElement.addAttribute("direction", join.getDirection());        	
+        	joinElement.addAttribute("direction", join.getDirection().name().toLowerCase());        	
         }
         if (join.getMedia() != null) {
-        	joinElement.addAttribute("media", join.getMedia());
+        	joinElement.addAttribute("media", join.getMedia().name().toLowerCase());
         }
         if (join.getTo() != null) {
         	if (join.getType() == JoinDestinationType.CALL) {

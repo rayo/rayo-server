@@ -241,6 +241,14 @@ public abstract class BaseProvider implements XmlProvider {
         }
         return new Character(value.charAt(0));
     }
+    
+    protected <T extends Enum<T>> T toEnum(Class<T> enumClass, String name, Element element) {
+        try {
+            return Enum.valueOf(enumClass, element.attributeValue(name.toUpperCase()));
+        } catch (IllegalArgumentException iae) {
+            throw new ValidationException(String.format(Messages.INVALID_ENUM, name));
+        }
+    }
 
     @SuppressWarnings("unchecked")
     protected List<Element> children(Element element) {

@@ -2,8 +2,6 @@ package com.tropo.server;
 
 import java.net.URI;
 
-import javax.media.mscontrol.join.Joinable.Direction;
-
 import com.tropo.core.CallRef;
 import com.tropo.core.DialCommand;
 import com.tropo.core.JoinCommand;
@@ -12,7 +10,6 @@ import com.voxeo.moho.ApplicationContext;
 import com.voxeo.moho.Call;
 import com.voxeo.moho.CallableEndpoint;
 import com.voxeo.moho.Endpoint;
-import com.voxeo.moho.Participant.JoinType;
 
 public class CallManager extends ReflectiveActor {
 
@@ -41,10 +38,10 @@ public class CallManager extends ReflectiveActor {
 
         if (command.getJoin() != null) {        	
 	        if (command.getJoin().getMedia() != null) {
-	        	mohoCall.setAttribute(JoinCommand.MEDIA_TYPE, JoinType.valueOf(command.getJoin().getMedia()));
+	        	mohoCall.setAttribute(JoinCommand.MEDIA_TYPE, command.getJoin().getMedia());
 	        }
 	        if (command.getJoin().getDirection() != null) {
-	        	mohoCall.setAttribute(JoinCommand.DIRECTION, Direction.valueOf(command.getJoin().getDirection()));
+	        	mohoCall.setAttribute(JoinCommand.DIRECTION, command.getJoin().getDirection());
 	        }
 	        if (command.getJoin().getTo() != null) {
 	        	mohoCall.setAttribute(JoinCommand.TO, command.getJoin().getTo());

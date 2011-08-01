@@ -38,6 +38,7 @@ public class Messages {
     public static final String INVALID_MEDIA_DIRECTION = "Invalid direction. It should be one of DUPLEX|RECV|SEND.";
     public static final String INVALID_JOIN_TYPE = "Invalid join type. It should be one of BRIDGE|DIRECT.";
     public static final String INVALID_BARGEIN_TYPE = "Invalid 'interrupt-on'.";
+    public static final String INVALID_ENUM = "Unsupported value for '%s'";
 
 	public static final String UNKNOWN_NAMESPACE_ELEMENT = "Could not find the element on namespace.";
 

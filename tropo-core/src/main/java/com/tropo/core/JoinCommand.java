@@ -1,13 +1,13 @@
 package com.tropo.core;
 
+import javax.media.mscontrol.join.Joinable.Direction;
 import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
 import com.tropo.core.validation.Messages;
-import com.tropo.core.validation.ValidDirection;
-import com.tropo.core.validation.ValidJoinType;
+import com.voxeo.moho.Participant.JoinType;
 
 public class JoinCommand extends AbstractCallCommand {
 	
@@ -16,30 +16,28 @@ public class JoinCommand extends AbstractCallCommand {
 	public static final String TO = "TO";
 	public static final String TYPE = "TYPE";
 	
-	@ValidDirection
-	private String direction;
+	private Direction direction = Direction.DUPLEX;
 
-	@ValidJoinType
-	private String media;
+	private JoinType media = JoinType.BRIDGE;
 
 	@NotNull(message=Messages.MISSING_JOIN_ID)
 	private String to;
 	
 	private JoinDestinationType type; 
 
-	public String getDirection() {
+	public Direction getDirection() {
 		return direction;
 	}
 
-	public void setDirection(String direction) {
+	public void setDirection(Direction direction) {
 		this.direction = direction;
 	}
 
-	public String getMedia() {
+	public JoinType getMedia() {
 		return media;
 	}
 
-	public void setMedia(String media) {
+	public void setMedia(JoinType media) {
 		this.media = media;
 	}
 
