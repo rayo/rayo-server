@@ -1262,6 +1262,83 @@ public class RayoProviderTest {
         assertEquals("""<output xmlns="urn:xmpp:rayo:output:1" interrupt-on="any" start-offset="2000" start-paused="true" repeat-interval="2000" repeat-times="10" max-time="2000" voice="bling">hello world</output>""", toXml(output));
     }
 
+	@Test
+	public void outputFromXml() {
+		
+		def output = fromXml("""<output xmlns="urn:xmpp:rayo:output:1" bargein="ANY" interrupt-on="any" start-offset="2000" start-paused="true" repeat-interval="2000" repeat-times="10" max-time="2000" voice="bling">hello world</output>""")
+
+		def ssml = new Ssml("hello world")
+		ssml.voice = "bling"
+		
+		assertProperties(output, [
+            bargeinType: BargeinType.ANY,
+            startOffset: new Duration(2000),
+            startPaused: true,
+            repeatInterval : new Duration(2000),
+            repeatTimes: 10,
+            maxTime: new Duration(2000),
+            voice: "bling",
+		])
+		assertEquals output.prompt.toString(),ssml.toString()
+	}
+
+	@Test
+	public void ssmlOutputFromXml() {
+		
+		def output = fromXml("""<output xmlns="urn:xmpp:rayo:output:1" voice="allison">Hello World</output>""")
+		assertNotNull output
+		assertNotNull output.prompt
+		assertEquals output.prompt.text,"Hello World"
+
+	}
+
+	@Test
+	public void ssmlOutputWithMultipleElementsFromXml() {
+		
+		def output = fromXml("""<output xmlns="urn:xmpp:rayo:output:1" voice="allison"><audio src="a.mp3"/><audio src="a.mp3"/></output>""")
+		assertNotNull output
+		assertNotNull output.prompt
+		assertEquals output.prompt.text,"""<audio src="a.mp3"/><audio src="a.mp3"/>"""
+
+	}
+
+	@Test
+	public void emptyOutputToXml() {
+		
+		Output output = new Output();
+		assertEquals("""<output xmlns="urn:xmpp:rayo:output:1"/>""", toXml(output));
+	}
+	
+	@Test
+	public void audioOutputToXml() {
+		
+		Output output = new Output();
+		output.prompt = new Ssml("""<audio src="http://ccmixter.org/content/DoKashiteru/DoKashiteru_-_you_(na-na-na-na).mp3"/>""")
+		output.prompt.voice = "allison"
+
+		assertEquals("""<output xmlns="urn:xmpp:rayo:output:1" voice="allison"><audio xmlns="" src="http://ccmixter.org/content/DoKashiteru/DoKashiteru_-_you_(na-na-na-na).mp3"/></output>""", toXml(output));
+	}
+	
+	@Test
+	public void ssmlOutputToXml() {
+		
+		Output output = new Output();
+		output.prompt = new Ssml("Hello World.")
+		output.prompt.voice = "allison"
+
+		assertEquals("""<output xmlns="urn:xmpp:rayo:output:1" voice="allison">Hello World.</output>""", toXml(output));
+	}
+
+	@Test
+	public void ssmlOutputWithMultipleElementsToXml() {
+		
+		Output output = new Output();
+		output.prompt = new Ssml("""<audio src="a.mp3"/><audio src="b.mp3"/>""")
+		output.prompt.voice = "allison"
+
+		assertEquals("""<output xmlns="urn:xmpp:rayo:output:1" voice="allison"><audio xmlns="" src="a.mp3"/><audio xmlns="" src="b.mp3"/></output>""", toXml(output));
+	}
+
 
 	// Hold 
 	// ====================================================================================
