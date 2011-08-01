@@ -28,8 +28,10 @@ import com.tropo.core.UnjoinedEvent;
 import com.tropo.core.validation.Messages;
 import com.tropo.core.validation.ValidationException;
 import com.tropo.core.verb.HoldCommand;
+import com.tropo.core.verb.MuteCommand;
 import com.tropo.core.verb.StopCommand;
 import com.tropo.core.verb.UnholdCommand;
+import com.tropo.core.verb.UnmuteCommand;
 import com.tropo.core.xml.XmlProvider;
 
 public class RayoProvider extends BaseProvider {
@@ -47,6 +49,10 @@ public class RayoProvider extends BaseProvider {
             return buildHoldCommand(element);
         } else if (elementName.equals("unhold")) {
             return buildUnholdCommand(element);            
+        } else if (elementName.equals("mute")) {
+            return buildMuteCommand(element);
+        } else if (elementName.equals("unmute")) {
+            return buildUnmuteCommand(element);            
         } else if (elementName.equals("join")) {
             return buildJoinCommand(element);            
         } else if (elementName.equals("unjoin")) {
@@ -163,6 +169,17 @@ public class RayoProvider extends BaseProvider {
         return new UnholdCommand();
     }
 
+    private Object buildMuteCommand(Element element) {
+
+        return new MuteCommand();
+    }
+
+
+    private Object buildUnmuteCommand(Element element) {
+
+        return new UnmuteCommand();
+    }
+    
     JoinCommand buildJoinCommand(Element element) {
         
     	JoinCommand join = new JoinCommand();
@@ -281,6 +298,10 @@ public class RayoProvider extends BaseProvider {
             createHoldCommand(object, document);            
         } else if (object instanceof UnholdCommand) {
             createUnholdCommand(object, document);            
+        } else if (object instanceof MuteCommand) {
+            createMuteCommand(object, document);            
+        } else if (object instanceof UnmuteCommand) {
+            createUnmuteCommand(object, document);            
         } else if (object instanceof JoinCommand) {
             createJoinCommand(object, document);            
         } else if (object instanceof UnjoinCommand) {
@@ -366,6 +387,20 @@ public class RayoProvider extends BaseProvider {
         return document;
     }
 
+    private Document createMuteCommand(Object object, Document document) {
+
+        document.addElement(new QName("mute", RAYO_NAMESPACE));
+
+        return document;
+    }
+
+    private Document createUnmuteCommand(Object object, Document document) {
+
+        document.addElement(new QName("unmute", RAYO_NAMESPACE));
+
+        return document;
+    }
+    
     void createJoinCommand(JoinCommand join, Element element) {
     	
         Element root = element.addElement(new QName("join", RAYO_NAMESPACE));
@@ -513,6 +548,8 @@ public class RayoProvider extends BaseProvider {
 		       clazz == DtmfEvent.class ||
 		       clazz == HoldCommand.class ||
 		       clazz == UnholdCommand.class ||
+		       clazz == MuteCommand.class ||
+		       clazz == UnmuteCommand.class ||
 		       clazz == JoinCommand.class ||
 		       clazz == UnjoinCommand.class ||
 		       clazz == JoinedEvent.class ||
