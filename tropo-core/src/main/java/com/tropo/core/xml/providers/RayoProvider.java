@@ -9,7 +9,6 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.Namespace;
 import org.dom4j.QName;
-import org.joda.time.Duration;
 
 import com.tropo.core.AcceptCommand;
 import com.tropo.core.AnswerCommand;

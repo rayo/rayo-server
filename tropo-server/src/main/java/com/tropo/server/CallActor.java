@@ -20,6 +20,7 @@ import com.tropo.core.UnjoinCommand;
 import com.tropo.core.UnjoinedEvent;
 import com.tropo.core.verb.HoldCommand;
 import com.tropo.core.verb.UnholdCommand;
+import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.Call;
 import com.voxeo.moho.Joint;
 import com.voxeo.moho.Participant;
@@ -27,6 +28,7 @@ import com.voxeo.moho.Participant.JoinType;
 import com.voxeo.moho.conference.ConferenceManager;
 import com.voxeo.moho.event.AutowiredEventListener;
 import com.voxeo.moho.event.CallCompleteEvent;
+import com.voxeo.moho.event.HangupEvent;
 import com.voxeo.moho.event.InputDetectedEvent;
 
 //TODO: 
@@ -34,6 +36,8 @@ import com.voxeo.moho.event.InputDetectedEvent;
 // https://evolution.voxeo.com/ticket/1500185
 public class CallActor <T extends Call> extends AbstractActor<T> {
 
+    private static final Loggerf log = Loggerf.getLogger(CallActor.class);
+    
     //TODO: Move this to Spring configuration
     private int JOIN_TIMEOUT = 30000;
     
@@ -206,6 +210,17 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     @com.voxeo.moho.State
     public void onDtmf(InputDetectedEvent<Call> event) throws Exception {
         fire(new DtmfEvent(getParticipantId(), event.getInput()));
+    }
+
+    @com.voxeo.moho.State
+    public void onHangup(HangupEvent event) throws Exception {
+        for(Participant peer : participant.getParticipants()) {
+            try {
+                participant.unjoin(peer);
+            } catch (Exception e) {
+                log.error("Failed to unjoin participant [%s]", peer, e);
+            }
+        }
     }
 
     // Properties
