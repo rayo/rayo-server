@@ -137,13 +137,20 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     
     private Participant getDestinationParticipant(String destination, JoinDestinationType type) {
 
+    	Participant participant = null;
     	if (type == JoinDestinationType.CALL) {
-    		return callRegistry.get(destination).getCall();
+    		participant = callRegistry.get(destination).getCall();
+    		if (participant == null) {
+    			throw new IllegalStateException(String.format("Call with id %s not found", destination));
+    		}
     	} else if (type == JoinDestinationType.MIXER) {
-			ConferenceManager conferenceManager = participant.getApplicationContext().getConferenceManager();
-    		return conferenceManager.getConference(destination);
+			ConferenceManager conferenceManager = this.participant.getApplicationContext().getConferenceManager();
+    		participant = conferenceManager.getConference(destination);
+    		if (participant == null) {
+    			throw new IllegalStateException(String.format("Mixer with id %s not found", destination));
+    		}
     	}
-    	throw new IllegalStateException("Call or Mixer could not be found");
+    	return participant;
 	}
     
     @Message
