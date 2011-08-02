@@ -20,6 +20,7 @@ import com.voxeo.moho.Participant;
 import com.voxeo.moho.State;
 import com.voxeo.moho.media.output.AudibleResource;
 import com.voxeo.moho.media.output.OutputCommand;
+import com.voxeo.moho.media.output.OutputCommand.BehaviorIfBusy;
 import com.voxeo.servlet.xmpp.XmppStanzaError;
 
 public class OutputHandler extends AbstractLocalVerbHandler<Output, Participant> {
@@ -36,6 +37,8 @@ public class OutputHandler extends AbstractLocalVerbHandler<Output, Participant>
         Ssml prompt = model.getPrompt();
         AudibleResource audibleResource = resolveAudio(prompt);
         OutputCommand outcommand = new OutputCommand(audibleResource);
+        
+        outcommand.setBahavior(BehaviorIfBusy.STOP);
 
         if (model.getBargeinType() != null) {
             outcommand.setBargeinType(model.getBargeinType());
