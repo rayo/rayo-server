@@ -52,4 +52,22 @@ public class SimpleEndpoint implements CallableEndpoint {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public Call createCall(Endpoint caller) {
+    	 throw new UnsupportedOperationException();
+    }
+    
+    public Call createCall(Endpoint caller, java.util.Map<String,String> headers) {
+    	 throw new UnsupportedOperationException();
+    };
+    
+    @Override
+    public Call createCall(String caller) {
+    	 throw new UnsupportedOperationException();
+    }
+    
+    @Override
+    public Call createCall(String caller, Map<String, String> headers) {
+    	 throw new UnsupportedOperationException();
+    }
 }
