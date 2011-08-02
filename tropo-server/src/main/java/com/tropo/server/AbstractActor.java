@@ -219,6 +219,7 @@ public abstract class AbstractActor<T extends Participant> extends ReflectiveAct
         if (endEvent.getReason() == Reason.ERROR || verbs.isEmpty()) {
             fire(endEvent);
             stop();
+            unjoinAll();
             participant.disconnect();
             for (VerbHandler<?,?> handler : verbs.values()) {
                 try {
@@ -243,6 +244,17 @@ public abstract class AbstractActor<T extends Participant> extends ReflectiveAct
         }
     }
     
+    protected void unjoinAll() {
+        for(Participant peer : participant.getParticipants()) {
+            try {
+                log.info("Call is disconnecting. Unjoining peer [%s]", peer);
+                participant.unjoin(peer);
+            } catch (Exception e) {
+                log.error("Failed to unjoin participant [%s]", peer, e);
+            }
+        }
+    }
+
     protected String getParticipantId() {
     	
         return participant.getId();

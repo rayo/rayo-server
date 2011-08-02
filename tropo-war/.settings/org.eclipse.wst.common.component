@@ -17,6 +17,6 @@
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <property name="java-output-path" value="/tropo-war/target/classes"/>
-        <property name="context-root" value="tropo-war"/>
+        <property name="context-root" value="tropo2"/>
     </wb-module>
 </project-modules>

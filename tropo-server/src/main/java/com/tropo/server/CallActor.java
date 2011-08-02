@@ -21,7 +21,6 @@ import com.tropo.core.UnjoinedEvent;
 import com.tropo.core.verb.HoldCommand;
 import com.tropo.core.verb.MuteCommand;
 import com.tropo.core.verb.UnholdCommand;
-import com.voxeo.logging.Loggerf;
 import com.tropo.core.verb.UnmuteCommand;
 import com.voxeo.moho.Call;
 import com.voxeo.moho.Joint;
@@ -38,8 +37,6 @@ import com.voxeo.moho.event.InputDetectedEvent;
 // https://evolution.voxeo.com/ticket/1500185
 public class CallActor <T extends Call> extends AbstractActor<T> {
 
-    private static final Loggerf log = Loggerf.getLogger(CallActor.class);
-    
     //TODO: Move this to Spring configuration
     private int JOIN_TIMEOUT = 30000;
     
@@ -151,6 +148,8 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     
     @Message
     public void hangup(HangupCommand message) {
+        // Unjoin app participants before hanging up to get around Moho B2BUA thing
+        unjoinAll();
     	participant.hangup(message.getHeaders());
     }
 
@@ -226,15 +225,11 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 
     @com.voxeo.moho.State
     public void onHangup(HangupEvent event) throws Exception {
-        for(Participant peer : participant.getParticipants()) {
-            try {
-                participant.unjoin(peer);
-            } catch (Exception e) {
-                log.error("Failed to unjoin participant [%s]", peer, e);
-            }
+        if(event.getSource().equals(participant)) {
+            unjoinAll();
         }
     }
-
+    
     // Properties
     // ================================================================================
 
