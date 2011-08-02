@@ -11,6 +11,8 @@ import java.net.URI
 import java.util.HashMap
 import java.util.Map
 
+import javax.media.mscontrol.join.Joinable
+
 import org.dom4j.Document
 import org.dom4j.io.SAXReader
 import org.joda.time.Duration
@@ -21,33 +23,33 @@ import com.tropo.core.AcceptCommand
 import com.tropo.core.AnswerCommand
 import com.tropo.core.CallRejectReason
 import com.tropo.core.DialCommand
-import com.tropo.core.DtmfEvent;
+import com.tropo.core.DtmfEvent
 import com.tropo.core.HangupCommand
-import com.tropo.core.JoinCommand;
-import com.tropo.core.JoinDestinationType;
-import com.tropo.core.JoinedEvent;
+import com.tropo.core.JoinCommand
+import com.tropo.core.JoinDestinationType
+import com.tropo.core.JoinedEvent
 import com.tropo.core.OfferEvent
 import com.tropo.core.RedirectCommand
 import com.tropo.core.RejectCommand
-import com.tropo.core.UnjoinCommand;
-import com.tropo.core.UnjoinedEvent;
+import com.tropo.core.UnjoinCommand
+import com.tropo.core.UnjoinedEvent
 import com.tropo.core.validation.Validator
 import com.tropo.core.verb.Ask
 import com.tropo.core.verb.AskCompleteEvent
 import com.tropo.core.verb.Choices
 import com.tropo.core.verb.Conference
 import com.tropo.core.verb.ConferenceCompleteEvent
-import com.tropo.core.verb.HoldCommand;
+import com.tropo.core.verb.HoldCommand
 import com.tropo.core.verb.InputMode
 import com.tropo.core.verb.KickCommand
-import com.tropo.core.verb.MediaType;
-import com.tropo.core.verb.MuteCommand;
-import com.tropo.core.verb.Output;
+import com.tropo.core.verb.MediaType
+import com.tropo.core.verb.MuteCommand
+import com.tropo.core.verb.Output
 import com.tropo.core.verb.PauseCommand
-import com.tropo.core.verb.Record;
-import com.tropo.core.verb.RecordCompleteEvent;
-import com.tropo.core.verb.RecordPauseCommand;
-import com.tropo.core.verb.RecordResumeCommand;
+import com.tropo.core.verb.Record
+import com.tropo.core.verb.RecordCompleteEvent
+import com.tropo.core.verb.RecordPauseCommand
+import com.tropo.core.verb.RecordResumeCommand
 import com.tropo.core.verb.ResumeCommand
 import com.tropo.core.verb.Say
 import com.tropo.core.verb.SayCompleteEvent
@@ -55,18 +57,19 @@ import com.tropo.core.verb.Ssml
 import com.tropo.core.verb.StopCommand
 import com.tropo.core.verb.Transfer
 import com.tropo.core.verb.TransferCompleteEvent
+import com.tropo.core.verb.UnholdCommand
+import com.tropo.core.verb.UnmuteCommand
+import com.tropo.core.verb.VerbCompleteEvent
 import com.tropo.core.verb.AskCompleteEvent.Reason
-import com.tropo.core.verb.UnholdCommand;
-import com.tropo.core.verb.UnmuteCommand;
-import com.tropo.core.verb.VerbCompleteEvent;
 import com.tropo.core.xml.providers.AskProvider
 import com.tropo.core.xml.providers.ConferenceProvider
-import com.tropo.core.xml.providers.OutputProvider;
+import com.tropo.core.xml.providers.OutputProvider
 import com.tropo.core.xml.providers.RayoProvider
-import com.tropo.core.xml.providers.RecordProvider;
+import com.tropo.core.xml.providers.RecordProvider
 import com.tropo.core.xml.providers.SayProvider
 import com.tropo.core.xml.providers.TransferProvider
-import com.voxeo.moho.media.output.OutputCommand.BargeinType;
+import com.voxeo.moho.Participant.JoinType
+import com.voxeo.moho.media.output.OutputCommand.BargeinType
 
 public class RayoProviderTest {
 
@@ -127,7 +130,7 @@ public class RayoProviderTest {
 	@Test
 	public void joinToXmlWithCallId() {
 		
-		def join = new JoinCommand(direction:"duplex", media:"bridge", to:"1234", type: JoinDestinationType.CALL);
+		def join = new JoinCommand(direction:Joinable.Direction.DUPLEX, media:JoinType.BRIDGE, to:"1234", type: JoinDestinationType.CALL);
 		
 		assertEquals("""<join xmlns="urn:xmpp:rayo:1" direction="duplex" media="bridge" call-id="1234"/>""", toXml(join));
 	}
@@ -135,7 +138,7 @@ public class RayoProviderTest {
 	@Test
 	public void joinToXmlWithMixerId() {
 		
-		def join = new JoinCommand(direction:"duplex", media:"bridge", to:"1234", type: JoinDestinationType.MIXER);
+		def join = new JoinCommand(direction:Joinable.Direction.DUPLEX, media:JoinType.BRIDGE, to:"1234", type: JoinDestinationType.MIXER);
 		
 		assertEquals("""<join xmlns="urn:xmpp:rayo:1" direction="duplex" media="bridge" mixer-id="1234"/>""", toXml(join));
 	}
@@ -145,8 +148,8 @@ public class RayoProviderTest {
 
 		def join = fromXml("""<join xmlns="urn:xmpp:rayo:1" direction="duplex" media="bridge" call-id="1234"/>""")
 		assertProperties(join, [
-			direction: "DUPLEX",
-			media: "BRIDGE",
+			direction: Joinable.Direction.DUPLEX,
+			media: JoinType.BRIDGE,
 			to:"1234",
 			type: JoinDestinationType.CALL
 		])
@@ -157,8 +160,8 @@ public class RayoProviderTest {
 
 		def join = fromXml("""<join xmlns="urn:xmpp:rayo:1" direction="duplex" media="bridge" mixer-id="1234"/>""")
 		assertProperties(join, [
-			direction: "DUPLEX",
-			media: "BRIDGE",
+			direction: Joinable.Direction.DUPLEX,
+			media: JoinType.BRIDGE,
 			to:"1234",
 			type: JoinDestinationType.MIXER
 		])
@@ -282,7 +285,7 @@ public class RayoProviderTest {
 		def join = new JoinCommand();
 		command.join = join
 		
-		assertEquals("""<dial xmlns="urn:xmpp:rayo:1" to="tel:44477773333333" from="tel:34637710708"><join/></dial>""", toXml(command));
+		assertEquals("""<dial xmlns="urn:xmpp:rayo:1" to="tel:44477773333333" from="tel:34637710708"><join direction="duplex" media="bridge"/></dial>""", toXml(command));
 	}
 	
 	
@@ -292,7 +295,7 @@ public class RayoProviderTest {
 		DialCommand command = new DialCommand();
 		command.setTo(new URI("tel:44477773333333"));
 		command.setFrom(new URI("tel:34637710708"));
-		def join = new JoinCommand(direction:"duplex", media:"bridge", to:"1234", type:JoinDestinationType.CALL);
+		def join = new JoinCommand(direction:Joinable.Direction.DUPLEX, media:JoinType.BRIDGE, to:"1234", type:JoinDestinationType.CALL);
 		command.join = join
 		
 		assertEquals("""<dial xmlns="urn:xmpp:rayo:1" to="tel:44477773333333" from="tel:34637710708"><join direction="duplex" media="bridge" call-id="1234"/></dial>""", toXml(command));
@@ -304,7 +307,7 @@ public class RayoProviderTest {
 		DialCommand command = new DialCommand();
 		command.setTo(new URI("tel:44477773333333"));
 		command.setFrom(new URI("tel:34637710708"));
-		def join = new JoinCommand(direction:"duplex", media:"bridge", to:"1234", type:JoinDestinationType.MIXER);
+		def join = new JoinCommand(direction:Joinable.Direction.DUPLEX, media:JoinType.BRIDGE, to:"1234", type:JoinDestinationType.MIXER);
 		command.join = join
 		
 		assertEquals("""<dial xmlns="urn:xmpp:rayo:1" to="tel:44477773333333" from="tel:34637710708"><join direction="duplex" media="bridge" mixer-id="1234"/></dial>""", toXml(command));
@@ -332,8 +335,8 @@ public class RayoProviderTest {
 			from: new URI("tel:34637710708"),
 		])
 		assertProperties(dial.join, [
-			direction: null,
-			media: null,
+			direction: Joinable.Direction.DUPLEX,
+			media: JoinType.BRIDGE,
 			to:"abcd",
 			type: JoinDestinationType.CALL
 		])
@@ -348,8 +351,8 @@ public class RayoProviderTest {
 			from: new URI("tel:34637710708"),
 		])
 		assertProperties(dial.join, [
-			direction: null,
-			media: null,
+			direction: Joinable.Direction.DUPLEX,
+			media: JoinType.BRIDGE,
 			to:"abcd",
 			type: JoinDestinationType.MIXER
 		])
@@ -364,8 +367,8 @@ public class RayoProviderTest {
 			from: new URI("tel:34637710708"),
 		])
 		assertProperties(dial.join, [
-			direction: "DUPLEX",
-			media: "BRIDGE",
+			direction: Joinable.Direction.DUPLEX,
+			media: JoinType.BRIDGE,
 			to:"1234",
 			type:JoinDestinationType.CALL
 		])
@@ -380,8 +383,8 @@ public class RayoProviderTest {
 			from: new URI("tel:34637710708"),
 		])
 		assertProperties(dial.join, [
-			direction: "DUPLEX",
-			media: "BRIDGE",
+			direction: Joinable.Direction.DUPLEX,
+			media: JoinType.BRIDGE,
 			to:"1234",
 			type:JoinDestinationType.MIXER
 		])
