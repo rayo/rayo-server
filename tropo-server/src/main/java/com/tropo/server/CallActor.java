@@ -150,7 +150,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 			ConferenceManager conferenceManager = this.participant.getApplicationContext().getConferenceManager();
     		participant = conferenceManager.getConference(destination);
     		if (participant == null) {
-    			throw new IllegalStateException(String.format("Call with id %s not found", destination));
+    			throw new IllegalStateException(String.format("Mixer with id %s not found", destination));
     		}
     	}
     	return participant;
