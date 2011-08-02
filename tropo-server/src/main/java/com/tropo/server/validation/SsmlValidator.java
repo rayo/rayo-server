@@ -45,7 +45,7 @@ public class SsmlValidator {
 					try {
 						schema = sf.newSchema(new StreamSource(new StringReader(strSchema)));
 					} catch (Exception e) {
-						logger.error("Could not initialize SSML Validation. SSML Validaiton will be turned off");
+						logger.error("Could not initialize SSML Validation. SSML Validation will be turned off");
 						e.printStackTrace();
 					}					
 				}
@@ -54,6 +54,15 @@ public class SsmlValidator {
 		} catch (Exception e) {
 			logger.error("Could not initialize SSML Validation. SSML Validaiton will be turned off");
 			e.printStackTrace();
+		}
+	}
+	
+	void waitToInitialize(long timeout) {
+		
+		try {
+			initThread.join(timeout);
+		} catch (InterruptedException e) {
+			throw new IllegalStateException(e.getMessage());
 		}
 	}
 	
