@@ -499,7 +499,7 @@ class ValidationTest {
 		assertNotNull errorMapping
 		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
 		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
-		assertEquals errorMapping.text, Messages.INVALID_MEDIA_DIRECTION
+		assertEquals errorMapping.text, String.format(Messages.INVALID_ENUM, 'direction')
 	}
 	
 	
@@ -512,7 +512,7 @@ class ValidationTest {
 		assertNotNull errorMapping
 		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
 		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
-		assertEquals errorMapping.text, Messages.INVALID_JOIN_TYPE
+		assertEquals errorMapping.text, String.format(Messages.INVALID_ENUM, 'media')
 	}
 	
 	@Test
@@ -563,7 +563,7 @@ class ValidationTest {
 		assertNotNull errorMapping
 		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
 		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
-		assertEquals errorMapping.text, Messages.INVALID_MEDIA_DIRECTION
+		assertEquals errorMapping.text, String.format(Messages.INVALID_ENUM, 'direction')
 	}
 	
 	
@@ -576,7 +576,7 @@ class ValidationTest {
 		assertNotNull errorMapping
 		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
 		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
-		assertEquals errorMapping.text, Messages.INVALID_JOIN_TYPE
+		assertEquals errorMapping.text, String.format(Messages.INVALID_ENUM, 'media')
 	}
 	
 	@Test
