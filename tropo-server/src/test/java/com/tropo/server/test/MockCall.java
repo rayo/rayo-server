@@ -29,6 +29,7 @@ import com.voxeo.moho.MediaException;
 import com.voxeo.moho.MediaService;
 import com.voxeo.moho.Participant;
 import com.voxeo.moho.SignalException;
+import com.voxeo.moho.Unjoint;
 import com.voxeo.moho.event.AcceptableEvent;
 import com.voxeo.moho.event.AutowiredEventListener;
 import com.voxeo.moho.event.AutowiredEventTarget;
@@ -94,7 +95,9 @@ public class MockCall implements IncomingCall {
     }
 
     @Override
-    public void unjoin(Participant other) {}
+    public Unjoint unjoin(Participant other) {
+        return null;
+    }
 
     @Override
     public Participant[] getParticipants() {
