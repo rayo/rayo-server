@@ -1,5 +1,7 @@
 package com.tropo.server;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -42,6 +44,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 	
     //TODO: Move this to Spring configuration
     private int JOIN_TIMEOUT = 30000;
+    private Set<Participant> joinees =new HashSet<Participant>();
     
     private CallStatistics callStatistics;
     private CdrManager cdrManager;
@@ -114,6 +117,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     	Participant destination = getDestinationParticipant(message.getTo(), message.getType());
 		Joint joint = participant.join(destination, message.getMedia(), message.getDirection());
         waitForJoin(joint);	
+        joinees.add(destination);
     }
 
 	private void waitForJoin(Joint join) throws Exception {
@@ -126,10 +130,14 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 	}
 
 	@Message
-    public void unjoin(UnjoinCommand message) {
-
+    public void unjoin(UnjoinCommand message) throws Exception {
     	Participant destination = getDestinationParticipant(message.getFrom(), message.getType());
-    	participant.unjoin(destination);
+    	try {
+            participant.unjoin(destination).get(JOIN_TIMEOUT, TimeUnit.MILLISECONDS);
+            joinees.remove(destination);
+        } catch (TimeoutException e) {
+            throw new TimeoutException("Timed out while trying to unjoin.");
+        }
     }
     
     private Participant getDestinationParticipant(String destination, JoinDestinationType type) {
@@ -167,33 +175,44 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 
     @com.voxeo.moho.State
     public void onJoinComplete(com.voxeo.moho.event.JoinCompleteEvent event) {
-    	
-    	if (event.getCause() == Cause.JOINED) {
-    		if (event.getParticipant() != null) {
-	    		JoinDestinationType type = null;
-	    		if (event.getParticipant() instanceof Mixer) {
-	    			type = JoinDestinationType.MIXER;
-	    		} else if (event.getParticipant() instanceof Call) {
-	    			type = JoinDestinationType.CALL;
-	    		}
-	    		fire(new JoinedEvent(participant.getId(), event.getParticipant().getId(), type));
-    		}
-    	}
+        if(event.getSource().equals(participant)) {
+            Participant peer = event.getParticipant();
+            // If the join was successful and either:
+            //    a) initiated via a JoinComand or 
+            //    b) initiated by a remote call
+            if (event.getCause() == Cause.JOINED && (joinees.contains(peer) || !event.isInitiator())) {
+                if (peer != null) {
+                    JoinDestinationType type = null;
+                    if (peer instanceof Mixer) {
+                        type = JoinDestinationType.MIXER;
+                    } else if (peer instanceof Call) {
+                        type = JoinDestinationType.CALL;
+                    }
+                    fire(new JoinedEvent(participant.getId(), peer.getId(), type));
+                }
+            }
+        }
     }
 
 	@com.voxeo.moho.State
 	public void onUnjoinEvent(com.voxeo.moho.event.UnjoinCompleteEvent event) {
-	
-		switch(event.getCause()) {
-			case SUCCESS_UNJOIN:
-			case DISCONNECT:
-				fireUnjoinedEvent(event);
-				break;
-			case ERROR:
-			case FAIL_UNJOIN:
-				log.error(String.format("Call with id %s could not be unjoined from %s", 
-									participant.getId(), event.getParticipant().getId()));
-		}
+	    if(event.getSource().equals(participant)) {
+	        Participant peer = event.getParticipant();
+	        
+	        switch(event.getCause()) {
+	        case SUCCESS_UNJOIN:
+	        case DISCONNECT:
+	            if(joinees.contains(peer) || !event.isInitiator()) {
+	                fireUnjoinedEvent(event);
+	                joinees.remove(peer);
+	            }
+	            break;
+	        case ERROR:
+	        case FAIL_UNJOIN:
+	            log.error(String.format("Call with id %s could not be unjoined from %s", 
+	                    participant.getId(), peer.getId()));
+	        }
+	    }
 	}
 
 	private void fireUnjoinedEvent(UnjoinCompleteEvent event) {
@@ -211,7 +230,9 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 
     @com.voxeo.moho.State
     public void onAnswered(com.voxeo.moho.event.AnsweredEvent<Participant> event) throws Exception {
-        fire(new AnsweredEvent(getParticipantId()));
+        if(event.getSource().equals(participant)) {
+            fire(new AnsweredEvent(getParticipantId()));
+        }
     }
 
     @com.voxeo.moho.State
@@ -268,7 +289,9 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 
     @com.voxeo.moho.State
     public void onDtmf(InputDetectedEvent<Call> event) throws Exception {
-        fire(new DtmfEvent(getParticipantId(), event.getInput()));
+        if(event.getSource().equals(participant)) {
+            fire(new DtmfEvent(getParticipantId(), event.getInput()));
+        }
     }
 
     @com.voxeo.moho.State

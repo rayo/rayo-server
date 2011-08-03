@@ -91,7 +91,7 @@ public class MockCall implements IncomingCall {
 
     @Override
     public Joint join(Participant other, JoinType type, Direction direction) {
-        return new SimpleJoint(new MohoJoinCompleteEvent(this, this, Cause.JOINED));
+        return new SimpleJoint(new MohoJoinCompleteEvent(this, this, Cause.JOINED, true));
     }
 
     @Override
@@ -289,22 +289,22 @@ public class MockCall implements IncomingCall {
 
     @Override
     public Joint join() {
-        return new SimpleJoint(new MohoJoinCompleteEvent(this, this, Cause.JOINED));
+        return new SimpleJoint(new MohoJoinCompleteEvent(this, this, Cause.JOINED, true));
     }
 
     @Override
     public Joint join(Direction direction) {
-        return new SimpleJoint(new MohoJoinCompleteEvent(this, this, Cause.JOINED));
+        return new SimpleJoint(new MohoJoinCompleteEvent(this, this, Cause.JOINED, true));
     }
 
     @Override
     public Joint join(CallableEndpoint other, JoinType type, Direction direction) {
-        return new SimpleJoint(new MohoJoinCompleteEvent(this, this, Cause.JOINED));
+        return new SimpleJoint(new MohoJoinCompleteEvent(this, this, Cause.JOINED, true));
     }
 
     @Override
     public Joint join(CallableEndpoint other, JoinType type, Direction direction, Map<String, String> headers) {
-        return new SimpleJoint(new MohoJoinCompleteEvent(this, this, Cause.JOINED));
+        return new SimpleJoint(new MohoJoinCompleteEvent(this, this, Cause.JOINED, true));
     }
 
     protected MediaService<Call> getMediaService(boolean reinvite) {
