@@ -56,7 +56,9 @@
 
 	<!-- Model / Request Validation -->
 	<bean id="validator" class="com.tropo.core.validation.Validator"/>
-	<bean id="ssmlValidator" class="com.tropo.server.validation.SsmlValidator"/>
+	<bean id="ssmlValidator" class="com.tropo.server.validation.SsmlValidator">
+		<property name="resource" value="classpath:synthesis-core.xsd"/>
+	</bean>
 
 	<!-- Rayo providers -->
 	<bean id="rayoProvider" class="com.tropo.core.xml.providers.RayoProvider">

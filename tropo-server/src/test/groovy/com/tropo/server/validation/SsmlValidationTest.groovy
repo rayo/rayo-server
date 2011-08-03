@@ -21,7 +21,6 @@ public class SsmlValidationTest {
     public void testSsmlValidator() throws InterruptedException {
 
 		assertNotNull ssmlValidator
-		ssmlValidator.waitToInitialize(60000)
 		ssmlValidator.validateSsml("<say-as interpret-as=\"number:cardinal\">12345</say-as>")
 		
 		try {
