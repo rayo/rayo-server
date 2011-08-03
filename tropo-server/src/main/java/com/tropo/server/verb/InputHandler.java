@@ -7,6 +7,7 @@ import com.tropo.core.verb.Input;
 import com.tropo.core.verb.InputCompleteEvent;
 import com.tropo.core.verb.InputCompleteEvent.Reason;
 import com.tropo.core.verb.VerbCompleteEvent;
+import com.voxeo.moho.Call;
 import com.voxeo.moho.Participant;
 import com.voxeo.moho.State;
 import com.voxeo.moho.event.InputDetectedEvent;
@@ -118,8 +119,16 @@ public class InputHandler extends AbstractLocalVerbHandler<Input, Participant> {
             completeEvent = new InputCompleteEvent(model, VerbCompleteEvent.Reason.HANGUP);
             break;
         case ERROR:
+            completeEvent = new InputCompleteEvent(model, "Internal Server Error");
+            break;
         case UNKNOWN:
         default:
+        	if (participant instanceof Call) {
+        		if (((Call)participant).getCallState() == com.voxeo.moho.Call.State.DISCONNECTED) {
+        			completeEvent = new InputCompleteEvent(model, VerbCompleteEvent.Reason.HANGUP);      
+        			break;
+        		}
+        	} 
             completeEvent = new InputCompleteEvent(model, "Internal Server Error");
         }
         
