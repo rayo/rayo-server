@@ -7,6 +7,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import javax.media.mscontrol.join.Joinable.Direction;
 
@@ -227,14 +230,18 @@ public class TransferHandler extends AbstractLocalVerbHandler<Transfer, Call> im
         
         // Join back to the media server
         if(peer != null) {
-            peer.unjoin(participant);
+            try {
+                peer.unjoin(participant).get(10, TimeUnit.SECONDS);
+            } catch (Exception e) {
+                log.error("Failed to unjoin peer [%s]", peer);
+            }
         }
 
         complete(event);
     }
 
     private void dial(CallableEndpoint to) {
-        Call destination = to.call(resolveFrom(), model.getHeaders());
+        Call destination = to.createCall(resolveFrom(), model.getHeaders());
         destination.addObserver(new ActorEventListener(actor));
         Joint joint = destination.join();
         joints.put(destination, joint);

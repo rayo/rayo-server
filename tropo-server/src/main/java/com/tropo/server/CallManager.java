@@ -34,7 +34,7 @@ public class CallManager extends ReflectiveActor {
             fromEndpoint = applicationContext.createEndpoint(from.toString());
         }
         
-        final Call mohoCall = toEndpoint.call(fromEndpoint, command.getHeaders());
+        final Call mohoCall = toEndpoint.createCall(fromEndpoint, command.getHeaders());
 
         if (command.getJoin() != null) {        	
 	        if (command.getJoin().getMedia() != null) {

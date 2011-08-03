@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 
 import com.tropo.core.CallCommand;
 import com.tropo.core.EndEvent;
@@ -248,7 +249,8 @@ public abstract class AbstractActor<T extends Participant> extends ReflectiveAct
         for(Participant peer : participant.getParticipants()) {
             try {
                 log.info("Call is disconnecting. Unjoining peer [%s]", peer);
-                participant.unjoin(peer);
+                participant.unjoin(peer).get(10, TimeUnit.SECONDS);
+                log.info("Peer unjoined [%s]", peer);
             } catch (Exception e) {
                 log.error("Failed to unjoin participant [%s]", peer, e);
             }
