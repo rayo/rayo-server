@@ -22,8 +22,10 @@ import com.tropo.core.verb.HoldCommand;
 import com.tropo.core.verb.MuteCommand;
 import com.tropo.core.verb.UnholdCommand;
 import com.tropo.core.verb.UnmuteCommand;
+import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.Call;
 import com.voxeo.moho.Joint;
+import com.voxeo.moho.Mixer;
 import com.voxeo.moho.Participant;
 import com.voxeo.moho.Participant.JoinType;
 import com.voxeo.moho.conference.ConferenceManager;
@@ -31,12 +33,13 @@ import com.voxeo.moho.event.AutowiredEventListener;
 import com.voxeo.moho.event.CallCompleteEvent;
 import com.voxeo.moho.event.HangupEvent;
 import com.voxeo.moho.event.InputDetectedEvent;
+import com.voxeo.moho.event.JoinCompleteEvent.Cause;
+import com.voxeo.moho.event.UnjoinCompleteEvent;
 
-//TODO: 
-// https://evolution.voxeo.com/ticket/1500180
-// https://evolution.voxeo.com/ticket/1500185
 public class CallActor <T extends Call> extends AbstractActor<T> {
 
+	private static final Loggerf log = Loggerf.getLogger(CallActor.class);
+	
     //TODO: Move this to Spring configuration
     private int JOIN_TIMEOUT = 30000;
     
@@ -67,8 +70,6 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 	            Participant destination = getDestinationParticipant(dest, type);
                         
         		participant.join(destination, mediaType, direction);
-        		fire(new JoinedEvent(participant.getId(), destination.getId(), type));
-        		fire(new JoinedEvent(destination.getId(), participant.getId(), type));
             } else {
             	participant.join();
             }
@@ -112,9 +113,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     public void join(JoinCommand message) throws Exception {
     	Participant destination = getDestinationParticipant(message.getTo(), message.getType());
 		Joint joint = participant.join(destination, message.getMedia(), message.getDirection());
-        waitForJoin(joint);
-		fire(new JoinedEvent(participant.getId(), destination.getId(), message.getType()));    	
-		fire(new JoinedEvent(destination.getId(), participant.getId(), message.getType()));    	
+        waitForJoin(joint);	
     }
 
 	private void waitForJoin(Joint join) throws Exception {
@@ -131,8 +130,6 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 
     	Participant destination = getDestinationParticipant(message.getFrom(), message.getType());
     	participant.unjoin(destination);
-		fire(new UnjoinedEvent(participant.getId(), destination.getId(), message.getType()));    		
-		fire(new UnjoinedEvent(destination.getId(), participant.getId(), message.getType()));
     }
     
     private Participant getDestinationParticipant(String destination, JoinDestinationType type) {
@@ -167,6 +164,50 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 
     // Moho Events
     // ================================================================================
+
+    @com.voxeo.moho.State
+    public void onJoinComplete(com.voxeo.moho.event.JoinCompleteEvent event) {
+    	
+    	if (event.getCause() == Cause.JOINED) {
+    		if (event.getParticipant() != null) {
+	    		JoinDestinationType type = null;
+	    		if (event.getParticipant() instanceof Mixer) {
+	    			type = JoinDestinationType.MIXER;
+	    		} else if (event.getParticipant() instanceof Call) {
+	    			type = JoinDestinationType.CALL;
+	    		}
+	    		fire(new JoinedEvent(participant.getId(), event.getParticipant().getId(), type));
+    		}
+    	}
+    }
+
+	@com.voxeo.moho.State
+	public void onUnjoinEvent(com.voxeo.moho.event.UnjoinCompleteEvent event) {
+	
+		switch(event.getCause()) {
+			case SUCCESS_UNJOIN:
+			case DISCONNECT:
+				fireUnjoinedEvent(event);
+				break;
+			case ERROR:
+			case FAIL_UNJOIN:
+				log.error(String.format("Call with id %s could not be unjoined from %s", 
+									participant.getId(), event.getParticipant().getId()));
+		}
+	}
+
+	private void fireUnjoinedEvent(UnjoinCompleteEvent event) {
+		
+		if (event.getParticipant() != null) {
+			JoinDestinationType type = null;
+			if (event.getParticipant() instanceof Mixer) {
+				type = JoinDestinationType.MIXER;
+			} else if (event.getParticipant() instanceof Call) {
+				type = JoinDestinationType.CALL;
+			}
+			fire(new UnjoinedEvent(participant.getId(), event.getParticipant().getId(), type));
+		}
+	}
 
     @com.voxeo.moho.State
     public void onAnswered(com.voxeo.moho.event.AnsweredEvent<Participant> event) throws Exception {
