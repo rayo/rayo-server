@@ -3,18 +3,19 @@ package com.tropo.server.verb;
 import javax.validation.ConstraintValidatorContext;
 
 import com.tropo.core.validation.ValidationException;
-import com.tropo.core.verb.JumpCommand;
-import com.tropo.core.verb.MoveCommand;
 import com.tropo.core.verb.Output;
 import com.tropo.core.verb.OutputCompleteEvent;
 import com.tropo.core.verb.PauseCommand;
 import com.tropo.core.verb.ResumeCommand;
 import com.tropo.core.verb.SayCompleteEvent.Reason;
-import com.tropo.core.verb.SpeedCommand;
+import com.tropo.core.verb.SeekCommand;
+import com.tropo.core.verb.SpeedDownCommand;
+import com.tropo.core.verb.SpeedUpCommand;
 import com.tropo.core.verb.Ssml;
 import com.tropo.core.verb.VerbCommand;
 import com.tropo.core.verb.VerbCompleteEvent;
-import com.tropo.core.verb.VolumeCommand;
+import com.tropo.core.verb.VolumeDownCommand;
+import com.tropo.core.verb.VolumeUpCommand;
 import com.tropo.server.validation.SsmlValidator;
 import com.voxeo.moho.Participant;
 import com.voxeo.moho.State;
@@ -96,14 +97,16 @@ public class OutputHandler extends AbstractLocalVerbHandler<Output, Participant>
             pause();
         } else if (command instanceof ResumeCommand) {
             resume();
-        } else if (command instanceof JumpCommand) {
-            jump(((JumpCommand) command));
-        } else if (command instanceof MoveCommand) {
-            move((MoveCommand) command);
-        } else if (command instanceof SpeedCommand) {
-            speed((SpeedCommand) command);
-        } else if (command instanceof VolumeCommand) {
-            volume((VolumeCommand) command);
+        } else if (command instanceof SeekCommand) {
+            seek(((SeekCommand) command));
+        } else if (command instanceof SpeedUpCommand) {
+            speedUp((SpeedUpCommand) command);
+        } else if (command instanceof SpeedDownCommand) {
+            speedDown((SpeedDownCommand) command);
+        } else if (command instanceof VolumeUpCommand) {
+            volumeUp((VolumeUpCommand) command);
+        } else if (command instanceof VolumeDownCommand) {
+            volumeDown((VolumeDownCommand) command);
         }
     }
 
@@ -117,24 +120,33 @@ public class OutputHandler extends AbstractLocalVerbHandler<Output, Participant>
         output.resume();
     }
 
-    public void jump(JumpCommand command) {
+    public void seek(SeekCommand command) {
 
-        output.jump(command.getPosition());
+    	if (command.getDirection() == SeekCommand.Direction.FORWARD) {
+    		output.move(true, command.getAmount());
+    	} else {
+    		output.move(false, command.getAmount());    		
+    	}
     }
 
-    public void move(MoveCommand command) {
+    public void speedUp(SpeedUpCommand command) {
 
-        output.move(command.isDirection(), command.getTime());
+        output.speed(true);
     }
 
-    public void speed(SpeedCommand command) {
+    public void speedDown(SpeedDownCommand command) {
 
-        output.speed(command.isUp());
+        output.speed(false);
     }
 
-    public void volume(VolumeCommand command) {
+    public void volumeUp(VolumeUpCommand command) {
 
-        output.volume(command.isUp());
+        output.volume(true);
+    }
+
+    public void volumeDown(VolumeDownCommand command) {
+
+        output.volume(false);
     }
 
     // Moho Events

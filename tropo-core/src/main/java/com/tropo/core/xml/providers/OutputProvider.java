@@ -9,15 +9,16 @@ import org.dom4j.QName;
 
 import com.tropo.core.validation.Messages;
 import com.tropo.core.validation.ValidationException;
-import com.tropo.core.verb.JumpCommand;
-import com.tropo.core.verb.MoveCommand;
 import com.tropo.core.verb.Output;
 import com.tropo.core.verb.OutputCompleteEvent;
 import com.tropo.core.verb.OutputCompleteEvent.Reason;
 import com.tropo.core.verb.PauseCommand;
 import com.tropo.core.verb.ResumeCommand;
-import com.tropo.core.verb.SpeedCommand;
-import com.tropo.core.verb.VolumeCommand;
+import com.tropo.core.verb.SeekCommand;
+import com.tropo.core.verb.SpeedDownCommand;
+import com.tropo.core.verb.SpeedUpCommand;
+import com.tropo.core.verb.VolumeDownCommand;
+import com.tropo.core.verb.VolumeUpCommand;
 import com.voxeo.moho.media.output.OutputCommand.BargeinType;
 
 public class OutputProvider extends BaseProvider {
@@ -30,10 +31,11 @@ public class OutputProvider extends BaseProvider {
 
     private static final QName PAUSE_QNAME = new QName("pause", NAMESPACE);
     private static final QName RESUME_QNAME = new QName("resume", NAMESPACE);
-    private static final QName JUMP_QNAME = new QName("jump", NAMESPACE);
-    private static final QName MOVE_QNAME = new QName("move", NAMESPACE);
-    private static final QName SPEED_QNAME = new QName("speed", NAMESPACE);
-    private static final QName VOLUME_QNAME = new QName("volume", NAMESPACE);
+    private static final QName SEEK_QNAME = new QName("seek", NAMESPACE);
+    private static final QName SPEED_UP_QNAME = new QName("speed-up", NAMESPACE);
+    private static final QName SPEED_DOWN_QNAME = new QName("speed-down", NAMESPACE);
+    private static final QName VOLUME_UP_QNAME = new QName("volume-up", NAMESPACE);
+    private static final QName VOLUME_DOWN_QNAME = new QName("volume-down", NAMESPACE);
     
     @Override
     protected Object processElement(Element element) throws Exception {
@@ -43,14 +45,16 @@ public class OutputProvider extends BaseProvider {
             return buildPauseCommand(element);
         } else if (RESUME_QNAME.equals(element.getQName())) {
             return buildResumeCommand(element);
-        } else if (JUMP_QNAME.equals(element.getQName())) {
-            return buildJumpCommand(element);
-        } else if (MOVE_QNAME.equals(element.getQName())) {
-            return buildMoveCommand(element);
-        } else if (SPEED_QNAME.equals(element.getQName())) {
-            return buildSpeedCommand(element);
-        } else if (VOLUME_QNAME.equals(element.getQName())) {
-            return buildVolumeCommand(element);
+        } else if (SEEK_QNAME.equals(element.getQName())) {
+            return buildSeekCommand(element);
+        } else if (SPEED_UP_QNAME.equals(element.getQName())) {
+            return buildSpeedUpCommand(element);
+        } else if (SPEED_DOWN_QNAME.equals(element.getQName())) {
+            return buildSpeedDownCommand(element);
+        } else if (VOLUME_UP_QNAME.equals(element.getQName())) {
+            return buildVolumeUpCommand(element);
+        } else if (VOLUME_DOWN_QNAME.equals(element.getQName())) {
+            return buildVolumeDownCommand(element);
         } else if (element.getNamespace().equals(COMPLETE_NAMESPACE)) {
             return buildCompleteCommand(element);
         }
@@ -101,66 +105,37 @@ public class OutputProvider extends BaseProvider {
         return new ResumeCommand();
     }
 
-    private Object buildJumpCommand(Element element) {
-        
-    	JumpCommand command = new JumpCommand();
-        if (element.attribute("position") != null) {
-        	try {
-        		command.setPosition(Integer.parseInt(element.attributeValue("position")));
-        	} catch (ValidationException e) {
-        		throw new ValidationException(Messages.INVALID_POSITION);
-        	}
-        }
-        return command;
-    }
-    
-    private Object buildMoveCommand(Element element) throws URISyntaxException {
+    private Object buildSeekCommand(Element element) throws URISyntaxException {
 
-    	MoveCommand command = new MoveCommand();
-        if (element.attribute("time") != null) {
-        	try {
-        		command.setTime(Integer.parseInt(element.attributeValue("time")));
-        	} catch (ValidationException e) {
-        		throw new ValidationException(Messages.INVALID_TIME);
-        	}
-        }
+    	SeekCommand command = new SeekCommand();
         if (element.attribute("direction") != null) {
-        	try {
-        		command.setDirection(Boolean.parseBoolean(element.attributeValue("direction")));
-        	} catch (ValidationException e) {
-        		throw new ValidationException(Messages.INVALID_DIRECTION);
-        	}
+        	command.setDirection(toEnum(SeekCommand.Direction.class, "direction", element));
+        }
+        if (element.attribute("amount") != null) {
+        	command.setAmount(toInteger("amount", element));
         }
         return command;
     }
-    
-    
-    private Object buildVolumeCommand(Element element) throws URISyntaxException {
+        
+    private Object buildVolumeUpCommand(Element element) throws URISyntaxException {
 
-    	VolumeCommand command = new VolumeCommand();
-        if (element.attribute("up") != null) {
-        	try {
-        		command.setUp(Boolean.parseBoolean(element.attributeValue("up")));
-        	} catch (ValidationException e) {
-        		throw new ValidationException(Messages.INVALID_VOLUME);
-        	}
-        }
-        return command;
+        return new VolumeUpCommand();
     }
     
-    private Object buildSpeedCommand(Element element) throws URISyntaxException {
+    private Object buildVolumeDownCommand(Element element) throws URISyntaxException {
 
-    	SpeedCommand command = new SpeedCommand();
-        if (element.attribute("up") != null) {
-        	try {
-        		command.setUp(Boolean.parseBoolean(element.attributeValue("up")));
-        	} catch (ValidationException e) {
-        		throw new ValidationException(Messages.INVALID_SPEED);
-        	}
-        }
-        return command;
+        return new VolumeDownCommand();
     }
     
+    private Object buildSpeedUpCommand(Element element) throws URISyntaxException {
+
+    	return new SpeedUpCommand();
+    }
+    
+    private Object buildSpeedDownCommand(Element element) throws URISyntaxException {
+
+    	return new SpeedDownCommand();
+    }    
     
     // Object -> XML
     // ================================================================================
@@ -174,14 +149,16 @@ public class OutputProvider extends BaseProvider {
             createPauseCommand((PauseCommand) object, document);
         } else if (object instanceof ResumeCommand) {
             createResumeCommand((ResumeCommand) object, document);
-        } else if (object instanceof MoveCommand) {
-            createMoveCommand((MoveCommand) object, document);
-        } else if (object instanceof SpeedCommand) {
-            createSpeedCommand((SpeedCommand) object, document);
-        } else if (object instanceof VolumeCommand) {
-            createVolumeCommand((VolumeCommand) object, document);
-        } else if (object instanceof JumpCommand) {
-            createJumpCommand((JumpCommand) object, document);
+        } else if (object instanceof SeekCommand) {
+            createSeekCommand((SeekCommand) object, document);
+        } else if (object instanceof SpeedDownCommand) {
+            createSpeedDownCommand((SpeedDownCommand) object, document);
+        } else if (object instanceof SpeedUpCommand) {
+            createSpeedUpCommand((SpeedUpCommand) object, document);
+        } else if (object instanceof VolumeUpCommand) {
+            createVolumeUpCommand((VolumeUpCommand) object, document);
+        } else if (object instanceof VolumeDownCommand) {
+            createVolumeDownCommand((VolumeDownCommand) object, document);
         } else if (object instanceof OutputCompleteEvent) {
             createOutputCompleteEvent((OutputCompleteEvent) object, document);
         }
@@ -224,30 +201,32 @@ public class OutputProvider extends BaseProvider {
     private void createResumeCommand(ResumeCommand command, Document document) throws Exception {
         document.addElement(new QName("resume", NAMESPACE));
     }
-
-    private void createJumpCommand(JumpCommand command, Document document) throws Exception {
+    
+    private void createSeekCommand(SeekCommand command, Document document) throws Exception {
         
-    	Element jump = document.addElement(new QName("jump", NAMESPACE));
-    	jump.addAttribute("position", String.valueOf(command.getPosition()));
+    	Element seek = document.addElement(new QName("seek", NAMESPACE));
+    	seek.addAttribute("amount", String.valueOf(command.getAmount()));
+    	seek.addAttribute("direction", command.getDirection().toString());    	
     }
     
-    private void createMoveCommand(MoveCommand command, Document document) throws Exception {
+    private void createSpeedUpCommand(SpeedUpCommand command, Document document) throws Exception {
         
-    	Element move = document.addElement(new QName("move", NAMESPACE));
-    	move.addAttribute("time", String.valueOf(command.getTime()));
-    	move.addAttribute("direction", String.valueOf(command.isDirection()));    	
+    	document.addElement(new QName("speed-up", NAMESPACE));
     }
     
-    private void createSpeedCommand(SpeedCommand command, Document document) throws Exception {
+    private void createSpeedDownCommand(SpeedDownCommand command, Document document) throws Exception {
         
-    	Element move = document.addElement(new QName("speed", NAMESPACE));
-    	move.addAttribute("up", String.valueOf(command.isUp()));    	
+    	document.addElement(new QName("speed-down", NAMESPACE));
     }
     
-    private void createVolumeCommand(VolumeCommand command, Document document) throws Exception {
+    private void createVolumeUpCommand(VolumeUpCommand command, Document document) throws Exception {
         
-    	Element move = document.addElement(new QName("volume", NAMESPACE));
-    	move.addAttribute("up", String.valueOf(command.isUp()));    	
+    	document.addElement(new QName("volume-up", NAMESPACE));
+    }
+    
+    private void createVolumeDownCommand(VolumeDownCommand command, Document document) throws Exception {
+        
+    	document.addElement(new QName("volume-down", NAMESPACE));
     }
     
     private void createOutputCompleteEvent(OutputCompleteEvent event, Document document) throws Exception {
@@ -269,10 +248,11 @@ public class OutputProvider extends BaseProvider {
         return clazz == Output.class || 
                clazz == PauseCommand.class || 
                clazz == ResumeCommand.class || 
-               clazz == VolumeCommand.class || 
-               clazz == JumpCommand.class || 
-               clazz == MoveCommand.class || 
-               clazz == SpeedCommand.class || 
+               clazz == VolumeUpCommand.class || 
+               clazz == VolumeDownCommand.class || 
+               clazz == SeekCommand.class || 
+               clazz == SpeedUpCommand.class || 
+               clazz == SpeedDownCommand.class || 
                clazz == OutputCompleteEvent.class;
     }
 }

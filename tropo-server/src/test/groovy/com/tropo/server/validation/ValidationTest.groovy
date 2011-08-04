@@ -734,6 +734,54 @@ class ValidationTest {
 	}
 	
 	@Test
+	public void validateSeekInvalidDirection() {
+				
+		def output = parseXml("""<seek xmlns="urn:xmpp:rayo:output:1" amount="10000" direction="aaa"/>""")
+		
+		def errorMapping = assertValidationException(output)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, String.format(Messages.INVALID_ENUM, 'direction')
+	}
+	
+	@Test
+	public void validateSeekInvalidAmount() {
+				
+		def output = parseXml("""<seek xmlns="urn:xmpp:rayo:output:1" amount="dfdf" direction="forward"/>""")
+		
+		def errorMapping = assertValidationException(output)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, String.format(Messages.INVALID_INTEGER, 'amount')
+	}
+	
+	@Test
+	public void validateSeekMissingAmount() {
+				
+		def output = parseXml("""<seek xmlns="urn:xmpp:rayo:output:1" direction="forward"/>""")
+		
+		def errorMapping = assertValidationException(output)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.MISSING_AMOUNT
+	}
+	
+	@Test
+	public void validateSeekMissingDirection() {
+				
+		def output = parseXml("""<seek xmlns="urn:xmpp:rayo:output:1" amount="10000"/>""")
+		
+		def errorMapping = assertValidationException(output)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, Messages.MISSING_DIRECTION
+	}
+	
+	@Test
 	public void validateOutputValid() {
 				
 		def output = parseXml("""<output xmlns=\"urn:xmpp:rayo:output:1\" voice=\"allison\"><speak>Hello World</speak></output>""")
