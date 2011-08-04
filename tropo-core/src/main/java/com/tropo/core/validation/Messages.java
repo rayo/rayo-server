@@ -15,6 +15,8 @@ public class Messages {
 	public static final String MISSING_DESTINATION = "Missing destination.";
     public static final String MISSING_COMPLETE_REASON = "Complete event with no reason!";
     public static final String MISSING_JOIN_ID = "Missing Join id. You need to specify either a valid call-id or mixer-id";
+	public static final String MISSING_AMOUNT = "Amount is a mandatory field.";
+	public static final String MISSING_DIRECTION = "Direction is a mandatory field.";
 
     public static final String INVALID_DURATION = "Invalid duration for '%s'";
     public static final String INVALID_INPUT_MODE = "Invalid input mode.";

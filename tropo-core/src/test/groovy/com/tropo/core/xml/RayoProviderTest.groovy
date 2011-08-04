@@ -53,6 +53,9 @@ import com.tropo.core.verb.RecordResumeCommand
 import com.tropo.core.verb.ResumeCommand
 import com.tropo.core.verb.Say
 import com.tropo.core.verb.SayCompleteEvent
+import com.tropo.core.verb.SeekCommand;
+import com.tropo.core.verb.SpeedDownCommand;
+import com.tropo.core.verb.SpeedUpCommand;
 import com.tropo.core.verb.Ssml
 import com.tropo.core.verb.StopCommand
 import com.tropo.core.verb.Transfer
@@ -61,6 +64,8 @@ import com.tropo.core.verb.UnholdCommand
 import com.tropo.core.verb.UnmuteCommand
 import com.tropo.core.verb.VerbCompleteEvent
 import com.tropo.core.verb.AskCompleteEvent.Reason
+import com.tropo.core.verb.VolumeDownCommand;
+import com.tropo.core.verb.VolumeUpCommand;
 import com.tropo.core.xml.providers.AskProvider
 import com.tropo.core.xml.providers.ConferenceProvider
 import com.tropo.core.xml.providers.OutputProvider
@@ -1344,7 +1349,115 @@ public class RayoProviderTest {
 		assertEquals("""<output xmlns="urn:xmpp:rayo:output:1" voice="allison"><audio xmlns="" src="a.mp3"/><audio xmlns="" src="b.mp3"/></output>""", toXml(output));
 	}
 
+	@Test
+	public void speedUpToXml() {
+		
+		def speedUp = new SpeedUpCommand()
 
+		assertEquals("""<speed-up xmlns="urn:xmpp:rayo:output:1"/>""", toXml(speedUp));
+	}
+
+	@Test
+	public void speedUpFromXml() {
+		
+		def speedUp = fromXml("""<speed-up xmlns='urn:xmpp:rayo:output:1' />""")
+
+		assertNotNull speedUp
+		assertTrue speedUp instanceof SpeedUpCommand
+	}
+	
+	
+	@Test
+	public void speedDownToXml() {
+		
+		def speedDown = new SpeedDownCommand()
+
+		assertEquals("""<speed-down xmlns="urn:xmpp:rayo:output:1"/>""", toXml(speedDown));
+	}
+
+	@Test
+	public void speedDownFromXml() {
+		
+		def speedDown = fromXml("""<speed-down xmlns='urn:xmpp:rayo:output:1' />""")
+
+		assertNotNull speedDown
+		assertTrue speedDown instanceof SpeedDownCommand
+	}
+	
+	@Test
+	public void volumeUpToXml() {
+		
+		def volumeUp = new VolumeUpCommand()
+
+		assertEquals("""<volume-up xmlns="urn:xmpp:rayo:output:1"/>""", toXml(volumeUp));
+	}
+
+	@Test
+	public void volumeUpFromXml() {
+		
+		def volumeUp = fromXml("""<volume-up xmlns='urn:xmpp:rayo:output:1' />""")
+
+		assertNotNull volumeUp
+		assertTrue volumeUp instanceof VolumeUpCommand
+	}
+	
+	
+	@Test
+	public void volumeDownToXml() {
+		
+		def volumeDown = new VolumeDownCommand()
+
+		assertEquals("""<volume-down xmlns="urn:xmpp:rayo:output:1"/>""", toXml(volumeDown));
+	}
+
+	@Test
+	public void volumeDownFromXml() {
+		
+		def volumeDown = fromXml("""<volume-down xmlns='urn:xmpp:rayo:output:1' />""")
+
+		assertNotNull volumeDown
+		assertTrue volumeDown instanceof VolumeDownCommand
+	}
+	
+	@Test
+	public void seekToXml() {
+		
+		def seek = new SeekCommand(direction:SeekCommand.Direction.FORWARD, amount:10000)
+
+		assertEquals("""<seek xmlns="urn:xmpp:rayo:output:1" amount="10000" direction="FORWARD"/>""", toXml(seek));
+	}
+
+	@Test
+	public void seekFromXml() {
+		
+		def seek = fromXml("""<seek xmlns="urn:xmpp:rayo:output:1" direction="forward" amount="10000"/>""")
+
+		assertProperties(seek, [
+            direction: SeekCommand.Direction.FORWARD,
+            amount: 10000
+		])	
+	}
+	
+	// Pause
+	// ====================================================================================
+	@Test
+	public void outputPauseFromXml() {
+		
+		def pause = fromXml("""<pause xmlns="urn:xmpp:rayo:output:1" />""")
+		assertNotNull pause
+		assertTrue pause instanceof PauseCommand
+	}
+	
+	// Resume
+	// ====================================================================================
+	@Test
+	public void outputResumeFromXml() {
+		
+		def resume = fromXml("""<resume xmlns="urn:xmpp:rayo:output:1" />""")
+		assertNotNull resume
+		assertTrue resume instanceof ResumeCommand
+	}
+	
 	// Hold 
 	// ====================================================================================
 
