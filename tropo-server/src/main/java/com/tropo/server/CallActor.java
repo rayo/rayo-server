@@ -134,7 +134,6 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     	Participant destination = getDestinationParticipant(message.getFrom(), message.getType());
     	try {
             participant.unjoin(destination).get(JOIN_TIMEOUT, TimeUnit.MILLISECONDS);
-            joinees.remove(destination);
         } catch (TimeoutException e) {
             throw new TimeoutException("Timed out while trying to unjoin.");
         }
