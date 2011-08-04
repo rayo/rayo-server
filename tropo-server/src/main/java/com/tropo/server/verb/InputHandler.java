@@ -38,31 +38,23 @@ public class InputHandler extends AbstractLocalVerbHandler<Input, Participant> {
         
         InputCommand inputCommand = new InputCommand(grammars);
         if (model.getInitialTimeout() != null) {
-        	inputCommand.setInitialTimeout(model.getInitialTimeout());
+        	inputCommand.setInitialTimeout(model.getInitialTimeout().getMillis());
         }
-        if (model.getMaxTimeout() != null) {
-        	inputCommand.setMaxTimeout(model.getMaxTimeout());
-        }
-        if (model.getInterSigTimeout() != null) {
-        	inputCommand.setMaxTimeout(model.getInterSigTimeout());
+        // TODO: put this back in when we get clarification from wei
+        //if (model.getMaxDigits() != null) {
+        //	inputCommand.setNumberOfDigits(model.getMaxDigits());
+        //}
+        if (model.getInterDigitTimeout() != null) {
+        	inputCommand.setInterDigitsTimeout(model.getInterDigitTimeout().getMillis());
         }
         if (model.getRecognizer() != null) {
         	inputCommand.setRecognizer(model.getRecognizer());
         }
-        if (model.getDtmfHotword() != null) {
-        	inputCommand.setDtmfHotword(model.getDtmfHotword());
+        if (model.getMinConfidence() != null) {
+        	inputCommand.setMinConfidence(model.getMinConfidence());
         }
-        if (model.getDtmfTypeAhead() != null) {
-        	inputCommand.setDtmfTypeahead(model.getDtmfTypeAhead());
-        }
-        if (model.getSupervised() != null) {
-        	inputCommand.setSupervised(model.getSupervised());
-        }
-        if (model.getConfidence() != null) {
-        	inputCommand.setMinConfidence(model.getConfidence());
-        }
-        if (model.getInputMode() != null) {
-        	inputCommand.setInputMode(getMohoMode(model.getInputMode()));
+        if (model.getMode() != null) {
+        	inputCommand.setInputMode(getMohoMode(model.getMode()));
         }
         if (model.getSensitivity() != null) {
         	inputCommand.setSensitivity(model.getSensitivity());

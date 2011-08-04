@@ -179,18 +179,6 @@ public class AskProvider extends BaseProvider {
                 if (event.getUtterance() != null) {
                     completeElement.addElement("utterance").setText(event.getUtterance());
                 }
-
-                // Not sure about these yet so comment them out
-                //if (event.getTag() != null) {
-                //    completeElement.addElement("tag").setText(event.getTag());
-                //}
-                //if (event.getConcept() != null) {
-                //    completeElement.addElement("concept").setText(event.getConcept());
-                //}
-                //if (event.getNlsml() != null) {
-                //    completeElement.addElement("nlsml").setText(event.getNlsml());
-                //}
-                
             }
         }
     }

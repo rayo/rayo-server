@@ -67,40 +67,28 @@ public class InputProvider extends BaseProvider {
         
     	Input input = new Input();
         
-        if (element.attribute("buffering") != null) {
-        	input.setBuffering(toBoolean("buffering", element));
-        }
-        if (element.attribute("confidence") != null) {
-        	input.setConfidence(toFloatConfidence(element.attributeValue("confidence")));
-        }
-        if (element.attribute("dtmf-hot-word") != null) {
-        	input.setDtmfHotword(toBoolean("dtmf-hot-word",element));
-        }
-        if (element.attribute("dtmf-type-ahead") != null) {
-        	input.setDtmfTypeAhead(toBoolean("dtmf-type-ahead",element));
+        if (element.attribute("min-confidence") != null) {
+        	input.setMinConfidence(toFloatConfidence(element.attributeValue("min-confidence")));
         }
         if (element.attribute("initial-timeout") != null) {
-        	input.setInitialTimeout(toInteger("initial-timeout",element));
+        	input.setInitialTimeout(toDuration("initial-timeout",element));
         }
-        if (element.attribute("offset") != null) {
-        	input.setInputMode(loadInputMode(element));
+        if (element.attribute("max-digits") != null) {
+            input.setMaxDigits(toInteger("max-digits",element));
         }
-        if (element.attribute("inter-sig-timeout") != null) {
-        	input.setInterSigTimeout(toInteger("inter-sig-timeout", element));
+        if (element.attribute("mode") != null) {
+        	input.setMode(loadInputMode(element));
+        }
+        if (element.attribute("inter-digit-timeout") != null) {
+        	input.setInterDigitTimeout(toDuration("inter-digit-timeout", element));
         }
         if (element.attribute("recognizer") != null) {
         	input.setRecognizer(element.attributeValue("recognizer"));
         }
-        if (element.attribute("max-timeout") != null) {
-        	input.setMaxTimeout(toInteger("max-timeout", element));
-        }
         if (element.attribute("sensitivity") != null) {
         	input.setSensitivity(toFloat("sensitivity", element));
         }
-        if (element.attribute("supervised") != null) {
-        	input.setSupervised(toBoolean("supervised",element));
-        }
-        if (element.attribute("supervised") != null) {
+        if (element.attribute("terminator") != null) {
         	input.setTerminator(toTerminator(element.attributeValue("terminator")));
         }
         
@@ -139,35 +127,23 @@ public class InputProvider extends BaseProvider {
     private void createInput(Input input, Document document) throws Exception {
     	
         Element root = document.addElement(new QName("input", NAMESPACE));
-        if (input.getBuffering() != null ) {
-        	root.addAttribute("buffering", input.getBuffering().toString());        	
-        }
-        if (input.getDtmfHotword() != null ) {
-        	root.addAttribute("dtmf-hot-word", input.getDtmfHotword().toString());        	
-        }
-        if (input.getDtmfTypeAhead() != null ) {
-        	root.addAttribute("dtmf-type-ahead", String.valueOf(input.getDtmfTypeAhead()));        	
-        }
-        if (input.getSupervised() != null ) {
-        	root.addAttribute("supervised", String.valueOf(input.getSupervised()));        	
-        }
-        if (input.getConfidence() != null ) {
-        	root.addAttribute("confidence", String.valueOf(input.getConfidence()));        	
+        if (input.getMinConfidence() != null ) {
+        	root.addAttribute("confidence", String.valueOf(input.getMinConfidence()));        	
         }
         if (input.getInitialTimeout() != null ) {
         	root.addAttribute("initial-timeout", String.valueOf(input.getInitialTimeout()));        	
         }
-        if (input.getInputMode() != null ) {
-        	root.addAttribute("input-mode", input.getInputMode().toString());        	
+        if (input.getMode() != null ) {
+        	root.addAttribute("mode", input.getMode().toString());        	
         }
-        if (input.getInterSigTimeout() != null ) {
-        	root.addAttribute("inter-sig-timeout", input.getInterSigTimeout().toString());        	
+        if (input.getInterDigitTimeout() != null ) {
+        	root.addAttribute("inter-digit-timeout", Long.toString(input.getInterDigitTimeout().getMillis()));        	
         }
         if (input.getRecognizer() != null ) {
         	root.addAttribute("recognizer", input.getRecognizer());        	
         }
-        if (input.getMaxTimeout() != null ) {
-        	root.addAttribute("max-timeout", String.valueOf(input.getMaxTimeout()));        	
+        if (input.getMaxDigits() != null ) {
+        	root.addAttribute("max-digits", String.valueOf(input.getMaxDigits()));        	
         }
         if (input.getSensitivity() != null ) {
         	root.addAttribute("sensitivity", String.valueOf(input.getSensitivity()));        	
