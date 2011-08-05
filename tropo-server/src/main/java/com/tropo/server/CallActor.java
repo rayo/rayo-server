@@ -189,6 +189,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
                     } else if (peer instanceof Call) {
                         type = JoinDestinationType.CALL;
                     }
+                    joinees.add(peer);
                     fire(new JoinedEvent(participant.getId(), peer.getId(), type));
                 }
             }
@@ -210,8 +211,9 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 	            break;
 	        case ERROR:
 	        case FAIL_UNJOIN:
-	            log.error(String.format("Call with id %s could not be unjoined from %s", 
-	                    participant.getId(), peer.getId()));
+	        case NOT_JOINED:
+	            log.error(String.format("Call with id %s could not be unjoined from %s [reason=%s]", 
+	                    participant.getId(), peer.getId(), event.getCause()));
 	        }
 	    }
 	}
