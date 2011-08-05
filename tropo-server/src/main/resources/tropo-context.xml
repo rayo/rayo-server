@@ -279,7 +279,9 @@
 	</bean>
 
 	<!-- Admin Service -->
-	<bean id="adminService" class="com.tropo.server.AdminService"/>
+	<bean id="adminService" class="com.tropo.server.AdminService">
+		<property name="callRegistry" ref="callRegistry"/>
+	</bean>
 	
 	<!-- JMX Configuration -->
   	<bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">

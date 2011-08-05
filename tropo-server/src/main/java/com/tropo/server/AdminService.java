@@ -9,6 +9,9 @@ import java.util.jar.Manifest;
 import javax.servlet.ServletContext;
 
 import com.voxeo.logging.Loggerf;
+import com.voxeo.moho.Call;
+import com.voxeo.moho.event.InputDetectedEvent;
+import com.voxeo.moho.event.MohoInputDetectedEvent;
 
 public class AdminService {
 
@@ -19,9 +22,23 @@ public class AdminService {
 	private String buildId;
 	private String versionNumber;
 	
+	private CallRegistry callRegistry;
+	
 	public boolean isQuiesceMode() {
 		
 		return quiesceMode.get();
+	}
+	
+	public void sendDtmf(String callId, String dtmf) {
+		
+		CallActor<?> actor = callRegistry.get(callId);
+		InputDetectedEvent<Call> event = new MohoInputDetectedEvent<Call>(actor.getCall(), dtmf);
+		try {
+			actor.onDtmf(event);
+			actor.flush();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void disableQuiesce() {
@@ -69,5 +86,9 @@ public class AdminService {
 
 	public String getVersionNumber() {
 		return versionNumber;
+	}
+
+	public void setCallRegistry(CallRegistry callRegistry) {
+		this.callRegistry = callRegistry;
 	}
 }

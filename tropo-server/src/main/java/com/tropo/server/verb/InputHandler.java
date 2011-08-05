@@ -37,6 +37,8 @@ public class InputHandler extends AbstractLocalVerbHandler<Input, Participant> {
         }
         
         InputCommand inputCommand = new InputCommand(grammars);
+        inputCommand.setInputMode(com.voxeo.moho.media.InputMode.DTMF);
+        inputCommand.setSupervised(true);
         if (model.getInitialTimeout() != null) {
         	inputCommand.setInitialTimeout(model.getInitialTimeout().getMillis());
         }

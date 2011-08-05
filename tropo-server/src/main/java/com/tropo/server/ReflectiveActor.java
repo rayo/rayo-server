@@ -220,6 +220,11 @@ public abstract class ReflectiveActor implements Actor, Callback<Object> {
         }
     }
     
+    public void flush() {
+    	
+    	flushEvents();
+    }
+    
     protected void fire(Object message) {
         if(running) {
             log.info("Queued Event [%s]", message);
