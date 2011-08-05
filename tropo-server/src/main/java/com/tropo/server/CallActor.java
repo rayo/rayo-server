@@ -44,7 +44,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 	
     //TODO: Move this to Spring configuration
     private int JOIN_TIMEOUT = 30000;
-    private Set<Participant> joinees =new HashSet<Participant>();
+    private Set<Participant> joinees = new HashSet<Participant>();
     
     private CallStatistics callStatistics;
     private CdrManager cdrManager;
@@ -71,7 +71,9 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 	            javax.media.mscontrol.join.Joinable.Direction direction = participant.getAttribute(JoinCommand.DIRECTION);
 	            JoinType mediaType = participant.getAttribute(JoinCommand.MEDIA_TYPE);                        
 	            Participant destination = getDestinationParticipant(dest, type);
-                        
+	            
+	            joinees.add(destination);
+	            
         		participant.join(destination, mediaType, direction);
             } else {
             	participant.join();
