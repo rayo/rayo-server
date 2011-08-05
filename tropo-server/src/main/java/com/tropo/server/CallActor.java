@@ -204,7 +204,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 	        switch(event.getCause()) {
 	        case SUCCESS_UNJOIN:
 	        case DISCONNECT:
-	            if(joinees.contains(peer) || !event.isInitiator()) {
+	            if(joinees.contains(peer)) {
 	                fireUnjoinedEvent(event);
 	                joinees.remove(peer);
 	            }
