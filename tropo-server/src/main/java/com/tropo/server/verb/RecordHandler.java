@@ -48,53 +48,32 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
 		}
 		
 		RecordCommand command = new RecordCommand(model.getTo());
-        if (model.getAppend() != null) {
-        	command.setAppend(model.getAppend());
-        }
-        if (model.getDtmfTruncate() != null) {
-        	command.setSignalTruncationOn(model.getDtmfTruncate());
-        }
-        if (model.getSilenceTerminate() != null) {
-        	command.setSilenceTerminationOn(model.getSilenceTerminate());
-        }
         if (model.getStartBeep() != null) {
         	command.setStartBeep(model.getStartBeep());
-        }/* else {
-        	command.setStartBeep(Boolean.FALSE);
-        }*/
-        if (model.getStartPauseMode() != null) {
-        	command.setStartInPausedMode(model.getStartPauseMode());
         }
-        if (model.getCodec() != null) {
-        	command.setAudioCODEC(Output.toCodecValue(model.getCodec()));
+        if (model.getStopBeep() != null) {
+        	//TODO: https://evolution.voxeo.com/ticket/1506906
         }
-
-        if (model.getCodecParameters() != null) {
-        	command.setAudioFMTP(model.getCodecParameters());
+        if (model.getStartPaused() != null) {
+        	command.setStartInPausedMode(model.getStartPaused());
         }
         if (model.getFinalTimeout() != null) {
-        	command.setFinalTimeout(model.getFinalTimeout());
+        	command.setFinalTimeout(model.getFinalTimeout().getMillis());
         }
         if (model.getFormat() != null) {
         	command.setFileFormat(Output.toFileFormat(model.getFormat()));
-        	if (command.getFileFormat().equals(FileFormatConstants.RAW) && model.getCodec() == null) {
+        	if (command.getFileFormat().equals(FileFormatConstants.RAW)) {
         		command.setAudioCODEC(CodecConstants.LINEAR_16BIT_128K);
         	}
         } else {
         	command.setFileFormat(FileFormatConstants.INFERRED);
         }
         if (model.getInitialTimeout() != null) {
-        	command.setInitialTimeout(model.getInitialTimeout());
+        	command.setInitialTimeout(model.getInitialTimeout().getMillis());
         }
         if (model.getMaxDuration() != null) {
-        	command.setMaxDuration(model.getMaxDuration());
+        	command.setMaxDuration(model.getMaxDuration().getMillis());
         }
-        if (model.getMinDuration() != null) {
-        	command.setMinDuration(model.getMinDuration());
-        }
-        if (model.getSampleRate() != null) {
-        	command.setAudioClockRate(model.getSampleRate());
-        } 
         
 		recording = getMediaService().record(command);
 	}

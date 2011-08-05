@@ -614,18 +614,6 @@ class ValidationTest {
 	}
 	
 	@Test
-	public void validateRecordInvalidCodec() {
-				
-		def record = parseXml("""<record xmlns="urn:xmpp:rayo:record:1" codec="abcd"/>""")
-		
-		def errorMapping = assertValidationException(record)
-		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
-		assertEquals errorMapping.text, Messages.INVALID_CODEC
-	}
-	
-	@Test
 	public void validateRecordInvalidFileFormat() {
 				
 		def record = parseXml("""<record xmlns="urn:xmpp:rayo:record:1" format="abcd"/>""")
@@ -635,6 +623,78 @@ class ValidationTest {
 		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
 		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
 		assertEquals errorMapping.text, Messages.INVALID_FILE_FORMAT
+	}
+		
+	@Test
+	public void validateRecordInvalidStartBeep() {
+				
+		def record = parseXml("""<record xmlns="urn:xmpp:rayo:record:1" start-beep="abcd"/>""")
+		
+		def errorMapping = assertValidationException(record)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, String.format(Messages.INVALID_BOOLEAN, 'start-beep')
+	}
+	
+	@Test
+	public void validateRecordInvalidStopBeep() {
+				
+		def record = parseXml("""<record xmlns="urn:xmpp:rayo:record:1" stop-beep="abcd"/>""")
+		
+		def errorMapping = assertValidationException(record)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, String.format(Messages.INVALID_BOOLEAN, 'stop-beep')
+	}
+	
+	@Test
+	public void validateRecordInvalidStartPaused() {
+				
+		def record = parseXml("""<record xmlns="urn:xmpp:rayo:record:1" start-paused="abcd"/>""")
+		
+		def errorMapping = assertValidationException(record)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, String.format(Messages.INVALID_BOOLEAN, 'start-paused')
+	}
+	
+	@Test
+	public void validateRecordInvalidInitialTimeout() {
+				
+		def record = parseXml("""<record xmlns="urn:xmpp:rayo:record:1" initial-timeout="abcd"/>""")
+		
+		def errorMapping = assertValidationException(record)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, String.format(Messages.INVALID_DURATION, 'initial-timeout')
+	}
+	
+	@Test
+	public void validateRecordInvalidFinalTimeout() {
+				
+		def record = parseXml("""<record xmlns="urn:xmpp:rayo:record:1" final-timeout="abcd"/>""")
+		
+		def errorMapping = assertValidationException(record)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, String.format(Messages.INVALID_DURATION, 'final-timeout')
+	}
+	
+	@Test
+	public void validateRecordInvalidMaxDuration() {
+				
+		def record = parseXml("""<record xmlns="urn:xmpp:rayo:record:1" max-duration="abcd"/>""")
+		
+		def errorMapping = assertValidationException(record)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
+		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.text, String.format(Messages.INVALID_DURATION, 'max-duration')
 	}
 	
 	// Mixed tests

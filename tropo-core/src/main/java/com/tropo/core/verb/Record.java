@@ -4,41 +4,28 @@ import java.net.URI;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
+import org.joda.time.Duration;
 
-import com.tropo.core.validation.ValidCodec;
 import com.tropo.core.validation.ValidFileFormat;
 
 public class Record extends BaseVerb {
 
 	private URI to;
 	
-	private Boolean append;
-	
-	private Integer sampleRate;
-		
-	@ValidCodec
-	private String codec;
-
-	private String codecParameters;
-
 	@ValidFileFormat
 	private String format;
 	
-	private Integer maxDuration;
-	
-	private Integer minDuration;
-	
-	private Boolean dtmfTruncate;
-	
-	private Boolean silenceTerminate;
+	private Duration maxDuration;
 	
 	private Boolean startBeep;
 	
-	private Boolean startPauseMode;
+	private Boolean stopBeep;
 	
-	private Integer initialTimeout;
+	private Boolean startPaused;
 	
-	private Integer finalTimeout;
+	private Duration initialTimeout;
+	
+	private Duration finalTimeout;
 	
 	public URI getTo() {
 		return to;
@@ -46,40 +33,6 @@ public class Record extends BaseVerb {
 
 	public void setTo(URI to) {
 		this.to = to;
-	}
-
-	
-	
-	public Boolean getAppend() {
-		return append;
-	}
-
-	public void setAppend(Boolean append) {
-		this.append = append;
-	}
-
-	public Integer getSampleRate() {
-		return sampleRate;
-	}
-
-	public void setSampleRate(Integer sampleRate) {
-		this.sampleRate = sampleRate;
-	}
-
-	public String getCodec() {
-		return codec;
-	}
-
-	public void setCodec(String codec) {
-		this.codec = codec;
-	}
-
-	public String getCodecParameters() {
-		return codecParameters;
-	}
-
-	public void setCodecParameters(String codecParameters) {
-		this.codecParameters = codecParameters;
 	}
 
 	public String getFormat() {
@@ -90,36 +43,12 @@ public class Record extends BaseVerb {
 		this.format = format;
 	}
 
-	public Integer getMaxDuration() {
+	public Duration getMaxDuration() {
 		return maxDuration;
 	}
 
-	public void setMaxDuration(Integer maxDuration) {
+	public void setMaxDuration(Duration maxDuration) {
 		this.maxDuration = maxDuration;
-	}
-
-	public Integer getMinDuration() {
-		return minDuration;
-	}
-
-	public void setMinDuration(Integer minDuration) {
-		this.minDuration = minDuration;
-	}
-
-	public Boolean getDtmfTruncate() {
-		return dtmfTruncate;
-	}
-
-	public void setDtmfTruncate(Boolean dtmfTruncate) {
-		this.dtmfTruncate = dtmfTruncate;
-	}
-
-	public Boolean getSilenceTerminate() {
-		return silenceTerminate;
-	}
-
-	public void setSilenceTerminate(Boolean silenceTerminate) {
-		this.silenceTerminate = silenceTerminate;
 	}
 
 	public Boolean getStartBeep() {
@@ -130,28 +59,36 @@ public class Record extends BaseVerb {
 		this.startBeep = startBeep;
 	}
 
-	public Boolean getStartPauseMode() {
-		return startPauseMode;
+	public Boolean getStartPaused() {
+		return startPaused;
 	}
 
-	public void setStartPauseMode(Boolean startPauseMode) {
-		this.startPauseMode = startPauseMode;
+	public void setStartPaused(Boolean startPaused) {
+		this.startPaused = startPaused;
 	}
 
-	public Integer getInitialTimeout() {
+	public Duration getInitialTimeout() {
 		return initialTimeout;
 	}
 
-	public void setInitialTimeout(Integer initialTimeout) {
+	public void setInitialTimeout(Duration initialTimeout) {
 		this.initialTimeout = initialTimeout;
 	}
 
-	public Integer getFinalTimeout() {
+	public Duration getFinalTimeout() {
 		return finalTimeout;
 	}
 
-	public void setFinalTimeout(Integer finalTimeout) {
+	public void setFinalTimeout(Duration finalTimeout) {
 		this.finalTimeout = finalTimeout;
+	}
+
+	public Boolean getStopBeep() {
+		return stopBeep;
+	}
+
+	public void setStopBeep(Boolean stopBeep) {
+		this.stopBeep = stopBeep;
 	}
 
 	@Override
@@ -161,19 +98,12 @@ public class Record extends BaseVerb {
 				.append("callId", getCallId())
 				.append("verbId", getVerbId())
 				.append("to", getTo())
-				.append("append", getAppend())
-				.append("codec", getCodec())
-				.append("codec-params", getCodecParameters())
-				.append("dtmf-truncate", getDtmfTruncate())
 				.append("final-timeout", getFinalTimeout())
 				.append("format", getFormat())
 				.append("initial-timeout", getInitialTimeout())
 				.append("max-duration", getMaxDuration())
-				.append("min-duration", getMinDuration())
-				.append("sample-rate", getSampleRate())
-				.append("silence-terminate", getSilenceTerminate())
 				.append("start-beep", getStartBeep())
-				.append("start-pause-mode", getStartPauseMode())				
+				.append("start-pause-mode", getStartPaused())				
 				.toString();
 
 	}
