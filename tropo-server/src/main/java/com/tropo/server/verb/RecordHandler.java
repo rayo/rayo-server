@@ -66,7 +66,7 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
         		command.setAudioCODEC(CodecConstants.LINEAR_16BIT_128K);
         	}
         } else {
-        	command.setFileFormat(FileFormatConstants.INFERRED);
+        	command.setFileFormat(FileFormatConstants.WAV);
         }
         if (model.getInitialTimeout() != null) {
         	command.setInitialTimeout(model.getInitialTimeout().getMillis());
@@ -96,7 +96,7 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
 				return ".wav";
 			}
 		}
-		return ".mp3";
+		return ".wav";
 	}
 
 	@Override
