@@ -1,7 +1,10 @@
 package com.tropo.server;
 
+import java.util.concurrent.TimeUnit;
+
 import com.voxeo.moho.event.Event;
 import com.voxeo.moho.event.EventSource;
+import com.voxeo.moho.util.SettableResultFuture;
 import com.voxeo.moho.utils.EventListener;
 
 public class ActorEventListener implements EventListener<Event<EventSource>> {
@@ -13,6 +16,18 @@ public class ActorEventListener implements EventListener<Event<EventSource>> {
     }
 
     public void onEvent(Event<EventSource> event) throws Exception {
-        actor.publish(event);
+        
+        final SettableResultFuture<Object> future = new SettableResultFuture<Object>();
+        
+        Request request = new Request(event, new ResponseHandler() {
+            public void handle(Response response) throws Exception {
+                future.setResult(response);
+            }
+        });
+        
+        actor.publish(request);
+        
+        future.get(30, TimeUnit.SECONDS);
+        
     }
 }
