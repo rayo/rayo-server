@@ -75,6 +75,8 @@ public class RecordProvider extends BaseProvider {
     	}
     	if (element.attribute("format") !=  null) {
     		record.setFormat(element.attributeValue("format"));
+    	} else {
+    		record.setFormat("mp3");
     	}
     	if (element.attribute("initial-timeout") !=  null) {
     		record.setInitialTimeout(toInteger("initial-timeout",element));
