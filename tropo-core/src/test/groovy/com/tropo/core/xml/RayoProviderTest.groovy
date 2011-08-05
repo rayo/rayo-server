@@ -480,13 +480,12 @@ public class RayoProviderTest {
 	@Test
 	public void recordFullToXml() {
 		
-		def record = new Record(to:new URI("file:/tmp/myrecording.mp3"), append:true,
-								codec:"LINEAR_16BIT_256K", codecParameters:"bitrate=5.3;annexa=no", dtmfTruncate:true,
-								format:"INFERRED", initialTimeout:10000, finalTimeout:10000, minDuration:-1, 
-								maxDuration:500000, sampleRate:16000, silenceTerminate:false, startBeep:true,
-								startPauseMode:false);
+		def record = new Record(to:new URI("file:/tmp/myrecording.mp3"), 
+								format:"INFERRED", initialTimeout:new Duration(10000), finalTimeout:new Duration(10000), 
+								maxDuration:new Duration(500000), startBeep:true, stopBeep:true,
+								startPaused:false);
 							
-		assertEquals("""<record xmlns="urn:xmpp:rayo:record:1" to="file:/tmp/myrecording.mp3" append="true" dtmf-truncate="true" silence-terminate="false" start-beep="true" start-pause-mode="false" codec="LINEAR_16BIT_256K" codec-params="bitrate=5.3;annexa=no" final-timeout="10000" format="INFERRED" initial-timeout="10000" max-length="500000" min-length="-1" sample-rate="16000"/>""", toXml(record));
+		assertEquals("""<record xmlns="urn:xmpp:rayo:record:1" to="file:/tmp/myrecording.mp3" start-beep="true" stop-beep="true" start-paused="false" final-timeout="10000" format="INFERRED" initial-timeout="10000" max-duration="500000"/>""", toXml(record));
 	}
 
 	@Test
@@ -498,22 +497,18 @@ public class RayoProviderTest {
 	@Test
 	public void recordFullFromXml() {
 		
-		def record = fromXml("""<record xmlns="urn:xmpp:rayo:record:1" to="file:/tmp/myrecording.mp3" append="true" voice="allison" bargein="true" dtmf-truncate="true" silence-terminate="false" start-beep="true" start-pause-mode="false" codec="LINEAR_16BIT_256K" codec-params="bitrate=5.3;annexa=no" final-timeout="10000" format="INFERRED" initial-timeout="10000" max-length="500000" min-length="-1" sample-rate="16000"/>""")
-		assertNotNull record
-		assertEquals record.to, new URI("file:/tmp/myrecording.mp3")
-		assertTrue record.append
-		assertEquals record.format, "INFERRED"
-		assertEquals record.initialTimeout,10000
-		assertEquals record.finalTimeout, 10000
-		assertEquals record.minDuration,-1
-		assertTrue record.dtmfTruncate
-		assertEquals record.codec, "LINEAR_16BIT_256K"
-		assertEquals record.codecParameters, "bitrate=5.3;annexa=no"
-		assertEquals record.maxDuration, 500000
-		assertEquals record.sampleRate, 16000
-		assertFalse record.silenceTerminate
-		assertTrue record.startBeep
-		assertFalse record.startPauseMode
+		def record = fromXml("""<record xmlns="urn:xmpp:rayo:record:1" to="file:/tmp/myrecording.mp3" start-beep="true" stop-beep="true" start-paused="true" 
+		final-timeout="10000" format="INFERRED" initial-timeout="10000" max-duration="500000"/>""")
+		assertProperties(record, [
+			to: new URI("file:/tmp/myrecording.mp3"),
+			startBeep: true,
+			stopBeep: true,
+			startPaused: true,
+			finalTimeout: new Duration(10000), 
+			format: "INFERRED",
+			initialTimeout: new Duration(10000),
+			maxDuration: new Duration(500000)	
+		])
 	}
 	
 	// Record Pause

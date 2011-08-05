@@ -56,22 +56,9 @@ public class RecordProvider extends BaseProvider {
     	Record record = new Record();
     	if (element.attribute("to") !=  null) {
     		record.setTo(toURI(element.attributeValue("to")));
-    	}
-
-    	if (element.attribute("append") !=  null) {
-    		record.setAppend(toBoolean("append",element));
-    	}
-    	if (element.attribute("codec") !=  null) {
-    		record.setCodec(element.attributeValue("codec"));
-    	}
-    	if (element.attribute("codec-params") !=  null) {
-    		record.setCodecParameters(element.attributeValue("codec-params"));
-    	}
-    	if (element.attribute("dtmf-truncate") !=  null) {
-    		record.setDtmfTruncate(toBoolean("dtmf-truncate", element));
-    	}
+    	}    	
     	if (element.attribute("final-timeout") !=  null) {
-    		record.setFinalTimeout(toInteger("final-timeout", element));
+    		record.setFinalTimeout(toDuration("final-timeout", element));
     	}
     	if (element.attribute("format") !=  null) {
     		record.setFormat(element.attributeValue("format"));
@@ -79,25 +66,19 @@ public class RecordProvider extends BaseProvider {
     		record.setFormat("mp3");
     	}
     	if (element.attribute("initial-timeout") !=  null) {
-    		record.setInitialTimeout(toInteger("initial-timeout",element));
+    		record.setInitialTimeout(toDuration("initial-timeout",element));
     	}
-    	if (element.attribute("max-length") !=  null) {
-    		record.setMaxDuration(toInteger("max-length", element));
-    	}
-    	if (element.attribute("min-length") !=  null) {
-    		record.setMinDuration(toInteger("min-length",element));
-    	}
-    	if (element.attribute("sample-rate") !=  null) {
-    		record.setSampleRate(toInteger("sample-rate",element));
-    	}
-    	if (element.attribute("silence-terminate") !=  null) {
-    		record.setSilenceTerminate(toBoolean("silence-terminate",element));
+    	if (element.attribute("max-duration") !=  null) {
+    		record.setMaxDuration(toDuration("max-duration", element));
     	}
     	if (element.attribute("start-beep") !=  null) {
     		record.setStartBeep(toBoolean("start-beep", element));
     	}
-    	if (element.attribute("start-pause-mode") !=  null) {
-    		record.setStartPauseMode(toBoolean("start-pause-mode", element));
+    	if (element.attribute("stop-beep") !=  null) {
+    		record.setStopBeep(toBoolean("stop-beep", element));
+    	}
+    	if (element.attribute("start-paused") !=  null) {
+    		record.setStartPaused(toBoolean("start-paused", element));
     	}
         return record;
     }
@@ -159,47 +140,28 @@ public class RecordProvider extends BaseProvider {
         Element root = document.addElement(new QName("record", NAMESPACE));
         if (record.getTo() != null) {
         	root.addAttribute("to", record.getTo().toString());
-        }
-        if (record.getAppend() != null) {
-        	root.addAttribute("append", record.getAppend().toString());
-        }
-
-        if (record.getDtmfTruncate() != null) {
-        	root.addAttribute("dtmf-truncate", record.getDtmfTruncate().toString());
-        }
-        if (record.getSilenceTerminate() != null) {
-        	root.addAttribute("silence-terminate", record.getSilenceTerminate().toString());
-        }
+        }        
         if (record.getStartBeep() != null) {
         	root.addAttribute("start-beep", record.getStartBeep().toString());
         }
-        if (record.getStartPauseMode() != null) {
-        	root.addAttribute("start-pause-mode", record.getStartPauseMode().toString());
+        if (record.getStopBeep() != null) {
+        	root.addAttribute("stop-beep", record.getStopBeep().toString());
         }
-        if (record.getCodec() != null) {
-        	root.addAttribute("codec", record.getCodec());
-        }
-        if (record.getCodecParameters() != null) {
-        	root.addAttribute("codec-params", record.getCodecParameters());
+        if (record.getStartPaused() != null) {
+        	root.addAttribute("start-paused", record.getStartPaused().toString());
         }
         if (record.getFinalTimeout() != null) {
-        	root.addAttribute("final-timeout", record.getFinalTimeout().toString());
+        	root.addAttribute("final-timeout", String.valueOf(record.getFinalTimeout().getMillis()));
         }
         if (record.getFormat() != null) {
         	root.addAttribute("format", record.getFormat());
         }
         if (record.getInitialTimeout() != null) {
-        	root.addAttribute("initial-timeout", record.getInitialTimeout().toString());
+        	root.addAttribute("initial-timeout", String.valueOf(record.getInitialTimeout().getMillis()));
         }
         if (record.getMaxDuration() != null) {
-        	root.addAttribute("max-length", record.getMaxDuration().toString());
+        	root.addAttribute("max-duration", String.valueOf(record.getMaxDuration().getMillis()));
         }
-        if (record.getMinDuration() != null) {
-        	root.addAttribute("min-length", record.getMinDuration().toString());
-        }
-        if (record.getSampleRate() != null) {
-        	root.addAttribute("sample-rate", record.getSampleRate().toString());
-        }        
     }
 
     @Override
