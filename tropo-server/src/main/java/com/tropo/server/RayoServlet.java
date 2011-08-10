@@ -153,9 +153,10 @@ public class RayoServlet extends XmppServlet {
 
     	if (event instanceof OfferEvent) {
     		for (XmppSession session : clientSessions.values()) {
-    			JID jid = session.getRemoteJIDs().iterator().next();
-    			if (match(jid.getBareJID(),eventElement)) {
-    				callsMap.put(event.getCallId(),session);
+    			for (JID jid: session.getRemoteJIDs()) {
+	    			if (match(jid.getBareJID(),eventElement)) {
+	    				callsMap.put(event.getCallId(),session);
+	    			}
     			}
     		}
     	}            	
