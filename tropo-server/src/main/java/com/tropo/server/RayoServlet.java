@@ -163,14 +163,17 @@ public class RayoServlet extends XmppServlet {
     	
     	XmppSession session = callsMap.get(event.getCallId());
     	if (session != null) {
+    		log.debug("Found a session matching the call with id %s. Sending event.", event.getCallId());
     		sendToSession(event,eventElement,session);
     	} else {
+    		log.debug("Could not find a session matching the call with id %s. Sending event to all client sessions.", event.getCallId());
     		for (XmppSession clientSession : clientSessions.values()) {
     	        sendToSession(event, eventElement, clientSession);    			
     		}
     	}
 
         if (event instanceof EndEvent) {
+        	log.debug("End event received. Removing session for call with id %s.", event.getCallId());
         	callsMap.remove(event.getCallId());
         }
         rayoStatistics.callEventProcessed();
