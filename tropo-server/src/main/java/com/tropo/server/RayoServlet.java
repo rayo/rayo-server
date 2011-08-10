@@ -219,7 +219,10 @@ public class RayoServlet extends XmppServlet {
     			jidTo  = jidTo+":5060";
     		}    		
     	}
-    	return to.equals(jidTo);
+    	boolean matches = to.equals(jidTo);
+    	log.debug("Matching bare jid: %s to Event's to URL: %s. Matches: %s", bareJID, to, matches);
+    	
+    	return matches;
 	}
 
 	protected void doMessage(XmppServletStanzaRequest req) throws ServletException, IOException {
