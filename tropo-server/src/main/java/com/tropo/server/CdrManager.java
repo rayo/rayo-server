@@ -125,6 +125,11 @@ public class CdrManager {
 		
 		cdrs.clear();
 	}
+	
+	public void removeAllStorageStrategies() {
+		
+		storageStrategies.clear();
+	}
 
 	public void setSpiStorageStrategies(List<CdrStorageStrategy> spiStorageStrategies) {
 		
