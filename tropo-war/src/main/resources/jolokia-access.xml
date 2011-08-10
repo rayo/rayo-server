@@ -7,6 +7,7 @@
     <host>localhost</host>
     <host>127.0.0.1</host>
     <host>10.0.0.0/16</host>
+    <host>10.6.0.0/16</host>
   </remote>
 
   <!-- Allowed methods -->
