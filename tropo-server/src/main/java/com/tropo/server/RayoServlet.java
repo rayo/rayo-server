@@ -209,6 +209,16 @@ public class RayoServlet extends XmppServlet {
     private boolean match(JID bareJID, Element element) {
 
     	String to = element.attributeValue("to");
+    	return match(bareJID, to);
+	}
+
+    private boolean match(JID bareJID, JID element) {
+
+    	return match(bareJID, element.getBareJID().toString());
+	}
+    
+    private boolean match(JID bareJID, String to ) {
+
     	if (to.startsWith("sip:")) {
     		to = to.substring(4,to.length());
     	}
@@ -290,6 +300,14 @@ public class RayoServlet extends XmppServlet {
                             public void handle(Response response) throws Exception {
                                 if (response.isSuccess()) {
                                     CallRef callRef = (CallRef) response.getValue();
+                            		for (XmppSession session : clientSessions.values()) {
+                            			for (JID jid: session.getRemoteJIDs()) {
+                        	    			if (match(jid.getBareJID(),request.getFrom())) {
+                        	    				callsMap.put(callRef.getCallId(),session);
+                        	    			}
+                            			}
+                            		}
+                            		
                                     result.addElement("ref","urn:xmpp:rayo:1").addAttribute("id", callRef.getCallId());
                                     sendIqResult(request, result);
                                 }
