@@ -8,12 +8,11 @@ import javax.validation.ValidatorFactory;
 
 public class Validator {
 
-	private ValidatorFactory factory;
+	private static ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
 	private javax.validation.Validator validator;
 	
 	public Validator() {
 		
-        factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();		
 	}
 	
