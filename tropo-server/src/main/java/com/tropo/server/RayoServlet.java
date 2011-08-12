@@ -163,7 +163,7 @@ public class RayoServlet extends XmppServlet {
     	
     	XmppSession session = callsMap.get(event.getCallId());
     	if (session != null) {
-    		log.debug("Found a session matching the call with id %s. Sending event.", event.getCallId());
+    		//log.debug("Found a session matching the call with id %s. Sending event.", event.getCallId());
     		sendToSession(event,eventElement,session);
     	} else {
     		log.debug("Could not find a session matching the call with id %s. Sending event to all client sessions.", event.getCallId());
@@ -233,7 +233,7 @@ public class RayoServlet extends XmppServlet {
     		}    		
     	}
     	boolean matches = to.equals(jidTo);
-    	log.debug("Matching bare jid: %s to Event's to URL: %s. Matches: %s", bareJID, to, matches);
+    	//log.debug("Matching bare jid: %s to Event's to URL: %s. Matches: %s", bareJID, to, matches);
     	
     	return matches;
 	}
