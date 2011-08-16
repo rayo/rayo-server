@@ -552,4 +552,8 @@ public class MockCall implements IncomingCall {
     @Override
     public void proxyTo(boolean recordRoute, boolean parallel, Endpoint... destinations) throws SignalException {}
 
+    @Override
+    public boolean isProxied() {
+    	return false;
+    }
 }
