@@ -152,27 +152,7 @@ public class RayoServlet extends XmppServlet {
     		cdrManager.store(event.getCallId());
     	}
 
-    	XmppSession destinationSession = callsMap.get(event.getCallId());
-    	if (event instanceof OfferEvent) {
-    		CallActor<?> actor = callRegistry.get(event.getCallId());
-    		if (actor != null) {
-    			URI initiator = actor.getCall().getAttribute(DialCommand.DIAL_INITIATOR);
-    			if (initiator != null) {
-    				// Regular offer event. e.g. from Soft phone.
-    	    		for (XmppSession session : clientSessions.values()) {
-    	    			for (JID jid: session.getRemoteJIDs()) {
-    		    			if (match(jid.getBareJID(),eventElement)) {
-    		    				callsMap.put(event.getCallId(),session);
-    		    			}
-    	    			}
-    	    		}
-    	        	destinationSession = callsMap.get(event.getCallId());
-    			} else {
-    				// internal dial
-        			destinationSession = null;
-    			}
-    		}
-    	}            	
+    	XmppSession destinationSession = findSession(event, eventElement);            	
     	
     	if (destinationSession != null) {
     		//log.debug("Found a session matching the call with id %s. Sending event.", event.getCallId());
@@ -191,6 +171,85 @@ public class RayoServlet extends XmppServlet {
         rayoStatistics.callEventProcessed();
     }
 
+	private XmppSession findSession(CallEvent event, Element eventElement) {
+		
+		XmppSession destinationSession = callsMap.get(event.getCallId());
+    	if (event instanceof OfferEvent) {
+    		String iqFrom = eventElement.attributeValue("from");
+    		XmppSession fromSession = getSessionFromString(iqFrom);
+    		if (fromSession != null) {
+    			// There is already a session matching that from. This is handled as <dial/>
+        		// This is the only way to currently handle <dial/> as we can't really tell 
+        		// from an OfferEvent whether it is coming from a <dial/> or it is external
+    			callsMap.put(event.getCallId(), fromSession);
+    		} else {
+    			// There is no session matching the 'from'. This is the regular case where 
+    			// we receive a call from a sip phone client
+        		String iqTo = eventElement.attributeValue("to");
+        		XmppSession toSession = getSessionFromString(iqTo);
+        		if (toSession != null) {
+        			callsMap.put(event.getCallId(), toSession);
+        		}
+    		}
+    		String iqTo = eventElement.attributeValue("to");
+    		XmppSession toSession = getSessionFromString(iqTo);
+    		if (toSession != null) {
+        		destinationSession = toSession;
+    		}
+    		
+    		/*
+    		CallActor<?> actor = callRegistry.get(event.getCallId());
+    		if (actor != null) {
+    			URI initiator = actor.getCall().getAttribute(DialCommand.DIAL_INITIATOR);
+    			if (initiator != null) {
+    				// First, map the initiator dial 
+    	    		for (XmppSession session : clientSessions.values()) {
+    	    			for (JID jid: session.getRemoteJIDs()) {
+    		    			if (match(jid.getBareJID(),initiator.toString())) {
+    		    				callsMap.put(event.getCallId(),session);
+    		    			}
+    	    			}
+    	    		}
+    	    		
+    	    		// Next, try to find an existing session as with a regular offer
+    	    		// Just to send the OfferEvent to
+    	    		destinationSession = null;
+    	    		for (XmppSession session : clientSessions.values()) {
+    	    			for (JID jid: session.getRemoteJIDs()) {
+    		    			if (match(jid.getBareJID(),eventElement)) {
+    		    				destinationSession = session;
+    		    			}
+    	    			}
+    	    		}
+    			} else {
+    				// Regular offer event. e.g. from Soft phone.
+    	    		for (XmppSession session : clientSessions.values()) {
+    	    			for (JID jid: session.getRemoteJIDs()) {
+    		    			if (match(jid.getBareJID(),eventElement)) {
+    		    				callsMap.put(event.getCallId(),session);
+    		    				destinationSession = session;
+    		    			}
+    	    			}
+    	    		}
+    			}
+    		}
+    		*/
+    	}
+		return destinationSession;
+	}
+
+	private XmppSession getSessionFromString(String value) {
+		
+   		for (XmppSession session : clientSessions.values()) {
+			for (JID jid: session.getRemoteJIDs()) {
+    			if (match(jid.getBareJID(),value)) {
+    				return session;
+    			}
+			}
+		}
+   		return null;
+	}
+	
 	private void sendToSession(CallEvent event, Element eventElement,
 			XmppSession session) {
 		JID jid = session.getRemoteJIDs().iterator().next();
@@ -223,14 +282,26 @@ public class RayoServlet extends XmppServlet {
     	String to = element.attributeValue("to");
     	return match(bareJID, to);
 	}
+    
+    private boolean match(String jid, Element element) {
+
+    	String to = element.attributeValue("to");
+    	return match(jid, to);
+	}
 
     private boolean match(JID bareJID, JID element) {
 
     	return match(bareJID, element.getBareJID().toString());
 	}
-    
     private boolean match(JID bareJID, String to ) {
+    
+    	return match(bareJID.toString(), to);
+    }
+    
+    private boolean match(String bareJID, String to ) {
 
+    	bareJID = bareJID.replaceAll("127.0.0.1", "localhost");
+    	to = to.replaceAll("127.0.0.1", "localhost");
     	if (to.startsWith("sip:")) {
     		to = to.substring(4,to.length());
     	}
