@@ -3,6 +3,7 @@ package com.tropo.server;
 import static com.voxeo.utils.Objects.assertion;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -153,19 +154,23 @@ public class RayoServlet extends XmppServlet {
 
     	XmppSession destinationSession = callsMap.get(event.getCallId());
     	if (event instanceof OfferEvent) {
-    		if (!findSessionFromOfferFromAttribute((OfferEvent)event)) {
-	    		for (XmppSession session : clientSessions.values()) {
-	    			for (JID jid: session.getRemoteJIDs()) {
-		    			if (match(jid.getBareJID(),eventElement)) {
-		    				callsMap.put(event.getCallId(),session);
-		    			}
-	    			}
-	    		}
-    		} else {
-    			// internal dials (non soft phones) are special. All events need to go to the dialing session
-    			// (and they will as we already have mapped that session in callsMap) but on the other hand
-    			// the offer event needs to be broadcasted
-    			destinationSession = null;
+    		CallActor<?> actor = callRegistry.get(event.getCallId());
+    		if (actor != null) {
+    			URI initiator = actor.getCall().getAttribute(DialCommand.DIAL_INITIATOR);
+    			if (initiator != null) {
+    				// Regular offer event. e.g. from Soft phone.
+    	    		for (XmppSession session : clientSessions.values()) {
+    	    			for (JID jid: session.getRemoteJIDs()) {
+    		    			if (match(jid.getBareJID(),eventElement)) {
+    		    				callsMap.put(event.getCallId(),session);
+    		    			}
+    	    			}
+    	    		}
+    	        	destinationSession = callsMap.get(event.getCallId());
+    			} else {
+    				// internal dial
+        			destinationSession = null;
+    			}
     		}
     	}            	
     	
@@ -185,24 +190,6 @@ public class RayoServlet extends XmppServlet {
         }
         rayoStatistics.callEventProcessed();
     }
-
-	private boolean findSessionFromOfferFromAttribute(OfferEvent event) {
-
-		for (XmppSession session : clientSessions.values()) {
-			for (JID jid: session.getRemoteJIDs()) {
-				String from = event.getFrom().toString();
-				boolean matches = match(jid.getBareJID(), from);
-				if (!matches && from.contains("127.0.0.1")) {
-					matches = match(jid.getBareJID(), from.replaceAll("127.0.0.1", "localhost"));
-				}
-    			if (matches) {
-    				callsMap.put(event.getCallId(),session);
-    				return true;
-    			}
-			}
-		}
-		return false;
-	}
 
 	private void sendToSession(CallEvent event, Element eventElement,
 			XmppSession session) {
@@ -320,7 +307,9 @@ public class RayoServlet extends XmppServlet {
 
                     		sendIqError(request, XmppStanzaError.SERVICE_UNAVAILABLE_CONDITION, XmppStanzaError.Type_WAIT);
                     		return;
-                    	}                    	
+                    	}        
+                    	((DialCommand)command).setInitiator(new URI(request.getFrom().toString()));
+                    	
                         callManager.publish(new Request(command, new ResponseHandler() {
                             public void handle(Response response) throws Exception {
                                 if (response.isSuccess()) {

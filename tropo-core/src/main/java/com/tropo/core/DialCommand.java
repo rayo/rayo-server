@@ -13,6 +13,8 @@ import com.tropo.core.validation.Messages;
 
 public class DialCommand implements ServerCommand {
 
+	public static final String DIAL_INITIATOR = "DIAL_INITIATOR";
+	
     @NotNull(message=Messages.MISSING_TO)
     private URI to;
     
@@ -23,6 +25,9 @@ public class DialCommand implements ServerCommand {
 
     @Valid
     private JoinCommand join;
+    
+    // This is the URI of the party that has actually sent the IQ. It's meant to be used internally
+    private URI initiator;
     
     public URI getTo() {
         return to;
@@ -54,6 +59,14 @@ public class DialCommand implements ServerCommand {
 
 	public void setJoin(JoinCommand join) {
 		this.join = join;
+	}
+	
+	public URI getInitiator() {
+		return initiator;
+	}
+
+	public void setInitiator(URI initiator) {
+		this.initiator = initiator;
 	}
 
 	@Override
