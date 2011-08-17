@@ -3,7 +3,6 @@ package com.tropo.server;
 import static com.voxeo.utils.Objects.assertion;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -173,69 +172,17 @@ public class RayoServlet extends XmppServlet {
 
 	private XmppSession findSession(CallEvent event, Element eventElement) {
 		
-		XmppSession destinationSession = callsMap.get(event.getCallId());
+		
     	if (event instanceof OfferEvent) {
-    		String iqFrom = eventElement.attributeValue("from");
-    		XmppSession fromSession = getSessionFromString(iqFrom);
-    		if (fromSession != null) {
-    			// There is already a session matching that from. This is handled as <dial/>
-        		// This is the only way to currently handle <dial/> as we can't really tell 
-        		// from an OfferEvent whether it is coming from a <dial/> or it is external
-    			callsMap.put(event.getCallId(), fromSession);
-    		} else {
-    			// There is no session matching the 'from'. This is the regular case where 
-    			// we receive a call from a sip phone client
-        		String iqTo = eventElement.attributeValue("to");
-        		XmppSession toSession = getSessionFromString(iqTo);
-        		if (toSession != null) {
-        			callsMap.put(event.getCallId(), toSession);
-        		}
-    		}
+			// There is no session matching the 'from'. This is the regular case where 
+			// we receive a call from a sip phone client
     		String iqTo = eventElement.attributeValue("to");
     		XmppSession toSession = getSessionFromString(iqTo);
     		if (toSession != null) {
-        		destinationSession = toSession;
+    			callsMap.put(event.getCallId(), toSession);
     		}
-    		
-    		/*
-    		CallActor<?> actor = callRegistry.get(event.getCallId());
-    		if (actor != null) {
-    			URI initiator = actor.getCall().getAttribute(DialCommand.DIAL_INITIATOR);
-    			if (initiator != null) {
-    				// First, map the initiator dial 
-    	    		for (XmppSession session : clientSessions.values()) {
-    	    			for (JID jid: session.getRemoteJIDs()) {
-    		    			if (match(jid.getBareJID(),initiator.toString())) {
-    		    				callsMap.put(event.getCallId(),session);
-    		    			}
-    	    			}
-    	    		}
-    	    		
-    	    		// Next, try to find an existing session as with a regular offer
-    	    		// Just to send the OfferEvent to
-    	    		destinationSession = null;
-    	    		for (XmppSession session : clientSessions.values()) {
-    	    			for (JID jid: session.getRemoteJIDs()) {
-    		    			if (match(jid.getBareJID(),eventElement)) {
-    		    				destinationSession = session;
-    		    			}
-    	    			}
-    	    		}
-    			} else {
-    				// Regular offer event. e.g. from Soft phone.
-    	    		for (XmppSession session : clientSessions.values()) {
-    	    			for (JID jid: session.getRemoteJIDs()) {
-    		    			if (match(jid.getBareJID(),eventElement)) {
-    		    				callsMap.put(event.getCallId(),session);
-    		    				destinationSession = session;
-    		    			}
-    	    			}
-    	    		}
-    			}
-    		}
-    		*/
     	}
-		return destinationSession;
+    	return callsMap.get(event.getCallId());
 	}
 
 	private XmppSession getSessionFromString(String value) {
@@ -379,19 +326,15 @@ public class RayoServlet extends XmppServlet {
                     		sendIqError(request, XmppStanzaError.SERVICE_UNAVAILABLE_CONDITION, XmppStanzaError.Type_WAIT);
                     		return;
                     	}        
-                    	((DialCommand)command).setInitiator(new URI(request.getFrom().toString()));
-                    	
+                    
                         callManager.publish(new Request(command, new ResponseHandler() {
                             public void handle(Response response) throws Exception {
                                 if (response.isSuccess()) {
                                     CallRef callRef = (CallRef) response.getValue();
-                            		for (XmppSession session : clientSessions.values()) {
-                            			for (JID jid: session.getRemoteJIDs()) {
-                        	    			if (match(jid.getBareJID(),request.getFrom())) {
-                        	    				callsMap.put(callRef.getCallId(),session);
-                        	    			}
-                            			}
-                            		}
+                                    XmppSession session = getSessionFromString(request.getFrom().getBareJID().toString());
+                                    if (session != null) {
+                                    	callsMap.put(callRef.getCallId(), session);
+                                    }
                             		
                                     result.addElement("ref","urn:xmpp:rayo:1").addAttribute("id", callRef.getCallId());
                                     sendIqResult(request, result);

@@ -35,7 +35,6 @@ public class CallManager extends ReflectiveActor {
         }
         
         final Call mohoCall = toEndpoint.createCall(fromEndpoint, command.getHeaders());
-        mohoCall.setAttribute(DialCommand.DIAL_INITIATOR, command.getInitiator());
         
         if (command.getJoin() != null) {        	
 	        if (command.getJoin().getMedia() != null) {
