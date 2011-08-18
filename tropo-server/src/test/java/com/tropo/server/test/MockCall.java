@@ -556,4 +556,9 @@ public class MockCall implements IncomingCall {
     public boolean isProxied() {
     	return false;
     }
+    
+    @Override
+    public void proxyTo(boolean recordRoute, boolean parallel,
+    		Map<String, String> headers, Endpoint... destinations) {
+    }
 }
