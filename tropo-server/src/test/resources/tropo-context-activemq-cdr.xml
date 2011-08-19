@@ -341,18 +341,6 @@
   			</list>
   		</property>
   	</bean>
-  	
-  	<bean id="rayo" class="com.tropo.server.RayoServlet" init-method="start">
-		<!-- These dependencies come from the parent: tropo-context.xml -->
-		<property name="provider" ref="xmlProviderManager" />
-		<property name="callManager" ref="callManager" />
-		<property name="callRegistry" ref="callRegistry" />
-		<property name="mixerRegistry" ref="mixerRegistry" />
-		<property name="exceptionMapper" ref="exceptionMapper" />
-		<property name="rayoStatistics" ref="rayoStatistics" />
-		<property name="adminService" ref="adminService" />
-		<property name="cdrManager" ref="cdrManager" />
-	</bean>
 		
 	<bean id="exceptionMapper" class="com.tropo.server.exception.ExceptionMapper"/> 
 </beans>

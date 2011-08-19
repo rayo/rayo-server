@@ -16,6 +16,7 @@ class DefaultCallRegistryTest {
 	public void init() {
 	
 		callRegistry = new DefaultCallRegistry()	
+		callRegistry.jidRegistry = new JIDRegistry()
 	}
 	
 	@Test

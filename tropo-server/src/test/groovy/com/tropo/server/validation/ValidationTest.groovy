@@ -21,6 +21,7 @@ import com.tropo.core.xml.providers.RecordProvider;
 import com.tropo.core.xml.providers.SayProvider
 import com.tropo.core.xml.providers.TransferProvider
 import com.tropo.server.exception.ExceptionMapper
+import com.voxeo.servlet.xmpp.StanzaError;
 
 class ValidationTest {
 
@@ -58,8 +59,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(say)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString().toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString().toString()
 		assertEquals errorMapping.text, Messages.MISSING_SSML
 	}
 		
@@ -81,8 +82,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(ask)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, Messages.MISSING_CHOICES
 	}
 	
@@ -93,8 +94,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(ask)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, Messages.MISSING_CHOICES
 	}
 
@@ -105,8 +106,8 @@ class ValidationTest {
         
         def errorMapping = assertValidationException(ask)
         assertNotNull errorMapping
-        assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-        assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+        assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+        assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
         assertEquals errorMapping.text, Messages.MISSING_CHOICES_CONTENT_OR_URL
     }
 
@@ -117,8 +118,8 @@ class ValidationTest {
         
         def errorMapping = assertValidationException(ask)
         assertNotNull errorMapping
-        assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-        assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+        assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+        assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
         assertEquals errorMapping.text, Messages.MISSING_CHOICES_CONTENT_TYPE
     }
 
@@ -129,8 +130,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(ask)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, Messages.INVALID_URI
 	}
 
@@ -141,8 +142,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(ask)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, Messages.INVALID_INPUT_MODE
 	}
 	
@@ -153,8 +154,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(ask)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, Messages.INVALID_TIMEOUT
 	}
 	
@@ -165,8 +166,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(ask)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, Messages.INVALID_CONFIDENCE
 	}
 	
@@ -177,8 +178,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(ask)
 		assertNotNull errorMapping
-		assertEquals XmppStanzaError.Type_MODIFY, errorMapping.type
-		assertEquals XmppStanzaError.BAD_REQUEST_CONDITION, errorMapping.condition
+		assertEquals StanzaError.Type.MODIFY.toString(), errorMapping.type
+		assertEquals StanzaError.Condition.BAD_REQUEST.toString(), errorMapping.condition
 		assertEquals Messages.INVALID_CONFIDENCE_RANGE, errorMapping.text
 	}
 	
@@ -189,8 +190,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(ask)
 		assertNotNull errorMapping
-        assertEquals XmppStanzaError.Type_MODIFY, errorMapping.type
-        assertEquals XmppStanzaError.BAD_REQUEST_CONDITION, errorMapping.condition
+        assertEquals StanzaError.Type.MODIFY.toString(), errorMapping.type
+        assertEquals StanzaError.Condition.BAD_REQUEST.toString(), errorMapping.condition
         assertEquals Messages.INVALID_CONFIDENCE_RANGE, errorMapping.text
 	}
 	
@@ -201,8 +202,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(ask)
 		assertNotNull errorMapping
-		assertEquals XmppStanzaError.Type_MODIFY, errorMapping.type
-		assertEquals XmppStanzaError.BAD_REQUEST_CONDITION, errorMapping.condition
+		assertEquals StanzaError.Type.MODIFY.toString(), errorMapping.type
+		assertEquals StanzaError.Condition.BAD_REQUEST.toString(), errorMapping.condition
 		assertEquals Messages.INVALID_TERMINATOR, errorMapping.text
 	}
 	
@@ -223,8 +224,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(transfer)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, Messages.MISSING_TO
 	}
 	
@@ -235,8 +236,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(transfer)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, Messages.MISSING_TO
 	}
 	
@@ -247,8 +248,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(transfer)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, Messages.MISSING_TO
 	}
 	
@@ -266,8 +267,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(transfer)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, Messages.INVALID_URI
 	}
 	
@@ -278,8 +279,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(transfer)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, Messages.INVALID_URI
 	}
 	
@@ -290,8 +291,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(transfer)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, String.format(Messages.INVALID_BOOLEAN,"answer-on-media")
 	}
 	
@@ -302,8 +303,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(transfer)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, Messages.INVALID_TIMEOUT
 	}
 	
@@ -314,8 +315,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(transfer)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, Messages.INVALID_TERMINATOR
 	}
 	
@@ -326,8 +327,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(transfer)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, Messages.INVALID_MEDIA
 	}
 	
@@ -348,8 +349,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(conference)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, Messages.MISSING_ROOM_NAME
 	}
 	
@@ -360,8 +361,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(conference)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, String.format(Messages.INVALID_BOOLEAN,"beep")
 	}
 	
@@ -372,8 +373,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(conference)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, String.format(Messages.INVALID_BOOLEAN,"mute")
 	}
 	
@@ -384,8 +385,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(conference)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, String.format(Messages.INVALID_BOOLEAN,"tone-passthrough")
 	}
 	
@@ -396,8 +397,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(conference)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, Messages.INVALID_TERMINATOR
 	}
 	
@@ -418,8 +419,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(conference)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, Messages.MISSING_DESTINATION
 	}
 	
@@ -430,8 +431,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(conference)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, Messages.INVALID_URI
 	}
 	
@@ -445,8 +446,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(dial)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, Messages.MISSING_TO
 	}
 	
@@ -471,8 +472,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(dial)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, Messages.INVALID_URI
 	}
 	
@@ -483,8 +484,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(dial)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, Messages.INVALID_URI
 	}
 	
@@ -496,8 +497,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(dial)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, String.format(Messages.INVALID_ENUM, 'direction')
 	}
 	
@@ -509,8 +510,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(dial)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, String.format(Messages.INVALID_ENUM, 'media')
 	}
 	
@@ -521,8 +522,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(dial)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, Messages.MISSING_JOIN_ID
 	}
 	
@@ -533,8 +534,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(joined)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, Messages.MISSING_JOIN_ID
 	}
 	
@@ -545,8 +546,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(unjoined)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, Messages.MISSING_JOIN_ID
 	}
 
@@ -560,8 +561,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(join)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, String.format(Messages.INVALID_ENUM, 'direction')
 	}
 	
@@ -573,8 +574,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(join)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, String.format(Messages.INVALID_ENUM, 'media')
 	}
 	
@@ -585,8 +586,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(join)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, Messages.MISSING_JOIN_ID
 	}
 	
@@ -607,8 +608,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(record)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, Messages.INVALID_URI
 	}
 	
@@ -619,8 +620,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(record)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, Messages.INVALID_FILE_FORMAT
 	}
 		
@@ -631,8 +632,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(record)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, String.format(Messages.INVALID_BOOLEAN, 'start-beep')
 	}
 	
@@ -643,8 +644,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(record)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, String.format(Messages.INVALID_BOOLEAN, 'stop-beep')
 	}
 	
@@ -655,8 +656,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(record)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, String.format(Messages.INVALID_BOOLEAN, 'start-paused')
 	}
 	
@@ -667,8 +668,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(record)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, String.format(Messages.INVALID_DURATION, 'initial-timeout')
 	}
 	
@@ -679,8 +680,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(record)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, String.format(Messages.INVALID_DURATION, 'final-timeout')
 	}
 	
@@ -691,8 +692,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(record)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, String.format(Messages.INVALID_DURATION, 'max-duration')
 	}
 	
@@ -706,8 +707,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(say)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, Messages.UNKNOWN_NAMESPACE_ELEMENT
 	}
 	
@@ -721,7 +722,7 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(output)
 		assertNotNull errorMapping
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, Messages.INVALID_BARGEIN_TYPE
 	}
 	
@@ -732,7 +733,7 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(output)
 		assertNotNull errorMapping
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, String.format(Messages.INVALID_DURATION, 'start-offset')
 	}
 	
@@ -743,7 +744,7 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(output)
 		assertNotNull errorMapping
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, String.format(Messages.INVALID_DURATION, 'repeat-interval')
 	}
 	
@@ -754,7 +755,7 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(output)
 		assertNotNull errorMapping
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, String.format(Messages.INVALID_DURATION, 'max-time')
 	}
 	
@@ -765,7 +766,7 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(output)
 		assertNotNull errorMapping
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, String.format(Messages.INVALID_BOOLEAN, 'start-paused')
 	}
 	
@@ -776,7 +777,7 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(output)
 		assertNotNull errorMapping
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, String.format(Messages.INVALID_INTEGER, 'repeat-times')
 	}
 	
@@ -787,8 +788,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(output)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, Messages.MISSING_SSML
 	}
 	
@@ -799,8 +800,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(output)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, String.format(Messages.INVALID_ENUM, 'direction')
 	}
 	
@@ -811,8 +812,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(output)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, String.format(Messages.INVALID_INTEGER, 'amount')
 	}
 	
@@ -823,8 +824,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(output)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, Messages.MISSING_AMOUNT
 	}
 	
@@ -835,8 +836,8 @@ class ValidationTest {
 		
 		def errorMapping = assertValidationException(output)
 		assertNotNull errorMapping
-		assertEquals errorMapping.type, XmppStanzaError.Type_MODIFY
-		assertEquals errorMapping.condition, XmppStanzaError.BAD_REQUEST_CONDITION
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, StanzaError.Condition.BAD_REQUEST.toString()
 		assertEquals errorMapping.text, Messages.MISSING_DIRECTION
 	}
 	

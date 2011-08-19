@@ -7,6 +7,9 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
+
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -46,6 +49,9 @@ import com.voxeo.moho.media.Output
 import com.voxeo.moho.media.Recording
 import com.voxeo.moho.media.output.OutputCommand
 import com.voxeo.moho.media.record.RecordCommand
+import com.voxeo.servlet.xmpp.JID;
+import com.voxeo.servlet.xmpp.XmppFactory;
+import com.voxeo.servlet.xmpp.XmppServlet;
 
 
 
@@ -61,7 +67,7 @@ public class IntegrationTest {
 
 	@Autowired
 	def storageServices
-
+	
     private OfferEvent offer
     private Call mohoCall
     private CallActor callActor
@@ -69,7 +75,7 @@ public class IntegrationTest {
 
     @Before
     public void setup() {
-        
+
         callManager.start()
         
         messageQueue.clear();
@@ -560,7 +566,7 @@ public class IntegrationTest {
     }
     
     def makeMohoCall = {
-        MockCall mohoCall = new MockCall()
+        MockCall mohoCall = new MockCall(from:new URI('sip:usera@localhost'), to:new URI('sip:userb@localhost'))
         
         mohoCall.headers = [
             "foo":["bar"],
