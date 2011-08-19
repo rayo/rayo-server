@@ -9,6 +9,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.voxeo.logging.Loggerf;
 import com.voxeo.servlet.xmpp.JID;
 
 /**
@@ -24,6 +25,8 @@ import com.voxeo.servlet.xmpp.JID;
  */
 public class JIDRegistry {
 
+	Loggerf log = Loggerf.getLogger(JIDRegistry.class);
+	
 	// 5 minutes timeout for cleaning up calls that have already finished
 	long purgeTimeout = 5 * 60 * 1000;
 
@@ -41,12 +44,14 @@ public class JIDRegistry {
 			@Override
 			public void run() {
 				
+				log.debug("Starting call purging task");
 				List<JIDEntry> list = new ArrayList<JIDEntry>();
 				list.addAll(toPurge);
 				Iterator<JIDEntry> it = list.iterator();
 				while (it.hasNext()) {
 					JIDEntry entry = it.next();
 					if (System.currentTimeMillis() - entry.time > purgeTimeout) {
+						log.debug("Purging call with mapped jid %s from the JID registry", entry.jid);
 						jids.remove(entry.jid);
 						toPurge.remove(it);
 					}
@@ -60,6 +65,9 @@ public class JIDRegistry {
 	
 	public JID getJID(String callId) {
 		
+		if (callId == null) {
+			return null;
+		}
 		return jids.get(callId).jid;
 	}
 	
@@ -70,6 +78,7 @@ public class JIDRegistry {
 	
 	public void remove(String callId) {
 		
+		log.debug("Removing call id %s from the JID registry", callId);
 		JIDEntry jid = jids.get(callId);
 		if (jid != null) {
 			jid.time = System.currentTimeMillis();
