@@ -21,7 +21,6 @@ import com.tropo.core.xml.providers.RecordProvider;
 import com.tropo.core.xml.providers.SayProvider
 import com.tropo.core.xml.providers.TransferProvider
 import com.tropo.server.exception.ExceptionMapper
-import com.voxeo.servlet.xmpp.XmppStanzaError
 
 class ValidationTest {
 

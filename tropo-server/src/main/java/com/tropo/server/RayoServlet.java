@@ -3,17 +3,23 @@ package com.tropo.server;
 import static com.voxeo.utils.Objects.assertion;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 
-import org.dom4j.DocumentHelper;
+import org.apache.xerces.dom.CoreDocumentImpl;
+import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.Namespace;
 import org.dom4j.QName;
+import org.dom4j.dom.DOMDocument;
+import org.dom4j.dom.DOMDocumentFactory;
+import org.dom4j.dom.DOMElement;
+import org.dom4j.io.DOMReader;
+import org.dom4j.io.DOMWriter;
+import org.w3c.dom.ls.DOMImplementationLS;
+import org.w3c.dom.ls.LSSerializer;
 
 import com.tropo.core.CallCommand;
 import com.tropo.core.CallEvent;
@@ -32,17 +38,16 @@ import com.tropo.server.exception.ErrorMapping;
 import com.tropo.server.exception.ExceptionMapper;
 import com.voxeo.exceptions.NotFoundException;
 import com.voxeo.logging.Loggerf;
+import com.voxeo.moho.Call;
+import com.voxeo.servlet.xmpp.IQRequest;
+import com.voxeo.servlet.xmpp.IQResponse;
+import com.voxeo.servlet.xmpp.InstantMessage;
 import com.voxeo.servlet.xmpp.JID;
+import com.voxeo.servlet.xmpp.PresenceMessage;
+import com.voxeo.servlet.xmpp.StanzaError;
 import com.voxeo.servlet.xmpp.XmppFactory;
 import com.voxeo.servlet.xmpp.XmppServlet;
-import com.voxeo.servlet.xmpp.XmppServletFeaturesRequest;
-import com.voxeo.servlet.xmpp.XmppServletIQRequest;
-import com.voxeo.servlet.xmpp.XmppServletIQResponse;
-import com.voxeo.servlet.xmpp.XmppServletStanzaRequest;
-import com.voxeo.servlet.xmpp.XmppServletStreamRequest;
 import com.voxeo.servlet.xmpp.XmppSession;
-import com.voxeo.servlet.xmpp.XmppSession.SessionType;
-import com.voxeo.servlet.xmpp.XmppStanzaError;
 
 @SuppressWarnings("serial")
 public class RayoServlet extends XmppServlet {
@@ -53,6 +58,8 @@ public class RayoServlet extends XmppServlet {
     private static final QName BIND_QNAME = new QName("bind", new Namespace("", "urn:ietf:params:xml:ns:xmpp-bind"));
     private static final QName SESSION_QNAME = new QName("session", new Namespace("", "urn:ietf:params:xml:ns:xmpp-session"));
 
+    private JIDRegistry jidRegistry;
+    
     // Spring injected
     private XmlProvider provider;
     private CallManager callManager;
@@ -64,9 +71,7 @@ public class RayoServlet extends XmppServlet {
     private CdrManager cdrManager;
 
     private XmppFactory xmppFactory;
-    private Map<String, XmppSession> clientSessions = new ConcurrentHashMap<String, XmppSession>();
-    private Map<String, XmppSession> callsMap = new ConcurrentHashMap<String, XmppSession>();
-
+	
     // Setup
     // ================================================================================
 
@@ -108,35 +113,6 @@ public class RayoServlet extends XmppServlet {
 
     }
 
-    // Connection Management
-    // ================================================================================
-
-    @Override
-    protected void doStreamEnd(XmppServletStreamRequest request) throws ServletException, IOException {
-        if (request.getSession().getSessionType() == XmppSession.SessionType.CLIENT) {
-            JID jid = request.getSession().getRemoteJIDs().iterator().next();
-            clientSessions.remove(jid.getNode());
-        }
-    }
-
-    @Override
-    protected void doStreamStart(XmppServletStreamRequest request) throws ServletException, IOException {
-        if (request.getSession().getSessionType() == SessionType.CLIENT && request.isInitial()) {
-
-            request.createRespXMPPServletStreamRequest().send();
-            XmppServletFeaturesRequest featuresReq = request.createFeaturesRequest();
-            featuresReq.addFeature("urn:ietf:params:xml:ns:xmpp-session", "session");
-            featuresReq.send();
-
-            // Store the session
-            JID jid = request.getSession().getRemoteJIDs().iterator().next();
-            clientSessions.put(jid.getNode(), request.getSession());
-
-            // Store the remote address
-            request.getSession().setAttribute("remoteAddr", request.getRemoteAddr());
-        }
-    }
-
     // Events: Server -> Client
     // ================================================================================
 
@@ -150,131 +126,51 @@ public class RayoServlet extends XmppServlet {
     	if (event instanceof EndEvent) {
     		cdrManager.store(event.getCallId());
     	}
-
-    	XmppSession destinationSession = findSession(event, eventElement);            	
     	
-    	if (destinationSession != null) {
-    		//log.debug("Found a session matching the call with id %s. Sending event.", event.getCallId());
-    		sendToSession(event,eventElement,destinationSession);
-    	} else {
-    		log.debug("Could not find a session matching the call with id %s. Sending event to all client sessions.", event.getCallId());
-    		for (XmppSession clientSession : clientSessions.values()) {
-    	        sendToSession(event, eventElement.createCopy(), clientSession);    			
-    		}
+    	if (event instanceof OfferEvent) {
+    		JID callTo = xmppFactory.createJID(getBareJID(((OfferEvent)event).getTo().toString()));
+    		jidRegistry.put(event.getCallId(), callTo);
     	}
+    	
+    	JID jid = (JID)jidRegistry.getJID(event.getCallId());
+    	JID from = xmppFactory.createJID(event.getCallId() + "@" + jid.getDomain());
+		if (event instanceof VerbEvent) {
+			from.setResource(((VerbEvent) event).getVerbId());
+		}
+		try {
+			// Send presence
+			PresenceMessage presence = xmppFactory.createPresence(from, jid, null,
+					new DOMWriter().write(eventElement.getDocument()).getDocumentElement() // TODO: ouch
+				);
+			presence.send();
+    	
+		} catch (Exception e) {
+			// In the event of an error, continue dispatching to all remaining JIDs
+			log.error("Failed to dispatch event [jid=%s, event=%s]", jid, event, e);
+		}
 
-        if (event instanceof EndEvent) {
-        	log.debug("End event received. Removing session for call with id %s.", event.getCallId());
-        	callsMap.remove(event.getCallId());
-        }
         rayoStatistics.callEventProcessed();
     }
 
-	private XmppSession findSession(CallEvent event, Element eventElement) {
-		
-		
-    	if (event instanceof OfferEvent) {
-			// There is no session matching the 'from'. This is the regular case where 
-			// we receive a call from a sip phone client
-    		String iqTo = eventElement.attributeValue("to");
-    		XmppSession toSession = getSessionFromString(iqTo);
-    		if (toSession != null) {
-    			callsMap.put(event.getCallId(), toSession);
-    		}
+    private String getBareJID(String address) {
+
+    	address = address.replaceAll("sip:", "");
+    	int colon = address.indexOf(":"); 
+    	if (colon != -1) {
+    		address = address.substring(0, colon);
     	}
-    	return callsMap.get(event.getCallId());
+    	return address;
 	}
 
-	private XmppSession getSessionFromString(String value) {
-		
-   		for (XmppSession session : clientSessions.values()) {
-			for (JID jid: session.getRemoteJIDs()) {
-    			if (match(jid.getBareJID(),value)) {
-    				return session;
-    			}
-			}
-		}
-   		return null;
-	}
-	
-	private void sendToSession(CallEvent event, Element eventElement,
-			XmppSession session) {
-		JID jid = session.getRemoteJIDs().iterator().next();
-        
-        try {
-
-            Element eventStanza = DocumentHelper.createElement("presence");
-
-            // Resolve IQ.from
-            JID from = xmppFactory.createJID(event.getCallId() + "@" + jid.getDomain());
-            if (event instanceof VerbEvent) {
-                from.setResource(((VerbEvent) event).getVerbId());
-            }
-            eventStanza.addAttribute("from", from.toString());
-
-            eventStanza.add(eventElement);
-
-            // Send
-            session.createStanzaRequest(eventStanza, null, null, null, null, null).send();
-
-        }
-        catch (Exception e) {
-            // In the event of an error, continue dispatching to all remaining JIDs
-            log.error("Failed to dispatch event [jid=%s, event=%s]", jid, event, e);
-        }
-	}
-
-    private boolean match(JID bareJID, Element element) {
-
-    	String to = element.attributeValue("to");
-    	return match(bareJID, to);
-	}
-    
-    private boolean match(String jid, Element element) {
-
-    	String to = element.attributeValue("to");
-    	return match(jid, to);
-	}
-
-    private boolean match(JID bareJID, JID element) {
-
-    	return match(bareJID, element.getBareJID().toString());
-	}
-    private boolean match(JID bareJID, String to ) {
-    
-    	return match(bareJID.toString(), to);
-    }
-    
-    private boolean match(String bareJID, String to ) {
-
-    	bareJID = bareJID.replaceAll("127.0.0.1", "localhost");
-    	to = to.replaceAll("127.0.0.1", "localhost");
-    	if (to.startsWith("sip:")) {
-    		to = to.substring(4,to.length());
-    	}
-    	String jidTo = bareJID.toString();
-    	if (to.indexOf(":") == -1) {
-    		if (jidTo.indexOf(":") != -1) {
-    			to  = to+":5060";
-    		}
-    	} else {
-    		if (jidTo.indexOf(":") == -1) {
-    			jidTo  = jidTo+":5060";
-    		}    		
-    	}
-    	boolean matches = to.equals(jidTo);
-    	//log.debug("Matching bare jid: %s to Event's to URL: %s. Matches: %s", bareJID, to, matches);
+	@Override
+    protected void doMessage(InstantMessage message) throws ServletException, IOException {
     	
-    	return matches;
-	}
-
-	protected void doMessage(XmppServletStanzaRequest req) throws ServletException, IOException {
-
     	rayoStatistics.messageStanzaReceived();
     }
 
-    protected void doPresence(XmppServletStanzaRequest req) throws ServletException, IOException {
-
+    @Override
+    protected void doPresence(PresenceMessage presence) throws ServletException, IOException {
+    	
     	rayoStatistics.presenceStanzaReceived();
     }
 
@@ -282,48 +178,47 @@ public class RayoServlet extends XmppServlet {
     // ================================================================================
 
     @Override
-    protected void doIQRequest(final XmppServletIQRequest request) throws ServletException, IOException {
+    protected void doIQRequest(final IQRequest request) throws ServletException, IOException {
 
-        WIRE.debug("%s :: %s", request.getElement().asXML(), request.getSession().getId());
+		DOMElement requestElement = null;
+		try {
+			requestElement = toDOM(request.getElement());
+		}
+		catch (DocumentException ee) {
+			throw new IOException("Could not parse XML content", ee);
+		}
+        WIRE.debug("%s :: %s", requestElement.asXML(), request.getSession().getId());
     	rayoStatistics.iqReceived();
 
     	try {
-            if (request.getSession().getSessionType() == XmppSession.SessionType.CLIENT) {
+    		if (request.getSession().getType() == XmppSession.Type.INBOUNDCLIENT) {
 
-                // Extract Request
-                Element payload = (Element) request.getElement().elementIterator().next();
+    			// Extract Request
+            	DOMElement payload = (DOMElement) requestElement.elementIterator().next();
                 QName qname = payload.getQName();
 
-                // Create empty result element
-                final Element result = DocumentHelper.createElement("iq");
-                result.addAttribute("type", "result");
-
                 // Resource Binding
+                
                 if (qname.equals(BIND_QNAME)) {
                     String boundJid = request.getFrom().getNode() + "@" + request.getFrom().getDomain() + "/voxeo";
-                    result.addElement(BIND_QNAME).addElement("jid").setText(boundJid);
-                    sendIqResult(request, result);
-                    log.info("Bound client resource [jid=%s]", boundJid);
-
-                    // Session Binding
-                }
-                else if (qname.equals(SESSION_QNAME)) {
-                    result.addElement(SESSION_QNAME);
-                    sendIqResult(request, result);
-
-                    // Rayo Command
-                }
-                else if (isSupportedNamespace(qname)) {
-
+                    DOMElement bindElement = (DOMElement) DOMDocumentFactory.getInstance().createElement(BIND_QNAME);
+                    bindElement.addElement("jid").setText(boundJid);
+                    sendIqResult(request, bindElement);
+                    log.info("Bound client resource [jid=%s]", boundJid);    
+                } else if (qname.equals(SESSION_QNAME)) {
+                	// Session binding
+                	sendIqResult(request);                   
+                } else if (isSupportedNamespace(payload)) {
+                	
+                	// Rayo Command
                     Object command = provider.fromXML(payload);
                     rayoStatistics.commandReceived(command);
 
                     // Handle outbound 'dial' command
                     if (command instanceof DialCommand) {
                     	if (adminService.isQuiesceMode()) {
-                            log.debug("Quiesce Mode ON. Dropping incoming call: %s :: %s", request.getElement().asXML(), request.getSession().getId());
-
-                    		sendIqError(request, XmppStanzaError.SERVICE_UNAVAILABLE_CONDITION, XmppStanzaError.Type_WAIT);
+                            log.debug("Quiesce Mode ON. Dropping incoming call: %s :: %s", requestElement.asXML(), request.getSession().getId());
+                            sendIqError(request, StanzaError.Type.WAIT, StanzaError.Condition.SERVICE_UNAVAILABLE, "Quiesce Mode ON.");
                     		return;
                     	}        
                     
@@ -331,15 +226,15 @@ public class RayoServlet extends XmppServlet {
                             public void handle(Response response) throws Exception {
                                 if (response.isSuccess()) {
                                     CallRef callRef = (CallRef) response.getValue();
-                                    XmppSession session = getSessionFromString(request.getFrom().getBareJID().toString());
-                                    if (session != null) {
-                                    	callsMap.put(callRef.getCallId(), session);
-                                    }
-                            		
-                                    result.addElement("ref","urn:xmpp:rayo:1").addAttribute("id", callRef.getCallId());
-                                    sendIqResult(request, result);
-                                }
-                                else {
+                                    jidRegistry.put(callRef.getCallId(), request.getFrom().getBareJID());
+
+                                	CoreDocumentImpl document = new CoreDocumentImpl(false);
+                                	org.w3c.dom.Element refElement = document.createElementNS("urn:xmpp:rayo:1", "ref");
+                                	refElement.setAttribute("id", callRef.getCallId());
+
+                                    storeCdr(callRef.getCallId(), refElement);
+                                    sendIqResult(request, refElement);
+                                } else {
                                     sendIqError(request, (Exception) response.getValue());
                                 }
                             }
@@ -385,20 +280,22 @@ public class RayoServlet extends XmppServlet {
                                 sendIqError(request, (Exception)value);
                             }
                             else if (value instanceof VerbRef) {
-                                String verbId = ((VerbRef) value).getVerbId();
-                                result.addElement("ref","urn:xmpp:rayo:1").addAttribute("id", verbId);
-                                sendIqResult(request, result);
+                            	String verbId = ((VerbRef) value).getVerbId();
+                            	CoreDocumentImpl document = new CoreDocumentImpl(false);
+                            	org.w3c.dom.Element refElement = document.createElementNS("urn:xmpp:rayo:1", "ref");
+                            	refElement.setAttribute("id", verbId);
+                                storeCdr(callId, refElement);
+                                sendIqResult(request, refElement);
                             } else {
-                                sendIqResult(callId, request, result);
+                                storeCdr(callId, null);
+                                sendIqResult(request, null);
                             }
                         }
                     });
 
-                }
-
-                // We don't handle this type of request...
-                else {
-                    sendIqError(request, XmppStanzaError.FEATURE_NOT_IMPLEMENTED_CONDITION);
+                } else {
+                	 // We don't handle this type of request...
+                	sendIqError(request, StanzaError.Type.CANCEL, StanzaError.Condition.FEATURE_NOT_IMPLEMENTED, "Feature not supported");
                 }
             }
 
@@ -413,84 +310,77 @@ public class RayoServlet extends XmppServlet {
 
     }
 
-	private boolean isSupportedNamespace(QName qname) {
+	private boolean isSupportedNamespace(org.w3c.dom.Element element) {
 		
-		return qname.getNamespaceURI().startsWith("urn:xmpp:rayo") ||
-			   qname.getNamespaceURI().startsWith("urn:xmpp:tropo");
+		if (element == null) {
+			return false;
+		}
+		
+		return element.getNamespaceURI().startsWith("urn:xmpp:rayo") ||
+			   element.getNamespaceURI().startsWith("urn:xmpp:tropo");
 	}
 
     // Util
     // ================================================================================
 
-    /**
-     * We are currently not using the XmlProvider for this because it lacks the XMPP context 
-     * needed to construct a proper reply. We should consider factoring out am XMPP-aware 
-     * serialization provider for this purpose.
-     * 
-     * @param request
-     * @param e
-     * @throws IOException
-     */
-    private void sendIqError(XmppServletIQRequest request, Exception e) throws IOException {
+    private void sendIqError(IQRequest request, Exception e) throws IOException {
         ErrorMapping error = exceptionMapper.toXmppError(e);
-        XmppServletIQResponse response = request.createIQErrorResponse(error.getType(), error.getCondition(), error.getText(), null, null);
-        sendIqError(request, response);
+        sendIqError(request, error.getType(), error.getCondition(), error.getText());
     }
 
-    private void sendIqError(XmppServletIQRequest request, String error) throws IOException {
-        sendIqError(request, error, XmppStanzaError.Type_CANCEL, null);
+    private void sendIqError(IQRequest request, String type, String error, String text) throws IOException {
+        sendIqError(request, request.createError(StanzaError.Type.valueOf(type), StanzaError.Condition.valueOf(error), text));
     }
 
-    private void sendIqError(XmppServletIQRequest request, String error, String type) throws IOException {
-    	
-        sendIqError(request, error, type, null);
-    }
-    
-    private void sendIqError(XmppServletIQRequest request, String error, String type, Element contents) throws IOException {
-        XmppServletIQResponse response = request.createIQErrorResponse(type, error, null, null, null);
-        if (contents != null) {
-            response.getElement().add(contents);
-        }
-        sendIqError(request, response);
+    private void sendIqError(IQRequest request, StanzaError.Type type, StanzaError.Condition error, String text) throws IOException {
+         sendIqError(request, request.createError(type, error, text));
     }
 
-    private void sendIqError(XmppServletIQRequest request, XmppServletIQResponse response) throws IOException {
+    private void sendIqError(IQRequest request, IQResponse response) throws IOException {
     	
     	rayoStatistics.iqError();
     	generateErrorCdr(request,response);
         response.setFrom(request.getTo());
         response.send();
     }
-
-    private void generateErrorCdr(XmppServletIQRequest request, XmppServletIQResponse response) {
+    
+    private void generateErrorCdr(IQRequest request, IQResponse response) {
     	
-    	Element payload = (Element) request.getElement().elementIterator().next();
-        QName qname = payload.getQName();
-        if (isSupportedNamespace(qname)) {
+    	org.w3c.dom.Element payload = (org.w3c.dom.Element) request.getElement().getChildNodes().item(0);
+        if (isSupportedNamespace(payload)) {
         	final String callId = request.getTo().getNode();
-            if (callId != null) {
-	        	Element responsePayload = (Element) request.getElement().elementIterator().next();	        	
-	        	cdrManager.append(callId, responsePayload.asXML());
+            if (callId == null) {
+            	org.w3c.dom.Element responsePayload = (org.w3c.dom.Element) response.getElement().getChildNodes().item(0);      	
+	        	cdrManager.append(callId, asXML(responsePayload));
             }
         }
     }
     
-    private void sendIqResult(String callId, XmppServletIQRequest request, Element result) throws IOException {
-
-    	if (result.elementIterator().hasNext()) {
-    		Element resultPayload = (Element) result.elementIterator().next();
-    		cdrManager.append(callId, resultPayload.asXML());
+    private void storeCdr(String callId, org.w3c.dom.Element result) throws IOException {
+    	
+    	if (result != null && result.getChildNodes().getLength() > 0) {
+    		org.w3c.dom.Element resultPayload = (org.w3c.dom.Element) result.getChildNodes().item(0);
+    		cdrManager.append(callId, asXML(resultPayload));
     	} else {	
     		cdrManager.append(callId,"<todo>TODO: Empty IQ Result</todo>");
     	}
-    	sendIqResult(request, result);
     }
     
-    private void sendIqResult(XmppServletIQRequest request, Element result) throws IOException {
+    private void sendIqResult(IQRequest request) throws IOException {
+    	
+    	sendIqResult(request, null);
+    }
+    
+    private void sendIqResult(IQRequest request, org.w3c.dom.Element result) throws IOException {
     	
     	rayoStatistics.iqResult();
     	
-        XmppServletIQResponse response = request.createIQResultResponse(result);
+    	IQResponse response = null;
+    	if (result != null) {
+    		response = request.createResult(result);
+    	} else {
+    		response = request.createResult();
+    	}
         response.setFrom(request.getTo());
         response.send();
     }
@@ -499,6 +389,12 @@ public class RayoServlet extends XmppServlet {
         findActor(callId).publish(new EndCommand(callId, EndEvent.Reason.ERROR));
     }
 
+    @SuppressWarnings("unchecked")
+	private CallActor<Call> findCallActor(String callId) throws NotFoundException {
+
+    	return (CallActor<Call>)findActor(callId);
+    }
+    
     private AbstractActor<?> findActor(String callId) throws NotFoundException {
     	
         CallActor<?> callActor = callRegistry.get(callId);
@@ -516,6 +412,40 @@ public class RayoServlet extends XmppServlet {
     private String callId(JID jid) {
         return jid.getNode();
     }
+    
+	protected static String asXML (org.w3c.dom.Element element) {
+		
+		DOMImplementationLS impl = (DOMImplementationLS)element.getOwnerDocument().getImplementation();
+		LSSerializer serializer = impl.createLSSerializer();
+		return serializer.writeToString(element);
+	}
+	
+	public static DOMElement toDOM (org.dom4j.Element dom4jElement) throws DocumentException {
+		
+		DOMElement domElement = null;
+		if (dom4jElement instanceof DOMElement) {
+			domElement = (DOMElement) dom4jElement;
+		} else {
+			DOMDocument requestDocument = (DOMDocument)
+				new DOMWriter().write(dom4jElement.getDocument());
+			domElement = (DOMElement)requestDocument.getDocumentElement();
+		}
+		return domElement;
+	}
+
+	public static DOMElement toDOM (org.w3c.dom.Element w3cElement) throws DocumentException {
+		
+		DOMElement domElement = null;
+		if (w3cElement instanceof DOMElement) {
+			domElement = (DOMElement) w3cElement;
+		} else {
+			DOMDocument requestDocument = (DOMDocument)
+				new DOMReader(DOMDocumentFactory.getInstance())
+					.read(w3cElement.getOwnerDocument());
+			domElement = (DOMElement)requestDocument.getDocumentElement();
+		}
+		return domElement;
+	}
 
     // Properties
     // ================================================================================
@@ -568,4 +498,9 @@ public class RayoServlet extends XmppServlet {
 		
 		this.cdrManager = cdrManager;
 	}
+
+	public void setJidRegistry(JIDRegistry jidRegistry) {
+		this.jidRegistry = jidRegistry;
+	}
+
 }

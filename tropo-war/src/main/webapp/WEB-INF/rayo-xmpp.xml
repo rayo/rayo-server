@@ -20,9 +20,7 @@
 		<property name="exceptionMapper" ref="exceptionMapper" />
 		<property name="rayoStatistics" ref="rayoStatistics" />
 		<property name="adminService" ref="adminService" />
-		<property name="cdrManager" ref="cdrManager" />
-	</bean>
-		
-	<bean id="exceptionMapper" class="com.tropo.server.exception.ExceptionMapper"/>
-	
+		<property name="cdrManager" ref="cdrManager" />	
+		<property name="jidRegistry" ref="jidRegistry"/>	
+	</bean>	
 </beans>

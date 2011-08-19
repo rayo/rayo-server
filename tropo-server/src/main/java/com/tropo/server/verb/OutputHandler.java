@@ -22,7 +22,7 @@ import com.voxeo.moho.State;
 import com.voxeo.moho.media.output.AudibleResource;
 import com.voxeo.moho.media.output.OutputCommand;
 import com.voxeo.moho.media.output.OutputCommand.BehaviorIfBusy;
-import com.voxeo.servlet.xmpp.XmppStanzaError;
+import com.voxeo.servlet.xmpp.StanzaError;
 
 public class OutputHandler extends AbstractLocalVerbHandler<Output, Participant> {
 
@@ -70,11 +70,15 @@ public class OutputHandler extends AbstractLocalVerbHandler<Output, Participant>
     public boolean isStateValid(ConstraintValidatorContext context) {
 
         if (isOnConference(participant)) {
-            context.buildConstraintViolationWithTemplate("Call is joined to a conference.").addNode(XmppStanzaError.RESOURCE_CONSTRAINT_CONDITION).addConstraintViolation();
+            context.buildConstraintViolationWithTemplate("Call is joined to a conference.")
+            	.addNode(StanzaError.Condition.RESOURCE_CONSTRAINT.toString())
+            		.addConstraintViolation();
             return false;
         }
         if (isOnHold(participant)) {
-            context.buildConstraintViolationWithTemplate("Call is currently on hold.").addNode(XmppStanzaError.RESOURCE_CONSTRAINT_CONDITION).addConstraintViolation();
+            context.buildConstraintViolationWithTemplate("Call is currently on hold.")
+            	.addNode(StanzaError.Condition.RESOURCE_CONSTRAINT.toString())
+            		.addConstraintViolation();
             return false;
         }
         return true;

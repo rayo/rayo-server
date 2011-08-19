@@ -20,7 +20,7 @@ import com.voxeo.moho.media.input.Grammar;
 import com.voxeo.moho.media.input.InputCommand;
 import com.voxeo.moho.media.output.OutputCommand;
 import com.voxeo.moho.media.output.OutputCommand.BargeinType;
-import com.voxeo.servlet.xmpp.XmppStanzaError;
+import com.voxeo.servlet.xmpp.StanzaError;
 
 public class AskHandler extends AbstractLocalVerbHandler<Ask,Participant> {
 
@@ -75,14 +75,14 @@ public class AskHandler extends AbstractLocalVerbHandler<Ask,Participant> {
         if (isOnConference(participant)) {
         	context.buildConstraintViolationWithTemplate(
         			"Call is joined to a conference.")
-        			.addNode(XmppStanzaError.RESOURCE_CONSTRAINT_CONDITION)
+        			.addNode(StanzaError.Condition.RESOURCE_CONSTRAINT.toString())
         			.addConstraintViolation();
         	return false;
         }
         if (isOnHold(participant)) {
         	context.buildConstraintViolationWithTemplate(
 				"Call is currently on hold.")
-				.addNode(XmppStanzaError.RESOURCE_CONSTRAINT_CONDITION)
+				.addNode(StanzaError.Condition.RESOURCE_CONSTRAINT.toString())
 				.addConstraintViolation();
         	return false;        	
         }        

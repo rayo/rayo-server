@@ -21,8 +21,13 @@
 		<constructor-arg ref="executor" />
 	</bean>
 	
+	<!-- Global JIDs Registry -->
+	<bean id="jidRegistry" class="com.tropo.server.JIDRegistry" />
+	
 	<!-- Global Call Registry -->
-	<bean id="callRegistry" class="com.tropo.server.DefaultCallRegistry" />
+	<bean id="callRegistry" class="com.tropo.server.DefaultCallRegistry" >
+		<property name="jidRegistry" ref="jidRegistry"/>	
+	</bean>
 
 	<!-- Global Mixer Registry -->
 	<bean id="mixerRegistry" class="com.tropo.server.DefaultMixerRegistry" />
@@ -390,5 +395,8 @@
   			</list>
   		</property>
   		<property name="spiStorageStrategies" ref="spiCdrStorageStrategies"/>
-  	</bean> 
+  	</bean>
+  	
+  	<!-- Exception Mapper -->
+  	<bean id="exceptionMapper" class="com.tropo.server.exception.ExceptionMapper"/> 
 </beans>

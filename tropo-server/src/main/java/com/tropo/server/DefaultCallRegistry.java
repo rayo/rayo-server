@@ -9,6 +9,8 @@ public class DefaultCallRegistry implements CallRegistry {
 
     private Map<String, CallActor<?>> calls = new ConcurrentHashMap<String, CallActor<?>>();
 
+    private JIDRegistry jidRegistry;
+    
     @Override
     public void add(CallActor<?> actor) {
         calls.put(actor.getCall().getId(), actor);
@@ -17,6 +19,7 @@ public class DefaultCallRegistry implements CallRegistry {
     @Override
     public void remove(String id) {
         calls.remove(id);
+        jidRegistry.remove(id);
     }
 
     @Override
@@ -38,4 +41,8 @@ public class DefaultCallRegistry implements CallRegistry {
     public Collection<CallActor<?>> getActiveCalls() {
     	return new ArrayList<CallActor<?>>(calls.values());
     }
+    
+    public void setJidRegistry(JIDRegistry jidRegistry) {
+		this.jidRegistry = jidRegistry;
+	}
 }
