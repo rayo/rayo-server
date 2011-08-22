@@ -36,8 +36,20 @@ public class JIDRegistry {
 	private Map<String, JIDEntry> jids = new ConcurrentHashMap<String, JIDEntry>();	
 	
 	private List<JIDEntry> toPurge = new ArrayList<JIDEntry>();
+
+	public JIDRegistry(long purgingTaskInterval, long purgeTimeout) {
+		
+		setPurgeTimeout(purgeTimeout);
+		setPurgingTaskInterval(purgingTaskInterval);
+		init();
+	}
 	
 	public JIDRegistry() {
+
+		init();
+	}
+	
+	private void init() {
 		
 		TimerTask task = new TimerTask() {
 			
@@ -60,7 +72,7 @@ public class JIDRegistry {
 		};
 		
 		Timer timer = new Timer();
-		timer.scheduleAtFixedRate(task, new Date(System.currentTimeMillis() + purgingTaskInterval), purgingTaskInterval);
+		timer.scheduleAtFixedRate(task, new Date(System.currentTimeMillis() + purgingTaskInterval), purgingTaskInterval);		
 	}
 	
 	public JID getJID(String callId) {
