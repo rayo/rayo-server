@@ -66,8 +66,8 @@ public class JIDRegistry {
 					JIDEntry entry = it.next();
 					if (System.currentTimeMillis() - entry.time > purgeTimeout) {
 						log.debug("Purging call with mapped jid %s from the JID registry", entry.jid);
-						jids.remove(entry.jid);
-						toPurge.remove(it);
+						jids.remove(entry.key);
+						toPurge.remove(entry);
 					}
 				}
 			}
@@ -91,7 +91,7 @@ public class JIDRegistry {
 	
 	public void put(String callId, JID jid) {
 		
-		jids.put(callId, new JIDEntry(jid, -1L));
+		jids.put(callId, new JIDEntry(jid, -1L, callId));
 	}
 	
 	public void remove(String callId) {
@@ -126,11 +126,13 @@ public class JIDRegistry {
 }
 
 class JIDEntry {
+	String key;
 	JID jid;
 	long time;
 	
-	JIDEntry(JID jid, long time) {
+	JIDEntry(JID jid, long time, String key) {
 		
+		this.key = key;
 		this.jid = jid;
 		this.time = time;
 	}
