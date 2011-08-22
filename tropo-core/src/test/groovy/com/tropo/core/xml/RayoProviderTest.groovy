@@ -21,6 +21,7 @@ import org.junit.Test
 
 import com.tropo.core.AcceptCommand
 import com.tropo.core.AnswerCommand
+import com.tropo.core.AnsweredEvent;
 import com.tropo.core.CallRejectReason
 import com.tropo.core.DialCommand
 import com.tropo.core.DtmfEvent
@@ -31,6 +32,8 @@ import com.tropo.core.JoinedEvent
 import com.tropo.core.OfferEvent
 import com.tropo.core.RedirectCommand
 import com.tropo.core.RejectCommand
+import com.tropo.core.RingingEvent;
+import com.tropo.core.SpeakingEvent;
 import com.tropo.core.UnjoinCommand
 import com.tropo.core.UnjoinedEvent
 import com.tropo.core.validation.Validator
@@ -1509,6 +1512,53 @@ public class RayoProviderTest {
 		assertNotNull fromXml("""<unmute xmlns="urn:xmpp:rayo:1"></unmute>""")
 	}
 
+	// Ringing
+	// ====================================================================================
+
+	@Test
+	public void ringingToXml() {
+		RingingEvent ringing = new RingingEvent();
+		assertEquals("""<ringing xmlns="urn:xmpp:rayo:1"/>""", toXml(ringing));
+	}
+	
+	@Test
+	public void ringingFromXml() {
+		def ringing = fromXml("""<ringing xmlns="urn:xmpp:rayo:1"></ringing>""")
+		assertNotNull ringing
+		assertTrue ringing instanceof RingingEvent
+	}
+	
+	// Answered
+	// ====================================================================================
+
+	@Test
+	public void answeredToXml() {
+		AnsweredEvent ringing = new AnsweredEvent();
+		assertEquals("""<answered xmlns="urn:xmpp:rayo:1"/>""", toXml(ringing));
+	}
+	
+	@Test
+	public void answeredFromXml() {
+		def answered = fromXml("""<answered xmlns="urn:xmpp:rayo:1"></answered>""")
+		assertNotNull answered
+		assertTrue answered instanceof AnsweredEvent
+	}
+	
+	// Active Speaker
+	// ====================================================================================
+
+	@Test
+	public void speakingToXml() {
+		SpeakingEvent speaking = new SpeakingEvent();
+		assertEquals("""<speaking xmlns="urn:xmpp:rayo:1"/>""", toXml(speaking));
+	}
+	
+	@Test
+	public void speakingFromXml() {
+		def speaking = fromXml("""<speaking xmlns="urn:xmpp:rayo:1"></speaking>""")
+		assertNotNull speaking
+		assertTrue speaking instanceof SpeakingEvent
+	}
 	
     // Utility
     // ====================================================================================
