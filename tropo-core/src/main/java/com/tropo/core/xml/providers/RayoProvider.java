@@ -25,6 +25,7 @@ import com.tropo.core.OfferEvent;
 import com.tropo.core.RedirectCommand;
 import com.tropo.core.RejectCommand;
 import com.tropo.core.RingingEvent;
+import com.tropo.core.SpeakingEvent;
 import com.tropo.core.UnjoinCommand;
 import com.tropo.core.UnjoinedEvent;
 import com.tropo.core.validation.Messages;
@@ -76,6 +77,8 @@ public class RayoProvider extends BaseProvider {
             return buildAnsweredEvent(element);
         } else if (elementName.equals("ringing")) {
             return buildRingingEvent(element);
+        } else if (elementName.equals("speaking")) {
+            return buildSpeakingEvent(element);
         } else if (elementName.equals("end")) {
             return buildCallEnd(element);
         } else if (elementName.equals("dial")) {
@@ -139,6 +142,10 @@ public class RayoProvider extends BaseProvider {
         return new RingingEvent(null);
     }
 
+    private Object buildSpeakingEvent(Element element) {
+        return new SpeakingEvent(null);
+    }
+    
     private Object buildOfferEvent(Element element) throws URISyntaxException {
 
         OfferEvent offer = new OfferEvent(element.attributeValue("callId"));
@@ -293,6 +300,8 @@ public class RayoProvider extends BaseProvider {
             createEndEvent(object, document);
         } else if (object instanceof RingingEvent) {
             createRingEvent(object, document);
+        } else if (object instanceof SpeakingEvent) {
+            createSpeakingEvent(object, document);
         } else if (object instanceof AnsweredEvent) {
             createAnswerEvent(object, document);
         } else if (object instanceof AcceptCommand) {
@@ -357,6 +366,10 @@ public class RayoProvider extends BaseProvider {
         document.addElement(new QName("ringing", RAYO_NAMESPACE));
     }
 
+    private void createSpeakingEvent(Object object, Document document) {
+        document.addElement(new QName("speaking", RAYO_NAMESPACE));
+    }
+    
     private void createEndEvent(Object object, Document document) {
         EndEvent event = (EndEvent)object;
         Element root = document.addElement(new QName("end", RAYO_NAMESPACE));
@@ -540,6 +553,7 @@ public class RayoProvider extends BaseProvider {
 		return clazz == OfferEvent.class ||
 			   clazz == EndEvent.class ||
 			   clazz == RingingEvent.class ||
+			   clazz == SpeakingEvent.class ||
 			   clazz == AnsweredEvent.class ||
 			   clazz == AcceptCommand.class ||
 			   clazz == AnswerCommand.class ||

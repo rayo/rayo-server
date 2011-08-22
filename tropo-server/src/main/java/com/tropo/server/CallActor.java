@@ -18,6 +18,7 @@ import com.tropo.core.JoinCommand;
 import com.tropo.core.JoinDestinationType;
 import com.tropo.core.JoinedEvent;
 import com.tropo.core.RingingEvent;
+import com.tropo.core.SpeakingEvent;
 import com.tropo.core.UnjoinCommand;
 import com.tropo.core.UnjoinedEvent;
 import com.tropo.core.verb.HoldCommand;
@@ -31,6 +32,7 @@ import com.voxeo.moho.Mixer;
 import com.voxeo.moho.Participant;
 import com.voxeo.moho.Participant.JoinType;
 import com.voxeo.moho.conference.ConferenceManager;
+import com.voxeo.moho.event.ActiveSpeakerEvent;
 import com.voxeo.moho.event.AutowiredEventListener;
 import com.voxeo.moho.event.CallCompleteEvent;
 import com.voxeo.moho.event.HangupEvent;
@@ -302,6 +304,13 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
         if(event.getSource().equals(participant)) {
             unjoinAll();
         }
+    }
+    
+    @com.voxeo.moho.State
+    public void onActiveSpeaker(ActiveSpeakerEvent event) throws Exception {
+        if(event.getSource().equals(participant)) {
+            fire(new SpeakingEvent(getParticipantId()));
+        }    	
     }
     
     // Properties
