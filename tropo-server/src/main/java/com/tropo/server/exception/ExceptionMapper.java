@@ -18,13 +18,13 @@ public class ExceptionMapper {
 	public ErrorMapping toXmppError(Exception e) {
 		
 		String errorType = StanzaError.Type.CANCEL.toString();
-		String errorCondition = StanzaError.Condition.INTERNAL_SERVER_ERROR.toString();
+		String errorCondition = toString(StanzaError.Condition.INTERNAL_SERVER_ERROR);
 		String errorMessage = e.getMessage();
 		
 		if (e instanceof ValidationException) {
 			ConstraintViolation<?> violation = ((ValidationException)e).getFirstViolation();
 			errorType = StanzaError.Type.MODIFY.toString();
-			errorCondition = StanzaError.Condition.BAD_REQUEST.toString();
+			errorCondition = toString(StanzaError.Condition.BAD_REQUEST);
 			if (violation != null) {				
 				if (violation.getConstraintDescriptor() != null &&
 					violation.getConstraintDescriptor().getAnnotation() instanceof ValidHandlerState) {
@@ -44,23 +44,29 @@ public class ExceptionMapper {
 			return new ErrorMapping(errorType, errorCondition, errorMessage);
 		}
 		else if(e instanceof NotFoundException) {
-		    errorCondition = StanzaError.Condition.ITEM_NOT_FOUND.toString();
+		    errorCondition = toString(StanzaError.Condition.ITEM_NOT_FOUND);
 		} else if (e instanceof IllegalArgumentException) {
-			errorCondition = StanzaError.Condition.BAD_REQUEST.toString();
+			errorCondition = toString(StanzaError.Condition.BAD_REQUEST);
 		} else if (e instanceof MediaException) {
 			//TODO: Media Server needs to propagate proper response codes
 			if (e.getMessage().contains("Response code of 407")) {
 				// This is a grammar compilation issue
-				errorCondition = StanzaError.Condition.BAD_REQUEST.toString();
+				errorCondition = toString(StanzaError.Condition.BAD_REQUEST);
 				errorMessage = "There is an error in the grammar. It could not be compiled.";
 			}
 		} else if (e instanceof BusyException) {
-			errorCondition = StanzaError.Condition.RESOURCE_CONSTRAINT.toString();
+			errorCondition = toString(StanzaError.Condition.RESOURCE_CONSTRAINT);
 			errorMessage = "The requested resource is busy.";
 			errorType = StanzaError.Type.WAIT.toString();
 		}
 		
 		log.debug("Mapping unknown exception [type=%s, message=%s]",e.getClass(), e.getMessage());
 		return new ErrorMapping(errorType, errorCondition, errorMessage);
+	}
+	
+	public static String toString(StanzaError.Condition condition) {
+		
+		//TODO: Not needed once https://evolution.voxeo.com/ticket/1520421 is fixed
+		return condition.toString().replaceAll("_", "-");
 	}
 }

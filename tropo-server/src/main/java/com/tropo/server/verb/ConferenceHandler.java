@@ -25,6 +25,7 @@ import com.tropo.server.MixerActorFactory;
 import com.tropo.server.MixerRegistry;
 import com.tropo.server.MohoUtil;
 import com.tropo.server.conference.ParticipantController;
+import com.tropo.server.exception.ExceptionMapper;
 import com.voxeo.moho.Call;
 import com.voxeo.moho.Participant;
 import com.voxeo.moho.Participant.JoinType;
@@ -123,14 +124,14 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference, Call
         if (participant.getAttribute(participantKey) != null) {
         	context.buildConstraintViolationWithTemplate(
         			"Call is already a member of the conference: " + model.getRoomName())
-        			.addNode(StanzaError.Condition.RESOURCE_CONSTRAINT.toString())
+        			.addNode(ExceptionMapper.toString(StanzaError.Condition.RESOURCE_CONSTRAINT))
         			.addConstraintViolation();
         	return false;
         }
         if (isOnConference(participant)) {
         	context.buildConstraintViolationWithTemplate(
         			"Call is already joined to another conference")
-        			.addNode(StanzaError.Condition.RESOURCE_CONSTRAINT.toString())
+        			.addNode(ExceptionMapper.toString(StanzaError.Condition.RESOURCE_CONSTRAINT))
         			.addConstraintViolation();
         	return false;
         }

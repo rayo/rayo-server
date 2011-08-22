@@ -11,6 +11,7 @@ import com.tropo.core.verb.AskCompleteEvent.Reason;
 import com.tropo.core.verb.Choices;
 import com.tropo.core.verb.Ssml;
 import com.tropo.core.verb.VerbCompleteEvent;
+import com.tropo.server.exception.ExceptionMapper;
 import com.tropo.server.validation.SsmlValidator;
 import com.voxeo.moho.Participant;
 import com.voxeo.moho.State;
@@ -75,14 +76,14 @@ public class AskHandler extends AbstractLocalVerbHandler<Ask,Participant> {
         if (isOnConference(participant)) {
         	context.buildConstraintViolationWithTemplate(
         			"Call is joined to a conference.")
-        			.addNode(StanzaError.Condition.RESOURCE_CONSTRAINT.toString())
+        			.addNode(ExceptionMapper.toString(StanzaError.Condition.RESOURCE_CONSTRAINT))
         			.addConstraintViolation();
         	return false;
         }
         if (isOnHold(participant)) {
         	context.buildConstraintViolationWithTemplate(
 				"Call is currently on hold.")
-				.addNode(StanzaError.Condition.RESOURCE_CONSTRAINT.toString())
+				.addNode(ExceptionMapper.toString(StanzaError.Condition.RESOURCE_CONSTRAINT))
 				.addConstraintViolation();
         	return false;        	
         }        
