@@ -107,6 +107,11 @@ public class JIDRegistry {
 		
 		purgeTimeout = timeout;
 	}	
+	
+	public int size() {
+		
+		return jids.size();
+	}
 }
 
 class JIDEntry {
