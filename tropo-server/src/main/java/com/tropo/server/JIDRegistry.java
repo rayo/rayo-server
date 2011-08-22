@@ -80,7 +80,11 @@ public class JIDRegistry {
 		if (callId == null) {
 			return null;
 		}
-		return jids.get(callId).jid;
+		JIDEntry entry = jids.get(callId);
+		if (entry == null) {
+			return null;
+		}
+		return entry.jid;
 	}
 	
 	public void put(String callId, JID jid) {
