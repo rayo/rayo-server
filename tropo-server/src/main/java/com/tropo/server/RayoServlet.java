@@ -92,6 +92,7 @@ public class RayoServlet extends XmppServlet {
      */
     public void start() {
 
+    	log.info("Initializing Rayo Server. Build number: %s", adminService.getBuildNumber());
         log.info("Registering Rayo Event Handler");
 
         callManager.addEventHandler(new EventHandler() {
@@ -110,7 +111,6 @@ public class RayoServlet extends XmppServlet {
                 }
             }
         });
-
     }
 
     // Events: Server -> Client
