@@ -37,6 +37,8 @@ public class JIDRegistry {
 	
 	private List<JIDEntry> toPurge = new ArrayList<JIDEntry>();
 
+	private Timer timer;
+
 	public JIDRegistry(long purgingTaskInterval, long purgeTimeout) {
 		
 		setPurgeTimeout(purgeTimeout);
@@ -71,7 +73,7 @@ public class JIDRegistry {
 			}
 		};
 		
-		Timer timer = new Timer();
+		timer = new Timer();
 		timer.scheduleAtFixedRate(task, new Date(System.currentTimeMillis() + purgingTaskInterval), purgingTaskInterval);		
 	}
 	
@@ -115,6 +117,11 @@ public class JIDRegistry {
 	public int size() {
 		
 		return jids.size();
+	}
+	
+	public void shutdown() {
+		
+		timer.cancel();
 	}
 }
 
