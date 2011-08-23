@@ -4,7 +4,11 @@ import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import javax.media.mscontrol.EventType;
+import javax.media.mscontrol.Parameters;
 import javax.media.mscontrol.join.Joinable.Direction;
+import javax.media.mscontrol.mixer.MediaMixer;
+import javax.media.mscontrol.mixer.MixerEvent;
 import javax.validation.ConstraintValidatorContext;
 
 import com.tropo.core.verb.Conference;
@@ -37,6 +41,7 @@ import com.voxeo.moho.media.Output;
 import com.voxeo.moho.media.input.DigitInputCommand;
 import com.voxeo.moho.media.output.OutputCommand;
 import com.voxeo.moho.media.output.OutputCommand.BehaviorIfBusy;
+import com.voxeo.moho.spi.ExecutionContext;
 import com.voxeo.servlet.xmpp.StanzaError;
 
 public class ConferenceHandler extends AbstractLocalVerbHandler<Conference, Call> implements ParticipantController {
@@ -69,8 +74,12 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference, Call
         this.tonePassthrough = model.isTonePassthrough();
 
         // Create or get Moho Conference
-        mohoConference = participant.getApplicationContext().getConferenceManager().createConference(model.getRoomName(), Integer.MAX_VALUE, null, null);
-
+        ExecutionContext ctx = (ExecutionContext)participant.getApplicationContext();
+        Parameters parameters = ctx.getMSFactory().createParameters();
+        parameters.put(MediaMixer.ENABLED_EVENTS, new EventType[]{MixerEvent.ACTIVE_INPUTS_CHANGED});
+        mohoConference = participant.getApplicationContext().getConferenceManager()
+        	.createConference(model.getRoomName(),Integer.MAX_VALUE,parameters);
+        
         synchronized (mohoConference.getId()) {
 
             // If this is the first participant then we should configure the controller

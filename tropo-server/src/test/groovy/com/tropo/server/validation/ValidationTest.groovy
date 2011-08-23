@@ -847,7 +847,55 @@ class ValidationTest {
 		def output = parseXml("""<output xmlns=\"urn:xmpp:rayo:output:1\" voice=\"allison\"><speak>Hello World</speak></output>""")
 		assertNotNull fromXML(output)
 	}
+	
+	// DTMF
+	// ====================================================================================
 
+	@Test
+	public void validateDtmfMissingKey() {
+				
+		def output = parseXml("""<dtmf xmlns="urn:xmpp:rayo:1"/>""")
+		
+		def errorMapping = assertValidationException(output)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, ExceptionMapper.toString(StanzaError.Condition.BAD_REQUEST)
+		assertEquals errorMapping.text, Messages.MISSING_DTMF_KEY
+	}
+	
+	@Test
+	public void validateDtmfEmptyKey() {
+				
+		def output = parseXml("""<dtmf xmlns="urn:xmpp:rayo:1" key=""/>""")
+		
+		def errorMapping = assertValidationException(output)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, ExceptionMapper.toString(StanzaError.Condition.BAD_REQUEST)
+		assertEquals errorMapping.text, Messages.INVALID_DTMF_KEY
+	}
+	
+	@Test
+	public void validateDtmfLongKey() {
+				
+		def output = parseXml("""<dtmf xmlns="urn:xmpp:rayo:1" key="12"/>""")
+		
+		def errorMapping = assertValidationException(output)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, ExceptionMapper.toString(StanzaError.Condition.BAD_REQUEST)
+		assertEquals errorMapping.text, Messages.INVALID_DTMF_KEY
+	}
+	
+	@Test
+	public void validateDtmfValid() {
+				
+		def chars = ['0','1','2','3','4','5','6','7','8','9','#','*','A','B','C','D'] as char[]
+		chars.each {
+			def dtmf = parseXml("""<dtmf xmlns=\"urn:xmpp:rayo:1\" key="${it}"/>""")
+			assertEquals fromXML(dtmf).key, String.valueOf(it)
+		}
+	}
 	
 	// Invalid jids
 	// ====================================================================================

@@ -15,8 +15,10 @@ import com.tropo.core.AnswerCommand;
 import com.tropo.core.AnsweredEvent;
 import com.tropo.core.CallRejectReason;
 import com.tropo.core.DialCommand;
+import com.tropo.core.DtmfCommand;
 import com.tropo.core.DtmfEvent;
 import com.tropo.core.EndEvent;
+import com.tropo.core.FinishedSpeakingEvent;
 import com.tropo.core.HangupCommand;
 import com.tropo.core.JoinCommand;
 import com.tropo.core.JoinDestinationType;
@@ -79,6 +81,8 @@ public class RayoProvider extends BaseProvider {
             return buildRingingEvent(element);
         } else if (elementName.equals("speaking")) {
             return buildSpeakingEvent(element);
+        } else if (elementName.equals("finished-speaking")) {
+            return buildFinishedSpeakingEvent(element);
         } else if (elementName.equals("end")) {
             return buildCallEnd(element);
         } else if (elementName.equals("dial")) {
@@ -88,7 +92,7 @@ public class RayoProvider extends BaseProvider {
         } else if (element.getName().equals("complete")) {
             return buildCompleteEvent(element);
         } else if (element.getName().equals("dtmf")) {
-            return buildDtmfEvent(element);
+            return buildDtmfCommand(element);
         }
         
         return null;
@@ -145,6 +149,10 @@ public class RayoProvider extends BaseProvider {
     private Object buildSpeakingEvent(Element element) {
         return new SpeakingEvent(null);
     }
+
+    private Object buildFinishedSpeakingEvent(Element element) {
+        return new FinishedSpeakingEvent(null);
+    }
     
     private Object buildOfferEvent(Element element) throws URISyntaxException {
 
@@ -156,8 +164,8 @@ public class RayoProvider extends BaseProvider {
         return offer;
     }
 
-    private Object buildDtmfEvent(Element element) {
-        return new DtmfEvent(null, element.attributeValue("signal"));
+    private Object buildDtmfCommand(Element element) {
+        return new DtmfCommand(element.attributeValue("key"));
     }
 
     private Object buildAcceptCommand(Element element) throws URISyntaxException {
@@ -302,6 +310,8 @@ public class RayoProvider extends BaseProvider {
             createRingEvent(object, document);
         } else if (object instanceof SpeakingEvent) {
             createSpeakingEvent(object, document);
+        } else if (object instanceof FinishedSpeakingEvent) {
+            createFinishedSpeakingEvent(object, document);
         } else if (object instanceof AnsweredEvent) {
             createAnswerEvent(object, document);
         } else if (object instanceof AcceptCommand) {
@@ -368,6 +378,10 @@ public class RayoProvider extends BaseProvider {
 
     private void createSpeakingEvent(Object object, Document document) {
         document.addElement(new QName("speaking", RAYO_NAMESPACE));
+    }
+
+    private void createFinishedSpeakingEvent(Object object, Document document) {
+        document.addElement(new QName("finished-speaking", RAYO_NAMESPACE));
     }
     
     private void createEndEvent(Object object, Document document) {
@@ -554,6 +568,7 @@ public class RayoProvider extends BaseProvider {
 			   clazz == EndEvent.class ||
 			   clazz == RingingEvent.class ||
 			   clazz == SpeakingEvent.class ||
+			   clazz == FinishedSpeakingEvent.class ||
 			   clazz == AnsweredEvent.class ||
 			   clazz == AcceptCommand.class ||
 			   clazz == AnswerCommand.class ||

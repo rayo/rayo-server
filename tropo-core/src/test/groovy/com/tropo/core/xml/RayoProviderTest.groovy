@@ -25,6 +25,7 @@ import com.tropo.core.AnsweredEvent;
 import com.tropo.core.CallRejectReason
 import com.tropo.core.DialCommand
 import com.tropo.core.DtmfEvent
+import com.tropo.core.FinishedSpeakingEvent;
 import com.tropo.core.HangupCommand
 import com.tropo.core.JoinCommand
 import com.tropo.core.JoinDestinationType
@@ -456,7 +457,7 @@ public class RayoProviderTest {
         ])
     }
 
-    // Dtmf
+    // Dtmf Event
     // ====================================================================================
 
     @Test
@@ -465,11 +466,6 @@ public class RayoProviderTest {
         assertEquals("""<dtmf xmlns="urn:xmpp:rayo:1" signal="5"/>""", toXml(event));
     }
     
-    @Test
-    public void dtmfFromXml() {
-        assertNotNull "5", fromXml("""<dtmf xmlns="urn:xmpp:rayo:1" signal="5"></dtmf>""").signal
-    }
-
 	// Record
 	// ====================================================================================
 
@@ -1559,6 +1555,28 @@ public class RayoProviderTest {
 		assertNotNull speaking
 		assertTrue speaking instanceof SpeakingEvent
 	}
+	
+	@Test
+	public void finishedSpeakingToXml() {
+		FinishedSpeakingEvent speaking = new FinishedSpeakingEvent();
+		assertEquals("""<finished-speaking xmlns="urn:xmpp:rayo:1"/>""", toXml(speaking));
+	}
+	
+	@Test
+	public void finishedSpeakingFromXml() {
+		def speaking = fromXml("""<finished-speaking xmlns="urn:xmpp:rayo:1"></finished-speaking>""")
+		assertNotNull speaking
+		assertTrue speaking instanceof FinishedSpeakingEvent
+	}
+
+	// Dtmf Command
+	// ====================================================================================
+	
+	@Test
+	public void dtmfFromXml() {
+		assertNotNull "5", fromXml("""<dtmf xmlns="urn:xmpp:rayo:1" key="5"></dtmf>""").key
+	}
+
 	
     // Utility
     // ====================================================================================

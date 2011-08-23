@@ -17,6 +17,7 @@ public class Messages {
     public static final String MISSING_JOIN_ID = "Missing Join id. You need to specify either a valid call-id or mixer-id";
 	public static final String MISSING_AMOUNT = "Amount is a mandatory field.";
 	public static final String MISSING_DIRECTION = "Direction is a mandatory field.";
+	public static final String MISSING_DTMF_KEY = "DTMF key is a mandatory field.";
 
     public static final String INVALID_DURATION = "Invalid duration for '%s'";
     public static final String INVALID_INPUT_MODE = "Invalid input mode.";
@@ -41,6 +42,7 @@ public class Messages {
     public static final String INVALID_JOIN_TYPE = "Invalid join type. It should be one of BRIDGE|DIRECT.";
     public static final String INVALID_BARGEIN_TYPE = "Invalid 'interrupt-on'.";
     public static final String INVALID_ENUM = "Unsupported value for '%s'";
+    public static final String INVALID_DTMF_KEY = "Invalid DTMF key. Characters accepted are [0-9], [A,B,C,D], * or #.";
 
 	public static final String UNKNOWN_NAMESPACE_ELEMENT = "Could not find the element on namespace.";
 
