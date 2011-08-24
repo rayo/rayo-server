@@ -23,6 +23,7 @@ import com.tropo.core.UnjoinCommand;
 import com.tropo.core.UnjoinedEvent;
 import com.tropo.core.verb.HoldCommand;
 import com.tropo.core.verb.MuteCommand;
+import com.tropo.core.verb.Ssml;
 import com.tropo.core.verb.UnholdCommand;
 import com.tropo.core.verb.UnmuteCommand;
 import com.voxeo.logging.Loggerf;
@@ -38,6 +39,8 @@ import com.voxeo.moho.event.HangupEvent;
 import com.voxeo.moho.event.InputDetectedEvent;
 import com.voxeo.moho.event.JoinCompleteEvent.Cause;
 import com.voxeo.moho.event.UnjoinCompleteEvent;
+import com.voxeo.moho.media.output.AudibleResource;
+import com.voxeo.moho.media.output.OutputCommand;
 
 public class CallActor <T extends Call> extends AbstractActor<T> {
 
@@ -117,6 +120,11 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     
     public void dtmf(DtmfCommand message) {
     	
+    	Ssml ssml = new Ssml(String.format(
+    			"<?xml version=\"1.0\"?> <speak><audio src=\"dtmf:%s\"/></speak>",message.getKey()));
+    	AudibleResource resource = resolveAudio(ssml);
+    	OutputCommand command = new OutputCommand(resource);
+    	participant.output(command);
     }
     
     @Message

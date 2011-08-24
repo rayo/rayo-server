@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.tropo.core.FinishedSpeakingEvent;
 import com.tropo.core.SpeakingEvent;
+import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.Mixer;
 import com.voxeo.moho.Participant;
 import com.voxeo.moho.conference.Conference;
@@ -14,6 +15,8 @@ import com.voxeo.moho.event.AutowiredEventListener;
 
 public class MixerActor extends AbstractActor<Mixer> {
 
+	private static final Loggerf log = Loggerf.getLogger(MixerActor.class);
+	
     public MixerActor(Mixer mixer) {
 
     	super(mixer);
@@ -42,6 +45,9 @@ public class MixerActor extends AbstractActor<Mixer> {
     @com.voxeo.moho.State
     public void onActiveSpeaker(ActiveSpeakerEvent event) throws Exception {
         if(event.getSource().equals(participant)) {
+        	if (log.isDebugEnabled()) {
+        		log.debug("Received active speaker event. Active speakers: %s", event.getActiveSpeakers().length);
+        	}
         	for (Participant participant: event.getActiveSpeakers()) {
         		
         		if (!activeSpeakers.contains(participant.getId())) {

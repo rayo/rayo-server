@@ -2,6 +2,7 @@ package com.tropo.server;
 
 import static com.voxeo.utils.Objects.assertion;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -16,6 +17,7 @@ import com.tropo.core.EndEvent;
 import com.tropo.core.EndEvent.Reason;
 import com.tropo.core.validation.ValidationException;
 import com.tropo.core.validation.Validator;
+import com.tropo.core.verb.Ssml;
 import com.tropo.core.verb.StopCommand;
 import com.tropo.core.verb.Verb;
 import com.tropo.core.verb.VerbCommand;
@@ -33,6 +35,7 @@ import com.voxeo.moho.event.AutowiredEventListener;
 import com.voxeo.moho.event.Event;
 import com.voxeo.moho.event.EventSource;
 import com.voxeo.moho.event.Observer;
+import com.voxeo.moho.media.output.AudibleResource;
 
 public abstract class AbstractActor<T extends Participant> extends ReflectiveActor implements Observer {
 
@@ -273,5 +276,13 @@ public abstract class AbstractActor<T extends Participant> extends ReflectiveAct
     public Collection<VerbHandler<?,?>> getVerbs() {
 
         return new ArrayList<VerbHandler<?,?>>(verbs.values());
+    }
+    
+    protected AudibleResource resolveAudio(final Ssml item) {
+        return new AudibleResource() {
+            public URI toURI() {
+                return item.toUri();
+            }
+        };
     }
 }

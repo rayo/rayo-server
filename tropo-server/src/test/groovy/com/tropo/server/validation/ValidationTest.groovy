@@ -879,12 +879,7 @@ class ValidationTest {
 	public void validateDtmfLongKey() {
 				
 		def output = parseXml("""<dtmf xmlns="urn:xmpp:rayo:1" key="12"/>""")
-		
-		def errorMapping = assertValidationException(output)
-		assertNotNull errorMapping
-		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
-		assertEquals errorMapping.condition, ExceptionMapper.toString(StanzaError.Condition.BAD_REQUEST)
-		assertEquals errorMapping.text, Messages.INVALID_DTMF_KEY
+		assertNotNull fromXML(output)
 	}
 	
 	@Test
