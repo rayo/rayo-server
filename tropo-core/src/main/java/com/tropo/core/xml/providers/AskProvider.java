@@ -139,7 +139,7 @@ public class AskProvider extends BaseProvider {
                     elementChoice.addAttribute("url", choice.getUri().toString());
                 }
                 if (choice.getContent() != null) {
-                    elementChoice.setText(choice.getContent());
+                	elementChoice.addCDATA(" " + choice.getContent() + " ");
                 }
             }
         }
