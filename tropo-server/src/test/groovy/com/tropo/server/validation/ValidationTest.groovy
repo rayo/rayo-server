@@ -888,7 +888,7 @@ class ValidationTest {
 		def chars = ['0','1','2','3','4','5','6','7','8','9','#','*','A','B','C','D'] as char[]
 		chars.each {
 			def dtmf = parseXml("""<dtmf xmlns=\"urn:xmpp:rayo:1\" key="${it}"/>""")
-			assertEquals fromXML(dtmf).key, String.valueOf(it)
+			assertEquals fromXML(dtmf).tones, String.valueOf(it)
 		}
 	}
 

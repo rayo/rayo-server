@@ -165,7 +165,7 @@ public class RayoProvider extends BaseProvider {
     }
 
     private Object buildDtmfCommand(Element element) {
-        return new DtmfCommand(element.attributeValue("key"));
+        return new DtmfCommand(element.attributeValue("tones"));
     }
 
     private Object buildAcceptCommand(Element element) throws URISyntaxException {

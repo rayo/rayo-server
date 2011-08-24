@@ -121,7 +121,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     public void dtmf(DtmfCommand message) {
     	
     	Ssml ssml = new Ssml(String.format(
-    			"<?xml version=\"1.0\"?> <speak><audio src=\"dtmf:%s\"/></speak>",message.getKey()));
+    			"<?xml version=\"1.0\"?> <speak><audio src=\"dtmf:%s\"/></speak>",message.getTones()));
     	AudibleResource resource = resolveAudio(ssml);
     	OutputCommand command = new OutputCommand(resource);
     	participant.output(command);

@@ -8,25 +8,26 @@ import com.tropo.core.validation.ValidDtmf;
 public class DtmfCommand extends AbstractCallCommand {
 
 	@ValidDtmf
-	private String key;
+	private String tones;
 
-	public DtmfCommand(String key) {
-		
-		this.key = key;
-	}
-	
-	public String getKey() {
-		return key;
+	public DtmfCommand(String tones) {
+
+		this.tones = tones;
 	}
 
-	public void setKey(String key) {
-		this.key = key;
+	public String getTones() {
+		return tones;
+	}
+
+	public void setTones(String tones) {
+		this.tones = tones;
 	}
 
 	@Override
 	public String toString() {
+		
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
 			.append("callId", getCallId())
-			.append("key", key).toString();
+			.append("tones", tones).toString();
 	}
 }
