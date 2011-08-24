@@ -346,6 +346,8 @@ public class RayoProvider extends BaseProvider {
             createStopCommand((StopCommand)object, document);
         } else if (object instanceof DtmfEvent) {
             createDtmfEvent((DtmfEvent)object, document);
+        } else if (object instanceof DtmfCommand) {
+            createDtmfCommand((DtmfCommand)object, document);
         }
     }
 
@@ -535,6 +537,14 @@ public class RayoProvider extends BaseProvider {
         return document;
     }
 
+    private Document createDtmfCommand(DtmfCommand dtmf, Document document) {
+
+        Element root = document.addElement(new QName("dtmf", RAYO_NAMESPACE));
+        root.addAttribute("tones", dtmf.getTones());
+
+        return document;
+    }
+
     private Document createRedirectCommand(Object object, Document document) {
 
         RedirectCommand redirect = (RedirectCommand) object;
@@ -587,6 +597,7 @@ public class RayoProvider extends BaseProvider {
 		       clazz == JoinCommand.class ||
 		       clazz == UnjoinCommand.class ||
 		       clazz == JoinedEvent.class ||
-		       clazz == UnjoinedEvent.class;
+		       clazz == UnjoinedEvent.class ||
+		       clazz == DtmfCommand.class;
 	}
 }

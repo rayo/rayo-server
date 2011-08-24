@@ -118,13 +118,17 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     	participant.unmute();
     }
     
+    @Message
     public void dtmf(DtmfCommand message) {
     	
     	Ssml ssml = new Ssml(String.format(
-    			"<?xml version=\"1.0\"?> <speak><audio src=\"dtmf:%s\"/></speak>",message.getTones()));
+    			"<audio src=\"dtmf:%s\"/>",message.getTones()));
     	AudibleResource resource = resolveAudio(ssml);
     	OutputCommand command = new OutputCommand(resource);
     	participant.output(command);
+    	
+    	//TODO: Check with Jose if we should send this event to the target participant or not
+    	fire(new DtmfEvent(participant.getId(), message.getTones()));
     }
     
     @Message

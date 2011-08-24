@@ -24,6 +24,7 @@ import com.tropo.core.AnswerCommand
 import com.tropo.core.AnsweredEvent;
 import com.tropo.core.CallRejectReason
 import com.tropo.core.DialCommand
+import com.tropo.core.DtmfCommand;
 import com.tropo.core.DtmfEvent
 import com.tropo.core.FinishedSpeakingEvent;
 import com.tropo.core.HangupCommand
@@ -1579,6 +1580,11 @@ public class RayoProviderTest {
 		assertNotNull "5", fromXml("""<dtmf xmlns="urn:xmpp:rayo:1" tones="5"></dtmf>""").tones
 	}
 
+	@Test
+	public void dtmfCommandToXml() {
+		DtmfCommand dtmf = new DtmfCommand("12")
+		assertNotNull """<dtmf xmlns="urn:xmpp:rayo:1" tones="12"></dtmf>""", toXml(dtmf)
+	}
 	
     // Utility
     // ====================================================================================
