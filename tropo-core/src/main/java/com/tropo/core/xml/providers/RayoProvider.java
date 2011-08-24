@@ -147,11 +147,11 @@ public class RayoProvider extends BaseProvider {
     }
 
     private Object buildSpeakingEvent(Element element) {
-        return new SpeakingEvent(null);
+        return new SpeakingEvent(null, element.attributeValue("mixer-id"));
     }
 
     private Object buildFinishedSpeakingEvent(Element element) {
-        return new FinishedSpeakingEvent(null);
+        return new FinishedSpeakingEvent(null, element.attributeValue("mixer-id"));
     }
     
     private Object buildOfferEvent(Element element) throws URISyntaxException {
@@ -377,11 +377,13 @@ public class RayoProvider extends BaseProvider {
     }
 
     private void createSpeakingEvent(Object object, Document document) {
-        document.addElement(new QName("speaking", RAYO_NAMESPACE));
+        Element root = document.addElement(new QName("speaking", RAYO_NAMESPACE));
+        root.addAttribute("mixer-id", ((SpeakingEvent)object).getMixerId());
     }
 
     private void createFinishedSpeakingEvent(Object object, Document document) {
-        document.addElement(new QName("finished-speaking", RAYO_NAMESPACE));
+        Element root = document.addElement(new QName("finished-speaking", RAYO_NAMESPACE));
+        root.addAttribute("mixer-id", ((FinishedSpeakingEvent)object).getMixerId());
     }
     
     private void createEndEvent(Object object, Document document) {
