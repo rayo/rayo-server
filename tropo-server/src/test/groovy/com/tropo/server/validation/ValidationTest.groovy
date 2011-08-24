@@ -860,7 +860,7 @@ class ValidationTest {
 		assertNotNull errorMapping
 		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
 		assertEquals errorMapping.condition, ExceptionMapper.toString(StanzaError.Condition.BAD_REQUEST)
-		assertEquals errorMapping.text, Messages.MISSING_DTMF_KEY
+		assertEquals errorMapping.text, Messages.INVALID_DTMF_KEY
 	}
 	
 	@Test
@@ -896,7 +896,34 @@ class ValidationTest {
 			assertEquals fromXML(dtmf).key, String.valueOf(it)
 		}
 	}
+
+	// Active Speakier
+	// ====================================================================================
+
+	@Test
+	public void validateSpeakingMissingCallId() {
+				
+		def output = parseXml("""<speaking xmlns="urn:xmpp:rayo:1"/>""")
+		
+		def errorMapping = assertValidationException(output)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, ExceptionMapper.toString(StanzaError.Condition.BAD_REQUEST)
+		assertEquals errorMapping.text, Messages.MISSING_MIXER_ID
+	}
 	
+	@Test
+	public void validateFinishedSpeakingMissingCallId() {
+				
+		def output = parseXml("""<finished-speaking xmlns="urn:xmpp:rayo:1"/>""")
+		
+		def errorMapping = assertValidationException(output)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, ExceptionMapper.toString(StanzaError.Condition.BAD_REQUEST)
+		assertEquals errorMapping.text, Messages.MISSING_MIXER_ID
+	}
+
 	// Invalid jids
 	// ====================================================================================
 	
