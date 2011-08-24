@@ -489,6 +489,12 @@ class ValidationTest {
 		assertEquals errorMapping.text, Messages.INVALID_URI
 	}
 	
+	@Test
+	public void validateDialValidTelURIWithPlusSign() {
+				
+		def dial = parseXml("""<dial xmlns="urn:xmpp:rayo:1" to="tel:+447976224017 " from="sip:442035149248@173.255.241.49"></dial>""")
+		assertNotNull fromXML(dial)
+	}	
 	
 	@Test
 	public void validateNestedJoinInvalidDirection() {
@@ -866,7 +872,7 @@ class ValidationTest {
 	@Test
 	public void validateDtmfEmptyKey() {
 				
-		def output = parseXml("""<dtmf xmlns="urn:xmpp:rayo:1" key=""/>""")
+		def output = parseXml("""<dtmf xmlns="urn:xmpp:rayo:1" tones=""/>""")
 		
 		def errorMapping = assertValidationException(output)
 		assertNotNull errorMapping
@@ -878,7 +884,7 @@ class ValidationTest {
 	@Test
 	public void validateDtmfLongKey() {
 				
-		def output = parseXml("""<dtmf xmlns="urn:xmpp:rayo:1" key="12"/>""")
+		def output = parseXml("""<dtmf xmlns="urn:xmpp:rayo:1" tones="12"/>""")
 		assertNotNull fromXML(output)
 	}
 	
@@ -887,7 +893,7 @@ class ValidationTest {
 				
 		def chars = ['0','1','2','3','4','5','6','7','8','9','#','*','A','B','C','D'] as char[]
 		chars.each {
-			def dtmf = parseXml("""<dtmf xmlns=\"urn:xmpp:rayo:1\" key="${it}"/>""")
+			def dtmf = parseXml("""<dtmf xmlns=\"urn:xmpp:rayo:1\" tones="${it}"/>""")
 			assertEquals fromXML(dtmf).tones, String.valueOf(it)
 		}
 	}
