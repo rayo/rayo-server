@@ -870,7 +870,7 @@ public class RayoProviderTest {
         ask.choices = []
         ask.choices.add new Choices(uri:new URI("http://test"), contentType:"vxml", content:"sales,support")
 
-        assertEquals("""<ask xmlns="urn:xmpp:tropo:ask:1" voice="allison" min-confidence="0.8" mode="dtmf" recognizer="en-us" terminator="#" timeout="3000" bargein="true"><prompt>Hello World.</prompt><choices content-type="vxml" url="http://test">sales,support</choices></ask>""", toXml(ask));
+        assertEquals("""<ask xmlns="urn:xmpp:tropo:ask:1" voice="allison" min-confidence="0.8" mode="dtmf" recognizer="en-us" terminator="#" timeout="3000" bargein="true"><prompt>Hello World.</prompt><choices content-type="vxml" url="http://test"><![CDATA[ sales,support ]]></choices></ask>""", toXml(ask));
     }
     
     // Conference
