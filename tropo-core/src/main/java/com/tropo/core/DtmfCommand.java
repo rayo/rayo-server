@@ -5,7 +5,7 @@ import org.apache.commons.lang.builder.ToStringStyle;
 
 import com.tropo.core.validation.ValidDtmf;
 
-public class DtmfCommand implements ServerCommand {
+public class DtmfCommand extends AbstractCallCommand {
 
 	@ValidDtmf
 	private String key;
@@ -26,6 +26,7 @@ public class DtmfCommand implements ServerCommand {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-				.append("key", key).toString();
+			.append("callId", getCallId())
+			.append("key", key).toString();
 	}
 }
