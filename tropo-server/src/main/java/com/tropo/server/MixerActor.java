@@ -46,7 +46,7 @@ public class MixerActor extends AbstractActor<Mixer> {
         		
         		if (!activeSpeakers.contains(participant.getId())) {
         			activeSpeakers.add(participant.getId());
-            		fire(new SpeakingEvent(participant.getId()));
+            		fire(new SpeakingEvent(participant.getId(), this.participant.getId()));
         		}        		
         	}
         	Iterator<String> it = activeSpeakers.iterator();
@@ -61,7 +61,7 @@ public class MixerActor extends AbstractActor<Mixer> {
         		}
         		if (!found) {
         			it.remove();
-            		fire(new FinishedSpeakingEvent(participantId));
+            		fire(new FinishedSpeakingEvent(participantId, this.participant.getId()));
         		}
         	}
         }    	
