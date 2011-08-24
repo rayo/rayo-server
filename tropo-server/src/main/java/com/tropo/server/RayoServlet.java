@@ -331,7 +331,7 @@ public class RayoServlet extends XmppServlet {
     private void sendIqError(IQRequest request, String type, String error, String text) throws IOException {
     	//TODO: Not needed once https://evolution.voxeo.com/ticket/1520421 is fixed
     	error = error.replaceAll("-", "_");
-        sendIqError(request, request.createError(StanzaError.Type.valueOf(type), StanzaError.Condition.valueOf(error), text));
+        sendIqError(request, request.createError(StanzaError.Type.valueOf(type.toUpperCase()), StanzaError.Condition.valueOf(error.toUpperCase()), text));
     }
 
     private void sendIqError(IQRequest request, StanzaError.Type type, StanzaError.Condition error, String text) throws IOException {
