@@ -160,7 +160,7 @@ public abstract class BaseProvider implements XmlProvider {
         if (string == null || string.trim().equals("")) {
             return null;
         }
-
+        string = string.trim();
         try {
             return new URI(string);
         } catch (URISyntaxException e) {
