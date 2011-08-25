@@ -27,6 +27,7 @@ import com.tropo.server.EventHandler;
 import com.tropo.server.MixerActor;
 import com.tropo.server.MixerActorFactory;
 import com.tropo.server.MixerRegistry;
+import com.tropo.server.MixerStatistics;
 import com.tropo.server.MohoUtil;
 import com.tropo.server.conference.ParticipantController;
 import com.tropo.server.exception.ExceptionMapper;
@@ -53,6 +54,7 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference, Call
     private MixerActorFactory mixerActoryFactory;
     private MixerRegistry mixerRegistry;
     private CallManager callManager;
+    private MixerStatistics mixerStatistics;
 
     private boolean hold;
     private boolean joined;
@@ -123,7 +125,7 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference, Call
         }
         actor.start();
         mixerRegistry.add(actor);
-                
+        mixerStatistics.mixerCreated();        
     }
 
     @Override
@@ -430,5 +432,9 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference, Call
 
 	public void setCallManager(CallManager callManager) {
 		this.callManager = callManager;
+	}
+
+	public void setMixerStatistics(MixerStatistics mixerStatistics) {
+		this.mixerStatistics = mixerStatistics;
 	}
 }

@@ -24,6 +24,7 @@ public class RayoStatistics implements RayoStatisticsMXBean {
 	private AtomicLong presencesReceived = new AtomicLong(0);
 	
 	private Map<String, AtomicLong> commands = new ConcurrentHashMap<String, AtomicLong>();
+	private AtomicLong totalCommands = new AtomicLong(0);
 	
 	@ManagedAttribute(description="Calls Received Count")
 	public long getCallsReceived() {
@@ -137,6 +138,13 @@ public class RayoStatistics implements RayoStatisticsMXBean {
 			commands.put(className, count);
 		}
 		count.incrementAndGet();
+		totalCommands.incrementAndGet();
+	}
+
+	@ManagedAttribute(description="Total Commands Count")
+	public long getTotalCommands() {
+		
+		return totalCommands.longValue();
 	}
 
 	@ManagedAttribute(description="Commands Count")

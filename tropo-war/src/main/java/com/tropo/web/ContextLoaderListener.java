@@ -6,6 +6,8 @@ import javax.servlet.ServletContextEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
 
+import com.tropo.server.jmx.Info;
+
 public class ContextLoaderListener extends org.springframework.web.context.ContextLoaderListener {
 
 	public static final String TROPO_STATUS = "tropo.status";
@@ -15,6 +17,11 @@ public class ContextLoaderListener extends org.springframework.web.context.Conte
 
 		super.contextInitialized(event);
 		event.getServletContext().setAttribute(TROPO_STATUS, TropoStatus.SUCCESSFUL);
+		
+	    WebApplicationContext context = (WebApplicationContext)
+	    	event.getServletContext().getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE); 
+	    Info info = (Info)context.getBean(Info.class);
+	    info.applicationStarted();
 	}
 	
 	@Override

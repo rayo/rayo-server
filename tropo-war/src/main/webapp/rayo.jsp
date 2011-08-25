@@ -10,7 +10,6 @@
 	AdminService adminService = (AdminService)context.getBean("adminService");
 	Calls calls = (Calls)context.getBean("callsBean");
 	RayoStatistics rayoStatistics = (RayoStatistics)context.getBean("rayoStatistics");
-	MixerStatistics mixerStatistics = (MixerStatistics)context.getBean("mixerStatistics");
 	Info info = (Info)context.getBean("infoBean");
 %>
 
@@ -39,7 +38,6 @@
 	    			<li><strong>Build Number:</strong> <%= adminService.getBuildNumber() %></li>
 	    			<li><strong>Uptime:</strong> <%= info.getUptime() %></li>
 	    			<li><strong>Total Calls:</strong> <%= calls.getTotalCalls() %></li>
-	    			<li><strong>Total Conferences:</strong> <%= mixerStatistics.getTotalMixers() %></li>
 	    			<li><strong>Commands:</strong> <%= rayoStatistics.getTotalCommands() %></li>
 	    			<li><strong>Events:</strong> <%= rayoStatistics.getCallEventsProcessed() %></li>
 	    		</ul>
@@ -70,7 +68,7 @@
   <script src="js/dashboard.js"></script>
   
 </body> 
-</html>
+</html> 
 
  
  

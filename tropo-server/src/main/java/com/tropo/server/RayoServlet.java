@@ -74,7 +74,7 @@ public class RayoServlet extends XmppServlet {
 	
     // Setup
     // ================================================================================
-
+    
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
