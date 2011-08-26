@@ -37,11 +37,11 @@
 	    	<div class="dashboard-info-detail">
 	    		<ul>
 	    			<li><strong>Build Number:</strong> <%= adminService.getBuildNumber() %></li>
-	    			<li><strong>Uptime:</strong> <%= info.getUptime() %></li>
-	    			<li><strong>Total Calls:</strong> <%= calls.getTotalCalls() %></li>
-	    			<li><strong>Total Conferences:</strong> <%= mixerStatistics.getTotalMixers() %></li>
-	    			<li><strong>Commands:</strong> <%= rayoStatistics.getTotalCommands() %></li>
-	    			<li><strong>Events:</strong> <%= rayoStatistics.getCallEventsProcessed() %></li>
+	    			<li><strong>Uptime:</strong> <span id="uptime"><%= info.getUptime() %></span></li>
+	    			<li><strong>Total Calls:</strong> <span id="calls"><%= calls.getTotalCalls() %></span></li>
+	    			<li><strong>Total Conferences:</strong> <span id="conferences"><%= mixerStatistics.getTotalMixers() %></span></li>
+	    			<li><strong>Commands:</strong> <span id="commands"><%= rayoStatistics.getTotalCommands() %></span></li>
+	    			<li><strong>Events:</strong> <span id="events"><%= rayoStatistics.getCallEventsProcessed() %></span></li>
 	    		</ul>
 	    	</div>
 		</div>
@@ -68,7 +68,26 @@
   <script src="js/jolokia-simple.js"></script>
   <script src="js/highcharts.src.js"></script>
   <script src="js/dashboard.js"></script>
+  <script src="js/periodic.js"></script>
+  <script>
+	  $(document).ready(function() {
+		$.periodic({period: 1000}, function() {
+			var j4p = new Jolokia("/jolokia");	
+			var uptime = { type: "read", mbean: "com.tropo:Type=Info", attribute: "Uptime" };
+			var calls = { type: "read", mbean: "com.tropo:Type=Calls", attribute: "ActiveCallsCount" };
+			var conferences = { type: "read", mbean: "com.tropo:Type=Mixer Statistics", attribute: "ActiveMixersCount" };
+			var events = { type: "read", mbean: "com.tropo:Type=Rayo", attribute: "CallEventsProcessed" };
+			var commands = { type: "read", mbean: "com.tropo:Type=Rayo", attribute: "TotalCommands" };
+			var responses = j4p.request([uptime,calls,conferences,events,commands]);
+		    $("#uptime").text(responses[0].value);
+		    $("#calls").text(responses[1].value);
+		    $("#conferences").text(responses[2].value);
+		    $("#events").text(responses[3].value);
+		    $("#commands").text(responses[4].value);
+		});	
+	  });  
   
+  </script>
 </body> 
 </html>
 
