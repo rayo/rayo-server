@@ -130,7 +130,7 @@ public abstract class ReflectiveActor implements Actor, Callback<Object> {
         }
         
         if (method != null) {
-        	globalMethodsCache.put(message.getClass(), method);
+ //       	globalMethodsCache.put(message.getClass(), method);
         }
         
         return method;
