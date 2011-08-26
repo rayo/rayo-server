@@ -72,7 +72,7 @@
   <script>
 	  $(document).ready(function() {
 		$.periodic({period: 1000}, function() {
-			var j4p = new Jolokia("/jolokia");	
+			var j4p = new Jolokia("<%=request.getContextPath()%>/jmx");	
 			var uptime = { type: "read", mbean: "com.tropo:Type=Info", attribute: "Uptime" };
 			var calls = { type: "read", mbean: "com.tropo:Type=Calls", attribute: "ActiveCallsCount" };
 			var conferences = { type: "read", mbean: "com.tropo:Type=Mixer Statistics", attribute: "ActiveMixersCount" };
