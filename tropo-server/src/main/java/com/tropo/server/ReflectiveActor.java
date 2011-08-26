@@ -10,6 +10,7 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.jetlang.channels.Channel;
 import org.jetlang.channels.MemoryChannel;
@@ -29,6 +30,7 @@ public abstract class ReflectiveActor implements Actor, Callback<Object> {
     private Channel<Object> channel;
     private boolean running = false;
     private Map<Class<?>, Method> targets = new HashMap<Class<?>, Method>();
+    private static Map<Class<?>, Method> globalMethodsCache = new ConcurrentHashMap<Class<?>, Method>();
 
     private PoolFiberFactory fiberFactory;
     private Set<EventHandler> eventHandlers = new LinkedHashSet<EventHandler>();
@@ -106,7 +108,8 @@ public abstract class ReflectiveActor implements Actor, Callback<Object> {
 
     private Method findMethod(Object message) {
         
-        Method method = null;
+        Method method = globalMethodsCache.get(message.getClass());
+        if (method != null) return method;
         
         Queue<Class<?>> queue = new LinkedList<Class<?>>();
         queue.add(message.getClass());
@@ -124,6 +127,10 @@ public abstract class ReflectiveActor implements Actor, Callback<Object> {
             if(superclz != null && !superclz.equals(Object.class)) {
                 queue.add(superclz);
             }
+        }
+        
+        if (method != null) {
+        	globalMethodsCache.put(message.getClass(), method);
         }
         
         return method;
