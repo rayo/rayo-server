@@ -54,10 +54,11 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     private CdrManager cdrManager;
     private CallRegistry callRegistry;
 
-    // This flag is used to send an answered event only after an initial join. We cannot 
-    // rely on Moho's AnsweredEvent event as it is being sent even when the media has not
-    // been joined yet causing potential issues on client code. See #133 on Github
+    // This is used to synchronize Answered event with media join as Moho may send you 
+    // an answered event before the media is joined
+    // Also note that no further synchronization is needed as we are within an Actor
     private boolean initialJoinReceived = false;
+    private boolean hasToBeAnswered = false;
     
     
     public CallActor(T call) {
@@ -204,19 +205,31 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     // ================================================================================
 
     @com.voxeo.moho.State
+    public void onAnswered(com.voxeo.moho.event.AnsweredEvent<Participant> event) throws Exception {
+        if(event.getSource().equals(participant)) {
+        	validateMediaOnAnswer();
+        }
+    }
+
+    private void validateMediaOnAnswer() {
+    	
+    	if (initialJoinReceived) {
+    		fire(new AnsweredEvent(getParticipantId()));
+    	} else {
+    		hasToBeAnswered = true;
+    	}
+	}
+        
+    @com.voxeo.moho.State
     public void onJoinComplete(com.voxeo.moho.event.JoinCompleteEvent event) {
         if(event.getSource().equals(participant)) {
-        	
-        	if (!initialJoinReceived) {
-        		initialJoinReceived = true;
-        		fire(new AnsweredEvent(getParticipantId()));
-        	}
-        	
+        	        	
             Participant peer = event.getParticipant();
             // If the join was successful and either:
             //    a) initiated via a JoinComand or 
             //    b) initiated by a remote call
             if (event.getCause() == Cause.JOINED && (joinees.contains(peer) || !event.isInitiator())) {
+            	validateMediaOnJoin();
                 if (peer != null) {
                     JoinDestinationType type = null;
                     if (peer instanceof Mixer) {
@@ -229,6 +242,16 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
                 }
             }
         }
+    }
+    
+    private void validateMediaOnJoin() {
+    	
+    	if (!initialJoinReceived) {
+    		initialJoinReceived = true;
+    	}
+    	if (hasToBeAnswered) {
+    		fire(new AnsweredEvent(getParticipantId()));
+    	}
     }
 
 	@com.voxeo.moho.State
