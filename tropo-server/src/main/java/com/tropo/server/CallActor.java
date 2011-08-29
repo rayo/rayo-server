@@ -54,6 +54,12 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     private CdrManager cdrManager;
     private CallRegistry callRegistry;
 
+    // This flag is used to send an answered event only after an initial join. We cannot 
+    // rely on Moho's AnsweredEvent event as it is being sent even when the media has not
+    // been joined yet causing potential issues on client code. See #133 on Github
+    private boolean initialJoinReceived = false;
+    
+    
     public CallActor(T call) {
     	super(call);
     }
@@ -200,6 +206,12 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     @com.voxeo.moho.State
     public void onJoinComplete(com.voxeo.moho.event.JoinCompleteEvent event) {
         if(event.getSource().equals(participant)) {
+        	
+        	if (!initialJoinReceived) {
+        		initialJoinReceived = true;
+        		fire(new AnsweredEvent(getParticipantId()));
+        	}
+        	
             Participant peer = event.getParticipant();
             // If the join was successful and either:
             //    a) initiated via a JoinComand or 
@@ -254,14 +266,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 		}
 	}
 
-    @com.voxeo.moho.State
-    public void onAnswered(com.voxeo.moho.event.AnsweredEvent<Participant> event) throws Exception {
-        if(event.getSource().equals(participant)) {
-            fire(new AnsweredEvent(getParticipantId()));
-        }
-    }
-
-    @com.voxeo.moho.State
+	@com.voxeo.moho.State
     public void onRing(com.voxeo.moho.event.RingEvent event) throws Exception {
         if(event.getSource().equals(participant)) {
             fire(new RingingEvent(getParticipantId()));
