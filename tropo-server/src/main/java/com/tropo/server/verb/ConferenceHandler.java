@@ -1,5 +1,7 @@
 package com.tropo.server.verb;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -11,6 +13,8 @@ import javax.media.mscontrol.mixer.MediaMixer;
 import javax.media.mscontrol.mixer.MixerEvent;
 import javax.validation.ConstraintValidatorContext;
 
+import com.tropo.core.FinishedSpeakingEvent;
+import com.tropo.core.SpeakingEvent;
 import com.tropo.core.verb.Conference;
 import com.tropo.core.verb.ConferenceCompleteEvent;
 import com.tropo.core.verb.ConferenceCompleteEvent.Reason;
@@ -31,11 +35,13 @@ import com.tropo.server.MixerStatistics;
 import com.tropo.server.MohoUtil;
 import com.tropo.server.conference.ParticipantController;
 import com.tropo.server.exception.ExceptionMapper;
+import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.Call;
 import com.voxeo.moho.Participant;
 import com.voxeo.moho.Participant.JoinType;
 import com.voxeo.moho.State;
 import com.voxeo.moho.conference.ConferenceController;
+import com.voxeo.moho.event.ActiveSpeakerEvent;
 import com.voxeo.moho.event.InputCompleteEvent;
 import com.voxeo.moho.media.Input;
 import com.voxeo.moho.media.Output;
@@ -47,6 +53,8 @@ import com.voxeo.servlet.xmpp.StanzaError;
 
 public class ConferenceHandler extends AbstractLocalVerbHandler<Conference, Call> implements ParticipantController {
 
+	private static final Loggerf log = Loggerf.getLogger(ConferenceHandler.class);
+	
     public static final String PARTICIPANT_KEY = "com.tropo.conference.participant.";
     private static final String WAIT_LIST_KEY = "com.tropo.conference.waitList";
 
@@ -66,6 +74,8 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference, Call
     private boolean mute;
     private Character terminator;
     private boolean tonePassthrough;
+
+    private List<String> activeSpeakers = new ArrayList<String>();
 
     @Override
     public void start() {
@@ -118,7 +128,7 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference, Call
         //TODO: This is the only place I found to create the actual conference actor. I didn't find events for 
         // conference/mixer creation
         MixerActor actor = mixerActoryFactory.create(mohoConference);
-        actor.setupMohoListeners(mohoConference);
+        actor.setupMohoListeners(mohoConference, this);
         // Wire up default call handlers
         for (EventHandler handler : callManager.getEventHandlers()) {
             actor.addEventHandler(handler);
@@ -420,6 +430,41 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference, Call
         }
     }
     
+    
+    // Moho Events
+    // ================================================================================
+
+    @State
+    public void onActiveSpeaker(ActiveSpeakerEvent event) throws Exception {
+
+    	if (log.isDebugEnabled()) {
+    		log.debug("Received active speaker event. Active speakers: %s", event.getActiveSpeakers().length);
+    	}
+    	for (Participant participant: event.getActiveSpeakers()) {
+    		
+    		if (!activeSpeakers.contains(participant.getId())) {
+    			activeSpeakers.add(participant.getId());
+        		fire(new SpeakingEvent(model, participant.getId()));
+    		}        		
+    	}
+    	Iterator<String> it = activeSpeakers.iterator();
+    	while (it.hasNext()) {
+    		String participantId = it.next();
+    		boolean found = false;
+    		for (Participant participant: event.getActiveSpeakers()) {
+    			if (participant.getId().equals(participantId)) {
+        			found = true;
+        			break;
+    			}
+    		}
+    		if (found) {
+    			it.remove();
+        		fire(new FinishedSpeakingEvent(model, participantId));
+    		}
+    	}
+
+    }
+    
     public void setMixerActoryFactory(MixerActorFactory mixerActoryFactory) {
 		
     	this.mixerActoryFactory = mixerActoryFactory;
@@ -437,4 +482,9 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference, Call
 	public void setMixerStatistics(MixerStatistics mixerStatistics) {
 		this.mixerStatistics = mixerStatistics;
 	}
+	
+    public List<String> getActiveSpeakers() {
+    	
+    	return new ArrayList<String>(activeSpeakers);
+    }
 }

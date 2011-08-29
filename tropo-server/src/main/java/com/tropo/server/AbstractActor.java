@@ -154,6 +154,7 @@ public abstract class AbstractActor<T extends Participant> extends ReflectiveAct
         public void fire(VerbEvent event) {
             try {
                 AbstractActor.this.fire(event);
+                AbstractActor.this.flush();
             } catch (Exception e) {
                 log.error("Uncaght exception while dispatching subscription events", e);
             }

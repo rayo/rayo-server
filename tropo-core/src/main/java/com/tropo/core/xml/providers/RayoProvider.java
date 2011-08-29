@@ -79,10 +79,6 @@ public class RayoProvider extends BaseProvider {
             return buildAnsweredEvent(element);
         } else if (elementName.equals("ringing")) {
             return buildRingingEvent(element);
-        } else if (elementName.equals("speaking")) {
-            return buildSpeakingEvent(element);
-        } else if (elementName.equals("finished-speaking")) {
-            return buildFinishedSpeakingEvent(element);
         } else if (elementName.equals("end")) {
             return buildCallEnd(element);
         } else if (elementName.equals("dial")) {
@@ -144,14 +140,6 @@ public class RayoProvider extends BaseProvider {
 
     private Object buildRingingEvent(Element element) {
         return new RingingEvent(null);
-    }
-
-    private Object buildSpeakingEvent(Element element) {
-        return new SpeakingEvent(null, element.attributeValue("mixer-id"));
-    }
-
-    private Object buildFinishedSpeakingEvent(Element element) {
-        return new FinishedSpeakingEvent(null, element.attributeValue("mixer-id"));
     }
     
     private Object buildOfferEvent(Element element) throws URISyntaxException {
@@ -308,10 +296,6 @@ public class RayoProvider extends BaseProvider {
             createEndEvent(object, document);
         } else if (object instanceof RingingEvent) {
             createRingEvent(object, document);
-        } else if (object instanceof SpeakingEvent) {
-            createSpeakingEvent(object, document);
-        } else if (object instanceof FinishedSpeakingEvent) {
-            createFinishedSpeakingEvent(object, document);
         } else if (object instanceof AnsweredEvent) {
             createAnswerEvent(object, document);
         } else if (object instanceof AcceptCommand) {
@@ -376,16 +360,6 @@ public class RayoProvider extends BaseProvider {
 
     private void createRingEvent(Object object, Document document) {
         document.addElement(new QName("ringing", RAYO_NAMESPACE));
-    }
-
-    private void createSpeakingEvent(Object object, Document document) {
-        Element root = document.addElement(new QName("speaking", RAYO_NAMESPACE));
-        root.addAttribute("mixer-id", ((SpeakingEvent)object).getMixerId());
-    }
-
-    private void createFinishedSpeakingEvent(Object object, Document document) {
-        Element root = document.addElement(new QName("finished-speaking", RAYO_NAMESPACE));
-        root.addAttribute("mixer-id", ((FinishedSpeakingEvent)object).getMixerId());
     }
     
     private void createEndEvent(Object object, Document document) {

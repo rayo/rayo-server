@@ -18,7 +18,7 @@ public class Messages {
 	public static final String MISSING_AMOUNT = "Amount is a mandatory field.";
 	public static final String MISSING_DIRECTION = "Direction is a mandatory field.";
 	public static final String MISSING_DTMF_KEY = "DTMF key is a mandatory field.";
-	public static final String MISSING_MIXER_ID = "Mixer id is a mandatory field.";
+	public static final String MISSING_SPEAKER_ID = "Call id is a mandatory field.";
 
     public static final String INVALID_DURATION = "Invalid duration for '%s'";
     public static final String INVALID_INPUT_MODE = "Invalid input mode.";

@@ -904,25 +904,25 @@ class ValidationTest {
 	@Test
 	public void validateSpeakingMissingCallId() {
 				
-		def output = parseXml("""<speaking xmlns="urn:xmpp:rayo:1"/>""")
+		def output = parseXml("""<speaking xmlns="urn:xmpp:tropo:conference:1"/>""")
 		
 		def errorMapping = assertValidationException(output)
 		assertNotNull errorMapping
 		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
 		assertEquals errorMapping.condition, ExceptionMapper.toString(StanzaError.Condition.BAD_REQUEST)
-		assertEquals errorMapping.text, Messages.MISSING_MIXER_ID
+		assertEquals errorMapping.text, Messages.MISSING_SPEAKER_ID
 	}
 	
 	@Test
 	public void validateFinishedSpeakingMissingCallId() {
 				
-		def output = parseXml("""<finished-speaking xmlns="urn:xmpp:rayo:1"/>""")
+		def output = parseXml("""<finished-speaking xmlns="urn:xmpp:tropo:conference:1"/>""")
 		
 		def errorMapping = assertValidationException(output)
 		assertNotNull errorMapping
 		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
 		assertEquals errorMapping.condition, ExceptionMapper.toString(StanzaError.Condition.BAD_REQUEST)
-		assertEquals errorMapping.text, Messages.MISSING_MIXER_ID
+		assertEquals errorMapping.text, Messages.MISSING_SPEAKER_ID
 	}
 
 	// Invalid jids

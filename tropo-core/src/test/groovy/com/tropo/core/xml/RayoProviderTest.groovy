@@ -1546,30 +1546,30 @@ public class RayoProviderTest {
 
 	@Test
 	public void speakingToXml() {
-		SpeakingEvent speaking = new SpeakingEvent(null,"1234");
-		assertEquals("""<speaking xmlns="urn:xmpp:rayo:1" mixer-id="1234"/>""", toXml(speaking));
+		SpeakingEvent speaking = new SpeakingEvent(new Conference(callId:'12', verbId:'13'),"1234");
+		assertEquals("""<speaking xmlns="urn:xmpp:tropo:conference:1" call-id="1234"/>""", toXml(speaking));
 	}
 	
 	@Test
 	public void speakingFromXml() {
-		def speaking = fromXml("""<speaking xmlns="urn:xmpp:rayo:1" mixer-id="1234"></speaking>""")
+		def speaking = fromXml("""<speaking xmlns="urn:xmpp:tropo:conference:1" call-id="1234"></speaking>""")
 		assertNotNull speaking
 		assertTrue speaking instanceof SpeakingEvent
-		assertEquals speaking.mixerId,"1234"
+		assertEquals speaking.speakerId,"1234"
 	}
 	
 	@Test
 	public void finishedSpeakingToXml() {
-		FinishedSpeakingEvent speaking = new FinishedSpeakingEvent(null,"1234");
-		assertEquals("""<finished-speaking xmlns="urn:xmpp:rayo:1" mixer-id="1234"/>""", toXml(speaking));
+		FinishedSpeakingEvent speaking = new FinishedSpeakingEvent(new Conference(callId:'12', verbId:'13'),"1234");
+		assertEquals("""<finished-speaking xmlns="urn:xmpp:tropo:conference:1" call-id="1234"/>""", toXml(speaking));
 	}
 	
 	@Test
 	public void finishedSpeakingFromXml() {
-		def speaking = fromXml("""<finished-speaking xmlns="urn:xmpp:rayo:1" mixer-id="1234"></finished-speaking>""")
+		def speaking = fromXml("""<finished-speaking xmlns="urn:xmpp:tropo:conference:1" call-id="1234"></finished-speaking>""")
 		assertNotNull speaking			
 		assertTrue speaking instanceof FinishedSpeakingEvent
-		assertEquals speaking.mixerId,"1234"
+		assertEquals speaking.speakerId,"1234"
 	}
 
 	// Dtmf Command
