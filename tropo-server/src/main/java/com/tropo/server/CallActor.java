@@ -207,7 +207,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     @com.voxeo.moho.State
     public void onAnswered(com.voxeo.moho.event.AnsweredEvent<Participant> event) throws Exception {
         if(event.getSource().equals(participant)) {
-        	validateMediaOnAnswer();
+        	fire(new AnsweredEvent(getParticipantId()));
         }
     }
 
@@ -229,7 +229,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
             //    a) initiated via a JoinComand or 
             //    b) initiated by a remote call
             if (event.getCause() == Cause.JOINED && (joinees.contains(peer) || !event.isInitiator())) {
-            	validateMediaOnJoin();
+
                 if (peer != null) {
                     JoinDestinationType type = null;
                     if (peer instanceof Mixer) {
