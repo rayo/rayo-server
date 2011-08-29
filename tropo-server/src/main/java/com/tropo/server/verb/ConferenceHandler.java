@@ -286,6 +286,7 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference, Call
         synchronized (mohoConference.getId()) {
             
         	participant.setAttribute(getMohoParticipantAttributeKey(), null);
+        	activeSpeakers.clear();
             removeCallFromWaitList();
 
             // Free up media resources if the call is still active
