@@ -128,7 +128,13 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     	participant.output(command);
     	
     	//TODO: Check with Jose if we should send this event to the target participant or not
-    	fire(new DtmfEvent(participant.getId(), message.getTones()));
+    	if (message.getTones().length() == 1) {
+    		fire(new DtmfEvent(participant.getId(), message.getTones()));    		
+    	} else {
+    		for (int i = 0; i < message.getTones().length(); i++) {
+        		fire(new DtmfEvent(participant.getId(), String.valueOf(message.getTones().charAt(i))));
+    		}
+    	}
     }
     
     @Message
