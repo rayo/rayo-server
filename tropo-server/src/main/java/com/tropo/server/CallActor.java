@@ -1,6 +1,8 @@
 package com.tropo.server;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -58,7 +60,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     // an answered event before the media is joined
     // Also note that no further synchronization is needed as we are within an Actor
     private boolean initialJoinReceived = false;
-    private boolean hasToBeAnswered = false;
+    private Set<String> pendingAnswer = new HashSet<String>();
     
     
     public CallActor(T call) {
@@ -207,7 +209,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     @com.voxeo.moho.State
     public void onAnswered(com.voxeo.moho.event.AnsweredEvent<Participant> event) throws Exception {
         if(event.getSource().equals(participant)) {
-        	fire(new AnsweredEvent(getParticipantId()));
+        	validateMediaOnAnswer();
         }
     }
 
@@ -216,20 +218,21 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     	if (initialJoinReceived) {
     		fire(new AnsweredEvent(getParticipantId()));
     	} else {
-    		hasToBeAnswered = true;
+    		pendingAnswer.add(getParticipantId());
     	}
 	}
         
     @com.voxeo.moho.State
     public void onJoinComplete(com.voxeo.moho.event.JoinCompleteEvent event) {
         if(event.getSource().equals(participant)) {
-        	        	
             Participant peer = event.getParticipant();
+        	if (event.getCause() == Cause.JOINED) {
+        		validateMediaOnJoin(peer);
+        	}
             // If the join was successful and either:
             //    a) initiated via a JoinComand or 
             //    b) initiated by a remote call
-            if (event.getCause() == Cause.JOINED && (joinees.contains(peer) || !event.isInitiator())) {
-
+            if (event.getCause() == Cause.JOINED && (joinees.contains(peer) || !event.isInitiator())) {            	
                 if (peer != null) {
                     JoinDestinationType type = null;
                     if (peer instanceof Mixer) {
@@ -244,13 +247,24 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
         }
     }
     
-    private void validateMediaOnJoin() {
+    private void validateMediaOnJoin(Participant peer) {
     	
     	if (!initialJoinReceived) {
     		initialJoinReceived = true;
     	}
-    	if (hasToBeAnswered) {
-    		fire(new AnsweredEvent(getParticipantId()));
+    	if (pendingAnswer.size() > 0) {
+    		validateAnswer(participant);
+    		validateAnswer(peer);
+    	}
+    }
+    
+    private void validateAnswer(Participant participant) {
+    	
+    	if (participant != null) {
+    		if (pendingAnswer.contains(participant.getId())) {
+    			fire(new AnsweredEvent(participant.getId()));
+    			pendingAnswer.remove(participant.getId());
+    		}
     	}
     }
 
