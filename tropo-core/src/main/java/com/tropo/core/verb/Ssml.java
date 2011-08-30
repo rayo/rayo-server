@@ -17,10 +17,21 @@ public class Ssml {
     private String voice;
 
     public Ssml(String ssml) {
-        this.ssml = ssml;
+        this.ssml = cleanupSpeakTag(ssml);
     }
 
-    public String getText() {
+    private String cleanupSpeakTag(String ssml) {
+
+    	// Moho will wrap text with speak tags. 
+    	// The client app may have sent speak tags, so we get rid of it
+    	if (ssml.startsWith("<speak")) {
+    		ssml = ssml.substring(ssml.indexOf('>') +1);
+    		ssml = ssml.replaceAll("</speak>","");
+    	}
+    	return ssml;
+	}
+
+	public String getText() {
         return ssml;
     }
 
