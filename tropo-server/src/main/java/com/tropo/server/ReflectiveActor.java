@@ -30,7 +30,7 @@ public abstract class ReflectiveActor implements Actor, Callback<Object> {
     private Channel<Object> channel;
     private boolean running = false;
     private Map<Class<?>, Method> targets = new HashMap<Class<?>, Method>();
-    private static Map<Class<?>, Method> globalMethodsCache = new ConcurrentHashMap<Class<?>, Method>();
+    private static Map<String, Method> globalMethodsCache = new ConcurrentHashMap<String, Method>();
 
     private PoolFiberFactory fiberFactory;
     private Set<EventHandler> eventHandlers = new LinkedHashSet<EventHandler>();
@@ -108,7 +108,7 @@ public abstract class ReflectiveActor implements Actor, Callback<Object> {
 
     private Method findMethod(Object message) {
         
-        Method method = globalMethodsCache.get(message.getClass());
+        Method method = globalMethodsCache.get(getMethodKey(message));
         if (method != null) return method;
         
         Queue<Class<?>> queue = new LinkedList<Class<?>>();
@@ -130,13 +130,18 @@ public abstract class ReflectiveActor implements Actor, Callback<Object> {
         }
         
         if (method != null) {
- //       	globalMethodsCache.put(message.getClass(), method);
+        	globalMethodsCache.put(getMethodKey(message), method);
         }
         
         return method;
     }
 
-    /**
+    private String getMethodKey(Object message) {
+
+    	return this.getClass().toString() + message.getClass().toString();
+	}
+
+	/**
      * Continue after an exception by default
      * 
      * @param throwable
