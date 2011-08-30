@@ -140,7 +140,7 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
 				log.error("Error while recording conversation");
 				try {
 					recording.get();
-					complete(VerbCompleteEvent.Reason.ERROR);
+					complete(VerbCompleteEvent.Reason.ERROR, event.getErrorText());
 				} catch (Exception e) {
 					if (e.getCause() instanceof MediaException) {
 						complete(VerbCompleteEvent.Reason.ERROR,e.getCause().getMessage());

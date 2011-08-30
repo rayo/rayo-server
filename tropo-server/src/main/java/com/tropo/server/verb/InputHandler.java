@@ -113,7 +113,8 @@ public class InputHandler extends AbstractLocalVerbHandler<Input, Participant> {
             completeEvent = new InputCompleteEvent(model, VerbCompleteEvent.Reason.HANGUP);
             break;
         case ERROR:
-            completeEvent = new InputCompleteEvent(model, "Internal Server Error");
+        	String cause = event.getErrorText() == null ? "Internal Server Error" : event.getErrorText();
+            completeEvent = new InputCompleteEvent(model, cause);
             break;
         case UNKNOWN:
         default:

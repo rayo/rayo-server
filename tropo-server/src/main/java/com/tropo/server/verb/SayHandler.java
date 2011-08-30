@@ -126,7 +126,17 @@ public class SayHandler extends AbstractLocalVerbHandler<Say, Participant> {
 		} catch (ValidationException ve) {
 			return ve.getMessage();
 		}
-		return "Unknown cause";
+		
+		String cause = event.getErrorText();
+		if (cause != null) {
+			if (cause.startsWith("NOT_FOUND")) {
+				cause = "Could not find the Resource's URI";
+			}
+		} else {
+			cause = "Unknown cause";
+		}
+		
+		return cause;
 	}
 	
 	public void setSsmlValidator(SsmlValidator ssmlValidator) {

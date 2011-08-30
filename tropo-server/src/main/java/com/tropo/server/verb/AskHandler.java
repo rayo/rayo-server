@@ -154,7 +154,7 @@ public class AskHandler extends AbstractLocalVerbHandler<Ask,Participant> {
 		} catch (ValidationException ve) {
 			return ve.getMessage();
 		}
-		return "Internal Server Error";
+		return event.getErrorText() == null ? "Internal Server Error" : event.getErrorText();
 	}
 
 	public void setSsmlValidator(SsmlValidator ssmlValidator) {
