@@ -26,6 +26,7 @@ import com.tropo.core.verb.Ssml;
 import com.tropo.core.verb.UnmuteCommand;
 import com.tropo.core.verb.VerbCommand;
 import com.tropo.core.verb.VerbCompleteEvent;
+import com.tropo.server.CallActor;
 import com.tropo.server.CallManager;
 import com.tropo.server.EventHandler;
 import com.tropo.server.MixerActor;
@@ -463,7 +464,7 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference, Call
         		fire(new FinishedSpeakingEvent(model, participantId));
     		}
     	}
-
+    	((CallActor<?>)getActor()).flush();
     }
     
     public void setMixerActoryFactory(MixerActorFactory mixerActoryFactory) {
