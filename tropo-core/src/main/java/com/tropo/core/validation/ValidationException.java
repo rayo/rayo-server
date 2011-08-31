@@ -6,9 +6,11 @@ import java.util.Set;
 
 import javax.validation.ConstraintViolation;
 
+import com.tropo.core.exception.RecoverableException;
+
 
 @SuppressWarnings("serial")
-public class ValidationException extends RuntimeException {
+public class ValidationException extends RecoverableException {
 
 	private List<ConstraintViolation<?>> violations = new ArrayList<ConstraintViolation<?>>();
 	

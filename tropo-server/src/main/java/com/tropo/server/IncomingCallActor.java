@@ -12,6 +12,7 @@ import com.tropo.core.EndEvent.Reason;
 import com.tropo.core.OfferEvent;
 import com.tropo.core.RedirectCommand;
 import com.tropo.core.RejectCommand;
+import com.tropo.core.exception.RecoverableException;
 import com.voxeo.moho.ApplicationContext;
 import com.voxeo.moho.Call;
 import com.voxeo.moho.Endpoint;
@@ -83,9 +84,17 @@ public class IncomingCallActor extends CallActor<IncomingCall> {
 
     @Message
     public void answer(AnswerCommand message) {
-        Map<String, String> headers = message.getHeaders();
-        participant.answer(headers);
-        getCallStatistics().callAnswered();
+    	
+    	switch (participant.getCallState()) {
+    		case CONNECTED : throw new RecoverableException("Call is already answered");
+    		case DISCONNECTED:
+    		case FAILED:
+    			throw new RecoverableException("Call is either already disconnected or failed");
+    		default:
+    	        Map<String, String> headers = message.getHeaders();
+    	        participant.answer(headers);
+    	        getCallStatistics().callAnswered();
+    	}
     }
 
     @Message

@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 import com.tropo.core.CallCommand;
 import com.tropo.core.EndEvent;
 import com.tropo.core.EndEvent.Reason;
+import com.tropo.core.exception.RecoverableException;
 import com.tropo.core.validation.ValidationException;
 import com.tropo.core.validation.Validator;
 import com.tropo.core.verb.Ssml;
@@ -66,8 +67,10 @@ public abstract class AbstractActor<T extends Participant> extends ReflectiveAct
     @Override
     protected boolean handleException(Throwable throwable) {
     	
-    	if (throwable instanceof ValidationException) {
-    		// Right now, validation exceptions are considered as Recoverable exceptions
+    	if (throwable instanceof RecoverableException) {
+    		// Recoverable exceptions are considered as minor issues that should not 
+    		// end the calls.
+    		// Validation exceptions are considered as Recoverable exceptions
     		// so we won't be ending the call when a validation error happens
     		//TODO: This may be revisited in the future
     		return true;
