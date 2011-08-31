@@ -17,19 +17,8 @@ public class Ssml {
     private String voice;
 
     public Ssml(String ssml) {
-        this.ssml = cleanupSpeakTag(ssml);
+        this.ssml = ssml;
     }
-
-    private String cleanupSpeakTag(String ssml) {
-
-    	// Moho will wrap text with speak tags. 
-    	// The client app may have sent speak tags, so we get rid of it
-    	if (ssml.startsWith("<speak")) {
-    		ssml = ssml.substring(ssml.indexOf('>') +1);
-    		ssml = ssml.replaceAll("</speak>","");
-    	}
-    	return ssml;
-	}
 
 	public String getText() {
         return ssml;
@@ -48,7 +37,12 @@ public class Ssml {
     }    
 
     public URI toUri() {
-        return URI.create("data:" + Networks.urlEncode("application/ssml+xml,<speak>" + getText() + "</speak>"));
+    	String uriText = ssml.trim();
+    	if (ssml.startsWith("<speak")) {
+    		return URI.create("data:" + Networks.urlEncode("application/ssml+xml," + uriText));    		
+    	} else {
+    		return URI.create("data:" + Networks.urlEncode("application/ssml+xml,<speak>" + uriText + "</speak>"));
+    	}
     }
 
     @Override
