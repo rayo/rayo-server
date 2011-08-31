@@ -1,48 +1,34 @@
 package com.tropo.server.filter;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
 import com.tropo.core.CallCommand;
 import com.tropo.core.CallEvent;
 
 public class DefaultFilterChain extends AbstractListFilterChain {
 	
-	private Map<Object, Object> attributes = new ConcurrentHashMap<Object, Object>();
-
 	@Override
 	public void handleCommandRequest(CallCommand command) {
 	
+		FilterContext context = new FilterContext();
 		for(MessageFilter filter: filters) {
-			filter.handleCommandRequest(command, this);
+			filter.handleCommandRequest(command, context);
 		}
 	}
 	
 	@Override
 	public void handleCommandResponse(Object response) {
 		
+		FilterContext context = new FilterContext();
 		for(MessageFilter filter: filters) {
-			filter.handleCommandResponse(response, this);
+			filter.handleCommandResponse(response, context);
 		}
 	}
 	
 	@Override
 	public void handleEvent(CallEvent event) {
 		
+		FilterContext context = new FilterContext();
 		for(MessageFilter filter: filters) {
-			filter.handleEvent(event, this);
+			filter.handleEvent(event, context);
 		}
-	}
-	
-	@Override
-	public void setAttribute(Object key, Object value) {
-		
-		attributes.put(key,value);
-	}
-	
-	@Override
-	public Object getAttribute(Object key) {
-
-		return attributes.get(key);
 	}
 }

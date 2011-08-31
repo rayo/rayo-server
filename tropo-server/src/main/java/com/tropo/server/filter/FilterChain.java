@@ -48,23 +48,6 @@ public interface FilterChain {
 	public List<MessageFilter> getFilters();
 	
 	/**
-	 * Sets an attribute on the filter chain
-	 * 
-	 * @param key Key
-	 * @param value Value
-	 */
-	public void setAttribute(Object key, Object value);
-	
-	/**
-	 * Gets the value for the given key or <code>null</code> if the key is not found.
-	 * 
-	 * @param key Key
-	 * 
-	 * @return Object value for the given key or <code>null</code> if not found.
-	 */
-	public Object getAttribute(Object key);
-	
-	/**
 	 * Adds a message filter to this filter chain add the end of the chain
 	 * 
 	 * @param filter Filter to add

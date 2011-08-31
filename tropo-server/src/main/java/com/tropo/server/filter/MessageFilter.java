@@ -20,10 +20,9 @@ public interface MessageFilter {
 	 * invoked <b>before</b> the command is executed. 
 	 * 
 	 * @param command Call command that has been intercepted
-	 * @param chain The chain that this filter belongs to. It can be used to pass data across 
-	 * message filters
+	 * @param context Context data that can be shared across message filters
 	 */
-	public void handleCommandRequest(CallCommand command, FilterChain chain);
+	public void handleCommandRequest(CallCommand command, FilterContext context);
 	
 	/**
 	 * Intercepts and handles a Rayo command response. This message filter method is 
@@ -31,18 +30,16 @@ public interface MessageFilter {
 	 * response has been sent.
 	 * 
 	 * @param response Response object that has been intercepted
-	 * @param chain The chain that this filter belongs to. It can be used to pass data across 
-	 * message filters
+	 * @param context Context data that can be shared across message filters
 	 */
-	public void handleCommandResponse(Object response, FilterChain chain);
+	public void handleCommandResponse(Object response, FilterContext context);
 	
 	/**
 	 * Intercepts and handles any Rayo event. This message filter method is being invoked
 	 * <b>before</b> the event has been sent.
 	 * 
 	 * @param event CAll event that has been intercepted
-	 * @param chain The chain that this filter belongs to. It can be used to pass data across 
-	 * message filters
+	 * @param context Context data that can be shared across message filters
 	 */
-	public void handleEvent(CallEvent event, FilterChain chain);
+	public void handleEvent(CallEvent event, FilterContext context);
 }

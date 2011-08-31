@@ -63,15 +63,7 @@ public class FilterChainTest {
 		filtersChain.addFilter(1,filter3)
 		assertEquals filtersChain.filters[1],filter3
 	}
-	
-	@Test
-	public void testSetAttribute() throws InterruptedException {
 		
-		assertNull filtersChain.getAttribute("test")
-		filtersChain.setAttribute("test","value")
-		assertEquals filtersChain.getAttribute("test"),"value"
-	}
-	
 	@Test
 	public void testCommandRequestExecutedInSequence() throws InterruptedException {
 		
@@ -121,5 +113,42 @@ public class FilterChainTest {
 		assertEquals queue.poll(),"filter1"
 		assertEquals queue.poll(),"filter2"
 		assertEquals queue.poll(),"filter3"
+	}
+	
+	@Test
+	public void testSetAttribute() throws InterruptedException {
+
+		def queue = new LinkedList()
+		def filter1 = [handleCommandRequest:{command, context ->
+			context.setAttribute("test","value")
+			queue.offer("filter1")}] as MessageFilter
+		def filter2 = [handleCommandRequest:{command, context ->
+			queue.offer(context.getAttribute("test"))}] as MessageFilter
+
+		filtersChain.addFilter(filter1)
+		filtersChain.addFilter(filter2)
+
+		filtersChain.handleCommandRequest(null)
+		assertEquals queue.poll(),"filter1"
+		assertEquals queue.poll(),"value"
+	}
+	
+	@Test
+	public void testFilterContextIsResetAcrossChainExecutions() throws InterruptedException {
+
+		def queue = new LinkedList()
+		def filter1 = [handleCommandRequest:{command, context ->
+			context.setAttribute("test","value")}] as MessageFilter
+
+		filtersChain.addFilter(filter1)
+		filtersChain.handleCommandRequest(null)
+		
+		def filter2 = [handleCommandRequest:{command, context ->
+			queue.offer(context.getAttribute("test")?context.getAttribute("test"):"empty")}] as MessageFilter
+		filtersChain.clear()
+		filtersChain.addFilter(filter2)
+		filtersChain.handleCommandRequest(null)
+
+		assertEquals queue.poll(),"empty"
 	}
 }
