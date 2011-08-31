@@ -36,6 +36,7 @@ import com.tropo.core.verb.VerbRef;
 import com.tropo.core.xml.XmlProvider;
 import com.tropo.server.exception.ErrorMapping;
 import com.tropo.server.exception.ExceptionMapper;
+import com.tropo.server.filter.FilterChain;
 import com.voxeo.exceptions.NotFoundException;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.Call;
@@ -71,6 +72,8 @@ public class RayoServlet extends XmppServlet {
     private CdrManager cdrManager;
 
     private XmppFactory xmppFactory;
+    
+    private FilterChain filtersChain;
 	
     // Setup
     // ================================================================================
@@ -126,6 +129,9 @@ public class RayoServlet extends XmppServlet {
     	if (event instanceof EndEvent) {
     		cdrManager.store(event.getCallId());
     	}
+    	
+    	// Invoke filters
+    	filtersChain.handleEvent(event);
     	
     	if (event instanceof OfferEvent) {
     		JID callTo = xmppFactory.createJID(getBareJID(((OfferEvent)event).getTo().toString()));
@@ -213,7 +219,7 @@ public class RayoServlet extends XmppServlet {
                 	// Rayo Command
                     Object command = provider.fromXML(payload);
                     rayoStatistics.commandReceived(command);
-
+                    
                     // Handle outbound 'dial' command
                     if (command instanceof DialCommand) {
                     	if (adminService.isQuiesceMode()) {
@@ -246,7 +252,10 @@ public class RayoServlet extends XmppServlet {
                     assertion(command instanceof CallCommand, "Is this a valid call command?");
                     
                     final CallCommand callCommand = (CallCommand) command;
-                                        
+                    
+                	// Invoke filters
+                    filtersChain.handleCommandRequest(callCommand);
+                    
                     // Extract Call ID
                     final String callId = request.getTo().getNode();
                     if (callId == null) {
@@ -276,6 +285,9 @@ public class RayoServlet extends XmppServlet {
 
                             Object value = commandResponse.getValue();
 
+                        	// Invoke filters
+                            filtersChain.handleCommandResponse(value);
+                            
                             if (value instanceof Exception) {
                                 sendIqError(request, (Exception)value);
                             }
@@ -505,4 +517,8 @@ public class RayoServlet extends XmppServlet {
 		this.jidRegistry = jidRegistry;
 	}
 
+	public void setFiltersChain(FilterChain filtersChain) {
+		this.filtersChain = filtersChain;
+	}
+	
 }

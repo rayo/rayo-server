@@ -404,5 +404,16 @@
   	</bean>
   	
   	<!-- Exception Mapper -->
-  	<bean id="exceptionMapper" class="com.tropo.server.exception.ExceptionMapper"/> 
+  	<bean id="exceptionMapper" class="com.tropo.server.exception.ExceptionMapper"/>
+  	
+  	<!-- Message filters from SPI -->
+  	<bean id="spiMessageFilters"
+	      class="org.springframework.beans.factory.serviceloader.ServiceListFactoryBean"
+	      p:serviceType="com.tropo.server.filter.MessageFilter"/>
+	      
+  	<!-- Default filter chain -->
+  	<bean id="filtersChain" class="com.tropo.server.filter.DefaultFilterChain">
+  		<property name="filters" ref="spiMessageFilters"/>
+  	</bean> 
+  	 
 </beans>

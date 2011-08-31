@@ -22,5 +22,6 @@
 		<property name="adminService" ref="adminService" />
 		<property name="cdrManager" ref="cdrManager" />	
 		<property name="jidRegistry" ref="jidRegistry"/>	
+		<property name="filtersChain" ref="filtersChain"/>
 	</bean>	
 </beans>

@@ -342,5 +342,9 @@
   		</property>
   	</bean>
 		
-	<bean id="exceptionMapper" class="com.tropo.server.exception.ExceptionMapper"/> 
+	<bean id="exceptionMapper" class="com.tropo.server.exception.ExceptionMapper"/>
+	
+	<!-- Default filter chain -->
+  	<bean id="filtersChain" class="com.tropo.server.filter.DefaultFilterChain"/> 
+	 
 </beans>
