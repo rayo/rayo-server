@@ -1,16 +1,13 @@
 package com.tropo.server.filter;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.tropo.core.CallCommand;
 import com.tropo.core.CallEvent;
 
-public class DefaultFilterChain implements FilterChain {
+public class DefaultFilterChain extends AbstractListFilterChain {
 	
-	private List<MessageFilter> filters;
 	private Map<Object, Object> attributes = new ConcurrentHashMap<Object, Object>();
 
 	@Override
@@ -38,12 +35,6 @@ public class DefaultFilterChain implements FilterChain {
 	}
 	
 	@Override
-	public List<MessageFilter> getFilters() {
-		
-		return new ArrayList<MessageFilter>(filters);
-	}
-	
-	@Override
 	public void setAttribute(Object key, Object value) {
 		
 		attributes.put(key,value);
@@ -53,9 +44,5 @@ public class DefaultFilterChain implements FilterChain {
 	public Object getAttribute(Object key) {
 
 		return attributes.get(key);
-	}
-
-	public void setFilters(List<MessageFilter> filters) {
-		this.filters = filters;
 	}
 }
