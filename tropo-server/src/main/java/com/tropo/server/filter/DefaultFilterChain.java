@@ -14,7 +14,7 @@ public class DefaultFilterChain extends AbstractListFilterChain {
 	public void handleCommandRequest(CallCommand command) {
 	
 		for(MessageFilter filter: filters) {
-			filter.handleCommandRequest(command);
+			filter.handleCommandRequest(command, this);
 		}
 	}
 	
@@ -22,7 +22,7 @@ public class DefaultFilterChain extends AbstractListFilterChain {
 	public void handleCommandResponse(Object response) {
 		
 		for(MessageFilter filter: filters) {
-			filter.handleCommandResponse(response);
+			filter.handleCommandResponse(response, this);
 		}
 	}
 	
@@ -30,7 +30,7 @@ public class DefaultFilterChain extends AbstractListFilterChain {
 	public void handleEvent(CallEvent event) {
 		
 		for(MessageFilter filter: filters) {
-			filter.handleEvent(event);
+			filter.handleEvent(event, this);
 		}
 	}
 	

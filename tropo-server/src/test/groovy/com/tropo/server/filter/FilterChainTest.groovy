@@ -76,9 +76,9 @@ public class FilterChainTest {
 	public void testCommandRequestExecutedInSequence() throws InterruptedException {
 		
 		def queue = new LinkedList()
-		def filter1 = [handleCommandRequest:{queue.offer("filter1")}] as MessageFilter
-		def filter2 = [handleCommandRequest:{queue.offer("filter2")}] as MessageFilter
-		def filter3 = [handleCommandRequest:{queue.offer("filter3")}] as MessageFilter
+		def filter1 = [handleCommandRequest:{command, chain -> queue.offer("filter1")}] as MessageFilter
+		def filter2 = [handleCommandRequest:{command, chain -> queue.offer("filter2")}] as MessageFilter
+		def filter3 = [handleCommandRequest:{command, chain -> queue.offer("filter3")}] as MessageFilter
 		filtersChain.addFilter(filter1)
 		filtersChain.addFilter(filter2)
 		filtersChain.addFilter(filter3)
@@ -93,9 +93,9 @@ public class FilterChainTest {
 	public void testCommandResponseExecutedInSequence() throws InterruptedException {
 		
 		def queue = new LinkedList()
-		def filter1 = [handleCommandResponse:{queue.offer("filter1")}] as MessageFilter
-		def filter2 = [handleCommandResponse:{queue.offer("filter2")}] as MessageFilter
-		def filter3 = [handleCommandResponse:{queue.offer("filter3")}] as MessageFilter
+		def filter1 = [handleCommandResponse:{response, chain -> queue.offer("filter1")}] as MessageFilter
+		def filter2 = [handleCommandResponse:{response, chain -> queue.offer("filter2")}] as MessageFilter
+		def filter3 = [handleCommandResponse:{response, chain -> queue.offer("filter3")}] as MessageFilter
 		filtersChain.addFilter(filter1)
 		filtersChain.addFilter(filter2)
 		filtersChain.addFilter(filter3)
@@ -110,9 +110,9 @@ public class FilterChainTest {
 	public void testEventExecutedInSequence() throws InterruptedException {
 		
 		def queue = new LinkedList()
-		def filter1 = [handleEvent:{queue.offer("filter1")}] as MessageFilter
-		def filter2 = [handleEvent:{queue.offer("filter2")}] as MessageFilter
-		def filter3 = [handleEvent:{queue.offer("filter3")}] as MessageFilter
+		def filter1 = [handleEvent:{event, chain -> queue.offer("filter1")}] as MessageFilter
+		def filter2 = [handleEvent:{event, chain -> queue.offer("filter2")}] as MessageFilter
+		def filter3 = [handleEvent:{event, chain -> queue.offer("filter3")}] as MessageFilter
 		filtersChain.addFilter(filter1)
 		filtersChain.addFilter(filter2)
 		filtersChain.addFilter(filter3)
