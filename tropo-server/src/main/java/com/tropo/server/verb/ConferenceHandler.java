@@ -316,8 +316,8 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference, Call
     private boolean isLastModerator() {
         synchronized (mohoConference.getId()) {
             for (com.voxeo.moho.Participant mixerParticipant : mohoConference.getParticipants()) {
-                ParticipantController controller = (ParticipantController) mixerParticipant.getAttribute(getMohoParticipantAttributeKey());
-                if(controller.isModerator()) {
+                ParticipantController controller = (ParticipantController) mixerParticipant.getAttribute(getMohoParticipantAttributeKey());                
+                if(controller == null || controller.isModerator()) {
                     return false;
                 }
             }
