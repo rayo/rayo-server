@@ -1,0 +1,419 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context" 
+    xmlns:lang="http://www.springframework.org/schema/lang"
+    xmlns:p="http://www.springframework.org/schema/p" 
+    xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+		http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-3.0.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd"
+    default-autowire="byName">
+
+	<context:annotation-config />
+
+	<!-- Actor Thread Pool -->
+	<bean id="executor" class="java.util.concurrent.Executors" factory-method="newCachedThreadPool" />
+	
+	<!-- Jetlang Fiber Factory -->
+	<bean id="fiberFactory" class="org.jetlang.fibers.PoolFiberFactory">
+		<constructor-arg ref="executor" />
+	</bean>
+	
+	<!-- Global JIDs Registry -->
+	<bean id="jidRegistry" class="com.rayo.server.JIDRegistry" />
+	
+	<!-- Global Call Registry -->
+	<bean id="callRegistry" class="com.rayo.server.DefaultCallRegistry" >
+		<property name="jidRegistry" ref="jidRegistry"/>	
+	</bean>
+
+	<!-- Global Mixer Registry -->
+	<bean id="mixerRegistry" class="com.rayo.server.DefaultMixerRegistry" />
+
+	<!-- Call Statistics Service -->
+	<bean id="callStatistics" class="com.rayo.server.CallStatistics"/>
+
+	<!-- Mixer Statistics Service -->
+	<bean id="mixerStatistics" class="com.rayo.server.MixerStatistics">
+		<property name="mixerRegistry" ref="mixerRegistry"/>	
+	</bean>
+
+	<!-- Rayo Statistics Service -->
+	<bean id="rayoStatistics" class="com.rayo.server.RayoStatistics"/>
+
+	<!-- Call Actor Factory -->
+	<bean id="callActorFactory" class="com.rayo.server.DefaultCallActorFactory">
+		<property name="fiberFactory" ref="fiberFactory" />
+		<property name="verbManager" ref="callVerbManager" />
+		<property name="callStatistics" ref="callStatistics" />
+		<property name="cdrManager" ref="cdrManager" />
+		<property name="callRegistry" ref="callRegistry" />
+	</bean>	
+
+	<!-- Call Manager: Responsible for maintaining the Call Registry and creating new CallActors -->
+	<bean id="callManager" class="com.rayo.server.CallManager">
+		<property name="callRegistry" ref="callRegistry" />
+		<property name="callActorFactory" ref="callActorFactory" />
+		<property name="cdrManager" ref="cdrManager" />
+	</bean>
+
+	<!-- Mixer Actor Factory -->
+	<bean id="mixerActorFactory" class="com.rayo.server.DefaultMixerActorFactory">
+		<property name="fiberFactory" ref="fiberFactory" />
+		<property name="verbManager" ref="mixerVerbManager" />
+	</bean>	
+	
+	<!-- Conference Manager -->	
+	<bean id="conferenceController" class="com.rayo.server.conference.MohoConferenceController"/>
+
+	<!-- Model / Request Validation -->
+	<bean id="validator" class="com.rayo.core.validation.Validator"/>
+	<bean id="ssmlValidator" class="com.rayo.server.validation.SsmlValidator">
+		<property name="resource" value="classpath:synthesis-core.xsd"/>
+	</bean>
+
+	<!-- Rayo providers -->
+	<bean id="rayoProvider" class="com.rayo.core.xml.providers.RayoProvider">
+		<property name="validator" ref="validator" />
+		<property name="namespaces">
+			<list>
+				<value>urn:xmpp:rayo:1</value>
+                <value>urn:xmpp:rayo:ext:1</value>
+                <value>urn:xmpp:rayo:ext:complete:1</value>
+			</list>
+		</property>		
+	</bean>
+	<bean id="sayProvider" class="com.rayo.core.xml.providers.SayProvider">
+		<property name="validator" ref="validator" />
+		<property name="namespaces">
+			<list>
+				<value>urn:xmpp:tropo:say:1</value>
+                <value>urn:xmpp:tropo:say:complete:1</value>
+			</list>
+		</property>		
+	</bean>
+	<bean id="askProvider" class="com.rayo.core.xml.providers.AskProvider">
+		<property name="validator" ref="validator" />
+		<property name="namespaces">
+			<list>
+				<value>urn:xmpp:tropo:ask:1</value>
+                <value>urn:xmpp:tropo:ask:complete:1</value>
+			</list>
+		</property>		
+	</bean>
+	<bean id="transferProvider" class="com.rayo.core.xml.providers.TransferProvider">
+		<property name="validator" ref="validator" />
+		<property name="namespaces">
+			<list>
+				<value>urn:xmpp:tropo:transfer:1</value>
+                <value>urn:xmpp:tropo:transfer:complete:1</value>
+			</list>
+		</property>		
+	</bean>
+	<bean id="conferenceProvider" class="com.rayo.core.xml.providers.ConferenceProvider">
+		<property name="validator" ref="validator" />
+		<property name="namespaces">
+			<list>
+				<value>urn:xmpp:tropo:conference:1</value>
+                <value>urn:xmpp:tropo:conference:complete:1</value>
+			</list>
+		</property>		
+	</bean>				
+	<bean id="outputProvider" class="com.rayo.core.xml.providers.OutputProvider">
+		<property name="validator" ref="validator" />
+		<property name="namespaces">
+			<list>
+				<value>urn:xmpp:rayo:output:1</value>
+                <value>urn:xmpp:rayo:output:complete:1</value>
+			</list>
+		</property>		
+	</bean>
+	<bean id="inputProvider" class="com.rayo.core.xml.providers.InputProvider">
+		<property name="validator" ref="validator" />
+		<property name="namespaces">
+			<list>
+				<value>urn:xmpp:rayo:input:1</value>
+                <value>urn:xmpp:rayo:input:complete:1</value>
+			</list>
+		</property>		
+	</bean>
+	<bean id="recordProvider" class="com.rayo.core.xml.providers.RecordProvider">
+		<property name="validator" ref="validator" />
+		<property name="namespaces">
+			<list>
+				<value>urn:xmpp:rayo:record:1</value>
+			</list>
+		</property>		
+	</bean>
+	
+	<!-- Create a global XML Provider -->
+	<bean id="xmlProviderManager" class="com.rayo.core.xml.DefaultXmlProviderManagerFactoryBean">
+		<property name="providers">
+			<list>
+				<ref bean="rayoProvider"/>
+				<ref bean="sayProvider"/>
+				<ref bean="askProvider"/>
+				<ref bean="transferProvider"/>
+				<ref bean="conferenceProvider"/>
+				<ref bean="outputProvider"/>
+				<ref bean="inputProvider"/>
+				<ref bean="recordProvider"/>
+			</list>
+		</property>		
+	</bean>
+
+	<!-- Verb Manager: Used to create VerbHandler instances and read/write XML -->
+	<bean id="callVerbManager" class="com.rayo.server.verb.DefaultVerbManagerFactoryBean">
+		<property name="verbManager">
+			<bean class="com.rayo.server.verb.DefaultVerbManager">
+				<property name="xmlProviderManager" ref="xmlProviderManager" />
+			</bean>
+		</property>
+		<property name="verbFactoryList">
+			<list>
+				<!-- Say -->
+				<bean class="com.rayo.server.verb.AbstractVerbFactory">
+					<property name="xmlProvider" ref="sayProvider" />
+					<property name="modelClass" value="com.rayo.core.verb.Say" />
+					<lookup-method name="createVerbHandler" bean="sayHandler" />
+				</bean>
+				<!-- Ask -->
+				<bean class="com.rayo.server.verb.AbstractVerbFactory">
+					<property name="xmlProvider" ref="askProvider" />
+					<property name="modelClass" value="com.rayo.core.verb.Ask" />
+					<lookup-method name="createVerbHandler" bean="askHandler" />
+				</bean>
+				<!-- Transfer -->
+				<bean class="com.rayo.server.verb.AbstractVerbFactory">
+					<property name="xmlProvider" ref="transferProvider" />
+					<property name="modelClass" value="com.rayo.core.verb.Transfer" />
+					<lookup-method name="createVerbHandler" bean="transferHandler" />
+				</bean>
+				<!-- Conference -->
+				<bean class="com.rayo.server.verb.AbstractVerbFactory">
+					<property name="xmlProvider" ref="conferenceProvider" />
+					<property name="modelClass" value="com.rayo.core.verb.Conference" />
+					<lookup-method name="createVerbHandler" bean="conferenceHandler" />
+				</bean>
+				<!-- Output -->
+				<bean class="com.rayo.server.verb.AbstractVerbFactory">
+					<property name="xmlProvider" ref="outputProvider" />
+					<property name="modelClass" value="com.rayo.core.verb.Output" />
+					<lookup-method name="createVerbHandler" bean="outputHandler" />
+				</bean>
+				<!-- Input -->
+				<bean class="com.rayo.server.verb.AbstractVerbFactory">
+					<property name="xmlProvider" ref="inputProvider" />
+					<property name="modelClass" value="com.rayo.core.verb.Input" />
+					<lookup-method name="createVerbHandler" bean="inputHandler" />
+				</bean>
+				<!-- Record -->
+				<bean class="com.rayo.server.verb.AbstractVerbFactory">
+					<property name="xmlProvider" ref="recordProvider" />
+					<property name="modelClass" value="com.rayo.core.verb.Record" />
+					<lookup-method name="createVerbHandler" bean="recordHandler" />
+				</bean>				
+			</list>
+		</property>
+	</bean>
+
+	<!-- Mixer verb manager. Handles verbs that can be processed by a mixer -->
+	<bean id="mixerVerbManager" class="com.rayo.server.verb.DefaultVerbManagerFactoryBean">
+		<property name="verbManager">
+			<bean class="com.rayo.server.verb.DefaultVerbManager">
+				<property name="xmlProviderManager" ref="xmlProviderManager" />
+			</bean>
+		</property>
+		<property name="verbFactoryList">
+			<list>
+				<!-- Say -->
+				<bean class="com.rayo.server.verb.AbstractVerbFactory">
+					<property name="xmlProvider" ref="sayProvider" />
+					<property name="modelClass" value="com.rayo.core.verb.Say" />
+					<lookup-method name="createVerbHandler" bean="sayHandler" />
+				</bean>
+				<!-- Record -->
+				<bean class="com.rayo.server.verb.AbstractVerbFactory">
+					<property name="xmlProvider" ref="recordProvider" />
+					<property name="modelClass" value="com.rayo.core.verb.Record" />
+					<lookup-method name="createVerbHandler" bean="recordHandler" />
+				</bean>
+				<!-- Ask -->
+				<bean class="com.rayo.server.verb.AbstractVerbFactory">
+					<property name="xmlProvider" ref="askProvider" />
+					<property name="modelClass" value="com.rayo.core.verb.Ask" />
+					<lookup-method name="createVerbHandler" bean="askHandler" />
+				</bean>
+				<!-- Output -->
+				<bean class="com.rayo.server.verb.AbstractVerbFactory">
+					<property name="xmlProvider" ref="outputProvider" />
+					<property name="modelClass" value="com.rayo.core.verb.Output" />
+					<lookup-method name="createVerbHandler" bean="outputHandler" />
+				</bean>
+				<!-- Input -->
+				<bean class="com.rayo.server.verb.AbstractVerbFactory">
+					<property name="xmlProvider" ref="inputProvider" />
+					<property name="modelClass" value="com.rayo.core.verb.Input" />
+					<lookup-method name="createVerbHandler" bean="inputHandler" />
+				</bean>
+			</list>
+		</property>
+	</bean>
+
+	<!-- Storage Service implementations -->
+	<bean id="storageServices"
+	      class="org.springframework.beans.factory.serviceloader.ServiceListFactoryBean"
+	      p:serviceType="com.rayo.core.recording.StorageService"/>
+      
+	<!-- Verb Handlers -->	
+	<bean id="sayHandler" class="com.rayo.server.verb.SayHandler" scope="prototype">
+		<property name="ssmlValidator" ref="ssmlValidator"/>
+	</bean>
+	<bean id="askHandler" class="com.rayo.server.verb.AskHandler" scope="prototype">
+		<property name="ssmlValidator" ref="ssmlValidator"/>
+	</bean>
+	<bean id="transferHandler" class="com.rayo.server.verb.TransferHandler" scope="prototype" />
+	<bean id="conferenceHandler" class="com.rayo.server.verb.ConferenceHandler" scope="prototype">
+		<property name="mohoConferenceController" ref="conferenceController" />
+		<property name="mixerActoryFactory" ref="mixerActorFactory"/>
+		<property name="callManager" ref="callManager"/>
+		<property name="mixerStatistics" ref="mixerStatistics"/>	
+	</bean>
+	<bean id="outputHandler" class="com.rayo.server.verb.OutputHandler" scope="prototype">
+		<property name="ssmlValidator" ref="ssmlValidator"/>
+	</bean>
+	<bean id="inputHandler" class="com.rayo.server.verb.InputHandler" scope="prototype" />
+	<bean id="recordHandler" class="com.rayo.server.verb.RecordHandler" scope="prototype">
+		<property name="storageServices" ref="storageServices"/>
+	</bean>
+
+	<!-- Admin Service -->
+	<bean id="adminService" class="com.rayo.server.AdminService">
+		<property name="callRegistry" ref="callRegistry"/>
+	</bean>
+	
+	<!-- JMX Configuration -->
+  	<bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
+    	<property name="autodetect" value="true"/>
+		<property name="namingStrategy" ref="namingStrategy"/>
+    	<property name="assembler" ref="assembler"/>
+  	</bean>
+
+  	<bean id="callsBean" class="com.rayo.server.jmx.Calls">
+  		<property name="callRegistry" ref="callRegistry" />
+  		<property name="callStatistics" ref="callStatistics" />
+  		<property name="cdrManager" ref="cdrManager" />
+  	</bean>
+  	
+  	<bean id="cdrsBean" class="com.rayo.server.jmx.Cdrs">
+  		<property name="cdrManager" ref="cdrManager" />
+  	</bean>
+
+  	<bean id="infoBean" class="com.rayo.server.jmx.Info">
+  		<property name="adminService" ref="adminService" />
+  	</bean>
+  	
+  	<bean id="adminBean" class="com.rayo.server.jmx.Admin">
+  		<property name="adminService" ref="adminService" />
+  	</bean>
+  	
+	<bean id="attributeSource" class="org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource"/>
+	
+  	<bean id="assembler" class="org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler">
+    	<property name="attributeSource" ref="attributeSource"/>
+  	</bean> 
+  	
+	<bean id="namingStrategy" class="org.springframework.jmx.export.naming.MetadataNamingStrategy">
+		<property name="attributeSource" ref="attributeSource"/>
+	</bean>  	
+	
+  	<!-- CDR Handling -->
+  	<bean id="fileCdrStorageStrategy" class="com.rayo.server.cdr.FileCdrStorageStrategy" 
+  		  init-method="init"
+  		  destroy-method="shutdown">
+  		<property name="path" value="/tmp/test.log"/>
+  	</bean>
+  	
+  	<!--  Uncomment to enable the JMS CDR Storage
+	
+  	<util:map id="env" map-class="java.util.HashMap" key-type="java.lang.String" value-type="java.lang.String">
+		<entry>
+			<key><util:constant static-field="javax.naming.Context.INITIAL_CONTEXT_FACTORY"/></key>
+			<value>org.apache.activemq.jndi.ActiveMQInitialContextFactory</value>
+		</entry>
+		<entry>
+			<key><util:constant static-field="javax.naming.Context.PROVIDER_URL"/></key>
+			<value>tcp://localhost:61616</value>
+		</entry>
+	</util:map>
+  	
+  	<bean id="jmsCdrStorageStrategy" class="com.rayo.server.cdr.JMSCdrStorageStrategy" 
+  		  init-method="init"
+  		  destroy-method="shutdown">
+		<property name="environment" ref="env"/>
+		<property name="connectionFactory" value="QueueConnectionFactory"/>
+		<property name="queue" value="example.A"/>
+  	</bean>  	
+  	-->
+  	
+  	<!-- Uncomment to enable the Xmpp PubSub based CDR Storage
+  	
+  	<bean id="xmppCdrStorageStrategy" class="com.rayo.server.cdr.XmppCdrStorageStrategy"
+  		  init-method="init"
+  		  destroy-method="shutdown">
+  		  <property name="server" value="localhost"/>
+  		  <property name="port" value="6222"/>
+  		  <property name="username" value="admin"/>
+  		  <property name="password" value="admin"/>
+  		  <property name="node" value="rayo-cdr"/>
+  	</bean>
+  	-->
+  	
+  	<!-- Uncomment to enable AMQP based CDR storage 
+  	<bean id="amqpCdrStorageStrategy" class="com.rayo.server.cdr.AmqpCdrStorageStrategy"
+  		  init-method="init"
+  		  destroy-method="shutdown">
+  		  <property name="server" value="localhost"/>
+  		  <property name="port" value="5672"/>
+  		  <property name="username" value="guest"/>
+  		  <property name="password" value="guest"/>
+  		  <property name="exchange" value="rayo-exchange"/>
+  		  <property name="route" value="rayo-route"/>
+  	</bean>
+  	-->
+  	
+  	<!-- SPI defined CDR Storage Strategies implementations -->
+	<bean id="spiCdrStorageStrategies"
+	      class="org.springframework.beans.factory.serviceloader.ServiceListFactoryBean"
+	      p:serviceType="com.rayo.server.cdr.CdrStorageStrategy"/>
+  	
+  	<bean id="cdrErrorHandler" class="com.rayo.server.cdr.DefaultErrorHandler"/>
+  	<bean id="cdrManager" class="com.rayo.server.CdrManager">
+  		<property name="errorHandler" ref="cdrErrorHandler"/>
+  		<property name="storageStrategies">
+  			<list>
+  				<ref bean="fileCdrStorageStrategy"/>
+  				<!-- <ref bean="jmsCdrStorageStrategy"/> -->
+  				<!-- <ref bean="xmppCdrStorageStrategy"/>  -->
+  				<!-- <ref bean="amqpCdrStorageStrategy"/> -->
+  			</list>
+  		</property>
+  		<property name="spiStorageStrategies" ref="spiCdrStorageStrategies"/>
+  	</bean>
+  	
+  	<!-- Exception Mapper -->
+  	<bean id="exceptionMapper" class="com.rayo.server.exception.ExceptionMapper"/>
+  	
+  	<!-- Message filters from SPI -->
+  	<bean id="spiMessageFilters"
+	      class="org.springframework.beans.factory.serviceloader.ServiceListFactoryBean"
+	      p:serviceType="com.rayo.server.filter.MessageFilter"/>
+	      
+  	<!-- Default filter chain -->
+  	<bean id="filtersChain" class="com.rayo.server.filter.DefaultFilterChain">
+  		<property name="filters" ref="spiMessageFilters"/>
+  	</bean> 
+  	 
+</beans>
