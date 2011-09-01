@@ -1,4 +1,4 @@
-package com.tropo.core.xml;
+package com.rayo.core.xml;
 
 import org.dom4j.Namespace;
 

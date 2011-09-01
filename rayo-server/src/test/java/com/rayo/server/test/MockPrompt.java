@@ -1,4 +1,4 @@
-package com.tropo.server.test;
+package com.rayo.server.test;
 
 import com.voxeo.moho.MediaException;
 import com.voxeo.moho.Participant;

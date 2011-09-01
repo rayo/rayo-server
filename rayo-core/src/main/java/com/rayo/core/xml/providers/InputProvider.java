@@ -1,4 +1,4 @@
-package com.tropo.core.xml.providers;
+package com.rayo.core.xml.providers;
 
 import static com.voxeo.utils.Strings.isEmpty;
 
@@ -11,11 +11,11 @@ import org.dom4j.Element;
 import org.dom4j.Namespace;
 import org.dom4j.QName;
 
-import com.tropo.core.verb.Choices;
-import com.tropo.core.verb.Input;
-import com.tropo.core.verb.InputCompleteEvent;
-import com.tropo.core.verb.InputCompleteEvent.Reason;
-import com.tropo.core.verb.InputMode;
+import com.rayo.core.verb.Choices;
+import com.rayo.core.verb.Input;
+import com.rayo.core.verb.InputCompleteEvent;
+import com.rayo.core.verb.InputMode;
+import com.rayo.core.verb.InputCompleteEvent.Reason;
 
 public class InputProvider extends BaseProvider {
 

@@ -1,4 +1,4 @@
-package com.tropo.server.jmx;
+package com.rayo.server.jmx;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -7,11 +7,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.tropo.core.cdr.Cdr;
-import com.tropo.server.CallActor;
-import com.tropo.server.CallRegistry;
-import com.tropo.server.CdrManager;
-import com.tropo.server.verb.VerbHandler;
+import com.rayo.server.CallActor;
+import com.rayo.server.CallRegistry;
+import com.rayo.server.CdrManager;
+import com.rayo.server.verb.VerbHandler;
+import com.rayo.core.cdr.Cdr;
 
 public class Call {
 
@@ -126,7 +126,7 @@ public class Call {
 		if (actor != null) {
 			Collection<VerbHandler<?,?>> verbHandlers = actor.getVerbs();
 			for (VerbHandler<?,?> handler: verbHandlers) {
-				com.tropo.core.verb.Verb verb = handler.getModel();
+				com.rayo.core.verb.Verb verb = handler.getModel();
 				if (verb != null) {
 					Verb jmxVerb = new Verb(handler, verb);
 					verbs.add(jmxVerb);

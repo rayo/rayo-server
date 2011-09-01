@@ -1,4 +1,4 @@
-package com.tropo.server.jmx;
+package com.rayo.server.jmx;
 
 import java.io.Serializable;
 import java.util.List;
@@ -6,10 +6,10 @@ import java.util.List;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
-import com.tropo.core.cdr.Cdr;
-import com.tropo.server.CdrManager;
+import com.rayo.server.CdrManager;
+import com.rayo.core.cdr.Cdr;
 
-@ManagedResource(objectName="com.tropo:Type=Cdrs", description="Active CDRs")
+@ManagedResource(objectName="com.rayo:Type=Cdrs", description="Active CDRs")
 public class Cdrs implements Serializable, CdrsMXBean {
 
 	private static final long serialVersionUID = 1L;

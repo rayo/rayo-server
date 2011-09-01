@@ -1,4 +1,4 @@
-package com.tropo.core.xml.providers;
+package com.rayo.core.xml.providers;
 
 import java.net.URISyntaxException;
 
@@ -7,18 +7,18 @@ import org.dom4j.Element;
 import org.dom4j.Namespace;
 import org.dom4j.QName;
 
-import com.tropo.core.validation.Messages;
-import com.tropo.core.validation.ValidationException;
-import com.tropo.core.verb.Output;
-import com.tropo.core.verb.OutputCompleteEvent;
-import com.tropo.core.verb.OutputCompleteEvent.Reason;
-import com.tropo.core.verb.PauseCommand;
-import com.tropo.core.verb.ResumeCommand;
-import com.tropo.core.verb.SeekCommand;
-import com.tropo.core.verb.SpeedDownCommand;
-import com.tropo.core.verb.SpeedUpCommand;
-import com.tropo.core.verb.VolumeDownCommand;
-import com.tropo.core.verb.VolumeUpCommand;
+import com.rayo.core.validation.Messages;
+import com.rayo.core.validation.ValidationException;
+import com.rayo.core.verb.Output;
+import com.rayo.core.verb.OutputCompleteEvent;
+import com.rayo.core.verb.PauseCommand;
+import com.rayo.core.verb.ResumeCommand;
+import com.rayo.core.verb.SeekCommand;
+import com.rayo.core.verb.SpeedDownCommand;
+import com.rayo.core.verb.SpeedUpCommand;
+import com.rayo.core.verb.VolumeDownCommand;
+import com.rayo.core.verb.VolumeUpCommand;
+import com.rayo.core.verb.OutputCompleteEvent.Reason;
 import com.voxeo.moho.media.output.OutputCommand.BargeinType;
 
 public class OutputProvider extends BaseProvider {

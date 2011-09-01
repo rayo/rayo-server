@@ -1,12 +1,12 @@
-package com.tropo.server;
+package com.rayo.server;
 
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import com.tropo.core.CallContextResolver;
-import com.tropo.core.ExecutionContext;
-import com.tropo.core.OfferEvent;
-import com.tropo.core.sip.SipURI;
+import com.rayo.core.CallContextResolver;
+import com.rayo.core.ExecutionContext;
+import com.rayo.core.OfferEvent;
+import com.rayo.core.sip.SipURI;
 import com.voxeo.exceptions.AssertionException;
 import com.voxeo.exceptions.InputException;
 import com.voxeo.logging.Loggerf;

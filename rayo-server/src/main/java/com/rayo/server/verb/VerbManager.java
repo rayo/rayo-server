@@ -1,6 +1,6 @@
-package com.tropo.server.verb;
+package com.rayo.server.verb;
 
-import com.tropo.core.verb.Verb;
+import com.rayo.core.verb.Verb;
 
 public interface VerbManager {
 

@@ -1,7 +1,7 @@
-package com.tropo.server.filter;
+package com.rayo.server.filter;
 
-import com.tropo.core.CallCommand;
-import com.tropo.core.CallEvent;
+import com.rayo.core.CallCommand;
+import com.rayo.core.CallEvent;
 
 public class DefaultFilterChain extends AbstractListFilterChain {
 	

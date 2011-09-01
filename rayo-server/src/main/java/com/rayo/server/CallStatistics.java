@@ -1,13 +1,13 @@
-package com.tropo.server;
+package com.rayo.server;
 
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
-import com.tropo.server.jmx.CallStatisticsMXBean;
+import com.rayo.server.jmx.CallStatisticsMXBean;
 
-@ManagedResource(objectName="com.tropo:Type=Call Statistics", description="Call Statistics")
+@ManagedResource(objectName="com.rayo:Type=Call Statistics", description="Call Statistics")
 public class CallStatistics implements CallStatisticsMXBean {
 
 	private AtomicLong callsAccepted = new AtomicLong(0);

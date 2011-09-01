@@ -1,4 +1,4 @@
-package com.tropo.core.verb;
+package com.rayo.core.verb;
 
 import java.util.List;
 
@@ -9,8 +9,8 @@ import org.apache.commons.lang.builder.ToStringStyle;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.joda.time.Duration;
 
-import com.tropo.core.validation.Messages;
-import com.tropo.core.validation.ValidRecognizer;
+import com.rayo.core.validation.Messages;
+import com.rayo.core.validation.ValidRecognizer;
 
 public class Input extends BaseVerb {
 

@@ -1,4 +1,4 @@
-package com.tropo.server.test;
+package com.rayo.server.test;
 
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.TimeUnit;

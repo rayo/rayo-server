@@ -1,6 +1,6 @@
-package com.tropo.server.verb;
+package com.rayo.server.verb;
 
-import com.tropo.core.verb.VerbEvent;
+import com.rayo.core.verb.VerbEvent;
 
 public interface EventDispatcher {
 

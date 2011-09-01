@@ -1,9 +1,9 @@
-package com.tropo.core;
+package com.rayo.core;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
-import com.tropo.core.validation.ValidDtmf;
+import com.rayo.core.validation.ValidDtmf;
 
 public class DtmfCommand extends AbstractCallCommand {
 

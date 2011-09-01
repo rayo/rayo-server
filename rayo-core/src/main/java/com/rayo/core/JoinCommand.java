@@ -1,4 +1,4 @@
-package com.tropo.core;
+package com.rayo.core;
 
 import javax.media.mscontrol.join.Joinable.Direction;
 import javax.validation.constraints.NotNull;
@@ -6,7 +6,7 @@ import javax.validation.constraints.NotNull;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
-import com.tropo.core.validation.Messages;
+import com.rayo.core.validation.Messages;
 import com.voxeo.moho.Participant.JoinType;
 
 public class JoinCommand extends AbstractCallCommand {

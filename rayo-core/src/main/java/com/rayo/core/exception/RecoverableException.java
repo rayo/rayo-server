@@ -1,4 +1,4 @@
-package com.tropo.core.exception;
+package com.rayo.core.exception;
 
 /**
  * <p>A recoverable exception is an exception that won't cause any interruption on the 

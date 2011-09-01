@@ -1,8 +1,8 @@
-package com.tropo.server;
+package com.rayo.server;
 
 import org.jetlang.fibers.PoolFiberFactory;
 
-import com.tropo.server.verb.VerbManager;
+import com.rayo.server.verb.VerbManager;
 import com.voxeo.moho.Mixer;
 
 public class DefaultMixerActorFactory implements MixerActorFactory {

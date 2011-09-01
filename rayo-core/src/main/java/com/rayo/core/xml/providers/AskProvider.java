@@ -1,4 +1,4 @@
-package com.tropo.core.xml.providers;
+package com.rayo.core.xml.providers;
 
 import static com.voxeo.utils.Strings.isEmpty;
 
@@ -11,11 +11,11 @@ import org.dom4j.Element;
 import org.dom4j.Namespace;
 import org.dom4j.QName;
 
-import com.tropo.core.verb.Ask;
-import com.tropo.core.verb.AskCompleteEvent;
-import com.tropo.core.verb.InputMode;
-import com.tropo.core.verb.AskCompleteEvent.Reason;
-import com.tropo.core.verb.Choices;
+import com.rayo.core.verb.Ask;
+import com.rayo.core.verb.AskCompleteEvent;
+import com.rayo.core.verb.Choices;
+import com.rayo.core.verb.InputMode;
+import com.rayo.core.verb.AskCompleteEvent.Reason;
 
 public class AskProvider extends BaseProvider {
 

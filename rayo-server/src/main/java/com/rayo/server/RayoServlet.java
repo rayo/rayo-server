@@ -1,4 +1,4 @@
-package com.tropo.server;
+package com.rayo.server;
 
 import static com.voxeo.utils.Objects.assertion;
 
@@ -21,22 +21,22 @@ import org.dom4j.io.DOMWriter;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSSerializer;
 
-import com.tropo.core.CallCommand;
-import com.tropo.core.CallEvent;
-import com.tropo.core.CallRef;
-import com.tropo.core.DialCommand;
-import com.tropo.core.EndCommand;
-import com.tropo.core.EndEvent;
-import com.tropo.core.OfferEvent;
-import com.tropo.core.validation.ValidationException;
-import com.tropo.core.verb.Verb;
-import com.tropo.core.verb.VerbCommand;
-import com.tropo.core.verb.VerbEvent;
-import com.tropo.core.verb.VerbRef;
-import com.tropo.core.xml.XmlProvider;
-import com.tropo.server.exception.ErrorMapping;
-import com.tropo.server.exception.ExceptionMapper;
-import com.tropo.server.filter.FilterChain;
+import com.rayo.server.exception.ErrorMapping;
+import com.rayo.server.exception.ExceptionMapper;
+import com.rayo.server.filter.FilterChain;
+import com.rayo.core.CallCommand;
+import com.rayo.core.CallEvent;
+import com.rayo.core.CallRef;
+import com.rayo.core.DialCommand;
+import com.rayo.core.EndCommand;
+import com.rayo.core.EndEvent;
+import com.rayo.core.OfferEvent;
+import com.rayo.core.validation.ValidationException;
+import com.rayo.core.verb.Verb;
+import com.rayo.core.verb.VerbCommand;
+import com.rayo.core.verb.VerbEvent;
+import com.rayo.core.verb.VerbRef;
+import com.rayo.core.xml.XmlProvider;
 import com.voxeo.exceptions.NotFoundException;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.Call;
@@ -54,7 +54,7 @@ import com.voxeo.servlet.xmpp.XmppSession;
 public class RayoServlet extends XmppServlet {
 
     private static final Loggerf log = Loggerf.getLogger(RayoServlet.class);
-    private static final Loggerf WIRE = Loggerf.getLogger("com.tropo.rayo.wire");
+    private static final Loggerf WIRE = Loggerf.getLogger("com.rayo.rayo.wire");
 
     private static final QName BIND_QNAME = new QName("bind", new Namespace("", "urn:ietf:params:xml:ns:xmpp-bind"));
     private static final QName SESSION_QNAME = new QName("session", new Namespace("", "urn:ietf:params:xml:ns:xmpp-session"));

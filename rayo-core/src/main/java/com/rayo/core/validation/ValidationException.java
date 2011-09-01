@@ -1,4 +1,4 @@
-package com.tropo.core.validation;
+package com.rayo.core.validation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -6,7 +6,7 @@ import java.util.Set;
 
 import javax.validation.ConstraintViolation;
 
-import com.tropo.core.exception.RecoverableException;
+import com.rayo.core.exception.RecoverableException;
 
 
 @SuppressWarnings("serial")

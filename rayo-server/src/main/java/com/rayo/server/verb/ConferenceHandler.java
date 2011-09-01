@@ -1,4 +1,4 @@
-package com.tropo.server.verb;
+package com.rayo.server.verb;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -13,29 +13,29 @@ import javax.media.mscontrol.mixer.MediaMixer;
 import javax.media.mscontrol.mixer.MixerEvent;
 import javax.validation.ConstraintValidatorContext;
 
-import com.tropo.core.FinishedSpeakingEvent;
-import com.tropo.core.SpeakingEvent;
-import com.tropo.core.verb.Conference;
-import com.tropo.core.verb.ConferenceCompleteEvent;
-import com.tropo.core.verb.ConferenceCompleteEvent.Reason;
-import com.tropo.core.verb.KickCommand;
-import com.tropo.core.verb.MuteCommand;
-import com.tropo.core.verb.OffHoldEvent;
-import com.tropo.core.verb.OnHoldEvent;
-import com.tropo.core.verb.Ssml;
-import com.tropo.core.verb.UnmuteCommand;
-import com.tropo.core.verb.VerbCommand;
-import com.tropo.core.verb.VerbCompleteEvent;
-import com.tropo.server.CallActor;
-import com.tropo.server.CallManager;
-import com.tropo.server.EventHandler;
-import com.tropo.server.MixerActor;
-import com.tropo.server.MixerActorFactory;
-import com.tropo.server.MixerRegistry;
-import com.tropo.server.MixerStatistics;
-import com.tropo.server.MohoUtil;
-import com.tropo.server.conference.ParticipantController;
-import com.tropo.server.exception.ExceptionMapper;
+import com.rayo.server.CallActor;
+import com.rayo.server.CallManager;
+import com.rayo.server.EventHandler;
+import com.rayo.server.MixerActor;
+import com.rayo.server.MixerActorFactory;
+import com.rayo.server.MixerRegistry;
+import com.rayo.server.MixerStatistics;
+import com.rayo.server.MohoUtil;
+import com.rayo.server.conference.ParticipantController;
+import com.rayo.server.exception.ExceptionMapper;
+import com.rayo.core.FinishedSpeakingEvent;
+import com.rayo.core.SpeakingEvent;
+import com.rayo.core.verb.Conference;
+import com.rayo.core.verb.ConferenceCompleteEvent;
+import com.rayo.core.verb.ConferenceCompleteEvent.Reason;
+import com.rayo.core.verb.KickCommand;
+import com.rayo.core.verb.MuteCommand;
+import com.rayo.core.verb.OffHoldEvent;
+import com.rayo.core.verb.OnHoldEvent;
+import com.rayo.core.verb.Ssml;
+import com.rayo.core.verb.UnmuteCommand;
+import com.rayo.core.verb.VerbCommand;
+import com.rayo.core.verb.VerbCompleteEvent;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.Call;
 import com.voxeo.moho.Participant;
@@ -56,8 +56,8 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference, Call
 
 	private static final Loggerf log = Loggerf.getLogger(ConferenceHandler.class);
 	
-    public static final String PARTICIPANT_KEY = "com.tropo.conference.participant.";
-    private static final String WAIT_LIST_KEY = "com.tropo.conference.waitList";
+    public static final String PARTICIPANT_KEY = "com.rayo.conference.participant.";
+    private static final String WAIT_LIST_KEY = "com.rayo.conference.waitList";
 
     private ConferenceController mohoConferenceController;
     private MixerActorFactory mixerActoryFactory;
@@ -100,7 +100,7 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference, Call
                 mohoConference.setController(mohoConferenceController);
             }
             
-            // Register Tropo Participant object as an attribute of the Moho Call
+            // Register Rayo Participant object as an attribute of the Moho Call
             participant.setAttribute(getMohoParticipantAttributeKey(), this);
 
             // Determine if the conference is 'open' by checking if there are any moderators

@@ -1,4 +1,4 @@
-package com.tropo.core.validation;
+package com.rayo.core.validation;
 
 import javax.media.mscontrol.join.Joinable.Direction;
 import javax.validation.ConstraintValidator;

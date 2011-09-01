@@ -1,11 +1,11 @@
-package com.tropo.core.verb;
+package com.rayo.core.verb;
 
 import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
-import com.tropo.core.validation.Messages;
+import com.rayo.core.validation.Messages;
 
 public class VerbCompleteEvent extends AbstractVerbEvent {
 

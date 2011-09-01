@@ -1,4 +1,4 @@
-package com.tropo.server.exception;
+package com.rayo.server.exception;
 
 public class ErrorMapping {
 

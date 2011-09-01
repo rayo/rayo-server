@@ -12,7 +12,7 @@
 // limitations under the License.
 // ========================================================================
 
-package com.tropo.core.sip;
+package com.rayo.core.sip;
 
 public class SipGrammar {
 

@@ -1,12 +1,12 @@
-package com.tropo.server.verb;
+package com.rayo.server.verb;
 
 import java.util.List;
 
-import com.tropo.core.verb.Choices;
-import com.tropo.core.verb.Input;
-import com.tropo.core.verb.InputCompleteEvent;
-import com.tropo.core.verb.InputCompleteEvent.Reason;
-import com.tropo.core.verb.VerbCompleteEvent;
+import com.rayo.core.verb.Choices;
+import com.rayo.core.verb.Input;
+import com.rayo.core.verb.InputCompleteEvent;
+import com.rayo.core.verb.InputCompleteEvent.Reason;
+import com.rayo.core.verb.VerbCompleteEvent;
 import com.voxeo.moho.Call;
 import com.voxeo.moho.Participant;
 import com.voxeo.moho.State;
@@ -94,7 +94,7 @@ public class InputHandler extends AbstractLocalVerbHandler<Input, Participant> {
             completeEvent.setUtterance(event.getUtterance());
             completeEvent.setNlsml(event.getNlsml());
             completeEvent.setTag(event.getTag());
-            completeEvent.setMode(getTropoMode(event.getInputMode()));
+            completeEvent.setMode(getInputMode(event.getInputMode()));
             break;
         case INI_TIMEOUT:
             completeEvent = new InputCompleteEvent(model, Reason.NOINPUT);

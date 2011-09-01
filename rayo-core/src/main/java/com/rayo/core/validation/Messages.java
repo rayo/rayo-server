@@ -1,4 +1,4 @@
-package com.tropo.core.validation;
+package com.rayo.core.validation;
 
 public class Messages {
 

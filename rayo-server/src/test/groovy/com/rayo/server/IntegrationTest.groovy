@@ -1,4 +1,4 @@
-package com.tropo.server
+package com.rayo.server
 
 import static org.junit.Assert.*
 
@@ -18,23 +18,29 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 
-import com.tropo.core.CallRejectReason
-import com.tropo.core.EndCommand
-import com.tropo.core.EndEvent
-import com.tropo.core.OfferEvent
-import com.tropo.core.RejectCommand
-import com.tropo.core.EndEvent.Reason
-import com.tropo.core.recording.StorageService;
-import com.tropo.core.verb.PauseCommand
-import com.tropo.core.verb.Record
-import com.tropo.core.verb.ResumeCommand
-import com.tropo.core.verb.Say
-import com.tropo.core.verb.SayCompleteEvent
-import com.tropo.core.verb.Ssml
-import com.tropo.core.verb.StopCommand
-import com.tropo.core.verb.VerbCompleteEvent
-import com.tropo.server.test.MockCall
-import com.tropo.server.test.MockMediaService
+import com.rayo.server.CallActor;
+import com.rayo.server.CallManager;
+import com.rayo.server.CallRegistry;
+import com.rayo.server.EventHandler;
+import com.rayo.server.Response;
+import com.rayo.server.ResponseHandler;
+import com.rayo.core.CallRejectReason
+import com.rayo.core.EndCommand
+import com.rayo.core.EndEvent
+import com.rayo.core.OfferEvent
+import com.rayo.core.RejectCommand
+import com.rayo.core.EndEvent.Reason
+import com.rayo.core.recording.StorageService;
+import com.rayo.core.verb.PauseCommand
+import com.rayo.core.verb.Record
+import com.rayo.core.verb.ResumeCommand
+import com.rayo.core.verb.Say
+import com.rayo.core.verb.SayCompleteEvent
+import com.rayo.core.verb.Ssml
+import com.rayo.core.verb.StopCommand
+import com.rayo.core.verb.VerbCompleteEvent
+import com.rayo.server.test.MockCall
+import com.rayo.server.test.MockMediaService
 import com.voxeo.exceptions.NotFoundException
 import com.voxeo.moho.Call
 import com.voxeo.moho.MediaService
@@ -56,7 +62,7 @@ import com.voxeo.servlet.xmpp.XmppServlet;
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations=["/tropo-context-activemq-cdr.xml"])
+@ContextConfiguration(locations=["/rayo-context-activemq-cdr.xml"])
 public class IntegrationTest {
 
     @Autowired
@@ -346,7 +352,7 @@ public class IntegrationTest {
 	   assertTrue poll().success // Command callback
 
 	   // We should get a say complete event
-	   com.tropo.core.verb.RecordCompleteEvent recordComplete = poll()
+	   com.rayo.core.verb.RecordCompleteEvent recordComplete = poll()
 	   assertEquals VerbCompleteEvent.Reason.STOP, recordComplete.reason
 	   
 	   assertNotNull recordComplete.uri
@@ -404,7 +410,7 @@ public class IntegrationTest {
 	  assertTrue poll().success // Command callback
 
 	  // We should get a say complete event
-	  com.tropo.core.verb.RecordCompleteEvent recordComplete = poll()
+	  com.rayo.core.verb.RecordCompleteEvent recordComplete = poll()
 	  assertEquals VerbCompleteEvent.Reason.STOP, recordComplete.reason
 	  
 	  assertNotNull recordComplete.uri

@@ -1,4 +1,4 @@
-package com.tropo.server.cdr;
+package com.rayo.server.cdr;
 
 /**
  * Handles any errors when trying to read or write Cdr using one of the implemented storage strategies

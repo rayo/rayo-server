@@ -1,4 +1,4 @@
-package com.tropo.server.cdr;
+package com.rayo.server.cdr;
 
 import com.voxeo.logging.Loggerf;
 

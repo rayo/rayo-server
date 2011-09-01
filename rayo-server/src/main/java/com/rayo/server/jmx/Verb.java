@@ -1,14 +1,14 @@
-package com.tropo.server.jmx;
+package com.rayo.server.jmx;
 
-import com.tropo.server.verb.VerbHandler;
+import com.rayo.server.verb.VerbHandler;
 
 
 public class Verb implements VerbMXBean {
 
-	private transient final com.tropo.core.verb.Verb verb;
+	private transient final com.rayo.core.verb.Verb verb;
 	private transient final VerbHandler<?,?> verbHandler;
 	
-	public Verb(VerbHandler<?,?> handler, com.tropo.core.verb.Verb verb) {
+	public Verb(VerbHandler<?,?> handler, com.rayo.core.verb.Verb verb) {
 		
 		this.verb = verb;
 		this.verbHandler = handler;

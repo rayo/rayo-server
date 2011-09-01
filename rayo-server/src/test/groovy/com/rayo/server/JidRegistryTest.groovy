@@ -1,4 +1,4 @@
-package com.tropo.server;
+package com.rayo.server;
 
 import static org.junit.Assert.*;
 
@@ -6,6 +6,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.rayo.server.JIDRegistry;
 import com.voxeo.servlet.xmpp.JID;
 
 class JidRegistryTest {

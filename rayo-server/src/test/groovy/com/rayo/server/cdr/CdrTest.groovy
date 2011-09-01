@@ -1,9 +1,11 @@
-package com.tropo.server.cdr
+package com.rayo.server.cdr
 
 import java.io.IOException;
 
-import com.tropo.core.cdr.Cdr;
-import com.tropo.core.cdr.CdrException;
+import com.rayo.server.cdr.FileCdrStorageStrategy;
+import com.rayo.server.cdr.JMSCdrStorageStrategy;
+import com.rayo.core.cdr.Cdr;
+import com.rayo.core.cdr.CdrException;
 
 import static org.junit.Assert.*
 
@@ -19,24 +21,24 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 
-import com.tropo.core.EndEvent
-import com.tropo.core.OfferEvent
-import com.tropo.core.EndEvent.Reason
-import com.tropo.server.CallActor
-import com.tropo.server.CallManager
-import com.tropo.server.CallRegistry
-import com.tropo.server.CdrManager
-import com.tropo.server.EventHandler
-import com.tropo.server.test.MockCall
-import com.tropo.server.test.MockCdrErrorHandler;
-import com.tropo.server.test.MockCdrExceptionStrategy;
-import com.tropo.server.test.MockMediaService
+import com.rayo.core.EndEvent
+import com.rayo.core.OfferEvent
+import com.rayo.core.EndEvent.Reason
+import com.rayo.server.CallActor
+import com.rayo.server.CallManager
+import com.rayo.server.CallRegistry
+import com.rayo.server.CdrManager
+import com.rayo.server.EventHandler
+import com.rayo.server.test.MockCall
+import com.rayo.server.test.MockCdrErrorHandler;
+import com.rayo.server.test.MockCdrExceptionStrategy;
+import com.rayo.server.test.MockMediaService
 import com.voxeo.moho.Call
 
 
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations=["/tropo-context-activemq-cdr.xml"])
+@ContextConfiguration(locations=["/rayo-context-activemq-cdr.xml"])
 public class CdrTest {
 
     @Autowired

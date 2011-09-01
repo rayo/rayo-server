@@ -1,4 +1,4 @@
-package com.tropo.server.cdr;
+package com.rayo.server.cdr;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -11,12 +11,12 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
-import com.tropo.core.cdr.Cdr;
-import com.tropo.core.cdr.CdrException;
-import com.tropo.server.jmx.FileCdrMXBean;
+import com.rayo.server.jmx.FileCdrMXBean;
+import com.rayo.core.cdr.Cdr;
+import com.rayo.core.cdr.CdrException;
 import com.voxeo.logging.Loggerf;
 
-@ManagedResource(objectName = "com.tropo:Type=Admin,name=File CDR", description = "Filebased CDR storage")
+@ManagedResource(objectName = "com.rayo:Type=Admin,name=File CDR", description = "Filebased CDR storage")
 public class FileCdrStorageStrategy implements CdrStorageStrategy, FileCdrMXBean {
 
 	private Loggerf logger = Loggerf.getLogger(FileCdrStorageStrategy.class);

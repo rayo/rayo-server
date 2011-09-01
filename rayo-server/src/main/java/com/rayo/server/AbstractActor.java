@@ -1,4 +1,4 @@
-package com.tropo.server;
+package com.rayo.server;
 
 import static com.voxeo.utils.Objects.assertion;
 
@@ -12,23 +12,23 @@ import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
-import com.tropo.core.CallCommand;
-import com.tropo.core.EndEvent;
-import com.tropo.core.EndEvent.Reason;
-import com.tropo.core.exception.RecoverableException;
-import com.tropo.core.validation.ValidationException;
-import com.tropo.core.validation.Validator;
-import com.tropo.core.verb.Ssml;
-import com.tropo.core.verb.StopCommand;
-import com.tropo.core.verb.Verb;
-import com.tropo.core.verb.VerbCommand;
-import com.tropo.core.verb.VerbCompleteEvent;
-import com.tropo.core.verb.VerbEvent;
-import com.tropo.core.verb.VerbRef;
-import com.tropo.server.verb.EventDispatcher;
-import com.tropo.server.verb.VerbFactory;
-import com.tropo.server.verb.VerbHandler;
-import com.tropo.server.verb.VerbManager;
+import com.rayo.server.verb.EventDispatcher;
+import com.rayo.server.verb.VerbFactory;
+import com.rayo.server.verb.VerbHandler;
+import com.rayo.server.verb.VerbManager;
+import com.rayo.core.CallCommand;
+import com.rayo.core.EndEvent;
+import com.rayo.core.EndEvent.Reason;
+import com.rayo.core.exception.RecoverableException;
+import com.rayo.core.validation.ValidationException;
+import com.rayo.core.validation.Validator;
+import com.rayo.core.verb.Ssml;
+import com.rayo.core.verb.StopCommand;
+import com.rayo.core.verb.Verb;
+import com.rayo.core.verb.VerbCommand;
+import com.rayo.core.verb.VerbCompleteEvent;
+import com.rayo.core.verb.VerbEvent;
+import com.rayo.core.verb.VerbRef;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.NegotiateException;
 import com.voxeo.moho.Participant;

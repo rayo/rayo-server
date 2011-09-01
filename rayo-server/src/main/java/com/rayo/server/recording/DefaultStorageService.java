@@ -1,10 +1,10 @@
-package com.tropo.server.recording;
+package com.rayo.server.recording;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 
-import com.tropo.core.recording.StorageService;
+import com.rayo.core.recording.StorageService;
 import com.voxeo.moho.Participant;
 
 /**

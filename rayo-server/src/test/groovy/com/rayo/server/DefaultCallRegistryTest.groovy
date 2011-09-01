@@ -1,11 +1,14 @@
-package com.tropo.server
+package com.rayo.server
 
 import static org.junit.Assert.*
 
 import org.junit.Before
 import org.junit.Test;
 
-import com.tropo.server.test.MockCall;
+import com.rayo.server.CallActor;
+import com.rayo.server.DefaultCallRegistry;
+import com.rayo.server.JIDRegistry;
+import com.rayo.server.test.MockCall;
 import com.voxeo.moho.Call
 
 class DefaultCallRegistryTest {

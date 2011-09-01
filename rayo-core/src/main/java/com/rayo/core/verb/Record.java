@@ -1,4 +1,4 @@
-package com.tropo.core.verb;
+package com.rayo.core.verb;
 
 import java.net.URI;
 
@@ -6,7 +6,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 import org.joda.time.Duration;
 
-import com.tropo.core.validation.ValidFileFormat;
+import com.rayo.core.validation.ValidFileFormat;
 
 public class Record extends BaseVerb {
 

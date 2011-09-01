@@ -1,4 +1,4 @@
-package com.tropo.core.xml.providers;
+package com.rayo.core.xml.providers;
 
 import java.net.URISyntaxException;
 
@@ -7,11 +7,11 @@ import org.dom4j.Element;
 import org.dom4j.Namespace;
 import org.dom4j.QName;
 
-import com.tropo.core.verb.PauseCommand;
-import com.tropo.core.verb.ResumeCommand;
-import com.tropo.core.verb.Say;
-import com.tropo.core.verb.SayCompleteEvent;
-import com.tropo.core.verb.SayCompleteEvent.Reason;
+import com.rayo.core.verb.PauseCommand;
+import com.rayo.core.verb.ResumeCommand;
+import com.rayo.core.verb.Say;
+import com.rayo.core.verb.SayCompleteEvent;
+import com.rayo.core.verb.SayCompleteEvent.Reason;
 
 public class SayProvider extends BaseProvider {
 

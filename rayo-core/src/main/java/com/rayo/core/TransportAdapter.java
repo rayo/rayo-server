@@ -1,6 +1,6 @@
-package com.tropo.core;
+package com.rayo.core;
 
-import com.tropo.core.verb.VerbEvent;
+import com.rayo.core.verb.VerbEvent;
 
 public interface TransportAdapter {
 

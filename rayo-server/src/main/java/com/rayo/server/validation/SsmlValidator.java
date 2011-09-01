@@ -1,4 +1,4 @@
-package com.tropo.server.validation;
+package com.rayo.server.validation;
 
 import java.io.StringReader;
 
@@ -11,7 +11,7 @@ import javax.xml.validation.Validator;
 
 import org.springframework.core.io.Resource;
 
-import com.tropo.core.validation.ValidationException;
+import com.rayo.core.validation.ValidationException;
 import com.voxeo.logging.Loggerf;
 
 public class SsmlValidator {

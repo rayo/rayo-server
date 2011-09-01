@@ -1,10 +1,10 @@
-package com.tropo.server;
+package com.rayo.server;
 
 import java.net.URI;
 
-import com.tropo.core.CallRef;
-import com.tropo.core.DialCommand;
-import com.tropo.core.JoinCommand;
+import com.rayo.core.CallRef;
+import com.rayo.core.DialCommand;
+import com.rayo.core.JoinCommand;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.ApplicationContext;
 import com.voxeo.moho.Call;

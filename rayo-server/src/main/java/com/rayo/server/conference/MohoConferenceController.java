@@ -1,4 +1,4 @@
-package com.tropo.server.conference;
+package com.rayo.server.conference;
 
 import com.voxeo.moho.ApplicationContext;
 import com.voxeo.moho.conference.Conference;

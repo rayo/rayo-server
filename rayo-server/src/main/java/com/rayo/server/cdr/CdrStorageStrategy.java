@@ -1,9 +1,9 @@
-package com.tropo.server.cdr;
+package com.rayo.server.cdr;
 
 import java.io.IOException;
 
-import com.tropo.core.cdr.Cdr;
-import com.tropo.core.cdr.CdrException;
+import com.rayo.core.cdr.Cdr;
+import com.rayo.core.cdr.CdrException;
 
 public interface CdrStorageStrategy {
 

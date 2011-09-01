@@ -1,9 +1,9 @@
-package com.tropo.core.validation;
+package com.rayo.core.validation;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import com.tropo.core.verb.Output;
+import com.rayo.core.verb.Output;
 
 public class CodecValidator implements ConstraintValidator<ValidCodec, String> {
 

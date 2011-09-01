@@ -1,4 +1,4 @@
-package com.tropo.core.verb;
+package com.rayo.core.verb;
 
 import java.net.URI;
 
@@ -7,7 +7,7 @@ import javax.validation.constraints.AssertTrue;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
-import com.tropo.core.validation.Messages;
+import com.rayo.core.validation.Messages;
 
 public class Choices {
 

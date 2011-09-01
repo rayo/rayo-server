@@ -1,4 +1,4 @@
-package com.tropo.server.verb;
+package com.rayo.server.verb;
 
 import java.net.URI;
 import java.util.HashMap;
@@ -11,13 +11,13 @@ import java.util.concurrent.TimeUnit;
 
 import javax.media.mscontrol.join.Joinable.Direction;
 
-import com.tropo.core.verb.Ssml;
-import com.tropo.core.verb.Transfer;
-import com.tropo.core.verb.TransferCompleteEvent;
-import com.tropo.core.verb.TransferCompleteEvent.Reason;
-import com.tropo.core.verb.VerbCompleteEvent;
-import com.tropo.core.verb.VerbCompleteReason;
-import com.tropo.server.ActorEventListener;
+import com.rayo.server.ActorEventListener;
+import com.rayo.core.verb.Ssml;
+import com.rayo.core.verb.Transfer;
+import com.rayo.core.verb.TransferCompleteEvent;
+import com.rayo.core.verb.TransferCompleteEvent.Reason;
+import com.rayo.core.verb.VerbCompleteEvent;
+import com.rayo.core.verb.VerbCompleteReason;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.Call;
 import com.voxeo.moho.CallableEndpoint;

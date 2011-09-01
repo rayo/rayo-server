@@ -1,4 +1,4 @@
-package com.tropo.core.verb;
+package com.rayo.core.verb;
 
 public class MuteCommand extends AbstractVerbCommand {
 

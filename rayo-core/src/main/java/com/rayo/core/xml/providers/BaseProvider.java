@@ -1,4 +1,4 @@
-package com.tropo.core.xml.providers;
+package com.rayo.core.xml.providers;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -16,16 +16,16 @@ import org.dom4j.QName;
 import org.dom4j.Text;
 import org.joda.time.Duration;
 
-import com.tropo.core.validation.Messages;
-import com.tropo.core.validation.ValidationException;
-import com.tropo.core.validation.Validator;
-import com.tropo.core.verb.InputMode;
-import com.tropo.core.verb.Ssml;
-import com.tropo.core.verb.VerbCompleteEvent;
-import com.tropo.core.verb.VerbCompleteReason;
-import com.tropo.core.verb.VerbCompleteEvent.Reason;
-import com.tropo.core.xml.XmlProvider;
-import com.tropo.core.xml.XmlProviderManager;
+import com.rayo.core.validation.Messages;
+import com.rayo.core.validation.ValidationException;
+import com.rayo.core.validation.Validator;
+import com.rayo.core.verb.InputMode;
+import com.rayo.core.verb.Ssml;
+import com.rayo.core.verb.VerbCompleteEvent;
+import com.rayo.core.verb.VerbCompleteReason;
+import com.rayo.core.verb.VerbCompleteEvent.Reason;
+import com.rayo.core.xml.XmlProvider;
+import com.rayo.core.xml.XmlProviderManager;
 import com.voxeo.utils.Enums;
 
 public abstract class BaseProvider implements XmlProvider {

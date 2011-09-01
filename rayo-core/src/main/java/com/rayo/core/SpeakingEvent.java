@@ -1,13 +1,13 @@
-package com.tropo.core;
+package com.rayo.core;
 
 import javax.validation.constraints.NotNull;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
-import com.tropo.core.validation.Messages;
-import com.tropo.core.verb.AbstractVerbEvent;
-import com.tropo.core.verb.Conference;
+import com.rayo.core.validation.Messages;
+import com.rayo.core.verb.AbstractVerbEvent;
+import com.rayo.core.verb.Conference;
 
 public class SpeakingEvent extends AbstractVerbEvent {
 

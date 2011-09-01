@@ -1,4 +1,4 @@
-package com.tropo.core.xml;
+package com.rayo.core.xml;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -6,8 +6,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.dom4j.Element;
 import org.dom4j.Namespace;
 
-import com.tropo.core.validation.Messages;
-import com.tropo.core.validation.ValidationException;
+import com.rayo.core.validation.Messages;
+import com.rayo.core.validation.ValidationException;
 
 import static com.voxeo.utils.Objects.assertion;
 

@@ -1,18 +1,18 @@
-package com.tropo.server.verb;
+package com.rayo.server.verb;
 
 import javax.validation.ConstraintValidatorContext;
 
-import com.tropo.core.validation.ValidationException;
-import com.tropo.core.verb.PauseCommand;
-import com.tropo.core.verb.ResumeCommand;
-import com.tropo.core.verb.Say;
-import com.tropo.core.verb.SayCompleteEvent;
-import com.tropo.core.verb.SayCompleteEvent.Reason;
-import com.tropo.core.verb.Ssml;
-import com.tropo.core.verb.VerbCommand;
-import com.tropo.core.verb.VerbCompleteEvent;
-import com.tropo.server.exception.ExceptionMapper;
-import com.tropo.server.validation.SsmlValidator;
+import com.rayo.server.exception.ExceptionMapper;
+import com.rayo.server.validation.SsmlValidator;
+import com.rayo.core.validation.ValidationException;
+import com.rayo.core.verb.PauseCommand;
+import com.rayo.core.verb.ResumeCommand;
+import com.rayo.core.verb.Say;
+import com.rayo.core.verb.SayCompleteEvent;
+import com.rayo.core.verb.SayCompleteEvent.Reason;
+import com.rayo.core.verb.Ssml;
+import com.rayo.core.verb.VerbCommand;
+import com.rayo.core.verb.VerbCompleteEvent;
 import com.voxeo.moho.Participant;
 import com.voxeo.moho.State;
 import com.voxeo.moho.event.OutputCompleteEvent;

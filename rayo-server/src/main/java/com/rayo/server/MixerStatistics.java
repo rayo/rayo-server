@@ -1,13 +1,13 @@
-package com.tropo.server;
+package com.rayo.server;
 
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
-import com.tropo.server.jmx.MixerStatisticsMXBean;
+import com.rayo.server.jmx.MixerStatisticsMXBean;
 
-@ManagedResource(objectName="com.tropo:Type=Mixer Statistics", description="Mixer Statistics")
+@ManagedResource(objectName="com.rayo:Type=Mixer Statistics", description="Mixer Statistics")
 public class MixerStatistics implements MixerStatisticsMXBean {
 
 	private AtomicLong totalMixers = new AtomicLong(0);

@@ -1,4 +1,4 @@
-package com.tropo.server.conference;
+package com.rayo.server.conference;
 
 public interface ParticipantController {
 

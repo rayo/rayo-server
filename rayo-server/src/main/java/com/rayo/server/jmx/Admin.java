@@ -1,4 +1,4 @@
-package com.tropo.server.jmx;
+package com.rayo.server.jmx;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -6,10 +6,10 @@ import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
-import com.tropo.server.AdminService;
+import com.rayo.server.AdminService;
 import com.voxeo.logging.Loggerf;
 
-@ManagedResource(objectName = "com.tropo:Type=Admin,name=Admin", description = "Admin Interface")
+@ManagedResource(objectName = "com.rayo:Type=Admin,name=Admin", description = "Admin Interface")
 public class Admin implements AdminMXBean {
 
 	private Loggerf log = Loggerf.getLogger(Admin.class);

@@ -1,4 +1,4 @@
-package com.tropo.server;
+package com.rayo.server;
 
 import static com.voxeo.utils.Objects.iterable;
 
@@ -6,13 +6,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import com.tropo.core.AcceptCommand;
-import com.tropo.core.AnswerCommand;
-import com.tropo.core.EndEvent.Reason;
-import com.tropo.core.OfferEvent;
-import com.tropo.core.RedirectCommand;
-import com.tropo.core.RejectCommand;
-import com.tropo.core.exception.RecoverableException;
+import com.rayo.core.AcceptCommand;
+import com.rayo.core.AnswerCommand;
+import com.rayo.core.EndEvent.Reason;
+import com.rayo.core.OfferEvent;
+import com.rayo.core.RedirectCommand;
+import com.rayo.core.RejectCommand;
+import com.rayo.core.exception.RecoverableException;
 import com.voxeo.moho.ApplicationContext;
 import com.voxeo.moho.Call;
 import com.voxeo.moho.Endpoint;

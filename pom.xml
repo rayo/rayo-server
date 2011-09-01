@@ -5,8 +5,8 @@
   
   <name>Tropo2 Parent POM</name>
   
-  <groupId>com.tropo</groupId>
-  <artifactId>tropo-parent</artifactId>
+  <groupId>com.rayo</groupId>
+  <artifactId>rayo-parent</artifactId>
   <version>2.0-SNAPSHOT</version>
   
   <properties>
@@ -288,14 +288,14 @@
     </plugins>
   </build>
   <scm>
-    <connection>scm:git:git@github.com:tropo/tropo2.git</connection>
-    <url>scm:git:git@github.com:tropo/tropo2.git</url>
-    <developerConnection>scm:git:git@github.com:tropo/tropo2.git</developerConnection>
+    <connection>scm:git:git@github.com:rayo/rayo-server.git</connection>
+    <url>scm:git:git@github.com:rayo/rayo-server.git</url>
+    <developerConnection>scm:git:git@github.com:rayo/rayo-server.git</developerConnection>
   </scm>
   <modules>
-    <module>tropo-server</module>
-    <module>tropo-core</module>
-    <module>tropo-war</module>
+    <module>rayo-server</module>
+    <module>rayo-core</module>
+    <module>rayo-war</module>
   </modules>
   <profiles>
     <profile>

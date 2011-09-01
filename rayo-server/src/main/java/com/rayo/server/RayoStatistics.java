@@ -1,4 +1,4 @@
-package com.tropo.server;
+package com.rayo.server;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -8,9 +8,9 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
-import com.tropo.server.jmx.RayoStatisticsMXBean;
+import com.rayo.server.jmx.RayoStatisticsMXBean;
 
-@ManagedResource(objectName="com.tropo:Type=Rayo", description="Rayo Statistics")
+@ManagedResource(objectName="com.rayo:Type=Rayo", description="Rayo Statistics")
 public class RayoStatistics implements RayoStatisticsMXBean {
 
 	private AtomicLong callsReceived = new AtomicLong(0);

@@ -1,4 +1,4 @@
-package com.tropo.core.cdr;
+package com.rayo.core.cdr;
 
 @SuppressWarnings("serial")
 public class CdrException extends Exception {

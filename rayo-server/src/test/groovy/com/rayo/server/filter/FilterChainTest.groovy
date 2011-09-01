@@ -1,4 +1,4 @@
-package com.tropo.server.filter
+package com.rayo.server.filter
 
 import static org.junit.Assert.*
 
@@ -9,10 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 
-import com.tropo.core.validation.ValidationException;
+import com.rayo.server.filter.FilterChain;
+import com.rayo.server.filter.MessageFilter;
+import com.rayo.core.validation.ValidationException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations=["/tropo-context-activemq-cdr.xml"])
+@ContextConfiguration(locations=["/rayo-context-activemq-cdr.xml"])
 public class FilterChainTest {
 
     @Autowired

@@ -1,12 +1,12 @@
-package com.tropo.server.test;
+package com.rayo.server.test;
 
 import java.net.URI;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.tropo.core.CallContextResolver;
-import com.tropo.core.ExecutionContext;
-import com.tropo.core.OfferEvent;
+import com.rayo.core.CallContextResolver;
+import com.rayo.core.ExecutionContext;
+import com.rayo.core.OfferEvent;
 import com.voxeo.exceptions.AssertionException;
 import com.voxeo.logging.Loggerf;
 

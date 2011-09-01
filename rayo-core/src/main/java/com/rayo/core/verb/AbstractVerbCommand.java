@@ -1,4 +1,4 @@
-package com.tropo.core.verb;
+package com.rayo.core.verb;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;

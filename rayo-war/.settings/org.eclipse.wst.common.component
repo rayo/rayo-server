@@ -4,7 +4,7 @@
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
         <wb-resource deploy-path="/" source-path="/src/main/webapp"/>
-        <dependent-module deploy-path="/WEB-INF/lib" handle="module:/resource/tropo-server/tropo-server">
+        <dependent-module deploy-path="/WEB-INF/lib" handle="module:/resource/rayo-server/rayo-server">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <dependent-module deploy-path="/WEB-INF/lib" handle="module:/resource/moho-api/moho-api">
@@ -13,7 +13,7 @@
         <dependent-module deploy-path="/WEB-INF/lib" handle="module:/resource/moho-impl/moho-impl">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module deploy-path="/WEB-INF/lib" handle="module:/resource/tropo-core/tropo-core">
+        <dependent-module deploy-path="/WEB-INF/lib" handle="module:/resource/rayo-core/rayo-core">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <property name="java-output-path" value="/tropo-war/target/classes"/>

@@ -1,4 +1,4 @@
-package com.tropo.core.xml.providers;
+package com.rayo.core.xml.providers;
 
 import java.net.URISyntaxException;
 
@@ -7,14 +7,14 @@ import org.dom4j.Element;
 import org.dom4j.Namespace;
 import org.dom4j.QName;
 
-import com.tropo.core.FinishedSpeakingEvent;
-import com.tropo.core.SpeakingEvent;
-import com.tropo.core.verb.Conference;
-import com.tropo.core.verb.ConferenceCompleteEvent;
-import com.tropo.core.verb.KickCommand;
-import com.tropo.core.verb.OffHoldEvent;
-import com.tropo.core.verb.OnHoldEvent;
-import com.tropo.core.verb.Ssml;
+import com.rayo.core.FinishedSpeakingEvent;
+import com.rayo.core.SpeakingEvent;
+import com.rayo.core.verb.Conference;
+import com.rayo.core.verb.ConferenceCompleteEvent;
+import com.rayo.core.verb.KickCommand;
+import com.rayo.core.verb.OffHoldEvent;
+import com.rayo.core.verb.OnHoldEvent;
+import com.rayo.core.verb.Ssml;
 
 public class ConferenceProvider extends BaseProvider {
 

@@ -7,7 +7,7 @@
 	<xmpp:servlet>
 		<javaee:servlet-name>rayo</javaee:servlet-name>
 		<javaee:servlet-class>
-			com.tropo.server.SpringXmppServlet
+			com.rayo.server.SpringXmppServlet
 		</javaee:servlet-class>
 		<javaee:load-on-startup>1</javaee:load-on-startup>
 	</xmpp:servlet>

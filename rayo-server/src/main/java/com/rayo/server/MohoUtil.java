@@ -1,8 +1,8 @@
-package com.tropo.server;
+package com.rayo.server;
 
 import java.net.URI;
 
-import com.tropo.core.verb.Ssml;
+import com.rayo.core.verb.Ssml;
 import com.voxeo.moho.media.output.AudibleResource;
 import com.voxeo.moho.media.output.OutputCommand;
 

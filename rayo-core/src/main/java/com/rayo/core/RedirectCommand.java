@@ -1,4 +1,4 @@
-package com.tropo.core;
+package com.rayo.core;
 
 import java.net.URI;
 import java.util.Map;
@@ -8,7 +8,7 @@ import javax.validation.constraints.NotNull;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
-import com.tropo.core.validation.Messages;
+import com.rayo.core.validation.Messages;
 
 public class RedirectCommand extends AbstractCallCommand {
 

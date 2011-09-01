@@ -1,9 +1,9 @@
-<%@ page import="com.tropo.web.*,com.tropo.server.*,com.tropo.server.jmx.*" %>
+<%@ page import="com.rayo.web.*,com.rayo.server.*,com.rayo.server.jmx.*" %>
 <%@page import="org.springframework.web.context.WebApplicationContext"%>
 <%@page import="org.springframework.web.context.support.WebApplicationContextUtils"%>
 		
 <%
-	if (getServletConfig().getServletContext().getAttribute(ContextLoaderListener.TROPO_STATUS) == TropoStatus.FAILED) {
+	if (getServletConfig().getServletContext().getAttribute(ContextLoaderListener.RAYO_STATUS) == RayoStatus.FAILED) {
 	    response.sendError(500);
     }
     WebApplicationContext context = WebApplicationContextUtils.getWebApplicationContext(application);        
@@ -73,11 +73,11 @@
 	  $(document).ready(function() {
 		$.periodic({period: 1000}, function() {
 			var j4p = new Jolokia("<%=request.getContextPath()%>/jmx");	
-			var uptime = { type: "read", mbean: "com.tropo:Type=Info", attribute: "Uptime" };
-			var calls = { type: "read", mbean: "com.tropo:Type=Calls", attribute: "TotalCalls" };
-			var conferences = { type: "read", mbean: "com.tropo:Type=Mixer Statistics", attribute: "TotalMixers" };
-			var events = { type: "read", mbean: "com.tropo:Type=Rayo", attribute: "CallEventsProcessed" };
-			var commands = { type: "read", mbean: "com.tropo:Type=Rayo", attribute: "TotalCommands" };
+			var uptime = { type: "read", mbean: "com.rayo:Type=Info", attribute: "Uptime" };
+			var calls = { type: "read", mbean: "com.rayo:Type=Calls", attribute: "TotalCalls" };
+			var conferences = { type: "read", mbean: "com.rayo:Type=Mixer Statistics", attribute: "TotalMixers" };
+			var events = { type: "read", mbean: "com.rayo:Type=Rayo", attribute: "CallEventsProcessed" };
+			var commands = { type: "read", mbean: "com.rayo:Type=Rayo", attribute: "TotalCommands" };
 			var responses = j4p.request([uptime,calls,conferences,events,commands]);
 		    $("#uptime").text(responses[0].value);
 		    $("#calls").text(responses[1].value);

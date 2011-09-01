@@ -1,17 +1,17 @@
-package com.tropo.server.verb;
+package com.rayo.server.verb;
 
 import java.net.URI;
 
 import javax.validation.ConstraintValidatorContext;
 
-import com.tropo.core.verb.InputMode;
-import com.tropo.core.verb.Ssml;
-import com.tropo.core.verb.Verb;
-import com.tropo.core.verb.VerbCommand;
-import com.tropo.core.verb.VerbCompleteEvent;
-import com.tropo.core.verb.VerbEvent;
-import com.tropo.server.Actor;
-import com.tropo.server.validation.ValidHandlerState;
+import com.rayo.server.Actor;
+import com.rayo.server.validation.ValidHandlerState;
+import com.rayo.core.verb.InputMode;
+import com.rayo.core.verb.Ssml;
+import com.rayo.core.verb.Verb;
+import com.rayo.core.verb.VerbCommand;
+import com.rayo.core.verb.VerbCompleteEvent;
+import com.rayo.core.verb.VerbEvent;
 import com.voxeo.moho.Call;
 import com.voxeo.moho.MediaService;
 import com.voxeo.moho.Participant;
@@ -73,7 +73,7 @@ public abstract class AbstractLocalVerbHandler<T extends Verb, S extends Partici
         }
     }
     
-    protected InputMode getTropoMode(com.voxeo.moho.media.InputMode mode) {
+    protected InputMode getInputMode(com.voxeo.moho.media.InputMode mode) {
         switch(mode) {
             case ANY:
                 return InputMode.ANY;

@@ -1,4 +1,4 @@
-package com.tropo.core.verb;
+package com.rayo.core.verb;
 
 import java.util.Map;
 
@@ -8,7 +8,7 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 import org.joda.time.Duration;
 
-import com.tropo.core.validation.Messages;
+import com.rayo.core.validation.Messages;
 
 public class Conference extends BaseVerb {
 

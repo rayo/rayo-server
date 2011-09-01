@@ -1,4 +1,4 @@
-package com.tropo.server.cdr;
+package com.rayo.server.cdr;
 
 import java.io.IOException;
 import java.util.Hashtable;
@@ -15,8 +15,8 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 import javax.naming.InitialContext;
 
-import com.tropo.core.cdr.Cdr;
-import com.tropo.core.cdr.CdrException;
+import com.rayo.core.cdr.Cdr;
+import com.rayo.core.cdr.CdrException;
 import com.voxeo.logging.Loggerf;
 
 public class JMSCdrStorageStrategy implements CdrStorageStrategy {

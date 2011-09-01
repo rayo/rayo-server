@@ -1,4 +1,4 @@
-package com.tropo.core.verb;
+package com.rayo.core.verb;
 
 import java.net.URI;
 import java.util.List;
@@ -11,7 +11,7 @@ import org.apache.commons.lang.builder.ToStringStyle;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.joda.time.Duration;
 
-import com.tropo.core.validation.Messages;
+import com.rayo.core.validation.Messages;
 
 public class Transfer extends BaseVerb {
 

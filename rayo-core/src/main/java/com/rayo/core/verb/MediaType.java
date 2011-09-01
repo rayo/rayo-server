@@ -1,4 +1,4 @@
-package com.tropo.core.verb;
+package com.rayo.core.verb;
 
 import java.security.InvalidParameterException;
 import java.util.EnumSet;

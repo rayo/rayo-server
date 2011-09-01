@@ -1,4 +1,4 @@
-package com.tropo.server;
+package com.rayo.server;
 
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.context.support.XmlWebApplicationContext;

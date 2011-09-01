@@ -1,4 +1,4 @@
-package com.tropo.server;
+package com.rayo.server;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -8,9 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.tropo.core.cdr.Cdr;
-import com.tropo.server.cdr.CdrErrorHandler;
-import com.tropo.server.cdr.CdrStorageStrategy;
+import com.rayo.server.cdr.CdrErrorHandler;
+import com.rayo.server.cdr.CdrStorageStrategy;
+import com.rayo.core.cdr.Cdr;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.Call;
 

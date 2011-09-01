@@ -12,7 +12,7 @@
  * governing permissions and limitations under the License.
  */
 
-package com.tropo.server.test;
+package com.rayo.server.test;
 
 import java.io.BufferedReader;
 import java.io.IOException;

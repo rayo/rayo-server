@@ -1,4 +1,4 @@
-package com.tropo.core.xml.providers;
+package com.rayo.core.xml.providers;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -9,13 +9,13 @@ import org.dom4j.Element;
 import org.dom4j.Namespace;
 import org.dom4j.QName;
 
-import com.tropo.core.verb.RecordCompleteEvent.Reason;
-import com.tropo.core.verb.Record;
-import com.tropo.core.verb.RecordCompleteEvent;
-import com.tropo.core.verb.RecordPauseCommand;
-import com.tropo.core.verb.RecordResumeCommand;
-import com.tropo.core.verb.VerbCompleteEvent;
-import com.tropo.core.verb.VerbCompleteReason;
+import com.rayo.core.verb.Record;
+import com.rayo.core.verb.RecordCompleteEvent;
+import com.rayo.core.verb.RecordPauseCommand;
+import com.rayo.core.verb.RecordResumeCommand;
+import com.rayo.core.verb.VerbCompleteEvent;
+import com.rayo.core.verb.VerbCompleteReason;
+import com.rayo.core.verb.RecordCompleteEvent.Reason;
 
 
 public class RecordProvider extends BaseProvider {

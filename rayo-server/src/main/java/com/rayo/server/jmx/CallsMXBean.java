@@ -1,4 +1,4 @@
-package com.tropo.server.jmx;
+package com.rayo.server.jmx;
 
 import java.util.List;
 import java.util.Map;

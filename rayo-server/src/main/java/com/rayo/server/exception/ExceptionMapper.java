@@ -1,10 +1,10 @@
-package com.tropo.server.exception;
+package com.rayo.server.exception;
 
 import javax.validation.ConstraintViolation;
 
-import com.tropo.core.validation.ValidationException;
-import com.tropo.server.exception.ErrorMapping;
-import com.tropo.server.validation.ValidHandlerState;
+import com.rayo.server.exception.ErrorMapping;
+import com.rayo.server.validation.ValidHandlerState;
+import com.rayo.core.validation.ValidationException;
 import com.voxeo.exceptions.NotFoundException;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.BusyException;

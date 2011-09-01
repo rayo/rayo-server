@@ -1,10 +1,10 @@
-package com.tropo.server.test;
+package com.rayo.server.test;
 
 import java.io.IOException;
 
-import com.tropo.core.cdr.Cdr;
-import com.tropo.core.cdr.CdrException;
-import com.tropo.server.cdr.CdrStorageStrategy;
+import com.rayo.server.cdr.CdrStorageStrategy;
+import com.rayo.core.cdr.Cdr;
+import com.rayo.core.cdr.CdrException;
 
 public class MockCdrExceptionStrategy implements CdrStorageStrategy {
 

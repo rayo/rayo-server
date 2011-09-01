@@ -1,18 +1,18 @@
-package com.tropo.server.verb;
+package com.rayo.server.verb;
 
 import java.util.List;
 
 import javax.validation.ConstraintValidatorContext;
 
-import com.tropo.core.validation.ValidationException;
-import com.tropo.core.verb.Ask;
-import com.tropo.core.verb.AskCompleteEvent;
-import com.tropo.core.verb.AskCompleteEvent.Reason;
-import com.tropo.core.verb.Choices;
-import com.tropo.core.verb.Ssml;
-import com.tropo.core.verb.VerbCompleteEvent;
-import com.tropo.server.exception.ExceptionMapper;
-import com.tropo.server.validation.SsmlValidator;
+import com.rayo.server.exception.ExceptionMapper;
+import com.rayo.server.validation.SsmlValidator;
+import com.rayo.core.validation.ValidationException;
+import com.rayo.core.verb.Ask;
+import com.rayo.core.verb.AskCompleteEvent;
+import com.rayo.core.verb.AskCompleteEvent.Reason;
+import com.rayo.core.verb.Choices;
+import com.rayo.core.verb.Ssml;
+import com.rayo.core.verb.VerbCompleteEvent;
 import com.voxeo.moho.Participant;
 import com.voxeo.moho.State;
 import com.voxeo.moho.event.InputCompleteEvent;
@@ -120,7 +120,7 @@ public class AskHandler extends AbstractLocalVerbHandler<Ask,Participant> {
             completeEvent.setUtterance(event.getUtterance());
             completeEvent.setNlsml(event.getNlsml());
             completeEvent.setTag(event.getTag());
-            completeEvent.setMode(getTropoMode(event.getInputMode()));
+            completeEvent.setMode(getInputMode(event.getInputMode()));
             break;
         case INI_TIMEOUT:
             completeEvent = new AskCompleteEvent(model, Reason.NOINPUT);

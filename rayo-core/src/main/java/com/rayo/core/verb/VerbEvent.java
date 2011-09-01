@@ -1,6 +1,6 @@
-package com.tropo.core.verb;
+package com.rayo.core.verb;
 
-import com.tropo.core.CallEvent;
+import com.rayo.core.CallEvent;
 
 public interface VerbEvent extends CallEvent {
 

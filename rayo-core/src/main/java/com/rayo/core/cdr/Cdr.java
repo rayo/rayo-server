@@ -1,4 +1,4 @@
-package com.tropo.core.cdr;
+package com.rayo.core.cdr;
 
 import java.io.Serializable;
 import java.util.ArrayList;

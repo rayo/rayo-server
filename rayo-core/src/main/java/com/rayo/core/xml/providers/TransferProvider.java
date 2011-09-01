@@ -1,4 +1,4 @@
-package com.tropo.core.xml.providers;
+package com.rayo.core.xml.providers;
 
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -10,11 +10,11 @@ import org.dom4j.Element;
 import org.dom4j.Namespace;
 import org.dom4j.QName;
 
-import com.tropo.core.validation.Messages;
-import com.tropo.core.validation.ValidationException;
-import com.tropo.core.verb.MediaType;
-import com.tropo.core.verb.Transfer;
-import com.tropo.core.verb.TransferCompleteEvent;
+import com.rayo.core.validation.Messages;
+import com.rayo.core.validation.ValidationException;
+import com.rayo.core.verb.MediaType;
+import com.rayo.core.verb.Transfer;
+import com.rayo.core.verb.TransferCompleteEvent;
 
 public class TransferProvider extends BaseProvider {
 

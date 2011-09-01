@@ -14,12 +14,12 @@ $(document).ready(function() {
 	]);	
 	factory.create([
 		{
-			name: 'com.tropo:Type=Calls',
+			name: 'com.rayo:Type=Calls',
 			attribute: 'ActiveCallsCount'
 		}
 	]);
 	factory.create({
-		name:     'com.tropo:Type=Mixer Statistics',
+		name:     'com.rayo:Type=Mixer Statistics',
 		attribute: 'ActiveMixersCount'
 	});	
 });

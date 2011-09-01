@@ -1,4 +1,4 @@
-package com.tropo.server.jmx;
+package com.rayo.server.jmx;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -10,13 +10,13 @@ import java.util.Map;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
-import com.tropo.server.CallActor;
-import com.tropo.server.CallRegistry;
-import com.tropo.server.CallStatistics;
-import com.tropo.server.CdrManager;
-import com.tropo.server.verb.VerbHandler;
+import com.rayo.server.CallActor;
+import com.rayo.server.CallRegistry;
+import com.rayo.server.CallStatistics;
+import com.rayo.server.CdrManager;
+import com.rayo.server.verb.VerbHandler;
 
-@ManagedResource(objectName="com.tropo:Type=Calls", description="Active Calls")
+@ManagedResource(objectName="com.rayo:Type=Calls", description="Active Calls")
 public class Calls implements Serializable, CallsMXBean {
 
 	private static final long serialVersionUID = 1L;

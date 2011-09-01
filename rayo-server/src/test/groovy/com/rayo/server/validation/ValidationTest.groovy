@@ -1,4 +1,4 @@
-package com.tropo.server.validation;
+package com.rayo.server.validation;
 
 import static org.junit.Assert.*
 
@@ -9,18 +9,18 @@ import org.dom4j.io.SAXReader
 import org.junit.Before
 import org.junit.Test
 
-import com.tropo.core.validation.Messages
-import com.tropo.core.validation.ValidationException
-import com.tropo.core.validation.Validator
-import com.tropo.core.xml.DefaultXmlProviderManager;
-import com.tropo.core.xml.providers.AskProvider
-import com.tropo.core.xml.providers.ConferenceProvider
-import com.tropo.core.xml.providers.OutputProvider;
-import com.tropo.core.xml.providers.RayoProvider;
-import com.tropo.core.xml.providers.RecordProvider;
-import com.tropo.core.xml.providers.SayProvider
-import com.tropo.core.xml.providers.TransferProvider
-import com.tropo.server.exception.ExceptionMapper
+import com.rayo.core.validation.Messages
+import com.rayo.core.validation.ValidationException
+import com.rayo.core.validation.Validator
+import com.rayo.core.xml.DefaultXmlProviderManager;
+import com.rayo.core.xml.providers.AskProvider
+import com.rayo.core.xml.providers.ConferenceProvider
+import com.rayo.core.xml.providers.OutputProvider;
+import com.rayo.core.xml.providers.RayoProvider;
+import com.rayo.core.xml.providers.RecordProvider;
+import com.rayo.core.xml.providers.SayProvider
+import com.rayo.core.xml.providers.TransferProvider
+import com.rayo.server.exception.ExceptionMapper
 import com.voxeo.servlet.xmpp.StanzaError;
 
 class ValidationTest {

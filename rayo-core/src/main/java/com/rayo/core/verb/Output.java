@@ -1,4 +1,4 @@
-package com.tropo.core.verb;
+package com.rayo.core.verb;
 
 import javax.media.mscontrol.Value;
 import javax.media.mscontrol.mediagroup.CodecConstants;

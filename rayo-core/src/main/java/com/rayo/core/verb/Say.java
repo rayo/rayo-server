@@ -1,4 +1,4 @@
-package com.tropo.core.verb;
+package com.rayo.core.verb;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;

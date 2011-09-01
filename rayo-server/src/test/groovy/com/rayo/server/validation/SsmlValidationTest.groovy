@@ -1,4 +1,4 @@
-package com.tropo.server.validation
+package com.rayo.server.validation
 
 import static org.junit.Assert.*
 
@@ -8,10 +8,11 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 
-import com.tropo.core.validation.ValidationException;
+import com.rayo.server.validation.SsmlValidator;
+import com.rayo.core.validation.ValidationException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(locations=["/tropo-context-activemq-cdr.xml"])
+@ContextConfiguration(locations=["/rayo-context-activemq-cdr.xml"])
 public class SsmlValidationTest {
 
     @Autowired

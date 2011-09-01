@@ -1,6 +1,6 @@
-package com.tropo.server.test;
+package com.rayo.server.test;
 
-import com.tropo.server.cdr.CdrErrorHandler;
+import com.rayo.server.cdr.CdrErrorHandler;
 
 public class MockCdrErrorHandler implements CdrErrorHandler {
 

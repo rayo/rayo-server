@@ -1,4 +1,4 @@
-package com.tropo.server.verb;
+package com.rayo.server.verb;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,15 +9,15 @@ import javax.media.mscontrol.Value;
 import javax.media.mscontrol.mediagroup.CodecConstants;
 import javax.media.mscontrol.mediagroup.FileFormatConstants;
 
-import com.tropo.core.recording.StorageService;
-import com.tropo.core.verb.Output;
-import com.tropo.core.verb.Record;
-import com.tropo.core.verb.RecordCompleteEvent;
-import com.tropo.core.verb.RecordPauseCommand;
-import com.tropo.core.verb.RecordResumeCommand;
-import com.tropo.core.verb.VerbCommand;
-import com.tropo.core.verb.VerbCompleteEvent;
-import com.tropo.core.verb.VerbCompleteReason;
+import com.rayo.core.recording.StorageService;
+import com.rayo.core.verb.Output;
+import com.rayo.core.verb.Record;
+import com.rayo.core.verb.RecordCompleteEvent;
+import com.rayo.core.verb.RecordPauseCommand;
+import com.rayo.core.verb.RecordResumeCommand;
+import com.rayo.core.verb.VerbCommand;
+import com.rayo.core.verb.VerbCompleteEvent;
+import com.rayo.core.verb.VerbCompleteReason;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.MediaException;
 import com.voxeo.moho.Participant;

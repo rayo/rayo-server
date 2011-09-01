@@ -1,6 +1,6 @@
-package com.tropo.server;
+package com.rayo.server;
 
-import com.tropo.server.verb.ConferenceHandler;
+import com.rayo.server.verb.ConferenceHandler;
 import com.voxeo.moho.Mixer;
 import com.voxeo.moho.conference.Conference;
 import com.voxeo.moho.event.AutowiredEventListener;

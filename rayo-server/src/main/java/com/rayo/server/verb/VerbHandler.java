@@ -1,10 +1,10 @@
-package com.tropo.server.verb;
+package com.rayo.server.verb;
 
 import javax.validation.ConstraintValidatorContext;
 
-import com.tropo.core.verb.Verb;
-import com.tropo.core.verb.VerbCommand;
-import com.tropo.server.Actor;
+import com.rayo.server.Actor;
+import com.rayo.core.verb.Verb;
+import com.rayo.core.verb.VerbCommand;
 import com.voxeo.moho.Participant;
 
 public interface VerbHandler<T extends Verb, S extends Participant> {

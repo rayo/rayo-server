@@ -1,4 +1,4 @@
-package com.tropo.core.validation;
+package com.rayo.core.validation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

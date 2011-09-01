@@ -1,10 +1,10 @@
-package com.tropo.server.verb;
+package com.rayo.server.verb;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.tropo.core.verb.Verb;
-import com.tropo.core.xml.XmlProviderManager;
+import com.rayo.core.verb.Verb;
+import com.rayo.core.xml.XmlProviderManager;
 
 public class DefaultVerbManager implements VerbManager {
 

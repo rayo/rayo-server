@@ -1,4 +1,4 @@
-package com.tropo.server.test;
+package com.rayo.server.test;
 
 import javax.servlet.sip.Address;
 import javax.servlet.sip.AuthInfo;

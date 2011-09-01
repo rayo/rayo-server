@@ -1,4 +1,4 @@
-package com.tropo.server.cdr;
+package com.rayo.server.cdr;
 
 import java.io.IOException;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -11,12 +11,12 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 import com.rabbitmq.client.Channel;
 import com.rabbitmq.client.Connection;
 import com.rabbitmq.client.ConnectionFactory;
-import com.tropo.core.cdr.Cdr;
-import com.tropo.core.cdr.CdrException;
-import com.tropo.server.jmx.AmqpCdrMXBean;
+import com.rayo.server.jmx.AmqpCdrMXBean;
+import com.rayo.core.cdr.Cdr;
+import com.rayo.core.cdr.CdrException;
 import com.voxeo.logging.Loggerf;
 
-@ManagedResource(objectName = "com.tropo:Type=Admin,name=Amqp CDR", description = "AMQP based CDR storage")
+@ManagedResource(objectName = "com.rayo:Type=Admin,name=Amqp CDR", description = "AMQP based CDR storage")
 public class AmqpCdrStorageStrategy implements CdrStorageStrategy, AmqpCdrMXBean {
 
 	private Loggerf logger = Loggerf.getLogger(AmqpCdrStorageStrategy.class);

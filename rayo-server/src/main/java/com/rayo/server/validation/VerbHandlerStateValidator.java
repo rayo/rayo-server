@@ -1,9 +1,9 @@
-package com.tropo.server.validation;
+package com.rayo.server.validation;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import com.tropo.server.verb.VerbHandler;
+import com.rayo.server.verb.VerbHandler;
 
 public class VerbHandlerStateValidator implements ConstraintValidator<ValidHandlerState, VerbHandler<?,?>> {
 

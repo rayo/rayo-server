@@ -1,4 +1,4 @@
-package com.tropo.core.recording;
+package com.rayo.core.recording;
 
 import java.io.File;
 import java.io.IOException;

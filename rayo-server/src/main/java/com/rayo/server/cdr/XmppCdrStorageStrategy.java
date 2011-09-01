@@ -1,4 +1,4 @@
-package com.tropo.server.cdr;
+package com.rayo.server.cdr;
 
 import java.io.IOException;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -20,12 +20,12 @@ import org.springframework.beans.factory.annotation.Required;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
-import com.tropo.core.cdr.Cdr;
-import com.tropo.core.cdr.CdrException;
-import com.tropo.server.jmx.XmppCdrMXBean;
+import com.rayo.server.jmx.XmppCdrMXBean;
+import com.rayo.core.cdr.Cdr;
+import com.rayo.core.cdr.CdrException;
 import com.voxeo.logging.Loggerf;
 
-@ManagedResource(objectName = "com.tropo:Type=Admin,name=Xmpp CDR", description = "Xmpp PubSub based CDR storage")
+@ManagedResource(objectName = "com.rayo:Type=Admin,name=Xmpp CDR", description = "Xmpp PubSub based CDR storage")
 public class XmppCdrStorageStrategy implements CdrStorageStrategy, XmppCdrMXBean {
 
 	private Loggerf logger = Loggerf.getLogger(XmppCdrStorageStrategy.class);

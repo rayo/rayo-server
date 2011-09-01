@@ -1,4 +1,4 @@
-package com.tropo.server.jmx;
+package com.rayo.server.jmx;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -8,9 +8,9 @@ import java.util.Locale;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
-import com.tropo.server.AdminService;
+import com.rayo.server.AdminService;
 
-@ManagedResource(objectName="com.tropo:Type=Info", description="Application Information")
+@ManagedResource(objectName="com.rayo:Type=Info", description="Application Information")
 public class Info implements InfoMXBean {
 
 	private AdminService adminService;

@@ -34,11 +34,11 @@ $(document).ready(function() {
 	]);
     factory.create([
             {
-                    name: 'com.tropo:Type=Calls',
+                    name: 'com.rayo:Type=Calls',
                     attribute: 'ActiveCallsCount'
             },
             {
-                    name: 'com.tropo:Type=Calls',
+                    name: 'com.rayo:Type=Calls',
                     attribute: 'ActiveVerbsCount'
             }
     ]);

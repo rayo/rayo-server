@@ -1,4 +1,4 @@
-package com.tropo.server.test;
+package com.rayo.server.test;
 
 import com.voxeo.moho.Joint;
 import com.voxeo.moho.event.JoinCompleteEvent;

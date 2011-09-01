@@ -1,6 +1,6 @@
-package com.tropo.core.verb;
+package com.rayo.core.verb;
 
-import com.tropo.core.CallCommand;
+import com.rayo.core.CallCommand;
 
 public interface VerbCommand extends CallCommand {
 

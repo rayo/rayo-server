@@ -1,6 +1,6 @@
-package com.tropo.core.verb;
+package com.rayo.core.verb;
 
-import com.tropo.core.CallRef;
+import com.rayo.core.CallRef;
 
 public class VerbRef extends CallRef {
 
