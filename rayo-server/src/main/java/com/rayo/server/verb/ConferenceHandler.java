@@ -168,8 +168,6 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference, Call
         catch (RuntimeException e) {
             complete(new ConferenceCompleteEvent(model, e.getMessage()));
             throw e;
-        } finally {
-        	mixerRegistry.remove(mohoConference.getId());
         }
     }
 

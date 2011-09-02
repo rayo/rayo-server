@@ -66,7 +66,9 @@
 	</bean>	
 	
 	<!-- Conference Manager -->	
-	<bean id="conferenceController" class="com.rayo.server.conference.MohoConferenceController"/>
+	<bean id="conferenceController" class="com.rayo.server.conference.MohoConferenceController">
+		<property name="mixerRegistry" ref="mixerRegistry" />
+	</bean>
 
 	<!-- Model / Request Validation -->
 	<bean id="validator" class="com.rayo.core.validation.Validator"/>
