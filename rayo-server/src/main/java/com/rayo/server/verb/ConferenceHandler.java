@@ -37,6 +37,7 @@ import com.rayo.core.verb.UnmuteCommand;
 import com.rayo.core.verb.VerbCommand;
 import com.rayo.core.verb.VerbCompleteEvent;
 import com.voxeo.logging.Loggerf;
+import com.voxeo.moho.ApplicationContext;
 import com.voxeo.moho.Call;
 import com.voxeo.moho.Participant;
 import com.voxeo.moho.Participant.JoinType;
@@ -288,6 +289,10 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference, Call
         	activeSpeakers.clear();
             removeCallFromWaitList();
 
+            if (mohoConference.getParticipants().length == 0) {
+                mixerRegistry.remove(mohoConference.getId());
+            }
+            
             // Free up media resources if the call is still active
             if(!hangup) {
                 stopMixing();
