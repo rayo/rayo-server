@@ -86,7 +86,8 @@ public class IncomingCallActor extends CallActor<IncomingCall> {
     public void answer(AnswerCommand message) {
     	
     	switch (participant.getCallState()) {
-    		case CONNECTED : throw new RecoverableException("Call is already answered");
+    		case CONNECTED : //NOOP This serves as support for early media (http://www.ietf.org/rfc/rfc3960.txt)
+    			break;
     		case DISCONNECTED:
     		case FAILED:
     			throw new RecoverableException("Call is either already disconnected or failed");
