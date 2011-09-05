@@ -7,7 +7,7 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 
 import com.rayo.server.jmx.MixerStatisticsMXBean;
 
-@ManagedResource(objectName="com.rayo:Type=Mixer Statistics", description="Mixer Statistics")
+@ManagedResource(objectName="com.rayo:Type=MixerStatistics", description="Mixer Statistics")
 public class MixerStatistics implements MixerStatisticsMXBean {
 
 	private AtomicLong totalMixers = new AtomicLong(0);
