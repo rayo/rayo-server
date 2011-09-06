@@ -13,16 +13,6 @@ import javax.media.mscontrol.mixer.MediaMixer;
 import javax.media.mscontrol.mixer.MixerEvent;
 import javax.validation.ConstraintValidatorContext;
 
-import com.rayo.server.CallActor;
-import com.rayo.server.CallManager;
-import com.rayo.server.EventHandler;
-import com.rayo.server.MixerActor;
-import com.rayo.server.MixerActorFactory;
-import com.rayo.server.MixerRegistry;
-import com.rayo.server.MixerStatistics;
-import com.rayo.server.MohoUtil;
-import com.rayo.server.conference.ParticipantController;
-import com.rayo.server.exception.ExceptionMapper;
 import com.rayo.core.FinishedSpeakingEvent;
 import com.rayo.core.SpeakingEvent;
 import com.rayo.core.verb.Conference;
@@ -36,13 +26,23 @@ import com.rayo.core.verb.Ssml;
 import com.rayo.core.verb.UnmuteCommand;
 import com.rayo.core.verb.VerbCommand;
 import com.rayo.core.verb.VerbCompleteEvent;
+import com.rayo.server.CallActor;
+import com.rayo.server.CallManager;
+import com.rayo.server.EventHandler;
+import com.rayo.server.MixerActor;
+import com.rayo.server.MixerActorFactory;
+import com.rayo.server.MixerRegistry;
+import com.rayo.server.MixerStatistics;
+import com.rayo.server.MohoUtil;
+import com.rayo.server.conference.ParticipantController;
+import com.rayo.server.exception.ExceptionMapper;
 import com.voxeo.logging.Loggerf;
-import com.voxeo.moho.ApplicationContext;
 import com.voxeo.moho.Call;
 import com.voxeo.moho.Participant;
 import com.voxeo.moho.Participant.JoinType;
 import com.voxeo.moho.State;
 import com.voxeo.moho.conference.ConferenceController;
+import com.voxeo.moho.conference.ConferenceManager;
 import com.voxeo.moho.event.ActiveSpeakerEvent;
 import com.voxeo.moho.event.InputCompleteEvent;
 import com.voxeo.moho.media.Input;
@@ -91,15 +91,16 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference, Call
         ExecutionContext ctx = (ExecutionContext)participant.getApplicationContext();
         Parameters parameters = ctx.getMSFactory().createParameters();
         parameters.put(MediaMixer.ENABLED_EVENTS, new EventType[]{MixerEvent.ACTIVE_INPUTS_CHANGED});
-        mohoConference = participant.getApplicationContext().getConferenceManager()
-        	.createConference(model.getRoomName(),Integer.MAX_VALUE,parameters);
+        
+        ConferenceManager manager = participant.getApplicationContext().getConferenceManager();
+        mohoConference = manager.getConference(model.getRoomName());
+        if (mohoConference == null) {
+	        mohoConference = participant.getApplicationContext().getConferenceManager()
+	        	.createConference(model.getRoomName(),Integer.MAX_VALUE,parameters);
+            mohoConference.setController(mohoConferenceController);
+        }
         
         synchronized (mohoConference.getId()) {
-
-            // If this is the first participant then we should configure the controller
-            if (mohoConference.getController() == null) {
-                mohoConference.setController(mohoConferenceController);
-            }
             
             // Register Rayo Participant object as an attribute of the Moho Call
             participant.setAttribute(getMohoParticipantAttributeKey(), this);
@@ -288,14 +289,9 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference, Call
         	participant.setAttribute(getMohoParticipantAttributeKey(), null);
         	activeSpeakers.clear();
             removeCallFromWaitList();
-
-            if (mohoConference.getParticipants().length == 0) {
-                mixerRegistry.remove(mohoConference.getId());
-            }
             
-            // Free up media resources if the call is still active
             if(!hangup) {
-                stopMixing();
+            	stopMixing();
                 stopMusic();
                 stopHotwordListener();
             }
