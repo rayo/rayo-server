@@ -12,15 +12,10 @@ import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
-import com.rayo.server.verb.EventDispatcher;
-import com.rayo.server.verb.VerbFactory;
-import com.rayo.server.verb.VerbHandler;
-import com.rayo.server.verb.VerbManager;
 import com.rayo.core.CallCommand;
 import com.rayo.core.EndEvent;
 import com.rayo.core.EndEvent.Reason;
 import com.rayo.core.exception.RecoverableException;
-import com.rayo.core.validation.ValidationException;
 import com.rayo.core.validation.Validator;
 import com.rayo.core.verb.Ssml;
 import com.rayo.core.verb.StopCommand;
@@ -29,6 +24,10 @@ import com.rayo.core.verb.VerbCommand;
 import com.rayo.core.verb.VerbCompleteEvent;
 import com.rayo.core.verb.VerbEvent;
 import com.rayo.core.verb.VerbRef;
+import com.rayo.server.verb.EventDispatcher;
+import com.rayo.server.verb.VerbFactory;
+import com.rayo.server.verb.VerbHandler;
+import com.rayo.server.verb.VerbManager;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.NegotiateException;
 import com.voxeo.moho.Participant;
@@ -200,25 +199,44 @@ public abstract class AbstractActor<T extends Participant> extends ReflectiveAct
 
     protected void end(Reason reason) {
         
-    	end(new EndEvent(getParticipantId(), reason));
+    	end(new EndEvent(getParticipantId(), reason, null));
+    }
+    
+    protected void end(Reason reason, Map<String, String> headers) {
+        
+    	end(new EndEvent(getParticipantId(), reason, toHeaders(headers)));
     }
 
     protected void end(Reason reason, String errorMessage) {
     	
-        end(new EndEvent(getParticipantId(), reason, errorMessage));
+    	end(reason,errorMessage,null);
     }
     
-    protected void end(Reason reason, Exception exception) {
+    protected void end(Reason reason, String errorMessage, Map<String, String> headers) {
+    	
+        end(new EndEvent(getParticipantId(), reason, errorMessage, toHeaders(headers)));
+    }
+    
+    protected void end(Reason reason, Exception exception, Map<String, String> headers) {
 
         String errorMessage = null;
         if (exception instanceof NegotiateException) {
             errorMessage = "Could not negotiate call";
         }
 
-        end(new EndEvent(getParticipantId(), reason, errorMessage));
+        end(new EndEvent(getParticipantId(), reason, errorMessage, toHeaders(headers)));
     }
 
-    protected void end(EndEvent endEvent) {
+    private Map<String, String> toHeaders(Map<String, String> headers) {
+		
+    	if (headers == null) return null;
+    	
+    	Map<String,String> hdrs = new HashMap<String, String>();
+    	hdrs.putAll(headers);
+    	return hdrs;
+	}
+
+	protected void end(EndEvent endEvent) {
 
         // If the call ended in error then don't bother with a graceful
         // shutdown. Just send the EndEvent, stop the actor and make a best 

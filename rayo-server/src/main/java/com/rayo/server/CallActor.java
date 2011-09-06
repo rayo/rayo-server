@@ -1,8 +1,6 @@
 package com.rayo.server;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -200,7 +198,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 
     @Message
     public void end(EndCommand command) {
-        end(new EndEvent(getParticipantId(), command.getReason()));
+        end(new EndEvent(getParticipantId(), command.getReason(), null));
     }
 
     // Moho Events
@@ -348,9 +346,9 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
                 throw new UnsupportedOperationException("Reason not handled: " + event.getCause());
             }
             if (reason == Reason.ERROR) {
-                end(reason, event.getException());
+                end(reason, event.getException(), event.getHeaders());
             } else {
-                end(reason);
+                end(reason, event.getHeaders());
             }            
         }
     }

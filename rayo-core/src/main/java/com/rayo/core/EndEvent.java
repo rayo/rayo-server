@@ -15,19 +15,22 @@ public class EndEvent extends AbstractCallEvent {
     private String errorText;
     private Map<String, String> headers;
 
-    public EndEvent(String source) {
+    public EndEvent(String source, Map<String, String> headers) {
         super(source);
+        this.headers = headers;
     }
 
-    public EndEvent(String source, Reason reason) {
+    public EndEvent(String source, Reason reason, Map<String, String> headers) {
         super(source);
         this.reason = reason;
+        this.headers = headers;
     }
 
-    public EndEvent(String source, Reason reason, String errorText) {
+    public EndEvent(String source, Reason reason, String errorText, Map<String, String> headers) {
         super(source);
         this.reason = reason;
         this.errorText = errorText;
+        this.headers = headers;
     }
 
     public Reason getReason() {
