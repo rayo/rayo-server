@@ -150,11 +150,23 @@ public class AskHandler extends AbstractLocalVerbHandler<Ask,Participant> {
 	private String findErrorCause(com.voxeo.moho.event.InputCompleteEvent<Participant> event) {
 
 		try {
-			ssmlValidator.validateSsml(model.getPrompt().getText());
+			if (isGrxml(model)) {
+				ssmlValidator.validateSsml(model.getPrompt().getText());
+			}
 		} catch (ValidationException ve) {
 			return ve.getMessage();
 		}
 		return event.getErrorText() == null ? "Internal Server Error" : event.getErrorText();
+	}
+
+	private boolean isGrxml(Ask model) {
+
+		for (Choices choices: model.getChoices()) {
+			if (choices.getContentType().equalsIgnoreCase(Choices.GRXML_GRAMMAR)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public void setSsmlValidator(SsmlValidator ssmlValidator) {

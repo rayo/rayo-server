@@ -14,6 +14,9 @@ public class Choices {
     private URI uri;
     private String content;
     private String contentType;
+    
+    public static final String VOXEO_GRAMMAR = "application/grammar+voxeo";
+    public static final String GRXML_GRAMMAR = "application/grammar+grxml";
 
     public Choices() {}
     
