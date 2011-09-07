@@ -41,4 +41,7 @@
 
   <xmpp:outbound-s2s-config>
   </xmpp:outbound-s2s-config>
+  <listener>
+  	<listener-class>com.rayo.server.listener.RayoSessionListener</listener-class>
+  </listener>
 </xmpp:xmpp-app>

@@ -1,6 +1,7 @@
 package com.rayo.server;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -8,6 +9,9 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.voxeo.logging.Loggerf;
 import com.voxeo.servlet.xmpp.JID;
@@ -34,6 +38,8 @@ public class JIDRegistry {
 	long purgingTaskInterval = 30 * 60 * 1000;
 	
 	private Map<String, JIDEntry> jids = new ConcurrentHashMap<String, JIDEntry>();	
+	private Map<String, List<String>> callsByJid = new ConcurrentHashMap<String, List<String>>();	
+	private ReadWriteLock callsByJidLock = new ReentrantReadWriteLock();
 	
 	private List<JIDEntry> toPurge = new ArrayList<JIDEntry>();
 
@@ -86,12 +92,22 @@ public class JIDRegistry {
 		if (entry == null) {
 			return null;
 		}
+		
 		return entry.jid;
 	}
 	
 	public void put(String callId, JID jid) {
 		
 		jids.put(callId, new JIDEntry(jid, -1L, callId));
+		
+		callsByJidLock.writeLock().lock();
+		List<String> calls = callsByJid.get(jid);
+		if (calls == null) {
+			calls = new ArrayList<String>();
+			callsByJid.put(jid.getBareJID().toString(), calls);
+		}
+		calls.add(callId);
+		callsByJidLock.writeLock().unlock();
 	}
 	
 	public void remove(String callId) {
@@ -101,6 +117,28 @@ public class JIDRegistry {
 		if (jid != null) {
 			jid.time = System.currentTimeMillis();
 			toPurge.add(jid);
+		}
+
+		callsByJidLock.writeLock().lock();
+		List<String> calls = callsByJid.get(jid.jid.getBareJID().toString());
+		if (calls != null) {
+			calls.remove(callId);
+		}
+		callsByJidLock.writeLock().unlock();
+	}
+	
+	public List<String> getCallsByJID(JID jid) {
+		
+		callsByJidLock.readLock().lock();
+		try {
+			List<String> values = callsByJid.get(jid.getBareJID().toString());
+			if (values == null) {
+				return Collections.emptyList();
+			} else {
+				return new ArrayList<String>(values);
+			}
+		} finally {
+			callsByJidLock.readLock().unlock();
 		}
 	}
 	
