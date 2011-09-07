@@ -117,14 +117,14 @@ public class JIDRegistry {
 		if (jid != null) {
 			jid.time = System.currentTimeMillis();
 			toPurge.add(jid);
+			
+			callsByJidLock.writeLock().lock();
+			List<String> calls = callsByJid.get(jid.jid.getBareJID().toString());
+			if (calls != null) {
+				calls.remove(callId);
+			}
+			callsByJidLock.writeLock().unlock();
 		}
-
-		callsByJidLock.writeLock().lock();
-		List<String> calls = callsByJid.get(jid.jid.getBareJID().toString());
-		if (calls != null) {
-			calls.remove(callId);
-		}
-		callsByJidLock.writeLock().unlock();
 	}
 	
 	public List<String> getCallsByJID(JID jid) {
