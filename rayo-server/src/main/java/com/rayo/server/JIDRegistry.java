@@ -101,7 +101,7 @@ public class JIDRegistry {
 		jids.put(callId, new JIDEntry(jid, -1L, callId));
 		
 		callsByJidLock.writeLock().lock();
-		List<String> calls = callsByJid.get(jid);
+		List<String> calls = callsByJid.get(jid.getBareJID().toString());
 		if (calls == null) {
 			calls = new ArrayList<String>();
 			callsByJid.put(jid.getBareJID().toString(), calls);
@@ -159,6 +159,7 @@ public class JIDRegistry {
 	
 	public void shutdown() {
 		
+		jids.clear();
 		timer.cancel();
 	}
 }
