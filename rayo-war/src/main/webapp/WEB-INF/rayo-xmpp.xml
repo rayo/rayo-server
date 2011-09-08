@@ -23,6 +23,6 @@
 		<property name="cdrManager" ref="cdrManager" />	
 		<property name="jidRegistry" ref="jidRegistry"/>	
 		<property name="filtersChain" ref="filtersChain"/>
-		<property name="rayoLookupService" value="rayoJIDLookupService"/>
+		<property name="rayoLookupService" ref="rayoJIDLookupService"/>
 	</bean>	
 </beans>
