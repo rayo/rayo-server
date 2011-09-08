@@ -26,15 +26,19 @@ public class RegexpJIDLookupService implements RayoJIDLookupService<OfferEvent> 
 	
 	private void read(Resource properties) throws IOException {
 		
-		Properties props = new Properties();
-		props.load(properties.getInputStream());
-		for(Entry<Object, Object> entry: props.entrySet()) {
-			try {
-				Pattern p = Pattern.compile(entry.getKey().toString());
-				patterns.put(p,entry.getValue().toString());
-			} catch (Exception e) {
-				logger.error("Could not parse Regexp pattern: " + entry.getKey());
+		if (properties.exists()) {
+			Properties props = new Properties();
+			props.load(properties.getInputStream());
+			for(Entry<Object, Object> entry: props.entrySet()) {
+				try {
+					Pattern p = Pattern.compile(entry.getKey().toString());
+					patterns.put(p,entry.getValue().toString());
+				} catch (Exception e) {
+					logger.error("Could not parse Regexp pattern: " + entry.getKey());
+				}
 			}
+		} else {
+			logger.warn("Could not find JID lookup service configuration file");
 		}
 	}
 
