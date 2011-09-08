@@ -48,8 +48,15 @@ public class RegexpJIDLookupService implements RayoJIDLookupService<OfferEvent> 
 		for (Pattern pattern: patterns.keySet()) {
 			Matcher matcher = pattern.matcher(event.getTo().toString());
 			if (matcher.matches()) {
-				return patterns.get(pattern);
+				String value = patterns.get(pattern);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Found a match for %s : %s", event.getTo().toString(), value);
+				}
+				return value;
 			}
+		}
+		if (logger.isDebugEnabled()) {
+			logger.debug("We didn't find any Regexp match for %s", event.getTo().toString());
 		}
 		return null;
 	}
