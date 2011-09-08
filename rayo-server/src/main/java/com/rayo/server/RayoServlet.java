@@ -207,14 +207,11 @@ public class RayoServlet extends XmppServlet {
     	rayoStatistics.iqReceived();
 
     	try {
+			// Extract Request
+        	DOMElement payload = (DOMElement) requestElement.elementIterator().next();
+            QName qname = payload.getQName();
     		if (request.getSession().getType() == XmppSession.Type.INBOUNDCLIENT) {
-
-    			// Extract Request
-            	DOMElement payload = (DOMElement) requestElement.elementIterator().next();
-                QName qname = payload.getQName();
-
                 // Resource Binding
-                
                 if (qname.equals(BIND_QNAME)) {
                     String boundJid = request.getFrom().getNode() + "@" + request.getFrom().getDomain() + "/voxeo";
                     DOMElement bindElement = (DOMElement) DOMDocumentFactory.getInstance().createElement(BIND_QNAME);
@@ -223,104 +220,104 @@ public class RayoServlet extends XmppServlet {
                     log.info("Bound client resource [jid=%s]", boundJid);    
                 } else if (qname.equals(SESSION_QNAME)) {
                 	// Session binding
-                	sendIqResult(request);                   
-                } else if (isSupportedNamespace(payload)) {
+                	sendIqResult(request);   
+                }
+    		}
+            if (isSupportedNamespace(payload)) {
                 	
-                	// Rayo Command
-                    Object command = provider.fromXML(payload);
-                    rayoStatistics.commandReceived(command);
-                    
-                    // Handle outbound 'dial' command
-                    if (command instanceof DialCommand) {
-                    	if (adminService.isQuiesceMode()) {
-                            log.debug("Quiesce Mode ON. Dropping incoming call: %s :: %s", requestElement.asXML(), request.getSession().getId());
-                            sendIqError(request, StanzaError.Type.WAIT, StanzaError.Condition.SERVICE_UNAVAILABLE, "Quiesce Mode ON.");
-                    		return;
-                    	}        
-                    
-                        callManager.publish(new Request(command, new ResponseHandler() {
-                            public void handle(Response response) throws Exception {
-                                if (response.isSuccess()) {
-                                    CallRef callRef = (CallRef) response.getValue();
-                                    jidRegistry.put(callRef.getCallId(), request.getFrom().getBareJID(), request.getFrom().getDomain());
+            	// Rayo Command
+                Object command = provider.fromXML(payload);
+                rayoStatistics.commandReceived(command);
+                
+                // Handle outbound 'dial' command
+                if (command instanceof DialCommand) {
+                	if (adminService.isQuiesceMode()) {
+                        log.debug("Quiesce Mode ON. Dropping incoming call: %s :: %s", requestElement.asXML(), request.getSession().getId());
+                        sendIqError(request, StanzaError.Type.WAIT, StanzaError.Condition.SERVICE_UNAVAILABLE, "Quiesce Mode ON.");
+                		return;
+                	}        
+                
+                    callManager.publish(new Request(command, new ResponseHandler() {
+                        public void handle(Response response) throws Exception {
+                            if (response.isSuccess()) {
+                                CallRef callRef = (CallRef) response.getValue();
+                                jidRegistry.put(callRef.getCallId(), request.getFrom().getBareJID(), request.getFrom().getDomain());
 
-                                	CoreDocumentImpl document = new CoreDocumentImpl(false);
-                                	org.w3c.dom.Element refElement = document.createElementNS("urn:xmpp:rayo:1", "ref");
-                                	refElement.setAttribute("id", callRef.getCallId());
-
-                                    storeCdr(callRef.getCallId(), refElement);
-                                    sendIqResult(request, refElement);
-                                } else {
-                                    sendIqError(request, (Exception) response.getValue());
-                                }
-                            }
-                        }));
-                        return;
-                    }
-
-                    // If it's not dial then it must be a CallCommand
-                    assertion(command instanceof CallCommand, "Is this a valid call command?");
-                    
-                    final CallCommand callCommand = (CallCommand) command;
-                    
-                	// Invoke filters
-                    filtersChain.handleCommandRequest(callCommand);
-                    
-                    // Extract Call ID
-                    final String callId = request.getTo().getNode();
-                    if (callId == null) {
-                        throw new IllegalArgumentException("Call id cannot be null");
-                    }
-                    callCommand.setCallId(callId);
-
-                    // Log the message
-                    cdrManager.append(callId, payload.asXML());
-                    
-                    // Find the call actor
-                    AbstractActor<?> actor = findActor(callCommand.getCallId());
-
-                    if (callCommand instanceof VerbCommand) {
-                        VerbCommand verbCommand = (VerbCommand) callCommand;
-                        verbCommand.setCallId(callId(request.getTo()));
-                        if (callCommand instanceof Verb) {
-                            verbCommand.setVerbId(UUID.randomUUID().toString());
-                        }
-                        else {
-                            verbCommand.setVerbId(request.getTo().getResource());
-                        }
-                    }
-
-                    actor.command(callCommand, new ResponseHandler() {
-                        public void handle(Response commandResponse) throws Exception {
-
-                            Object value = commandResponse.getValue();
-
-                        	// Invoke filters
-                            filtersChain.handleCommandResponse(value);
-                            
-                            if (value instanceof Exception) {
-                                sendIqError(request, (Exception)value);
-                            }
-                            else if (value instanceof VerbRef) {
-                            	String verbId = ((VerbRef) value).getVerbId();
                             	CoreDocumentImpl document = new CoreDocumentImpl(false);
                             	org.w3c.dom.Element refElement = document.createElementNS("urn:xmpp:rayo:1", "ref");
-                            	refElement.setAttribute("id", verbId);
-                                storeCdr(callId, refElement);
+                            	refElement.setAttribute("id", callRef.getCallId());
+
+                                storeCdr(callRef.getCallId(), refElement);
                                 sendIqResult(request, refElement);
                             } else {
-                                storeCdr(callId, null);
-                                sendIqResult(request, null);
+                                sendIqError(request, (Exception) response.getValue());
                             }
                         }
-                    });
-
-                } else {
-                	 // We don't handle this type of request...
-                	sendIqError(request, StanzaError.Type.CANCEL, StanzaError.Condition.FEATURE_NOT_IMPLEMENTED, "Feature not supported");
+                    }));
+                    return;
                 }
-            }
 
+                // If it's not dial then it must be a CallCommand
+                assertion(command instanceof CallCommand, "Is this a valid call command?");
+                
+                final CallCommand callCommand = (CallCommand) command;
+                
+            	// Invoke filters
+                filtersChain.handleCommandRequest(callCommand);
+                
+                // Extract Call ID
+                final String callId = request.getTo().getNode();
+                if (callId == null) {
+                    throw new IllegalArgumentException("Call id cannot be null");
+                }
+                callCommand.setCallId(callId);
+
+                // Log the message
+                cdrManager.append(callId, payload.asXML());
+                
+                // Find the call actor
+                AbstractActor<?> actor = findActor(callCommand.getCallId());
+
+                if (callCommand instanceof VerbCommand) {
+                    VerbCommand verbCommand = (VerbCommand) callCommand;
+                    verbCommand.setCallId(callId(request.getTo()));
+                    if (callCommand instanceof Verb) {
+                        verbCommand.setVerbId(UUID.randomUUID().toString());
+                    }
+                    else {
+                        verbCommand.setVerbId(request.getTo().getResource());
+                    }
+                }
+
+                actor.command(callCommand, new ResponseHandler() {
+                    public void handle(Response commandResponse) throws Exception {
+
+                        Object value = commandResponse.getValue();
+
+                    	// Invoke filters
+                        filtersChain.handleCommandResponse(value);
+                        
+                        if (value instanceof Exception) {
+                            sendIqError(request, (Exception)value);
+                        }
+                        else if (value instanceof VerbRef) {
+                        	String verbId = ((VerbRef) value).getVerbId();
+                        	CoreDocumentImpl document = new CoreDocumentImpl(false);
+                        	org.w3c.dom.Element refElement = document.createElementNS("urn:xmpp:rayo:1", "ref");
+                        	refElement.setAttribute("id", verbId);
+                            storeCdr(callId, refElement);
+                            sendIqResult(request, refElement);
+                        } else {
+                            storeCdr(callId, null);
+                            sendIqResult(request, null);
+                        }
+                    }
+                });
+
+            } else {
+            	 // We don't handle this type of request...
+            	sendIqError(request, StanzaError.Type.CANCEL, StanzaError.Condition.FEATURE_NOT_IMPLEMENTED, "Feature not supported");
+            }
         }
         catch (Exception e) {
             if(e instanceof ValidationException) {
