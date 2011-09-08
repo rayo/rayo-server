@@ -21,9 +21,6 @@ import org.dom4j.io.DOMWriter;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSSerializer;
 
-import com.rayo.server.exception.ErrorMapping;
-import com.rayo.server.exception.ExceptionMapper;
-import com.rayo.server.filter.FilterChain;
 import com.rayo.core.CallCommand;
 import com.rayo.core.CallEvent;
 import com.rayo.core.CallRef;
@@ -31,12 +28,17 @@ import com.rayo.core.DialCommand;
 import com.rayo.core.EndCommand;
 import com.rayo.core.EndEvent;
 import com.rayo.core.OfferEvent;
+import com.rayo.core.sip.SipURI;
 import com.rayo.core.validation.ValidationException;
 import com.rayo.core.verb.Verb;
 import com.rayo.core.verb.VerbCommand;
 import com.rayo.core.verb.VerbEvent;
 import com.rayo.core.verb.VerbRef;
 import com.rayo.core.xml.XmlProvider;
+import com.rayo.server.exception.ErrorMapping;
+import com.rayo.server.exception.ExceptionMapper;
+import com.rayo.server.filter.FilterChain;
+import com.rayo.server.lookup.RayoJIDLookupService;
 import com.voxeo.exceptions.NotFoundException;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.Call;
@@ -74,6 +76,8 @@ public class RayoServlet extends XmppServlet {
     private XmppFactory xmppFactory;
     
     private FilterChain filtersChain;
+    
+    private RayoJIDLookupService<OfferEvent> rayoLookupService;
 	
     // Setup
     // ================================================================================
@@ -134,12 +138,18 @@ public class RayoServlet extends XmppServlet {
     	filtersChain.handleEvent(event);
     	
     	if (event instanceof OfferEvent) {
+    		SipURI sipUriTo = new SipURI(((OfferEvent)event).getTo().toString());
     		JID callTo = xmppFactory.createJID(getBareJID(((OfferEvent)event).getTo().toString()));
-    		jidRegistry.put(event.getCallId(), callTo);
+    		String forwardDestination = rayoLookupService.lookup((OfferEvent)event);
+    		if (forwardDestination != null) {
+    			callTo = xmppFactory.createJID(forwardDestination);
+    		}
+    		jidRegistry.put(event.getCallId(), callTo, sipUriTo.getHost());
     	}
     	
-    	JID jid = (JID)jidRegistry.getJID(event.getCallId());
-    	JID from = xmppFactory.createJID(event.getCallId() + "@" + jid.getDomain());
+    	String callDomain = jidRegistry.getOriginDomain(event.getCallId());
+    	JID jid = jidRegistry.getJID(event.getCallId());    	
+    	JID from = xmppFactory.createJID(event.getCallId() + "@" + callDomain);
 		if (event instanceof VerbEvent) {
 			from.setResource(((VerbEvent) event).getVerbId());
 		}
@@ -232,7 +242,7 @@ public class RayoServlet extends XmppServlet {
                             public void handle(Response response) throws Exception {
                                 if (response.isSuccess()) {
                                     CallRef callRef = (CallRef) response.getValue();
-                                    jidRegistry.put(callRef.getCallId(), request.getFrom().getBareJID());
+                                    jidRegistry.put(callRef.getCallId(), request.getFrom().getBareJID(), request.getFrom().getDomain());
 
                                 	CoreDocumentImpl document = new CoreDocumentImpl(false);
                                 	org.w3c.dom.Element refElement = document.createElementNS("urn:xmpp:rayo:1", "ref");
@@ -520,5 +530,8 @@ public class RayoServlet extends XmppServlet {
 	public void setFiltersChain(FilterChain filtersChain) {
 		this.filtersChain = filtersChain;
 	}
-	
+
+	public void setRayoLookupService(RayoJIDLookupService<OfferEvent> rayoLookupService) {
+		this.rayoLookupService = rayoLookupService;
+	}
 }

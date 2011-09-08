@@ -9,7 +9,6 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -17,9 +16,10 @@ import com.voxeo.logging.Loggerf;
 import com.voxeo.servlet.xmpp.JID;
 
 /**
- * <p>JID registry keeps a map of JIDs mapped to call ids. This way we can obtain the JID mapped to any call id 
- * without depending on the call's lifecycle. This way even if the call has been completed you can still access
- * to the JID that was mapped to the call.</p>
+ * <p>JID registry keeps a map of JIDs and origin domains mapped to call ids. This way we can obtain the JID 
+ * and origin domain mapped to any call id without depending on the call's lifecycle. This way even if the 
+ * call has been completed and wiped out from the system, you can still access to the JID that was mapped 
+ * to the call.</p>
  * 
  * <p>This class uses a thread to clean out any garbage that may have left due to calls not being finished up 
  * properly</p>
@@ -96,9 +96,23 @@ public class JIDRegistry {
 		return entry.jid;
 	}
 	
-	public void put(String callId, JID jid) {
+	
+	public String getOriginDomain(String callId) {
 		
-		jids.put(callId, new JIDEntry(jid, -1L, callId));
+		if (callId == null) {
+			return null;
+		}
+		JIDEntry entry = jids.get(callId);
+		if (entry == null) {
+			return null;
+		}
+		
+		return entry.originDomain;
+	}
+	
+	public void put(String callId, JID jid, String originDomain) {
+		
+		jids.put(callId, new JIDEntry(jid, -1L, callId, originDomain));
 		
 		callsByJidLock.writeLock().lock();
 		List<String> calls = callsByJid.get(jid.getBareJID().toString());
@@ -168,11 +182,13 @@ class JIDEntry {
 	String key;
 	JID jid;
 	long time;
+	String originDomain;
 	
-	JIDEntry(JID jid, long time, String key) {
+	JIDEntry(JID jid, long time, String key, String originDomain) {
 		
 		this.key = key;
 		this.jid = jid;
 		this.time = time;
+		this.originDomain = originDomain;
 	}
 }

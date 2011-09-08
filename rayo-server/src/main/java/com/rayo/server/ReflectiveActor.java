@@ -21,6 +21,8 @@ import org.jetlang.fibers.PoolFiberFactory;
 
 import com.voxeo.exceptions.NotFoundException;
 import com.voxeo.logging.Loggerf;
+import com.voxeo.moho.event.HangupEvent;
+import com.voxeo.moho.event.MohoCallCompleteEvent;
 
 public abstract class ReflectiveActor implements Actor, Callback<Object> {
 
@@ -200,6 +202,9 @@ public abstract class ReflectiveActor implements Actor, Callback<Object> {
 
     @Override
     public synchronized boolean publish(Object message) {
+    	if (message instanceof MohoCallCompleteEvent) {
+    		System.out.println ("MohoCallComplete");
+    	}
         if (running) {
             channel.publish(message);
         } else {

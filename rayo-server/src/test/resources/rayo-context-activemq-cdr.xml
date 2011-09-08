@@ -349,4 +349,8 @@
 	<!-- Default filter chain -->
   	<bean id="filtersChain" class="com.rayo.server.filter.DefaultFilterChain"/> 
 	 
+	<!-- JID Redirection --> 
+	<bean id="rayoJIDLookupService" class="com.rayo.server.lookup.RegexpJIDLookupService">
+		<constructor-arg value="classpath:rayo-routing.properties"/>
+	</bean> 
 </beans>
