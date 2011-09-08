@@ -60,12 +60,4 @@ public class RegexpJIDLookupService implements RayoJIDLookupService<OfferEvent> 
 		}
 		return null;
 	}
-	
-	public static void main(String[] args) {
-		
-		 Pattern p = Pattern.compile(".*@localhost");
-		 Matcher m = p.matcher("usera@localhost");
-		 boolean b = m.matches();
-		 System.out.println(b);
-	}
 }
