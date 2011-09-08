@@ -23,6 +23,11 @@
 		<property name="cdrManager" ref="cdrManager" />	
 		<property name="jidRegistry" ref="jidRegistry"/>	
 		<property name="filtersChain" ref="filtersChain"/>
-		<property name="rayoLookupService" ref="rayoJIDLookupService"/>
+		<property name="rayoLookupService">
+		  	<!-- JID Redirection --> 
+			<bean id="rayoJIDLookupService" class="com.rayo.server.lookup.RegexpJIDLookupService">
+				<constructor-arg value="classpath:rayo-routing.properties"/>
+			</bean>  		
+		</property>
 	</bean>	
 </beans>

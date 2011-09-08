@@ -416,10 +416,5 @@
   	<!-- Default filter chain -->
   	<bean id="filtersChain" class="com.rayo.server.filter.DefaultFilterChain">
   		<property name="filters" ref="spiMessageFilters"/>
-  	</bean> 
-  	 
-  	<!-- JID Redirection --> 
-	<bean id="rayoJIDLookupService" class="com.rayo.server.lookup.RegexpJIDLookupService">
-		<constructor-arg value="classpath:rayo-routing.properties"/>
-	</bean>  	
+  	</bean> 	
 </beans>
