@@ -43,6 +43,7 @@ import com.rayo.server.util.DomUtils;
 import com.voxeo.exceptions.NotFoundException;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.Call;
+import com.voxeo.moho.Call.State;
 import com.voxeo.servlet.xmpp.IQRequest;
 import com.voxeo.servlet.xmpp.IQResponse;
 import com.voxeo.servlet.xmpp.InstantMessage;
@@ -160,7 +161,20 @@ public class RayoServlet extends XmppServlet {
 					new DOMWriter().write(eventElement.getDocument()).getDocumentElement() // TODO: ouch
 				);
 			presence.send();
-    	
+		} catch (ServletException se) {
+			//TODO: Pending of internal ticket: https://evolution.voxeo.com/ticket/1536300
+			if (se.getMessage().startsWith("can't find corresponding client session")) {
+				CallActor<Call> actor = findCallActor(event.getCallId());
+				if (actor != null) {
+					log.error("An event has been received but there is no active call control session for handling JID %s. " + 
+							  "We will disconnect call with id %s", jid, event.getCallId());
+					cdrManager.store(event.getCallId());
+					callRegistry.remove(event.getCallId());
+					if (actor.getCall().getCallState() != State.DISCONNECTED || actor.getCall().getCallState() != State.FAILED) {
+						actor.getCall().disconnect();
+					}
+				}
+			}
 		} catch (Exception e) {
 			// In the event of an error, continue dispatching to all remaining JIDs
 			log.error("Failed to dispatch event [jid=%s, event=%s]", jid, event, e);
