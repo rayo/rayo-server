@@ -12,6 +12,8 @@ import java.util.UUID;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
+import javax.media.mscontrol.MediaException;
+
 import com.rayo.core.CallCommand;
 import com.rayo.core.EndEvent;
 import com.rayo.core.EndEvent.Reason;
@@ -74,7 +76,11 @@ public abstract class AbstractActor<T extends Participant> extends ReflectiveAct
     		//TODO: This may be revisited in the future
     		return true;
     	}
-        end(Reason.ERROR);
+    	if (throwable instanceof MediaException) {
+    		end(Reason.ERROR, "Unrecoverable error from the media server");
+    	} else {
+    		end(Reason.ERROR);
+    	}
         return true;
     }
     

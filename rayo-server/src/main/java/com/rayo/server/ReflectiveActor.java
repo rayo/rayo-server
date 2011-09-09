@@ -202,9 +202,7 @@ public abstract class ReflectiveActor implements Actor, Callback<Object> {
 
     @Override
     public synchronized boolean publish(Object message) {
-    	if (message instanceof MohoCallCompleteEvent) {
-    		System.out.println ("MohoCallComplete");
-    	}
+
         if (running) {
             channel.publish(message);
         } else {

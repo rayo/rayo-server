@@ -39,6 +39,7 @@ import com.rayo.server.exception.ErrorMapping;
 import com.rayo.server.exception.ExceptionMapper;
 import com.rayo.server.filter.FilterChain;
 import com.rayo.server.lookup.RayoJIDLookupService;
+import com.rayo.server.util.DomUtils;
 import com.voxeo.exceptions.NotFoundException;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.Call;
@@ -223,7 +224,7 @@ public class RayoServlet extends XmppServlet {
                 	sendIqResult(request);   
                 }
     		}
-            if (isSupportedNamespace(payload)) {
+            if (DomUtils.isSupportedNamespace(payload)) {
                 	
             	// Rayo Command
                 Object command = provider.fromXML(payload);
@@ -329,15 +330,7 @@ public class RayoServlet extends XmppServlet {
 
     }
 
-	private boolean isSupportedNamespace(org.w3c.dom.Element element) {
-		
-		if (element == null) {
-			return false;
-		}
-		
-		return element.getNamespaceURI().startsWith("urn:xmpp:rayo") ||
-			   element.getNamespaceURI().startsWith("urn:xmpp:tropo");
-	}
+
 
     // Util
     // ================================================================================
@@ -365,15 +358,12 @@ public class RayoServlet extends XmppServlet {
         response.send();
     }
     
-    private void generateErrorCdr(IQRequest request, IQResponse response) {
-    	
-    	org.w3c.dom.Element payload = (org.w3c.dom.Element) request.getElement().getChildNodes().item(0);
-        if (isSupportedNamespace(payload)) {
-        	final String callId = request.getTo().getNode();
-            if (callId == null) {
-            	org.w3c.dom.Element responsePayload = (org.w3c.dom.Element) response.getElement().getChildNodes().item(0);      	
-	        	cdrManager.append(callId, asXML(responsePayload));
-            }
+    private void generateErrorCdr(IQRequest request, IQResponse response) throws IOException {
+
+    	final String callId = DomUtils.findCallId(request);
+        if (callId != null) {
+         	org.w3c.dom.Element payload = DomUtils.findErrorPayload(response);
+         	cdrManager.append(callId, asXML(payload));
         }
     }
     
@@ -438,6 +428,7 @@ public class RayoServlet extends XmppServlet {
 		
 		DOMImplementationLS impl = (DOMImplementationLS)element.getOwnerDocument().getImplementation();
 		LSSerializer serializer = impl.createLSSerializer();
+		serializer.getDomConfig().setParameter("xml-declaration", false);
 		return serializer.writeToString(element);
 	}
 	
