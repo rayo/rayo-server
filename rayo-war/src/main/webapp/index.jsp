@@ -79,11 +79,21 @@
 			var events = { type: "read", mbean: "com.rayo:Type=Rayo", attribute: "CallEventsProcessed" };
 			var commands = { type: "read", mbean: "com.rayo:Type=Rayo", attribute: "TotalCommands" };
 			var responses = j4p.request([uptime,calls,conferences,events,commands]);
-		    $("#uptime").text(responses[0].value);
-		    $("#calls").text(responses[1].value);
-		    $("#conferences").text(responses[2].value);
-		    $("#events").text(responses[3].value);
-		    $("#commands").text(responses[4].value);
+			if (responses[0] != null) {
+		    	$("#uptime").text(responses[0].value);
+			}
+			if (responses[1] != null) {
+		    	$("#calls").text(responses[1].value);
+			}
+			if (responses[2] != null) {
+		    	$("#conferences").text(responses[2].value);
+			}
+			if (responses[3] != null) {
+		    	$("#events").text(responses[3].value);
+			}
+			if (responses[4] != null) {
+		    	$("#commands").text(responses[4].value);
+			}
 		});	
 	  });  
   
