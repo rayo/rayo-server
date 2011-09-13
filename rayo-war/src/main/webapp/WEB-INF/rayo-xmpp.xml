@@ -29,5 +29,6 @@
 				<constructor-arg value="classpath:rayo-routing.properties"/>
 			</bean>  		
 		</property>
+		<property name="xmppMessageListenersGroup" ref="xmppMessageListenersGroup"/>
 	</bean>	
 </beans>

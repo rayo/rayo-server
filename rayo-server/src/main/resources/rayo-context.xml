@@ -416,5 +416,8 @@
   	<!-- Default filter chain -->
   	<bean id="filtersChain" class="com.rayo.server.filter.DefaultFilterChain">
   		<property name="filters" ref="spiMessageFilters"/>
-  	</bean> 	
+  	</bean> 
+  	
+  	<!-- XMPP Message listeners -->
+  	<bean id="xmppMessageListenersGroup" class="com.rayo.server.listener.XmppMessageListenerGroup"/>	
 </beans>

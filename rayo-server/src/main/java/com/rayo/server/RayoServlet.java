@@ -38,6 +38,7 @@ import com.rayo.core.xml.XmlProvider;
 import com.rayo.server.exception.ErrorMapping;
 import com.rayo.server.exception.ExceptionMapper;
 import com.rayo.server.filter.FilterChain;
+import com.rayo.server.listener.XmppMessageListenerGroup;
 import com.rayo.server.lookup.RayoJIDLookupService;
 import com.rayo.server.util.DomUtils;
 import com.voxeo.exceptions.NotFoundException;
@@ -80,6 +81,9 @@ public class RayoServlet extends XmppServlet {
     private FilterChain filtersChain;
     
     private RayoJIDLookupService<OfferEvent> rayoLookupService;
+    
+    private XmppMessageListenerGroup xmppMessageListenersGroup;
+
 	
     // Setup
     // ================================================================================
@@ -161,6 +165,7 @@ public class RayoServlet extends XmppServlet {
 					new DOMWriter().write(eventElement.getDocument()).getDocumentElement() // TODO: ouch
 				);
 			presence.send();
+			xmppMessageListenersGroup.onPresenceSent(presence);
 		} catch (ServletException se) {
 			//TODO: Pending of internal ticket: https://evolution.voxeo.com/ticket/1536300
 			if (se.getMessage().startsWith("can't find corresponding client session")) {
@@ -240,6 +245,8 @@ public class RayoServlet extends XmppServlet {
     		}
             if (DomUtils.isSupportedNamespace(payload)) {
                 	
+            	xmppMessageListenersGroup.onIQReceived(request);
+    			
             	// Rayo Command
                 Object command = provider.fromXML(payload);
                 rayoStatistics.commandReceived(command);
@@ -370,6 +377,7 @@ public class RayoServlet extends XmppServlet {
     	generateErrorCdr(request,response);
         response.setFrom(request.getTo());
         response.send();
+        xmppMessageListenersGroup.onErrorSent(response);
     }
     
     private void generateErrorCdr(IQRequest request, IQResponse response) throws IOException {
@@ -408,6 +416,7 @@ public class RayoServlet extends XmppServlet {
     	}
         response.setFrom(request.getTo());
         response.send();
+        xmppMessageListenersGroup.onIQSent(response);
     }
 
     private void fail(String callId) {
@@ -535,5 +544,9 @@ public class RayoServlet extends XmppServlet {
 
 	public void setRayoLookupService(RayoJIDLookupService<OfferEvent> rayoLookupService) {
 		this.rayoLookupService = rayoLookupService;
+	}
+
+	public void setXmppMessageListenersGroup(XmppMessageListenerGroup xmppMessageListenersGroup) {
+		this.xmppMessageListenersGroup = xmppMessageListenersGroup;
 	}
 }

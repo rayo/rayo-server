@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.rayo.server.cdr.CdrErrorHandler;
+import com.rayo.server.cdr.CdrListener;
 import com.rayo.server.cdr.CdrStorageStrategy;
 import com.rayo.core.cdr.Cdr;
 import com.voxeo.logging.Loggerf;
@@ -22,6 +23,8 @@ public class CdrManager {
 	private List<CdrStorageStrategy> storageStrategies = new ArrayList<CdrStorageStrategy>();
 
 	private Map<String, Cdr> cdrs = new ConcurrentHashMap<String, Cdr>();
+	
+	private List<CdrListener> listeners = new ArrayList<CdrListener>();
 
 	private Comparator<Cdr> comparator = new Comparator<Cdr>() {
 		
@@ -44,7 +47,7 @@ public class CdrManager {
 			cdr.setTo(call.getInvitee().getURI().toString());
 		}
 		cdrs.put(call.getId(),cdr);
-		
+				
 		return cdr;
 	}
 	
@@ -73,6 +76,11 @@ public class CdrManager {
 			return;
 		}
 		cdr.add(element);
+		
+		for (CdrListener listener: listeners) {
+			
+			listener.elementAdded(callId, element);
+		}
 	}
 	
 	public void store(String callId) {
@@ -138,5 +146,15 @@ public class CdrManager {
 		if (spiStorageStrategies != null) {
 			storageStrategies.addAll(spiStorageStrategies);
 		}
+	}
+	
+	public void addCdrListener(CdrListener listener) {
+		
+		listeners.add(listener);
+	}
+	
+	public void removeCdrListener(CdrListener listener) {
+		
+		listeners.remove(listener);
 	}
 }
