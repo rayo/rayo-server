@@ -1,9 +1,9 @@
 package com.rayo.server.lookup;
 
 import java.io.IOException;
+import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -11,6 +11,7 @@ import java.util.regex.Pattern;
 import org.springframework.core.io.Resource;
 
 import com.rayo.core.OfferEvent;
+import com.rayo.server.util.LinkedProperties;
 import com.voxeo.logging.Loggerf;
 
 public class RegexpJIDLookupService implements RayoJIDLookupService<OfferEvent> {
@@ -27,14 +28,17 @@ public class RegexpJIDLookupService implements RayoJIDLookupService<OfferEvent> 
 	private void read(Resource properties) throws IOException {
 		
 		if (properties.exists()) {
-			Properties props = new Properties();
+			Properties props = new LinkedProperties();
 			props.load(properties.getInputStream());
-			for(Entry<Object, Object> entry: props.entrySet()) {
-				try {
-					Pattern p = Pattern.compile(entry.getKey().toString());
-					patterns.put(p,entry.getValue().toString());
+			@SuppressWarnings("rawtypes")
+			Enumeration en = props.keys();
+			while(en.hasMoreElements()) {
+				String key = en.nextElement().toString();
+				try {					
+					Pattern p = Pattern.compile(key);
+					patterns.put(p,props.getProperty(key));
 				} catch (Exception e) {
-					logger.error("Could not parse Regexp pattern: " + entry.getKey());
+					logger.error(String.format("Could not parse Regexp pattern: '%s'",key));
 				}
 			}
 		} else {
