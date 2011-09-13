@@ -189,6 +189,31 @@ public class CdrTest {
 			cdrManager.errorHandler = oldErrorHandler
 		}
 	}
+	
+	@Test
+	public void testCdrListeners() {
+		
+		int events = 0
+		assertEquals cdrManager.getCdrListeners().size(),0
+		assertEquals events,0
+		
+		def cdrListener1 = [elementAdded: { callId, element -> events++ }] as CdrListener
+		def cdrListener2 = [elementAdded: { callId, element -> events++ }] as CdrListener
+		def cdrListener3 = [elementAdded: { callId, element -> events++ }] as CdrListener
+		cdrManager.addCdrListener(cdrListener1)
+		cdrManager.addCdrListener(cdrListener2)
+		cdrManager.addCdrListener(cdrListener3)
+		
+		assertEquals cdrManager.getCdrListeners().size(),3
+		cdrManager.removeCdrListener(cdrListener2)
+		cdrManager.removeCdrListener(cdrListener3)
+		assertEquals cdrManager.getCdrListeners().size(),1
+		
+		cdrManager.append(mohoCall.id,"<event cdr:ts='1234'/>")
+		cdrManager.append(mohoCall.id,"<event cdr:ts='1235'/>")
+
+		assertEquals events,2
+	}
    
     def poll = {
         messageQueue.poll(10, TimeUnit.SECONDS);

@@ -157,4 +157,9 @@ public class CdrManager {
 		
 		listeners.remove(listener);
 	}
+	
+	public List<CdrListener> getCdrListeners() {
+		
+		return new ArrayList<CdrListener>(listeners);
+	}
 }
