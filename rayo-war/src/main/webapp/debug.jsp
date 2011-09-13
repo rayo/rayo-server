@@ -31,7 +31,7 @@
 	    
 	    function openWebSocket() {
 	      if (window.WebSocket) {
-	        socket = new WebSocket('ws://127.0.0.1:10000/websocket');
+	        socket = new WebSocket('ws://<%=request.getServerName()%>:10000/websocket');
 	        socket.onopen = function(event) {
 	          toggle(true);
 	        };
