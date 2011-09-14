@@ -263,7 +263,7 @@ public class RayoServlet extends XmppServlet {
                         public void handle(Response response) throws Exception {
                             if (response.isSuccess()) {
                                 CallRef callRef = (CallRef) response.getValue();
-                                jidRegistry.put(callRef.getCallId(), request.getFrom().getBareJID(), request.getFrom().getDomain());
+                                jidRegistry.put(callRef.getCallId(), request.getFrom().getBareJID(), request.getTo().getDomain());
 
                             	CoreDocumentImpl document = new CoreDocumentImpl(false);
                             	org.w3c.dom.Element refElement = document.createElementNS("urn:xmpp:rayo:1", "ref");
