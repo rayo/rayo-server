@@ -33,10 +33,10 @@ public class RegexpJIDLookupService implements RayoJIDLookupService<OfferEvent> 
 			@SuppressWarnings("rawtypes")
 			Enumeration en = props.keys();
 			while(en.hasMoreElements()) {
-				String key = en.nextElement().toString();
+				String key = en.nextElement().toString().trim();
 				try {					
 					Pattern p = Pattern.compile(key);
-					patterns.put(p,props.getProperty(key));
+					patterns.put(p,props.getProperty(key).trim());
 				} catch (Exception e) {
 					logger.error(String.format("Could not parse Regexp pattern: '%s'",key));
 				}

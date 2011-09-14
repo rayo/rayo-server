@@ -102,6 +102,28 @@ class RegexpJIDLookupServiceTests {
 		assertNull regexpJIDLookupService.lookup(offer)
 	}
 	
+	
+	@Test
+	public void testSpacesAreTrimmed() {
+		
+		buildLookupService("""
+			.*@localhost=all@conference.jabber.org     
+			
+			.*@anotherone=all@anotherone.jabber.org     
+			
+			
+		""")
+
+		def offer = new OfferEvent()
+		offer.setTo(new URI("sip:usera@localhost"))
+		def domain = regexpJIDLookupService.lookup(offer)
+		assertEquals domain, "all@conference.jabber.org"
+
+		offer.setTo(new URI("sip:usera@anotherone"))
+		domain = regexpJIDLookupService.lookup(offer)
+		assertEquals domain, "all@anotherone.jabber.org"
+	}
+	
 	def buildLookupService(String config) {
 		
 		def resource = new ByteArrayResource(config.getBytes())
