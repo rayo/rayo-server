@@ -1,6 +1,7 @@
 package com.rayo.server.verb;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -446,8 +447,9 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference, Call
     		if (!activeSpeakers.contains(participant.getId())) {
     			activeSpeakers.add(participant.getId());
         		fire(new SpeakingEvent(model, participant.getId()));
-    		}        		
+    		}
     	}
+
     	Iterator<String> it = activeSpeakers.iterator();
     	while (it.hasNext()) {
     		String participantId = it.next();
@@ -458,11 +460,12 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference, Call
         			break;
     			}
     		}
-    		if (found) {
+    		if (!found) {
     			it.remove();
         		fire(new FinishedSpeakingEvent(model, participantId));
     		}
     	}
+
     	((CallActor<?>)getActor()).flush();
     }
     
