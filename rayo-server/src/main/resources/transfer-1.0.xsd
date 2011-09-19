@@ -13,7 +13,7 @@
     <complexType name="transferType">
         <sequence>
             <element name="to" type="anyURI" minOccurs="0" maxOccurs="unbounded" />
-            <element name="ring" type="util:ssmlType" minOccurs="0" maxOccurs="1" />
+            <element name="ringback" type="util:ssmlType" minOccurs="0" maxOccurs="1" />
             <element name="header" type="tns:headerType" minOccurs="0" maxOccurs="unbounded" />
         </sequence>
         <attribute name="to" type="anyURI" use="optional" />
