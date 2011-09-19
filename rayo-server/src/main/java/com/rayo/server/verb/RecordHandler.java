@@ -75,6 +75,10 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
         	command.setMaxDuration(model.getMaxDuration().getMillis());
         }
         
+        command.setSilenceTerminationOn(false);
+        command.setInitialTimeout(10000);
+        command.setFinalTimeout(10000);
+        
 		recording = getMediaService().record(command);
 	}
 

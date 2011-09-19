@@ -971,7 +971,7 @@ public class RayoProviderTest {
     @Test
     public void audioTransferFromXml() {
         
-        Transfer transfer = fromXml("""<transfer xmlns="urn:xmpp:tropo:transfer:1" terminator="#" timeout="20000"><ring><audio url="http://ccmixter.org/content/DoKashiteru/DoKashiteru_-_you_(na-na-na-na).mp3"/></ring><to>sip:martin@127.0.0.1:6089</to></transfer>""")
+        Transfer transfer = fromXml("""<transfer xmlns="urn:xmpp:tropo:transfer:1" terminator="#" timeout="20000"><ringback><audio url="http://ccmixter.org/content/DoKashiteru/DoKashiteru_-_you_(na-na-na-na).mp3"/></ringback><to>sip:martin@127.0.0.1:6089</to></transfer>""")
         assertNotNull transfer
         assertNotNull transfer.ringbackTone
         assertEquals transfer.ringbackTone.text,"""<audio url="http://ccmixter.org/content/DoKashiteru/DoKashiteru_-_you_(na-na-na-na).mp3"/>"""
@@ -980,7 +980,7 @@ public class RayoProviderTest {
     @Test
     public void ssmlTransferFromXml() {
         
-        Transfer transfer = fromXml("""<transfer xmlns="urn:xmpp:tropo:transfer:1" voice="allison" terminator="#" timeout="20000"><ring>We are going to transfer your call. Wait a couple of seconds.</ring><to>sip:martin@127.0.0.1:6089</to></transfer>""")
+        Transfer transfer = fromXml("""<transfer xmlns="urn:xmpp:tropo:transfer:1" voice="allison" terminator="#" timeout="20000"><ringback>We are going to transfer your call. Wait a couple of seconds.</ringback><to>sip:martin@127.0.0.1:6089</to></transfer>""")
         assertNotNull transfer
         assertNotNull transfer.ringbackTone
         assertEquals transfer.ringbackTone.text,"We are going to transfer your call. Wait a couple of seconds."
@@ -1003,7 +1003,8 @@ public class RayoProviderTest {
 
         assertEquals("""<transfer xmlns="urn:xmpp:tropo:transfer:1" terminator="#" timeout="20000" media="bridge" to="sip:martin@127.0.0.1:6089" answer-on-media="false"/>""", toXml(transfer));
     }
-        
+
+	        
     @Test
     public void audioTransferToXml() {
         
@@ -1011,9 +1012,9 @@ public class RayoProviderTest {
         transfer.timeout = new Duration(20000)
         transfer.terminator = '#' as char
         transfer.to = [new URI("sip:martin@127.0.0.1:6089")]
-        transfer.ringbackTone = new Ssml("""<audio src="http://ccmixter.org/content/DoKashiteru/DoKashiteru_-_you_(na-na-na-na).mp3" />""")
+        transfer.ringbackTone = new Ssml("""<audio src="http://ccmixter.org/content/DoKashiteru/DoKashiteru_-_you_(na-na-na-na).mp3">Please wait while your call is being transfered.</audio>""")
 
-        assertEquals("""<transfer xmlns="urn:xmpp:tropo:transfer:1" terminator="#" timeout="20000" media="bridge" to="sip:martin@127.0.0.1:6089" answer-on-media="false"><audio xmlns="" src="http://ccmixter.org/content/DoKashiteru/DoKashiteru_-_you_(na-na-na-na).mp3"/></transfer>""", toXml(transfer));
+        assertEquals("""<transfer xmlns="urn:xmpp:tropo:transfer:1" terminator="#" timeout="20000" media="bridge" to="sip:martin@127.0.0.1:6089" answer-on-media="false"><ringback><audio xmlns="" src="http://ccmixter.org/content/DoKashiteru/DoKashiteru_-_you_(na-na-na-na).mp3">Please wait while your call is being transfered.</audio></ringback></transfer>""", toXml(transfer));
     }
     
     @Test
@@ -1025,7 +1026,7 @@ public class RayoProviderTest {
         transfer.to = [new URI("sip:martin@127.0.0.1:6089")]
         transfer.ringbackTone = new Ssml("We are going to transfer your call. Wait a couple of seconds.")
 
-        assertEquals("""<transfer xmlns="urn:xmpp:tropo:transfer:1" terminator="#" timeout="20000" media="bridge" to="sip:martin@127.0.0.1:6089" answer-on-media="false">We are going to transfer your call. Wait a couple of seconds.</transfer>""", toXml(transfer));
+        assertEquals("""<transfer xmlns="urn:xmpp:tropo:transfer:1" terminator="#" timeout="20000" media="bridge" to="sip:martin@127.0.0.1:6089" answer-on-media="false"><ringback>We are going to transfer your call. Wait a couple of seconds.</ringback></transfer>""", toXml(transfer));
     }
     
     @Test
@@ -1037,7 +1038,7 @@ public class RayoProviderTest {
         transfer.to = [new URI("sip:martin@127.0.0.1:6089"),new URI("sip:jose@127.0.0.1:6088")]
         transfer.ringbackTone = new Ssml("We are going to transfer your call. Wait a couple of seconds.")
 
-        assertEquals("""<transfer xmlns="urn:xmpp:tropo:transfer:1" terminator="#" timeout="20000" media="bridge" answer-on-media="false">We are going to transfer your call. Wait a couple of seconds.<to>sip:martin@127.0.0.1:6089</to><to>sip:jose@127.0.0.1:6088</to></transfer>""", toXml(transfer));
+        assertEquals("""<transfer xmlns="urn:xmpp:tropo:transfer:1" terminator="#" timeout="20000" media="bridge" answer-on-media="false"><ringback>We are going to transfer your call. Wait a couple of seconds.</ringback><to>sip:martin@127.0.0.1:6089</to><to>sip:jose@127.0.0.1:6088</to></transfer>""", toXml(transfer));
     }
     
     // Ask Complete

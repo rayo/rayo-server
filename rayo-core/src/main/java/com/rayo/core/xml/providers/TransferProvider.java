@@ -53,8 +53,8 @@ public class TransferProvider extends BaseProvider {
 			}
 		}
 
-		if(root.element("ring") != null) {
-		    transfer.setRingbackTone(extractSsml(root.element("ring")));
+		if(root.element("ringback") != null) {
+		    transfer.setRingbackTone(extractSsml(root.element("ringback")));
 		}
 				
 		if (root.attributeValue("from") != null) {
@@ -111,7 +111,10 @@ public class TransferProvider extends BaseProvider {
 		Element root = document.addElement(new QName("transfer", NAMESPACE));
 
 		addHeaders(transfer.getHeaders(), document.getRootElement());
-		addSsml(transfer.getRingbackTone(), document.getRootElement());
+		if (transfer.getRingbackTone() != null) {
+			Element ringback = root.addElement("ringback");
+			addSsml(transfer.getRingbackTone(), ringback);
+		}
 		
 		if (transfer.getTerminator() != null) {
 			root.addAttribute("terminator", transfer.getTerminator().toString());
