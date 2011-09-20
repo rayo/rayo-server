@@ -1517,31 +1517,78 @@ public class RayoProviderTest {
 
 	@Test
 	public void ringingToXml() {
-		RingingEvent ringing = new RingingEvent();
+		
+		RingingEvent ringing = new RingingEvent(null);
 		assertEquals("""<ringing xmlns="urn:xmpp:rayo:1"/>""", toXml(ringing));
+	}
+
+	@Test
+	public void ringingToXmlWithHeaders() {
+		
+		Map<String, String> headers = new HashMap<String, String>();
+		headers.put("test", "atest")
+		headers.put("test2", "atest2")
+		RingingEvent ringing = new RingingEvent(null, headers);
+		assertEquals("""<ringing xmlns="urn:xmpp:rayo:1"><header name="test" value="atest"/><header name="test2" value="atest2"/></ringing>""", toXml(ringing));
 	}
 	
 	@Test
 	public void ringingFromXml() {
+		
 		def ringing = fromXml("""<ringing xmlns="urn:xmpp:rayo:1"></ringing>""")
 		assertNotNull ringing
 		assertTrue ringing instanceof RingingEvent
 	}
-	
+
+	@Test
+	public void ringingFromXmlWithHeaders() {
+		
+		def ringing = fromXml("""<ringing xmlns="urn:xmpp:rayo:1"><header name="test" value="atest"/><header name="test2" value="atest2"/></ringing>""")
+		assertNotNull ringing
+		assertTrue ringing instanceof RingingEvent
+		assertNotNull ringing.headers
+		assertEquals ringing.headers.size(),2
+		assertEquals ringing.headers["test"], "atest"
+		assertEquals ringing.headers["test2"], "atest2"
+	}
+
 	// Answered
 	// ====================================================================================
 
 	@Test
 	public void answeredToXml() {
-		AnsweredEvent ringing = new AnsweredEvent();
+		
+		AnsweredEvent ringing = new AnsweredEvent(null);
 		assertEquals("""<answered xmlns="urn:xmpp:rayo:1"/>""", toXml(ringing));
 	}
+	
+	@Test
+	public void answeredToXmlWithHeaders() {
+		
+		Map<String, String> headers = new HashMap<String, String>();
+		headers.put("test", "atest")
+		headers.put("test2", "atest2")
+
+		AnsweredEvent answered = new AnsweredEvent(null, headers);
+		assertEquals("""<answered xmlns="urn:xmpp:rayo:1"><header name="test" value="atest"/><header name="test2" value="atest2"/></answered>""", toXml(answered));
+	}	
 	
 	@Test
 	public void answeredFromXml() {
 		def answered = fromXml("""<answered xmlns="urn:xmpp:rayo:1"></answered>""")
 		assertNotNull answered
 		assertTrue answered instanceof AnsweredEvent
+	}
+	
+	@Test
+	public void answeredFromXmlWithHeaders() {
+		def answered = fromXml("""<answered xmlns="urn:xmpp:rayo:1"><header name="test" value="atest"/><header name="test2" value="atest2"/></answered>""")
+		assertNotNull answered
+		assertTrue answered instanceof AnsweredEvent
+		assertNotNull answered.headers
+		assertEquals answered.headers.size(),2
+		assertEquals answered.headers["test"], "atest"
+		assertEquals answered.headers["test2"], "atest2"
 	}
 	
 	// Active Speaker

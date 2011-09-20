@@ -135,11 +135,11 @@ public class RayoProvider extends BaseProvider {
     }
 
     private Object buildAnsweredEvent(Element element) {
-        return new AnsweredEvent(null);
+        return new AnsweredEvent(null, grabHeaders(element));
     }
 
     private Object buildRingingEvent(Element element) {
-        return new RingingEvent(null);
+        return new RingingEvent(null, grabHeaders(element));
     }
     
     private Object buildOfferEvent(Element element) throws URISyntaxException {
@@ -355,11 +355,18 @@ public class RayoProvider extends BaseProvider {
     }
     
     private void createAnswerEvent(Object object, Document document) {
-        document.addElement(new QName("answered", RAYO_NAMESPACE));
+        
+    	AnsweredEvent event = (AnsweredEvent)object;
+    	Element root = document.addElement(new QName("answered", RAYO_NAMESPACE));
+    	addHeaders(event.getHeaders(), root);
     }
 
     private void createRingEvent(Object object, Document document) {
-        document.addElement(new QName("ringing", RAYO_NAMESPACE));
+    	
+    	RingingEvent event = (RingingEvent)object;
+        Element root = document.addElement(new QName("ringing", RAYO_NAMESPACE));
+        addHeaders(event.getHeaders(), root);
+        
     }
     
     private void createEndEvent(Object object, Document document) {

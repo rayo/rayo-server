@@ -207,14 +207,14 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     @com.voxeo.moho.State
     public void onAnswered(com.voxeo.moho.event.AnsweredEvent<Participant> event) throws Exception {
         if(event.getSource().equals(participant)) {
-        	validateMediaOnAnswer();
+        	validateMediaOnAnswer(event);
         }
     }
 
-    private void validateMediaOnAnswer() {
+    private void validateMediaOnAnswer(com.voxeo.moho.event.AnsweredEvent<Participant> event) {
     	
     	if (initialJoinReceived) {
-    		fire(new AnsweredEvent(getParticipantId()));
+    		fire(new AnsweredEvent(getParticipantId(), event.getHeaders()));
     	} else {
     		pendingAnswer.add(getParticipantId());
     	}
@@ -304,7 +304,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 	@com.voxeo.moho.State
     public void onRing(com.voxeo.moho.event.RingEvent event) throws Exception {
         if(event.getSource().equals(participant)) {
-            fire(new RingingEvent(getParticipantId()));
+            fire(new RingingEvent(getParticipantId(), event.getHeaders()));
         }
     }
 
