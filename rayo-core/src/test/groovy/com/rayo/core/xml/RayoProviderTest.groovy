@@ -1216,11 +1216,16 @@ public class RayoProviderTest {
 		def complete = fromXml("""
 			<complete xmlns="urn:xmpp:rayo:ext:1">
 				<stop xmlns="urn:xmpp:rayo:ext:complete:1"/>
-				<recording xmlns="urn:xmpp:rayo:record:complete:1" uri="file:///tmp/abc.mp3"/>
+				<recording xmlns="urn:xmpp:rayo:record:complete:1" uri="file:///tmp/abc.mp3" size="12000" duration="35000"/>
 			</complete>""")
 		assertNotNull complete
-		assertEquals complete.reason, VerbCompleteEvent.Reason.STOP
-		assertEquals complete.uri, new URI("file:///tmp/abc.mp3")
+		
+		assertProperties (complete, [
+			reason: VerbCompleteEvent.Reason.STOP,
+			uri: new URI("file:///tmp/abc.mp3"),
+			size: 12000,
+			duration: new Duration(35000)
+		])
 	}
 	
 	@Test
@@ -1237,8 +1242,10 @@ public class RayoProviderTest {
 		
 		def complete = new RecordCompleteEvent(new Record(), RecordCompleteEvent.Reason.SUCCESS)
 		complete.uri = new URI("file:///tmp/abc.mp3")
+		complete.duration = new Duration(35000)
+		complete.size = 12000
 		
-		assertEquals("""<complete xmlns="urn:xmpp:rayo:ext:1"><success xmlns="urn:xmpp:rayo:record:complete:1"/><recording xmlns="urn:xmpp:rayo:record:complete:1" uri="file:///tmp/abc.mp3"/></complete>""", toXml(complete));
+		assertEquals("""<complete xmlns="urn:xmpp:rayo:ext:1"><success xmlns="urn:xmpp:rayo:record:complete:1"/><recording xmlns="urn:xmpp:rayo:record:complete:1" uri="file:///tmp/abc.mp3" size="12000" duration="35000"/></complete>""", toXml(complete));
 	}
 	
 	@Test

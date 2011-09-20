@@ -2,6 +2,8 @@ package com.rayo.core.verb;
 
 import java.net.URI;
 
+import org.joda.time.Duration;
+
 public class RecordCompleteEvent extends VerbCompleteEvent {
 
     public enum Reason implements VerbCompleteReason {
@@ -9,6 +11,8 @@ public class RecordCompleteEvent extends VerbCompleteEvent {
     }
 
     private URI uri;
+    private Duration duration;
+    private long size;
     
     public RecordCompleteEvent() {}
     
@@ -45,4 +49,20 @@ public class RecordCompleteEvent extends VerbCompleteEvent {
 	public void setUri(URI uri) {
 		this.uri = uri;
 	}
+
+	public Duration getDuration() {
+		return duration;
+	}
+
+	public void setDuration(Duration duration) {
+		this.duration = duration;
+	}
+
+	public long getSize() {
+		return size;
+	}
+
+	public void setSize(long size) {
+		this.size = size;
+	}	
 }

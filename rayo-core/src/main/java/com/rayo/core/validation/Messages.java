@@ -25,6 +25,7 @@ public class Messages {
 	public static final String INVALID_URI = "You have submitted an invalid URI.";
 	public static final String INVALID_BOOLEAN = "You have submitted an invalid boolean value for '%s'";
 	public static final String INVALID_INTEGER = "You have submitted an invalid integer value for '%s'";
+	public static final String INVALID_LONG = "You have submitted an invalid long value for '%s'";
 	public static final String INVALID_FLOAT = "You have submitted an invalid float value for '%s'";
 	public static final String INVALID_TIMEOUT = "Invalid timeout specified.";
 	public static final String INVALID_CONFIDENCE = "Invalid confidence specified.";

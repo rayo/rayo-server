@@ -91,6 +91,12 @@ public class RecordProvider extends BaseProvider {
     	for (Element child: children) {
     		if (child.getName().equals("recording")) {
     			event.setUri(new URI(child.attributeValue("uri")));
+    			if (child.attribute("duration") != null) {
+    				event.setDuration(toDuration("duration", child));
+    			}
+    			if (child.attribute("size") != null) {
+    				event.setSize(toLong("size", child));
+    			}
     		} else {
     	    	String reasonValue = child.getName().toUpperCase();
     	        event.setReason(findReason(reasonValue));    			
@@ -131,7 +137,11 @@ public class RecordProvider extends BaseProvider {
 		if (event.getUri() != null) {
 			Element completeElement = document.getRootElement().addElement("recording", RecordProvider.COMPLETE_NAMESPACE.getURI());
 			completeElement.addAttribute("uri", event.getUri().toString());
+			
+			completeElement.addAttribute("size", String.valueOf(event.getSize()));
+			completeElement.addAttribute("duration", Long.toString(event.getDuration().getMillis()));
 		}
+		
 	}
     
     private void createRecord(Record record, Document document) throws Exception {

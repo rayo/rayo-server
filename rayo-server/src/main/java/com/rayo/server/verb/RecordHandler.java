@@ -9,6 +9,8 @@ import javax.media.mscontrol.Value;
 import javax.media.mscontrol.mediagroup.CodecConstants;
 import javax.media.mscontrol.mediagroup.FileFormatConstants;
 
+import org.joda.time.Duration;
+
 import com.rayo.core.recording.StorageService;
 import com.rayo.core.verb.Output;
 import com.rayo.core.verb.Record;
@@ -144,39 +146,47 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
 				log.error("Error while recording conversation");
 				try {
 					recording.get();
-					complete(VerbCompleteEvent.Reason.ERROR, event.getErrorText());
+					complete(VerbCompleteEvent.Reason.ERROR, event.getErrorText(), event.getDuration());
 				} catch (Exception e) {
 					if (e.getCause() instanceof MediaException) {
-						complete(VerbCompleteEvent.Reason.ERROR,e.getCause().getMessage());
+						complete(VerbCompleteEvent.Reason.ERROR,e.getCause().getMessage(), event.getDuration());
 					}
 				}
 				break;
 			case TIMEOUT:
 			case INI_TIMEOUT:
-				complete(VerbCompleteEvent.Reason.STOP);
+				complete(VerbCompleteEvent.Reason.STOP, event.getDuration());
 				break;
 			case DISCONNECT:
-				complete(VerbCompleteEvent.Reason.HANGUP);
+				complete(VerbCompleteEvent.Reason.HANGUP, event.getDuration());
 				break;
 			case CANCEL:
 			case SILENCE:
-				complete(VerbCompleteEvent.Reason.STOP);
+				complete(VerbCompleteEvent.Reason.STOP, event.getDuration());
 				break;				
 		}
 	}
 	
-	private void complete(VerbCompleteReason reason) {
+	private void complete(VerbCompleteReason reason, long duration) {
 	
-		complete(reason,null);
+		complete(reason,null, duration);
 	}
 	
-	private void complete(VerbCompleteReason reason, String errorText) {
+	private void complete(VerbCompleteReason reason, String errorText, long duration) {
 
 		RecordCompleteEvent event;
+		long size = 0;
 		
 		// When temp file is null the user has provided a to URL (right now an undocumented feature). In such cases
 		// no storage service policies will be applied.
 		if (tempFile != null) {
+			
+			try {
+				size = tempFile.length();
+			} catch (Exception e) {
+				log.error(e.getMessage(),e);
+			}
+			
 			URI fileUri = tempFile.toURI();
 			//TODO: Should we change this and add multiple URIs? Right now only the last URI will make it to the xml
 			for (Object storageService: storageServices) {
@@ -194,7 +204,9 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
 				}
 			}
 		}
-		event = createRecordCompleteEvent(reason, errorText);		
+		event = createRecordCompleteEvent(reason, errorText);
+		event.setDuration(new Duration(duration));
+		event.setSize(size);
 		complete(event);
 	}
 
