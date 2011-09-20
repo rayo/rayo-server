@@ -20,10 +20,20 @@
     </complexType>
 	
     <!-- Answered Event -->
-    <element name="answered" type="tns:empty" />
+    <element name="answered" type="tns:answeredType" />
+    <complexType name="answeredType">
+        <sequence>
+            <element name="header" type="tns:headerType" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>    
+    </complexType>
 
     <!-- Ringing Event -->
-    <element name="ringing" type="tns:empty" />
+    <element name="ringing" type="tns:ringingType" />
+    <complexType name="ringingType">
+        <sequence>
+            <element name="header" type="tns:headerType" minOccurs="0" maxOccurs="unbounded" />
+        </sequence>    
+    </complexType>
 
     <!-- DTMF Event -->
     <element name="dtmf" type="tns:dtmfType" />
