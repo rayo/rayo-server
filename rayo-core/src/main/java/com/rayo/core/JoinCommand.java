@@ -11,6 +11,8 @@ import com.voxeo.moho.Participant.JoinType;
 
 public class JoinCommand extends AbstractCallCommand {
 	
+	public enum Strategy { EXCLUSIVE_REPLACE, EXCLUSIVE_KEEP, MULTIPLE } 
+	
 	public static final String MEDIA_TYPE = "MEDIA_TYPE";	
 	public static final String DIRECTION = "DIRECTION";
 	public static final String TO = "TO";
@@ -24,6 +26,9 @@ public class JoinCommand extends AbstractCallCommand {
 	private String to;
 	
 	private JoinDestinationType type; 
+	
+	@NotNull(message=Messages.MISSING_JOIN_STRATEGY)
+	private Strategy strategy = Strategy.MULTIPLE;
 
 	public Direction getDirection() {
 		return direction;
@@ -56,6 +61,14 @@ public class JoinCommand extends AbstractCallCommand {
 
 	public JoinDestinationType getType() {
 		return type;
+	}
+
+	public Strategy getStrategy() {
+		return strategy;
+	}
+
+	public void setStrategy(Strategy strategy) {
+		this.strategy = strategy;
 	}
 
 	@Override

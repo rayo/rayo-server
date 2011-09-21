@@ -143,9 +143,9 @@ public class RayoProviderTest {
 	@Test
 	public void joinToXmlWithCallId() {
 		
-		def join = new JoinCommand(direction:Joinable.Direction.DUPLEX, media:JoinType.BRIDGE, to:"1234", type: JoinDestinationType.CALL);
+		def join = new JoinCommand(direction:Joinable.Direction.DUPLEX, media:JoinType.BRIDGE, to:"1234", type: JoinDestinationType.CALL, strategy:JoinCommand.Strategy.EXCLUSIVE_REPLACE);
 		
-		assertEquals("""<join xmlns="urn:xmpp:rayo:1" direction="duplex" media="bridge" call-id="1234"/>""", toXml(join));
+		assertEquals("""<join xmlns="urn:xmpp:rayo:1" direction="duplex" media="bridge" strategy="EXCLUSIVE_REPLACE" call-id="1234"/>""", toXml(join));
 	}
 	
 	@Test
@@ -153,18 +153,19 @@ public class RayoProviderTest {
 		
 		def join = new JoinCommand(direction:Joinable.Direction.DUPLEX, media:JoinType.BRIDGE, to:"1234", type: JoinDestinationType.MIXER);
 		
-		assertEquals("""<join xmlns="urn:xmpp:rayo:1" direction="duplex" media="bridge" mixer-id="1234"/>""", toXml(join));
+		assertEquals("""<join xmlns="urn:xmpp:rayo:1" direction="duplex" media="bridge" strategy="MULTIPLE" mixer-id="1234"/>""", toXml(join));
 	}
 		
 	@Test
 	public void joinCallIdFromXml() {
 
-		def join = fromXml("""<join xmlns="urn:xmpp:rayo:1" direction="duplex" media="bridge" call-id="1234"/>""")
+		def join = fromXml("""<join xmlns="urn:xmpp:rayo:1" direction="duplex" media="bridge" call-id="1234" strategy="EXCLUSIVE_REPLACE"/>""")
 		assertProperties(join, [
 			direction: Joinable.Direction.DUPLEX,
 			media: JoinType.BRIDGE,
 			to:"1234",
-			type: JoinDestinationType.CALL
+			type: JoinDestinationType.CALL,
+			strategy: JoinCommand.Strategy.EXCLUSIVE_REPLACE
 		])
 	}
 	
@@ -298,7 +299,7 @@ public class RayoProviderTest {
 		def join = new JoinCommand();
 		command.join = join
 		
-		assertEquals("""<dial xmlns="urn:xmpp:rayo:1" to="tel:44477773333333" from="tel:34637710708"><join direction="duplex" media="bridge"/></dial>""", toXml(command));
+		assertEquals("""<dial xmlns="urn:xmpp:rayo:1" to="tel:44477773333333" from="tel:34637710708"><join direction="duplex" media="bridge" strategy="MULTIPLE"/></dial>""", toXml(command));
 	}
 	
 	
@@ -311,7 +312,7 @@ public class RayoProviderTest {
 		def join = new JoinCommand(direction:Joinable.Direction.DUPLEX, media:JoinType.BRIDGE, to:"1234", type:JoinDestinationType.CALL);
 		command.join = join
 		
-		assertEquals("""<dial xmlns="urn:xmpp:rayo:1" to="tel:44477773333333" from="tel:34637710708"><join direction="duplex" media="bridge" call-id="1234"/></dial>""", toXml(command));
+		assertEquals("""<dial xmlns="urn:xmpp:rayo:1" to="tel:44477773333333" from="tel:34637710708"><join direction="duplex" media="bridge" strategy="MULTIPLE" call-id="1234"/></dial>""", toXml(command));
 	}
 	
 	@Test
@@ -323,7 +324,7 @@ public class RayoProviderTest {
 		def join = new JoinCommand(direction:Joinable.Direction.DUPLEX, media:JoinType.BRIDGE, to:"1234", type:JoinDestinationType.MIXER);
 		command.join = join
 		
-		assertEquals("""<dial xmlns="urn:xmpp:rayo:1" to="tel:44477773333333" from="tel:34637710708"><join direction="duplex" media="bridge" mixer-id="1234"/></dial>""", toXml(command));
+		assertEquals("""<dial xmlns="urn:xmpp:rayo:1" to="tel:44477773333333" from="tel:34637710708"><join direction="duplex" media="bridge" strategy="MULTIPLE" mixer-id="1234"/></dial>""", toXml(command));
 	}
 	
 	@Test
