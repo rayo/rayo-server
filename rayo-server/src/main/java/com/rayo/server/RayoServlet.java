@@ -63,6 +63,7 @@ public class RayoServlet extends XmppServlet {
 
     private static final QName BIND_QNAME = new QName("bind", new Namespace("", "urn:ietf:params:xml:ns:xmpp-bind"));
     private static final QName SESSION_QNAME = new QName("session", new Namespace("", "urn:ietf:params:xml:ns:xmpp-session"));
+    private static final QName PING_QNAME = new QName("ping", new Namespace("", "urn:xmpp:ping"));
 
     private JIDRegistry jidRegistry;
     
@@ -241,6 +242,8 @@ public class RayoServlet extends XmppServlet {
                 } else if (qname.equals(SESSION_QNAME)) {
                 	// Session binding
                 	sendIqResult(request);   
+                } else if (qname.equals(PING_QNAME)) {
+                	sendIqResult(request);
                 }
     		}
             if (DomUtils.isSupportedNamespace(payload)) {
