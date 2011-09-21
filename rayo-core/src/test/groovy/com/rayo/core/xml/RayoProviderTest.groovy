@@ -26,6 +26,7 @@ import com.rayo.core.CallRejectReason
 import com.rayo.core.DialCommand
 import com.rayo.core.DtmfCommand;
 import com.rayo.core.DtmfEvent
+import com.rayo.core.EndEvent;
 import com.rayo.core.FinishedSpeakingEvent;
 import com.rayo.core.HangupCommand
 import com.rayo.core.JoinCommand
@@ -1634,13 +1635,86 @@ public class RayoProviderTest {
 	
 	@Test
 	public void dtmfFromXml() {
-		assertNotNull "5", fromXml("""<dtmf xmlns="urn:xmpp:rayo:1" tones="5"></dtmf>""").tones
+		assertEquals "5", fromXml("""<dtmf xmlns="urn:xmpp:rayo:1" tones="5"/>""").tones
 	}
 
 	@Test
 	public void dtmfCommandToXml() {
 		DtmfCommand dtmf = new DtmfCommand("12")
-		assertNotNull """<dtmf xmlns="urn:xmpp:rayo:1" tones="12"></dtmf>""", toXml(dtmf)
+		assertEquals """<dtmf xmlns="urn:xmpp:rayo:1" tones="12"/>""", toXml(dtmf)
+	}
+	
+	// End Event
+	// ====================================================================================
+	
+	@Test
+	public void endEventEmptyToXml() {
+		
+		EndEvent event = new EndEvent("abcd", null)
+		assertEquals """<end xmlns="urn:xmpp:rayo:1"/>""", toXml(event)
+	}
+	
+	@Test
+	public void endEventReasonToXml() {
+		
+		EndEvent event = new EndEvent("abcd", EndEvent.Reason.TIMEOUT, null)
+		assertEquals """<end xmlns="urn:xmpp:rayo:1"><timeout/></end>""", toXml(event)
+	}
+	
+	@Test
+	public void endEventReasonAndErrorToXml() {
+		
+		EndEvent event = new EndEvent("abcd", EndEvent.Reason.BUSY, null)
+		event.setErrorText("This is an error")
+		assertEquals """<end xmlns="urn:xmpp:rayo:1"><busy>This is an error</busy></end>""", toXml(event)
+	}
+	
+	
+	@Test
+	public void endEventReasonAndErrorWithHeadersToXml() {
+		
+		Map<String, String> headers = new HashMap<String, String>();
+		headers.put("test1", "value1")
+		headers.put("test2", "value2")
+		EndEvent event = new EndEvent("abcd", EndEvent.Reason.BUSY, headers)
+		event.setErrorText("This is an error")
+		assertEquals """<end xmlns="urn:xmpp:rayo:1"><busy>This is an error</busy><header name="test1" value="value1"/><header name="test2" value="value2"/></end>""", toXml(event)
+	}
+		
+	@Test
+	public void endEventFromXml() {
+		
+		def event = fromXml("""<end xmlns="urn:xmpp:rayo:1"/>""")
+		assertNotNull event
+	}
+	
+	@Test
+	public void endEventFromXmlWithReason() {
+		
+		def event = fromXml("""<end xmlns="urn:xmpp:rayo:1"><timeout/></end>""")
+		assertNotNull event
+		assertEquals event.reason, EndEvent.Reason.TIMEOUT
+	}
+	
+	@Test
+	public void endEventFromXmlWithReasonAndErrorText() {
+		
+		def event = fromXml("""<end xmlns="urn:xmpp:rayo:1"><busy>This is an error</busy></end>""")
+		assertNotNull event
+		assertEquals event.reason, EndEvent.Reason.BUSY
+		assertEquals event.errorText, "This is an error"
+	}
+	
+	@Test
+	public void endEventFromXmlWithReasonAndErrorTextAndHeaders() {
+		
+		def event = fromXml("""<end xmlns="urn:xmpp:rayo:1"><busy>This is an error</busy><header name="test1" value="value1"/><header name="test2" value="value2"/></end>""")
+		assertNotNull event
+		assertEquals event.reason, EndEvent.Reason.BUSY
+		assertEquals event.errorText, "This is an error"
+		assertNotNull event.headers
+		assertEquals event.headers["test1"], "value1"
+		assertEquals event.headers["test2"], "value2"
 	}
 	
     // Utility

@@ -49,7 +49,15 @@ public class EndEvent extends AbstractCallEvent {
         this.headers = headers;
     }
 
-    @Override
+    public void setReason(Reason reason) {
+		this.reason = reason;
+	}
+
+	public void setErrorText(String errorText) {
+		this.errorText = errorText;
+	}
+
+	@Override
     public String toString() {
 
     	return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)    		

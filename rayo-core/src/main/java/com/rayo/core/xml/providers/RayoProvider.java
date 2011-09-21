@@ -2,6 +2,7 @@ package com.rayo.core.xml.providers;
 
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Map;
 
 import javax.media.mscontrol.join.Joinable.Direction;
 
@@ -131,7 +132,28 @@ public class RayoProvider extends BaseProvider {
     }
     
     private Object buildCallEnd(Element element) {
-        throw new UnsupportedOperationException();
+
+        EndEvent event = new EndEvent(null,null);
+        if (element.elements().size() > 0) {
+        	Element cause = null;
+        	for (Object item: element.elements()) {
+        		if (!((Element)item).getName().equals("header")) {
+        			cause = (Element)item;
+        			break;
+        		}
+        	}
+        	if (cause != null) {
+	        	EndEvent.Reason reason = EndEvent.Reason.valueOf(EndEvent.Reason.class, cause.getName().toUpperCase());
+	        	event.setReason(reason);
+	        	if (cause.getText() != null) {
+	        		event.setErrorText(cause.getText());
+	        	}
+        	}
+        }
+        Map<String,String> headers = grabHeaders(element);
+        event.setHeaders(headers);
+        
+        return event;
     }
 
     private Object buildAnsweredEvent(Element element) {
@@ -372,9 +394,11 @@ public class RayoProvider extends BaseProvider {
     private void createEndEvent(Object object, Document document) {
         EndEvent event = (EndEvent)object;
         Element root = document.addElement(new QName("end", RAYO_NAMESPACE));
-        Element cause = root.addElement(event.getReason().name().toLowerCase());
-        if (event.getErrorText() != null) {
-        	cause.setText(event.getErrorText());
+        if (event.getReason() != null) {
+	        Element cause = root.addElement(event.getReason().name().toLowerCase());
+	        if (event.getErrorText() != null) {
+	        	cause.setText(event.getErrorText());
+	        }
         }
         addHeaders(event.getHeaders(), root);
     }
