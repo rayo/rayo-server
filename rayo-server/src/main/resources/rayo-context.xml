@@ -420,4 +420,10 @@
   	
   	<!-- XMPP Message listeners -->
   	<bean id="xmppMessageListenersGroup" class="com.rayo.server.listener.XmppMessageListenerGroup"/>	
+  	
+  	<!-- Configuration settings for the RayoSessionListener cleanup code -->
+  	<bean id="sessionCleanupConfig" class="com.rayo.server.listener.SessionCleanupConfig">
+  		<property name="cleanupC2SResources" value="true"/>
+  		<property name="cleanupS2SResources" value="false"/>
+  	</bean>
 </beans>

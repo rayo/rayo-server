@@ -353,4 +353,11 @@
 	<bean id="rayoJIDLookupService" class="com.rayo.server.lookup.RegexpJIDLookupService">
 		<constructor-arg value="classpath:rayo-routing.properties"/>
 	</bean> 
+	
+	  	
+  	<!-- Configuration settings for the RayoSessionListener cleanup code -->
+  	<bean id="sessionCleanupConfig" class="com.rayo.server.listener.SessionCleanupConfig">
+  		<property name="cleanupC2SResources" value="true"/>
+  		<property name="cleanupS2SResources" value="false"/>
+  	</bean>
 </beans>

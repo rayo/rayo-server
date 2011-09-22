@@ -13,6 +13,7 @@ import com.rayo.server.JIDRegistry;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.servlet.xmpp.Feature;
 import com.voxeo.servlet.xmpp.XmppSession;
+import com.voxeo.servlet.xmpp.XmppSession.Type;
 import com.voxeo.servlet.xmpp.XmppSessionEvent;
 import com.voxeo.servlet.xmpp.XmppSessionListener;
 
@@ -24,6 +25,9 @@ import com.voxeo.servlet.xmpp.XmppSessionListener;
  *  <p>Therefore, the session listener will capture session destroy events and it 
  *  will check the status of any active calls for the XMPP Session's JID. If any active 
  *  call is found then the call will be terminated.</p>
+ *  
+ *  <p>Resources cleanup can be configured by using the {@link SessionCleanupConfig} configuration
+ *  class which is defined in Rayo Server's Spring configuration file.</p>
  * 
  * @author martin
  *
@@ -35,6 +39,8 @@ public class RayoSessionListener implements XmppSessionListener {
 	private JIDRegistry jidRegistry;
 	private CallRegistry callRegistry;
 	
+	private SessionCleanupConfig sessionCleanupConfig;
+	
 	@Override
 	public void sessionCreated(XmppSessionEvent xse) {
 		
@@ -44,7 +50,8 @@ public class RayoSessionListener implements XmppSessionListener {
         	.getRequiredWebApplicationContext(context);
     
         callRegistry = wac.getBean(CallRegistry.class);
-        jidRegistry = wac.getBean(JIDRegistry.class);		
+        jidRegistry = wac.getBean(JIDRegistry.class);
+        sessionCleanupConfig = wac.getBean(SessionCleanupConfig.class);
 	}
 	
 	@Override
@@ -59,7 +66,11 @@ public class RayoSessionListener implements XmppSessionListener {
 		logger.debug("Xmpp Session destroyed");
 		XmppSession session = xse.getSession();
 		
-		if (session.getType() != XmppSession.Type.S2S) {
+		boolean cleanup = 
+			(session.getType() == Type.S2S && sessionCleanupConfig.isCleanupS2SResources()) ||
+			(session.getType() != Type.S2S && sessionCleanupConfig.isCleanupC2SResources());
+
+		if (cleanup) {
 			List<String> callIds = jidRegistry.getCallsByJID(session.getRemoteJID());
 			for (String id: callIds) {
 				try {
@@ -73,4 +84,18 @@ public class RayoSessionListener implements XmppSessionListener {
 			}
 		}
 	}
+
+	public void setJidRegistry(JIDRegistry jidRegistry) {
+		this.jidRegistry = jidRegistry;
+	}
+
+	public void setCallRegistry(CallRegistry callRegistry) {
+		this.callRegistry = callRegistry;
+	}
+
+	public void setSessionCleanupConfig(SessionCleanupConfig sessionCleanupConfig) {
+		this.sessionCleanupConfig = sessionCleanupConfig;
+	}
+	
+	
 }
