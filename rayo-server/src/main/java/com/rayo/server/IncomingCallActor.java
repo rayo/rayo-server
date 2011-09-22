@@ -19,6 +19,7 @@ import com.voxeo.moho.Endpoint;
 import com.voxeo.moho.IncomingCall;
 import com.voxeo.moho.event.AcceptableEvent;
 import com.voxeo.moho.event.AutowiredEventListener;
+import com.voxeo.moho.sip.SIPCallImpl;
 
 public class IncomingCallActor extends CallActor<IncomingCall> {
 
@@ -67,7 +68,22 @@ public class IncomingCallActor extends CallActor<IncomingCall> {
 
     @Message
     public void accept(AcceptCommand message) {
-        Map<String, String> headers = message.getHeaders();
+
+    	switch (((SIPCallImpl)participant).getSIPCallState()) {
+			case RINGING:
+			case ANSWERING:
+			case ANSWERED:
+			case REDIRECTED:
+			case PROXIED:
+				throw new RecoverableException("Call is already accepted");
+			case DISCONNECTED:
+			case FAILED:
+			case REJECTED:
+				throw new RecoverableException("Call is either already disconnected or failed");
+			default:
+		}
+        
+    	Map<String, String> headers = message.getHeaders();
         participant.accept(headers);
         getCallStatistics().callAccepted();
     }
