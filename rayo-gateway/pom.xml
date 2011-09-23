@@ -22,15 +22,10 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>com.rayo</groupId>
-			<artifactId>rayo-server</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>com.rayo</groupId> 
 			<artifactId>rayo-core</artifactId>
 			<version>${project.version}</version>
-		</dependency>	
+		</dependency>			
 		<dependency>
 			<groupId>com.voxeo</groupId>
 			<artifactId>vlib-core</artifactId>
@@ -43,7 +38,12 @@
 			<groupId>com.voxeo.xmpp</groupId>
 			<artifactId>xmppservlet-api</artifactId>
 			<version>2.0-SNAPSHOT</version>
-		</dependency>	
+		</dependency>
+		<!-- Access to spring beans -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+		</dependency>		
 	</dependencies>
     <profiles>
 	  <profile> 

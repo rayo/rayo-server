@@ -115,26 +115,12 @@ public class GatewayServlet extends XmppServlet {
 	public void setGatewayDatastore(GatewayDatastore gatewayDatastore) {
 		this.gatewayDatastore = gatewayDatastore;
 	}
-	//
-	// protected String asXML (org.w3c.dom.Element element)
-	// {
-	// String xml = null;
-	// if (element == null)
-	// {
-	// xml = "<empty/>";
-	// }
-	// else if (element instanceof org.dom4j.Element)
-	// {
-	// xml = ((org.dom4j.Element)element).asXML();
-	// }
-	// else
-	// {
-	// DOMImplementationLS impl =
-	// (DOMImplementationLS)element.getOwnerDocument().getImplementation();
-	// LSSerializer serializer = impl.createLSSerializer();
-	// xml = serializer.writeToString(element);
-	// }
-	// return xml;
-	// }
 
+	public void setInternalDomains(Set<String> internalDomains) {
+		this.internalDomains = internalDomains;
+	}
+
+	public void setExternalDomains(Set<String> externalDomains) {
+		this.externalDomains = externalDomains;
+	}
 }

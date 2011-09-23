@@ -1,24 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE sip-app PUBLIC "-//Java Community Process//DTD SIP Application 1.0//EN" "http://www.jcp.org/dtd/sip-app_1_0.dtd">
 <sip-app id="rayo">
-	<context-param>
-		<param-name>contextConfigLocation</param-name>
-		<param-value>classpath:rayo-context.xml</param-value>
-	</context-param>
 	<listener>
-		<listener-class>com.rayo.web.ContextLoaderListener</listener-class>
+		<listener-class>com.rayo.server.gateway.ContextLoaderListener</listener-class>
 	</listener>
-	<servlet>
-		<servlet-name>Controller</servlet-name>
-		<servlet-class>com.voxeo.moho.sip.SIPController</servlet-class>
-		<init-param>
-			<param-name>ApplicationClass</param-name>
-			<param-value>com.rayo.server.MohoDriver</param-value>
-		</init-param>
-		<init-param>
-			<param-name>mediaDialectClass</param-name>
-			<param-value>com.voxeo.prism.moho.PrismDialect</param-value>
-		</init-param>
-		<load-on-startup>1</load-on-startup>
-	</servlet>	
 </sip-app>

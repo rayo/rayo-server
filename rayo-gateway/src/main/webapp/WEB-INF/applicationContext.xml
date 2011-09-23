@@ -11,23 +11,4 @@
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd"
     default-autowire="byName">
 
-	<bean id="gatewayDatastore" class="com.rayo.server.gateway.InMemoryGatewayDatastore"/>
-
-	<!--  
-	<bean id="rayoJIDLookupService" class="com.rayo.server.lookup.RegexpJIDLookupService">
-		<constructor-arg value="classpath:rayo-routing.properties"/>
-	</bean>  		
-	-->
-	
-	<util:set id="internalDomains" set-class="java.util.HashSet">
-		<value>internal.tropo.local</value>
-	</util:set>
-
-	<util:set id="externalDomains" set-class="java.util.HashSet">
-		<value>gw.tropo.local</value>
-	</util:set>
-	
-	<bean id="gateway" class="com.rayo.server.gateway.GatewayServlet">
-
-	</bean>	
 </beans>
