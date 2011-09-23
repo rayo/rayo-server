@@ -13,7 +13,7 @@
 	<version>2.0-SNAPSHOT</version>
 	<packaging>war</packaging>
 
-	<name>rayo-gateway</name>
+	<name>Rayo Gateway</name>
 	<url>http://maven.apache.org</url>
 
 	<properties>
