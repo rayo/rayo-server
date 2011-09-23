@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmpp:xmpp-app xmlns:javaee="http://java.sun.com/xml/ns/javaee"
+	xmlns:xmpp="http://www.voxeo.com/sipmethod/xmpp" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.voxeo.com/sipmethod/xmpp xmpp.xsd"
+	version="1.1">
+
+	<xmpp:servlet>
+		<javaee:servlet-name>gateway</javaee:servlet-name>
+		<javaee:servlet-class>
+			com.rayo.server.SpringXmppServlet
+		</javaee:servlet-class>
+		<javaee:load-on-startup>1</javaee:load-on-startup>
+	</xmpp:servlet>
+	<xmpp:defaultxmppapp />
+	<xmpp:serv-domains>
+		<xmpp:servdomain>127.0.0.1</xmpp:servdomain>
+		<xmpp:servdomain>localhost</xmpp:servdomain>
+	</xmpp:serv-domains>
+
+	<xmpp:servlet-selection>
+		<xmpp:main-servlet>gateway</xmpp:main-servlet>
+	</xmpp:servlet-selection>
+
+  <!-- the following is the main different part with SIP and HTTP descriptor -->
+  <xmpp:inboundclient-login-config>
+    <xmpp:SASL-configure>
+      <xmpp:SASL-mechanism>
+        <xmpp:auth-method>PLAIN</xmpp:auth-method>
+        <xmpp:realm-name>MemoryRealm</xmpp:realm-name>
+        <xmpp:NeedSecureTransport>FALSE</xmpp:NeedSecureTransport>
+      </xmpp:SASL-mechanism>
+    </xmpp:SASL-configure>
+    <xmpp:features>
+      <xmpp:resourcebinding />
+      <xmpp:session />
+    </xmpp:features>
+  </xmpp:inboundclient-login-config>
+
+  <xmpp:inbound-s2s-config>
+  </xmpp:inbound-s2s-config>
+
+  <xmpp:outbound-s2s-config>
+  </xmpp:outbound-s2s-config>
+</xmpp:xmpp-app>

@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>rayo-parent</artifactId>
+		<groupId>com.rayo</groupId>
+		<version>2.0-SNAPSHOT</version>
+	</parent>
+
+	<groupId>com.rayo</groupId>
+	<artifactId>rayo-gateway</artifactId>
+	<version>2.0-SNAPSHOT</version>
+	<packaging>war</packaging>
+
+	<name>rayo-gateway</name>
+	<url>http://maven.apache.org</url>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>com.rayo</groupId>
+			<artifactId>rayo-server</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.rayo</groupId> 
+			<artifactId>rayo-core</artifactId>
+			<version>${project.version}</version>
+		</dependency>	
+		<dependency>
+			<groupId>com.voxeo</groupId>
+			<artifactId>vlib-core</artifactId>
+		</dependency>	
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.voxeo.xmpp</groupId>
+			<artifactId>xmppservlet-api</artifactId>
+			<version>2.0-SNAPSHOT</version>
+		</dependency>	
+	</dependencies>
+    <profiles>
+	  <profile> 
+	     <id>hudson</id> 
+	     <activation> 
+	        <property><name>BUILD_NUMBER</name></property> 
+	     </activation> 
+	     <build> 
+	       <finalName>rayo-gateway_b${BUILD_NUMBER}</finalName> 
+	       <!-- any plugin configuration --> 
+	        <plugins>
+	            <plugin>
+	                <artifactId>maven-war-plugin</artifactId>
+	                <configuration>
+	                    <manifest>
+	                        <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+	                    </manifest>
+	                    <archive>
+	                        <manifestEntries>
+	                            <Specification-Title>${project.name}</Specification-Title>
+	                            <Specification-Version>${project.version}</Specification-Version>
+	                            <Implementation-Version>${BUILD_TAG}</Implementation-Version>
+	                            <Build-Id>${BUILD_ID}</Build-Id>
+	                        </manifestEntries>
+	                    </archive>
+	                </configuration>
+	            </plugin>
+	        </plugins>	       
+	     </build> 
+	  </profile>     
+    </profiles>
+	<build>
+		<finalName>rayo-gateway</finalName>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.2</version>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>    
+</project>
