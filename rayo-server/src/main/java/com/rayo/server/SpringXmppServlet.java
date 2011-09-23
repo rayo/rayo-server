@@ -14,6 +14,7 @@ import org.springframework.web.context.support.XmlWebApplicationContext;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.servlet.xmpp.XmppServlet;
 
+@SuppressWarnings("serial")
 public class SpringXmppServlet extends XmppServlet {
 
     private Loggerf log = Loggerf.getLogger(SpringXmppServlet.class);
