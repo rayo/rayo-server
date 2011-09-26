@@ -561,4 +561,9 @@ public class MockCall implements IncomingCall {
     public void proxyTo(boolean recordRoute, boolean parallel,
     		Map<String, String> headers, Endpoint... destinations) {
     }
+    
+    @Override
+    public String getRemoteAddress() {
+    	return null;
+    }
 }
