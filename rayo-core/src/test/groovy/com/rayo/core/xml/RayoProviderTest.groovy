@@ -59,6 +59,7 @@ import com.rayo.core.verb.KickCommand;
 import com.rayo.core.verb.MediaType;
 import com.rayo.core.verb.MuteCommand;
 import com.rayo.core.verb.Output;
+import com.rayo.core.verb.OutputCompleteEvent;
 import com.rayo.core.verb.PauseCommand;
 import com.rayo.core.verb.Record;
 import com.rayo.core.verb.RecordCompleteEvent;
@@ -1110,7 +1111,15 @@ public class RayoProviderTest {
         assertNotNull complete
         assertEquals complete.reason, VerbCompleteEvent.Reason.HANGUP
     }
-    
+
+	@Test
+	public void sayCompleteSuccessFromXml() {
+		
+		def complete = fromXml("""<complete xmlns="urn:xmpp:rayo:ext:1"><success xmlns="urn:xmpp:tropo:say:complete:1"/></complete>""")
+		assertNotNull complete
+		assertEquals complete.reason, SayCompleteEvent.Reason.SUCCESS
+	}
+
     @Test
     public void sayCompleteWithErrorsFromXml() {
         
@@ -1127,6 +1136,15 @@ public class RayoProviderTest {
         
         assertEquals("""<complete xmlns="urn:xmpp:rayo:ext:1"><hangup xmlns="urn:xmpp:rayo:ext:complete:1"/></complete>""", toXml(complete));
     }
+	
+	
+	@Test
+	public void sayCompleteSuccessToXml() {
+		
+		def complete = new SayCompleteEvent(new Say(), SayCompleteEvent.Reason.SUCCESS)
+		
+		assertEquals("""<complete xmlns="urn:xmpp:rayo:ext:1"><success xmlns="urn:xmpp:tropo:say:complete:1"/></complete>""", toXml(complete));
+	}
     
     @Test
     public void sayCompleteWithErrorsToXml() {
@@ -1356,6 +1374,25 @@ public class RayoProviderTest {
 		assertEquals("""<output xmlns="urn:xmpp:rayo:output:1" voice="allison"><audio xmlns="" src="a.mp3"/><audio xmlns="" src="b.mp3"/></output>""", toXml(output));
 	}
 
+	// Output Complete
+	// ====================================================================================
+	
+	@Test
+	public void outputCompleteFromXml() {
+		
+		def complete = fromXml("""<complete xmlns="urn:xmpp:rayo:ext:1"><success xmlns="urn:xmpp:rayo:output:complete:1"/></complete>""")
+        assertNotNull complete
+        assertEquals complete.reason, OutputCompleteEvent.Reason.SUCCESS
+	}
+	
+	@Test
+	public void outputCompleteToXml() {
+		
+		def complete = new OutputCompleteEvent(new Output(), OutputCompleteEvent.Reason.SUCCESS)
+		
+		assertEquals("""<complete xmlns="urn:xmpp:rayo:ext:1"><success xmlns="urn:xmpp:rayo:output:complete:1"/></complete>""", toXml(complete));
+	}
+	
 	@Test
 	public void speedUpToXml() {
 		

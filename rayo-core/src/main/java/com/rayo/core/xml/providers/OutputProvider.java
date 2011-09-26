@@ -55,15 +55,18 @@ public class OutputProvider extends BaseProvider {
             return buildVolumeUpCommand(element);
         } else if (VOLUME_DOWN_QNAME.equals(element.getQName())) {
             return buildVolumeDownCommand(element);
-        } else if (element.getNamespace().equals(COMPLETE_NAMESPACE)) {
+        } else if (element.getNamespace().equals(RAYO_COMPONENT_NAMESPACE)) {
             return buildCompleteCommand(element);
         }
         return null;
     }
 
     private Object buildCompleteCommand(Element element) {
-        String reasonValue = element.getName().toUpperCase();
+    	
+        Element reasonElement = (Element)element.elements().get(0);
+    	String reasonValue = reasonElement.getName().toUpperCase();
         Reason reason = Reason.valueOf(reasonValue);
+        
         OutputCompleteEvent complete = new OutputCompleteEvent();
         complete.setReason(reason);
         return complete;

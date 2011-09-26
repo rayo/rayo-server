@@ -32,16 +32,18 @@ public class SayProvider extends BaseProvider {
             return buildPauseCommand(element);
         } else if (RESUME_QNAME.equals(element.getQName())) {
             return buildResumeCommand(element);
-        } else if (element.getNamespace().equals(COMPLETE_NAMESPACE)) {
+        } else if (element.getNamespace().equals(RAYO_COMPONENT_NAMESPACE)) {
             return buildCompleteCommand(element);
         }
         return null;
     }
 
     private Object buildCompleteCommand(Element element) {
-    	
-        String reasonValue = element.getName().toUpperCase();
+    	   	
+        Element reasonElement = (Element)element.elements().get(0);
+    	String reasonValue = reasonElement.getName().toUpperCase();
         Reason reason = Reason.valueOf(reasonValue);
+        
         SayCompleteEvent complete = new SayCompleteEvent();
         complete.setReason(reason);
         return complete;
