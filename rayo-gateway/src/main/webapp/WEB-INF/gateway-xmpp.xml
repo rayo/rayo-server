@@ -12,12 +12,6 @@
     default-autowire="byName">
 
 	<bean id="gatewayDatastore" class="com.rayo.server.gateway.InMemoryGatewayDatastore"/>
-
-	<!--  
-	<bean id="rayoJIDLookupService" class="com.rayo.server.lookup.RegexpJIDLookupService">
-		<constructor-arg value="classpath:rayo-routing.properties"/>
-	</bean>  		
-	-->
 	
 	<util:set id="internalDomains" set-class="java.util.HashSet">
 		<value>internal.tropo.local</value>
@@ -25,9 +19,116 @@
 
 	<util:set id="externalDomains" set-class="java.util.HashSet">
 		<value>gw.tropo.local</value>
+		<value>192.168.1.33</value>
+		<value>localhost</value>
 	</util:set>
 	
-	<bean id="gateway" class="com.rayo.server.gateway.GatewayServlet">
-
+	<!-- Global JIDs Registry -->
+	<bean id="jidRegistry" class="com.rayo.server.gateway.JIDRegistry" />
+	
+	<!-- Model / Request Validation -->
+	<bean id="validator" class="com.rayo.core.validation.Validator"/>
+	
+	<!-- Rayo providers -->
+	<bean id="rayoProvider" class="com.rayo.core.xml.providers.RayoProvider">
+		<property name="validator" ref="validator" />
+		<property name="namespaces">
+			<list>
+				<value>urn:xmpp:rayo:1</value>
+                <value>urn:xmpp:rayo:ext:1</value>
+                <value>urn:xmpp:rayo:ext:complete:1</value>
+			</list>
+		</property>		
+	</bean>
+	<bean id="sayProvider" class="com.rayo.core.xml.providers.SayProvider">
+		<property name="validator" ref="validator" />
+		<property name="namespaces">
+			<list>
+				<value>urn:xmpp:tropo:say:1</value>
+                <value>urn:xmpp:tropo:say:complete:1</value>
+			</list>
+		</property>		
+	</bean>
+	<bean id="askProvider" class="com.rayo.core.xml.providers.AskProvider">
+		<property name="validator" ref="validator" />
+		<property name="namespaces">
+			<list>
+				<value>urn:xmpp:tropo:ask:1</value>
+                <value>urn:xmpp:tropo:ask:complete:1</value>
+			</list>
+		</property>		
+	</bean>
+	<bean id="transferProvider" class="com.rayo.core.xml.providers.TransferProvider">
+		<property name="validator" ref="validator" />
+		<property name="namespaces">
+			<list>
+				<value>urn:xmpp:tropo:transfer:1</value>
+                <value>urn:xmpp:tropo:transfer:complete:1</value>
+			</list>
+		</property>		
+	</bean>
+	<bean id="conferenceProvider" class="com.rayo.core.xml.providers.ConferenceProvider">
+		<property name="validator" ref="validator" />
+		<property name="namespaces">
+			<list>
+				<value>urn:xmpp:tropo:conference:1</value>
+                <value>urn:xmpp:tropo:conference:complete:1</value>
+			</list>
+		</property>		
+	</bean>				
+	<bean id="outputProvider" class="com.rayo.core.xml.providers.OutputProvider">
+		<property name="validator" ref="validator" />
+		<property name="namespaces">
+			<list>
+				<value>urn:xmpp:rayo:output:1</value>
+                <value>urn:xmpp:rayo:output:complete:1</value>
+			</list>
+		</property>		
+	</bean>
+	<bean id="inputProvider" class="com.rayo.core.xml.providers.InputProvider">
+		<property name="validator" ref="validator" />
+		<property name="namespaces">
+			<list>
+				<value>urn:xmpp:rayo:input:1</value>
+                <value>urn:xmpp:rayo:input:complete:1</value>
+			</list>
+		</property>		
+	</bean>
+	<bean id="recordProvider" class="com.rayo.core.xml.providers.RecordProvider">
+		<property name="validator" ref="validator" />
+		<property name="namespaces">
+			<list>
+				<value>urn:xmpp:rayo:record:1</value>
+			</list>
+		</property>		
+	</bean>
+	
+	<!-- Create a global XML Provider -->
+	<bean id="xmlProviderManager" class="com.rayo.core.xml.DefaultXmlProviderManagerFactoryBean">
+		<property name="providers">
+			<list>
+				<ref bean="rayoProvider"/>
+				<ref bean="sayProvider"/>
+				<ref bean="askProvider"/>
+				<ref bean="transferProvider"/>
+				<ref bean="conferenceProvider"/>
+				<ref bean="outputProvider"/>
+				<ref bean="inputProvider"/>
+				<ref bean="recordProvider"/>
+			</list>
+		</property>		
+	</bean>
+	
+	<bean id="gateway" class="com.rayo.server.gateway.ExternalGatewayServlet">
+		<property name="jidRegistry" ref="jidRegistry"/>	
+		<property name="rayoLookupService">
+		  	<!-- JID Redirection --> 
+			<bean id="rayoJIDLookupService" class="com.rayo.server.gateway.RegexpJIDLookupService">
+				<constructor-arg value="classpath:rayo-routing.properties"/>
+			</bean>  		
+		</property>
+		<property name="internalDomains" ref="internalDomains"/>
+		<property name="externalDomains" ref="externalDomains"/>
+		<property name="provider" ref="xmlProviderManager" />
 	</bean>	
 </beans>
