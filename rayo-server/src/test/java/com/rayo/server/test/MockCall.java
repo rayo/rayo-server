@@ -566,4 +566,13 @@ public class MockCall implements IncomingCall {
     public String getRemoteAddress() {
     	return null;
     }
+    
+    @Override
+    public boolean getAsync() {
+    	return false;
+    }
+    
+    @Override
+    public void setAsync(boolean async) {
+    }
 }
