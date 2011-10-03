@@ -2,12 +2,15 @@ package com.rayo.server;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
 import javax.servlet.ServletContext;
 
+import com.rayo.server.listener.AdminListener;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.Call;
 import com.voxeo.moho.event.InputDetectedEvent;
@@ -23,6 +26,8 @@ public class AdminService {
 	private String versionNumber;
 	
 	private CallRegistry callRegistry;
+	
+	private List<AdminListener> adminListeners = new ArrayList<AdminListener>();
 	
 	public boolean isQuiesceMode() {
 		
@@ -45,12 +50,26 @@ public class AdminService {
 		
 		log.debug("Quiesce Mode has been DISABLED");
 		quiesceMode.set(false);
+		for (AdminListener listener: adminListeners) {
+			listener.onQuiesceModeExited();
+		}
 	}
 	
 	public void enableQuiesce() {
 
 		log.debug("Quiesce Mode has been ENABLED");
 		quiesceMode.set(true);
+		for (AdminListener listener: adminListeners) {
+			listener.onQuiesceModeEntered();
+		}
+	}
+	
+	public void shutdown() {
+		
+		for (AdminListener listener: adminListeners) {
+			listener.onShutdown();
+		}
+		adminListeners.clear();
 	}
 	
 	public boolean getQuiesceMode() {
@@ -90,5 +109,15 @@ public class AdminService {
 
 	public void setCallRegistry(CallRegistry callRegistry) {
 		this.callRegistry = callRegistry;
+	}
+	
+	public void addAdminListener(AdminListener listener) {
+		
+		adminListeners.add(listener);
+	}
+	
+	public void removeAdminListener(AdminListener listener) {
+		
+		adminListeners.remove(listener);
 	}
 }

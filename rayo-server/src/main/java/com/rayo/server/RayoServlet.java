@@ -3,6 +3,8 @@ package com.rayo.server;
 import static com.voxeo.utils.Objects.assertion;
 
 import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.UUID;
 
 import javax.servlet.ServletConfig;
@@ -27,6 +29,7 @@ import com.rayo.core.CallRef;
 import com.rayo.core.DialCommand;
 import com.rayo.core.EndCommand;
 import com.rayo.core.EndEvent;
+import com.rayo.core.HangupCommand;
 import com.rayo.core.OfferEvent;
 import com.rayo.core.sip.SipURI;
 import com.rayo.core.validation.ValidationException;
@@ -38,6 +41,7 @@ import com.rayo.core.xml.XmlProvider;
 import com.rayo.server.exception.ErrorMapping;
 import com.rayo.server.exception.ExceptionMapper;
 import com.rayo.server.filter.FilterChain;
+import com.rayo.server.listener.AdminListener;
 import com.rayo.server.listener.XmppMessageListenerGroup;
 import com.rayo.server.lookup.RayoJIDLookupService;
 import com.rayo.server.util.DomUtils;
@@ -56,7 +60,7 @@ import com.voxeo.servlet.xmpp.XmppServlet;
 import com.voxeo.servlet.xmpp.XmppSession;
 
 @SuppressWarnings("serial")
-public class RayoServlet extends XmppServlet {
+public class RayoServlet extends XmppServlet implements AdminListener {
 
     private static final Loggerf log = Loggerf.getLogger(RayoServlet.class);
     private static final Loggerf WIRE = Loggerf.getLogger("com.rayo.rayo.wire");
@@ -65,6 +69,10 @@ public class RayoServlet extends XmppServlet {
     private static final QName SESSION_QNAME = new QName("session", new Namespace("", "urn:ietf:params:xml:ns:xmpp-session"));
     private static final QName PING_QNAME = new QName("ping", new Namespace("", "urn:xmpp:ping"));
 
+    public static final String GATEWAY_DOMAIN = "gateway-domain";
+    public static final String DEFAULT_PLATFORM_ID = "default-platform-id";
+    public static final String LOCAL_DOMAIN = "local-domain";
+    
     private JIDRegistry jidRegistry;
     
     // Spring injected
@@ -84,7 +92,11 @@ public class RayoServlet extends XmppServlet {
     private RayoJIDLookupService<OfferEvent> rayoLookupService;
     
     private XmppMessageListenerGroup xmppMessageListenersGroup;
-
+    
+    //TODO: This declarations are in the xmpp.xml Should they be elsewhere?
+    private String gatewayDomain;
+    private String defaultPlatform;
+    private String localDomain;
 	
     // Setup
     // ================================================================================
@@ -96,6 +108,67 @@ public class RayoServlet extends XmppServlet {
         
         // Read Manifest information and pass it to the admin service
         adminService.readConfigurationFromContext(getServletConfig().getServletContext());     
+        adminService.addAdminListener(this);
+        
+        gatewayDomain = config.getInitParameter(GATEWAY_DOMAIN);
+        defaultPlatform = config.getInitParameter(DEFAULT_PLATFORM_ID);
+        localDomain = config.getInitParameter(LOCAL_DOMAIN);
+        
+        if (gatewayDomain != null) {
+	        Timer timer = new Timer();
+	        timer.schedule(new TimerTask() {
+				
+				@Override
+				public void run() {
+					
+					broadcastPresence("chat");
+				}
+			}, 20000);
+        }
+    }
+    
+    @Override
+    public void onQuiesceModeEntered() {
+    
+    	broadcastPresence("busy");
+    }
+    
+    @Override
+    public void onQuiesceModeExited() {
+    	
+    	broadcastPresence("chat");
+    }
+    
+    @Override
+    public void onShutdown() {
+
+    	broadcastPresence("unavailable");
+    }
+    
+    private void broadcastPresence(String status) {
+    	
+    	//TODO: Make private
+        if (gatewayDomain != null) {
+        	//TODO: Extract this logic elsewhere. Advertises presence and platform id preference.
+        	CoreDocumentImpl document = new CoreDocumentImpl(false);
+        	
+        	org.w3c.dom.Element showElement = document.createElement("show");
+        	showElement.setTextContent(status);
+        	org.w3c.dom.Element nodeInfoElement = 
+        			document.createElementNS("urn:xmpp:rayo:cluster:1", "node-info");
+        	org.w3c.dom.Element platform = document.createElement("platform");
+        	platform.setTextContent(defaultPlatform);
+        	nodeInfoElement.appendChild(platform);
+        	
+        	try {
+				PresenceMessage presence = xmppFactory.createPresence(
+						localDomain, gatewayDomain, null, showElement, nodeInfoElement);
+	
+				presence.send();
+        	} catch (Exception e) {
+        		log.error("Could not broadcast presence to gateway [%s]", gatewayDomain);
+        	}
+        }    	
     }
 
     /**
@@ -205,10 +278,41 @@ public class RayoServlet extends XmppServlet {
     	rayoStatistics.messageStanzaReceived();
     }
 
-    @Override
+    @SuppressWarnings("rawtypes")
+	@Override
     protected void doPresence(PresenceMessage presence) throws ServletException, IOException {
     	
+		if (log.isDebugEnabled()) {
+			log.debug("%s :: %s", presence,presence.getSession().getId());
+		}
+		
     	rayoStatistics.presenceStanzaReceived();
+    	
+		JID toJid = presence.getTo();
+		JID fromJid = presence.getFrom();
+		if (fromJid.getNode() == null) {
+			if (gatewayDomain != null && fromJid.getDomain().equals(gatewayDomain)) {
+				if (presence.getType().equals("error")) {
+					String callId = toJid.getNode();
+					if (callId != null) {
+						CallActor actor = callRegistry.get(callId);
+						if (actor != null) {
+							HangupCommand command = new HangupCommand();
+							command.setCallId(callId);
+							actor.hangup(command);
+						} else {
+							log.error("Could not find call with id: [%s]", callId);
+						}
+					}
+				} else {
+					log.warn("Ignoring presence message from Gateay");
+				}
+			} else {
+				log.warn("Ignoring presence message from unknown domain");
+			}
+		} else {
+			log.warn("Ignoring unknown presence message");
+		}
     }
 
     // Commands: Client -> Server

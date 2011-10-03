@@ -9,6 +9,20 @@
 		<javaee:servlet-class>
 			com.rayo.server.SpringXmppServlet
 		</javaee:servlet-class>
+		<!--  
+		<javaee:init-param>
+     		<javaee:param-name>local-domain</javaee:param-name>
+     		<javaee:param-value>192.168.1.35</javaee:param-value>
+   		</javaee:init-param>
+		<javaee:init-param>
+     		<javaee:param-name>gateway-domain</javaee:param-name>
+     		<javaee:param-value>192.168.1.33</javaee:param-value>
+   		</javaee:init-param>
+		<javaee:init-param>
+     		<javaee:param-name>default-platform-id</javaee:param-name>
+     		<javaee:param-value>staging</javaee:param-value>
+   		</javaee:init-param>
+   		-->
 		<javaee:load-on-startup>1</javaee:load-on-startup>
 	</xmpp:servlet>
 	<xmpp:defaultxmppapp />

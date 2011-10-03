@@ -6,11 +6,15 @@ import javax.servlet.ServletContextEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
 
+import com.rayo.server.AdminService;
+import com.rayo.server.RayoServlet;
 import com.rayo.server.jmx.Info;
 
 public class ContextLoaderListener extends org.springframework.web.context.ContextLoaderListener {
 
 	public static final String RAYO_STATUS = "rayo.status";
+	
+	private AdminService adminService;
 	
 	@Override
 	public void contextInitialized(ServletContextEvent event) {
@@ -22,6 +26,7 @@ public class ContextLoaderListener extends org.springframework.web.context.Conte
 	    	event.getServletContext().getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE); 
 	    Info info = (Info)context.getBean(Info.class);
 	    info.applicationStarted();
+	    adminService = (AdminService)context.getBean(AdminService.class);
 	}
 	
 	@Override
@@ -39,6 +44,7 @@ public class ContextLoaderListener extends org.springframework.web.context.Conte
 	@Override
 	public void contextDestroyed(ServletContextEvent event) {
 		
+		adminService.shutdown();
 		super.contextDestroyed(event);
 	}
 }
