@@ -42,6 +42,7 @@ import com.rayo.core.UnjoinedEvent
 import com.rayo.core.verb.AskCompleteEvent.Reason
 import com.rayo.core.xml.providers.AskProvider
 import com.rayo.core.xml.providers.ConferenceProvider
+import com.rayo.core.xml.providers.InputProvider;
 import com.rayo.core.xml.providers.OutputProvider
 import com.rayo.core.xml.providers.RayoProvider
 import com.rayo.core.xml.providers.RecordProvider
@@ -54,6 +55,8 @@ import com.rayo.core.verb.Choices;
 import com.rayo.core.verb.Conference;
 import com.rayo.core.verb.ConferenceCompleteEvent;
 import com.rayo.core.verb.HoldCommand;
+import com.rayo.core.verb.Input;
+import com.rayo.core.verb.InputCompleteEvent;
 import com.rayo.core.verb.InputMode;
 import com.rayo.core.verb.KickCommand;
 import com.rayo.core.verb.MediaType;
@@ -104,7 +107,8 @@ public class RayoProviderTest {
          new TransferProvider(validator:validator,namespaces:['urn:xmpp:tropo:transfer:1', 'urn:xmpp:tropo:transfer:complete:1']),
          new ConferenceProvider(validator:validator,namespaces:['urn:xmpp:tropo:conference:1', 'urn:xmpp:tropo:conference:complete:1']),
          new RecordProvider(validator:validator,namespaces:['urn:xmpp:rayo:record:1', 'urn:xmpp:rayo:record:complete:1']),
-         new OutputProvider(validator:validator,namespaces:['urn:xmpp:rayo:output:1', 'urn:xmpp:rayo:output:complete:1'])
+         new OutputProvider(validator:validator,namespaces:['urn:xmpp:rayo:output:1', 'urn:xmpp:rayo:output:complete:1']),
+		 new InputProvider(validator:validator,namespaces:['urn:xmpp:rayo:input:1', 'urn:xmpp:rayo:input:complete:1'])
 		].each {
              provider.register it
          }
@@ -1391,6 +1395,114 @@ public class RayoProviderTest {
 		def complete = new OutputCompleteEvent(new Output(), OutputCompleteEvent.Reason.SUCCESS)
 		
 		assertEquals("""<complete xmlns="urn:xmpp:rayo:ext:1"><success xmlns="urn:xmpp:rayo:output:complete:1"/></complete>""", toXml(complete));
+	}
+	
+	// Input
+	// ====================================================================================
+	@Test
+	public void inputFromXml() {
+		
+		def input = fromXml("""<input xmlns="urn:xmpp:rayo:input:1" min-confidence="0.8" sensitivity="0.3" mode="dtmf" recognizer="en-us" terminator="#" initial-timeout="3000" inter-digit-timeout="1000"><grammar content-type="application/grammar+voxeo">a,b</grammar></input>""")
+		assertNotNull input
+		assertProperties(input, [
+			mode:InputMode.DTMF,
+			recognizer:"en-us",
+			terminator:Character.valueOf('#' as char), 
+			initialTimeout: new Duration(3000),
+			interDigitTimeout: new Duration(1000)
+		])
+		assertEquals input.minConfidence, 0.8f, 0
+		assertEquals input.sensitivity, 0.3f, 0
+		
+		assertNotNull input.grammars
+		assertEquals input.grammars.size(),1
+		assertEquals input.grammars[0].content,"a,b"
+		assertEquals input.grammars[0].contentType, "application/grammar+voxeo"
+	}
+
+	
+	@Test
+	public void grammarInputFromXml() {
+
+		def input = fromXml("""<input xmlns="urn:xmpp:rayo:input:1" min-confidence="0.8" mode="dtmf" recognizer="en-us" terminator="#" initial-timeout="3000" inter-digit-timeout="1000"><grammar url="http://test" content-type="grxml"/></input>""")
+		assertNotNull input
+		assertNotNull input.grammars
+		assertEquals input.grammars.size(),1
+		assertEquals input.grammars[0].uri,new URI("http://test")
+		assertEquals input.grammars[0].contentType, "grxml"
+	}
+	
+	@Test
+	public void emptyInputToXml() {
+		
+		def input = new Input()
+		assertEquals("""<input xmlns="urn:xmpp:rayo:input:1" min-confidence="0.3" mode="ANY"/>""", toXml(input));
+	}
+	
+	@Test
+	public void inputToXml() {
+		
+		def input = new Input()
+		input.minConfidence = 0.8f
+		input.mode = InputMode.DTMF
+		input.recognizer = 'en-us'
+		input.sensitivity = 0.3f
+		input.terminator = '#' as char
+		input.initialTimeout = new Duration(3000)
+		input.interDigitTimeout = new Duration(1000)
+		
+		assertEquals("""<input xmlns="urn:xmpp:rayo:input:1" min-confidence="0.8" initial-timeout="3000" mode="DTMF" inter-digit-timeout="1000" recognizer="en-us" sensitivity="0.3" terminator="#"/>""", toXml(input));
+	}
+	
+	@Test
+	public void grammarInputToXml() {
+		
+		def input = new Input()
+		input.minConfidence = 0.8f
+		input.sensitivity = 0.3f
+		input.mode = InputMode.DTMF
+		input.recognizer = 'en-us'
+		input.terminator = '#' as char
+		input.initialTimeout = new Duration(3000)
+		input.interDigitTimeout = new Duration(1000)
+		input.grammars = []
+		input.grammars.add new Choices(uri:new URI("http://test"), contentType:"vxml", content:"sales,support")
+
+		assertEquals("""<input xmlns="urn:xmpp:rayo:input:1" min-confidence="0.8" initial-timeout="3000" mode="DTMF" inter-digit-timeout="1000" recognizer="en-us" sensitivity="0.3" terminator="#"><grammar content-type="vxml" url="http://test">sales,support</grammar></input>""", toXml(input));
+	}
+	
+	// Input Complete
+	// ====================================================================================
+	
+	@Test
+	public void inputCompleteFromXml() {
+		
+		def complete = fromXml("""<complete xmlns="urn:xmpp:rayo:ext:1"><success xmlns="urn:xmpp:rayo:input:complete:1" confidence="0.65" mode="voice"><interpretation>yes</interpretation><utterance>yes</utterance><tag>yes</tag><concept>yes</concept>
+			<nlsml>&lt;?xml version="1.0"?&gt;
+				&lt;result grammar="0@c898304f.vxmlgrammar"&gt;
+				&lt;interpretation grammar="0@c898304f.vxmlgrammar" confidence="65"&gt;
+				&lt;input mode="speech"&gt;yes&lt;/input&gt;
+				&lt;/interpretation&gt;
+				&lt;/result&gt;
+			</nlsml></success></complete>""")
+		assertNotNull complete
+		
+		assertProperties(complete, [
+			reason: InputCompleteEvent.Reason.SUCCESS,
+			mode: InputMode.VOICE,
+			interpretation: "yes",
+			concept: "yes",
+			utterance: "yes", 
+			tag: "yes"
+		])
+	}
+
+	@Test
+	public void inputCompleteToXml() {
+		
+		def event = new InputCompleteEvent(reason: InputCompleteEvent.Reason.SUCCESS, confidence:0.65, mode:InputMode.VOICE, interpretation:"yes", utterance:"yes", tag:"yes", concept:"yes")
+		
+		assertEquals toXml(event), """<complete xmlns="urn:xmpp:rayo:ext:1"><success xmlns="urn:xmpp:rayo:input:complete:1" confidence="0.65" mode="voice"><interpretation>yes</interpretation><utterance>yes</utterance><tag>yes</tag><concept>yes</concept></success></complete>"""
 	}
 	
 	@Test

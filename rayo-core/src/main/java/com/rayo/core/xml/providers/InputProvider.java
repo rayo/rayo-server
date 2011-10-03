@@ -15,6 +15,7 @@ import com.rayo.core.verb.Choices;
 import com.rayo.core.verb.Input;
 import com.rayo.core.verb.InputCompleteEvent;
 import com.rayo.core.verb.InputMode;
+import com.rayo.core.verb.OutputCompleteEvent;
 import com.rayo.core.verb.InputCompleteEvent.Reason;
 
 public class InputProvider extends BaseProvider {
@@ -29,7 +30,7 @@ public class InputProvider extends BaseProvider {
     protected Object processElement(Element element) throws Exception {
         if (element.getName().equals("input")) {
             return buildInput(element);
-        } else if (element.getNamespace().equals(COMPLETE_NAMESPACE)) {
+        } else if (element.getNamespace().equals(RAYO_COMPONENT_NAMESPACE)) {
             return buildCompleteCommand(element);
         }
         return null;
@@ -37,28 +38,39 @@ public class InputProvider extends BaseProvider {
 
     private Object buildCompleteCommand(Element element) {
         
+        Element reasonElement = (Element)element.elements().get(0);
+    	String reasonValue = reasonElement.getName().toUpperCase();
+        Reason reason = Reason.valueOf(reasonValue);
+            	
     	InputCompleteEvent event = new InputCompleteEvent();
 
-    	String reasonValue = element.getName().toUpperCase();
-        Reason reason = Reason.valueOf(reasonValue);
         event.setReason(reason);
 
-        if (element.attributeValue("confidence") != null) {
-            event.setConfidence(toFloatConfidence(element.attributeValue("confidence")));           
+        if (reasonElement.attributeValue("confidence") != null) {
+            event.setConfidence(toFloatConfidence(reasonElement.attributeValue("confidence")));           
         }
-        if (element.attributeValue("mode") != null) {
-            String modeValue = element.attributeValue("mode").toUpperCase();
+        if (reasonElement.attributeValue("mode") != null) {
+            String modeValue = reasonElement.attributeValue("mode").toUpperCase();
             InputMode mode = InputMode.valueOf(modeValue);
             event.setMode(mode);           
         }
 
-        if (element.element("interpretation") != null) {
-            event.setInterpretation(element.element("interpretation").getText());          
+        if (reasonElement.element("interpretation") != null) {
+            event.setInterpretation(reasonElement.element("interpretation").getText());          
         }
-        if (element.element("utterance") != null) {
-            event.setUtterance(element.element("utterance").getText());            
+        if (reasonElement.element("utterance") != null) {
+            event.setUtterance(reasonElement.element("utterance").getText());            
         }
-    	
+        
+        if (reasonElement.element("concept") != null) {
+            event.setConcept(reasonElement.element("concept").getText());          
+        }
+        if (reasonElement.element("tag") != null) {
+            event.setTag(reasonElement.element("tag").getText());            
+        }
+        if (reasonElement.element("nlsml") != null) {
+            event.setNlsml(reasonElement.element("nlsml").getText());            
+        }    	
     	return event;
     }
 
@@ -128,7 +140,7 @@ public class InputProvider extends BaseProvider {
     	
         Element root = document.addElement(new QName("input", NAMESPACE));
         if (input.getMinConfidence() != null ) {
-        	root.addAttribute("confidence", String.valueOf(input.getMinConfidence()));        	
+        	root.addAttribute("min-confidence", String.valueOf(input.getMinConfidence()));        	
         }
         if (input.getInitialTimeout() != null ) {
         	root.addAttribute("initial-timeout", Long.toString(input.getInitialTimeout().getMillis()));        	
