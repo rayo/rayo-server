@@ -30,8 +30,10 @@ public class Messages {
 	public static final String INVALID_FLOAT = "You have submitted an invalid float value for '%s'";
 	public static final String INVALID_TIMEOUT = "Invalid timeout specified.";
 	public static final String INVALID_CONFIDENCE = "Invalid confidence specified.";
+	public static final String INVALID_SENSITIVITY = "Invalid sensitivity specified.";
 	public static final String INVALID_TERMINATOR = "Invalid terminator character.";
 	public static final String INVALID_CONFIDENCE_RANGE = "Confidence must be a value between 0 and 1.";
+	public static final String INVALID_SENSITIVITY_RANGE = "Sensitivity must be a value between 0 and 1.";
 	public static final String INVALID_REASON = "Invalid reason";
     public static final String INVALID_MEDIA = "Invalid media.";
     public static final String INVALID_DIRECTION = "Invalid direction. Should be either true or false.";

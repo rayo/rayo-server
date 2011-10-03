@@ -3,6 +3,7 @@ package com.rayo.core.verb;
 import java.util.List;
 
 import javax.validation.Valid;
+import javax.validation.constraints.AssertTrue;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
@@ -27,7 +28,6 @@ public class Input extends BaseVerb {
 	private Float sensitivity;
 	private Character terminator;
 	private InputMode mode = InputMode.ANY;
-	private Integer maxDigits;
 
 	public Duration getInitialTimeout() {
 		return initialTimeout;
@@ -93,13 +93,15 @@ public class Input extends BaseVerb {
 	public void setGrammars(List<Choices> grammars) {
 		this.grammars = grammars;
 	}
-
-    public Integer getMaxDigits() {
-        return maxDigits;
+	
+    @AssertTrue(message=Messages.INVALID_CONFIDENCE_RANGE)
+    public boolean isMinConfidenceWithinRange() {
+        return (minConfidence >= 0f && minConfidence <= 1f);
     }
-
-    public void setMaxDigits(Integer maxDigits) {
-        this.maxDigits = maxDigits;
+    
+    @AssertTrue(message=Messages.INVALID_SENSITIVITY_RANGE)
+    public boolean isSensitivityWithinRange() {
+        return sensitivity == null || (sensitivity >= 0f && sensitivity <= 1f);
     }
 
 	@Override
@@ -112,7 +114,6 @@ public class Input extends BaseVerb {
 				.append("mode", getMode())
 				.append("integerSigTimeout", getInterDigitTimeout())
 				.append("recognizer", getRecognizer())
-                .append("maxDigits", getMaxDigits())
 				.append("sensitivity", getSensitivity())
 				.append("terminator", getTerminator())
 				.append("grammars", grammars).toString();

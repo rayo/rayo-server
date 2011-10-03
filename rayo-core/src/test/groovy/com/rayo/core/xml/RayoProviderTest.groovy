@@ -1433,6 +1433,20 @@ public class RayoProviderTest {
 	}
 	
 	@Test
+	public void multipleGrammarsInputFromXml() {
+
+		def input = fromXml("""<input xmlns="urn:xmpp:rayo:input:1" min-confidence="0.8" mode="dtmf" recognizer="en-us" terminator="#" initial-timeout="3000" inter-digit-timeout="1000"><grammar url="http://test" content-type="grxml"/><grammar content-type="application/grammar+voxeo">a,b</grammar></input>""")
+		assertNotNull input
+		assertNotNull input.grammars
+		assertEquals input.grammars.size(),2
+		assertEquals input.grammars[0].uri,new URI("http://test")
+		assertEquals input.grammars[0].contentType, "grxml"
+		assertEquals input.grammars[1].content,"a,b"
+		assertEquals input.grammars[1].contentType, "application/grammar+voxeo"
+
+	}
+	
+	@Test
 	public void emptyInputToXml() {
 		
 		def input = new Input()
@@ -1469,6 +1483,24 @@ public class RayoProviderTest {
 		input.grammars.add new Choices(uri:new URI("http://test"), contentType:"vxml", content:"sales,support")
 
 		assertEquals("""<input xmlns="urn:xmpp:rayo:input:1" min-confidence="0.8" initial-timeout="3000" mode="DTMF" inter-digit-timeout="1000" recognizer="en-us" sensitivity="0.3" terminator="#"><grammar content-type="vxml" url="http://test">sales,support</grammar></input>""", toXml(input));
+	}
+
+	@Test
+	public void multipleGrammarsInputToXml() {
+		
+		def input = new Input()
+		input.minConfidence = 0.8f
+		input.sensitivity = 0.3f
+		input.mode = InputMode.DTMF
+		input.recognizer = 'en-us'
+		input.terminator = '#' as char
+		input.initialTimeout = new Duration(3000)
+		input.interDigitTimeout = new Duration(1000)
+		input.grammars = []
+		input.grammars.add new Choices(uri:new URI("http://test"), contentType:"vxml", content:"sales,support")
+		input.grammars.add new Choices(content:"a,b", contentType:"application/grammar+voxeo")
+		
+		assertEquals("""<input xmlns="urn:xmpp:rayo:input:1" min-confidence="0.8" initial-timeout="3000" mode="DTMF" inter-digit-timeout="1000" recognizer="en-us" sensitivity="0.3" terminator="#"><grammar content-type="vxml" url="http://test">sales,support</grammar><grammar content-type="application/grammar+voxeo">a,b</grammar></input>""", toXml(input));
 	}
 	
 	// Input Complete

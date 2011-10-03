@@ -85,9 +85,6 @@ public class InputProvider extends BaseProvider {
         if (element.attribute("initial-timeout") != null) {
         	input.setInitialTimeout(toDuration("initial-timeout",element));
         }
-        if (element.attribute("max-digits") != null) {
-            input.setMaxDigits(toInteger("max-digits",element));
-        }
         if (element.attribute("mode") != null) {
         	input.setMode(loadInputMode(element));
         }
@@ -153,9 +150,6 @@ public class InputProvider extends BaseProvider {
         }
         if (input.getRecognizer() != null ) {
         	root.addAttribute("recognizer", input.getRecognizer());        	
-        }
-        if (input.getMaxDigits() != null ) {
-        	root.addAttribute("max-digits", String.valueOf(input.getMaxDigits()));        	
         }
         if (input.getSensitivity() != null ) {
         	root.addAttribute("sensitivity", String.valueOf(input.getSensitivity()));        	

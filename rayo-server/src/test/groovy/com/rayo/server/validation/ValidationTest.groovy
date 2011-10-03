@@ -16,6 +16,7 @@ import com.rayo.core.validation.Validator
 import com.rayo.core.xml.DefaultXmlProviderManager;
 import com.rayo.core.xml.providers.AskProvider
 import com.rayo.core.xml.providers.ConferenceProvider
+import com.rayo.core.xml.providers.InputProvider;
 import com.rayo.core.xml.providers.OutputProvider;
 import com.rayo.core.xml.providers.RayoProvider;
 import com.rayo.core.xml.providers.RecordProvider;
@@ -40,7 +41,8 @@ class ValidationTest {
 					 new TransferProvider(validator:validator,namespaces:['urn:xmpp:tropo:transfer:1']),
 					 new ConferenceProvider(validator:validator,namespaces:['urn:xmpp:tropo:conference:1']),
 					 new RecordProvider(validator:validator,namespaces:['urn:xmpp:rayo:record:1']),
-					 new OutputProvider(validator:validator,namespaces:['urn:xmpp:rayo:output:1'])
+					 new OutputProvider(validator:validator,namespaces:['urn:xmpp:rayo:output:1']),
+					 new InputProvider(validator:validator,namespaces:['urn:xmpp:rayo:input:1'])
 					]
 		
 		manager = new DefaultXmlProviderManager();
@@ -884,6 +886,191 @@ class ValidationTest {
 				
 		def output = parseXml("""<output xmlns=\"urn:xmpp:rayo:output:1\" voice=\"allison\"><speak>Hello World</speak></output>""")
 		assertNotNull fromXML(output)
+	}
+	
+	// Input
+	// ====================================================================================
+	
+	@Test
+	public void validateInputGrammarsNull() {
+				
+		def input = parseXml("""<input xmlns=\"urn:xmpp:rayo:input:1\"></input>""")
+		
+		def errorMapping = assertValidationException(input)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, ExceptionMapper.toString(StanzaError.Condition.BAD_REQUEST)
+		assertEquals errorMapping.text, Messages.MISSING_CHOICES
+	}
+
+	@Test
+	public void validateInputInvalidGrammar() {
+				
+		def input = parseXml("""<input xmlns=\"urn:xmpp:rayo:input:1\"><grammar/></input>""")
+		
+		def errorMapping = assertValidationException(input)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, ExceptionMapper.toString(StanzaError.Condition.BAD_REQUEST)
+		assertEquals errorMapping.text, Messages.MISSING_CHOICES_CONTENT_OR_URL
+	}
+
+	@Test
+	public void validateInputMissingContentType() {
+				
+		def input = parseXml("""<input xmlns=\"urn:xmpp:rayo:input:1\"><grammar>bling</grammar></input>""")
+		
+		def errorMapping = assertValidationException(input)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, ExceptionMapper.toString(StanzaError.Condition.BAD_REQUEST)
+		assertEquals errorMapping.text, Messages.MISSING_CHOICES_CONTENT_TYPE
+	}
+
+	@Test
+	public void validateInputInvalidGrammarURI() {
+				
+		def input = parseXml("""<input xmlns=\"urn:xmpp:rayo:input:1\" recognizer="ar-oo"><grammar url="\$?\\.com">sales,support</grammar></input>""")
+		
+		def errorMapping = assertValidationException(input)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, ExceptionMapper.toString(StanzaError.Condition.BAD_REQUEST)
+		assertEquals errorMapping.text, Messages.INVALID_URI
+	}
+	
+	
+	@Test
+	public void validateInputInvalidRecognizer() {
+				
+		def input = parseXml("""<input xmlns=\"urn:xmpp:rayo:input:1\" recognizer="test"><grammar content-type="vxml">sales,support</grammar></input>""")
+		
+		def errorMapping = assertValidationException(input)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, ExceptionMapper.toString(StanzaError.Condition.BAD_REQUEST)
+		assertEquals errorMapping.text, Messages.INVALID_RECOGNIZER
+	}
+
+	@Test
+	public void validateInputInvalidInputMode() {
+				
+		def input = parseXml("""<input xmlns=\"urn:xmpp:rayo:input:1\" mode="aaaa"><grammar>sales,support</grammar></input>""")
+		
+		def errorMapping = assertValidationException(input)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, ExceptionMapper.toString(StanzaError.Condition.BAD_REQUEST)
+		assertEquals errorMapping.text, Messages.INVALID_INPUT_MODE
+	}
+	
+	@Test
+	public void validateInputInvalidInitialTimeout() {
+				
+		def input = parseXml("""<input xmlns=\"urn:xmpp:rayo:input:1\" mode="any" initial-timeout="aaaa"><grammar>sales,support</grammar></input>""")
+		
+		def errorMapping = assertValidationException(input)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, ExceptionMapper.toString(StanzaError.Condition.BAD_REQUEST)
+		assertEquals errorMapping.text, String.format(Messages.INVALID_DURATION, 'initial-timeout')
+	}
+	
+	@Test
+	public void validateInputInvalidInterDigitTimeout() {
+				
+		def input = parseXml("""<input xmlns=\"urn:xmpp:rayo:input:1\" mode="any" inter-digit-timeout="aaaa"><grammar>sales,support</grammar></input>""")
+		
+		def errorMapping = assertValidationException(input)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, ExceptionMapper.toString(StanzaError.Condition.BAD_REQUEST)
+		assertEquals errorMapping.text, String.format(Messages.INVALID_DURATION, 'inter-digit-timeout')
+	}
+	
+	@Test
+	public void validateInputInvalidConfidence() {
+				
+		def input = parseXml("""<input xmlns=\"urn:xmpp:rayo:input:1\" min-confidence="aaa"><grammar>sales,support</grammar></input>""")
+		
+		def errorMapping = assertValidationException(input)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, ExceptionMapper.toString(StanzaError.Condition.BAD_REQUEST)
+		assertEquals errorMapping.text, Messages.INVALID_CONFIDENCE
+	}
+	
+	@Test
+	public void validateInputInvalidSensitivity() {
+				
+		def input = parseXml("""<input xmlns=\"urn:xmpp:rayo:input:1\" sensitivity="aaa"><grammar>sales,support</grammar></input>""")
+		
+		def errorMapping = assertValidationException(input)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, ExceptionMapper.toString(StanzaError.Condition.BAD_REQUEST)
+		assertEquals errorMapping.text, String.format(Messages.INVALID_FLOAT, 'sensitivity')
+	}
+	
+	@Test
+	public void validateInputInvalidConfidenceRange() {
+				
+		def input = parseXml("""<input xmlns=\"urn:xmpp:rayo:input:1\" min-confidence="1.2"><grammar content-type="vxml">sales,support</grammar></input>""")
+		
+		def errorMapping = assertValidationException(input)
+		assertNotNull errorMapping
+		assertEquals StanzaError.Type.MODIFY.toString(), errorMapping.type
+		assertEquals ExceptionMapper.toString(StanzaError.Condition.BAD_REQUEST), errorMapping.condition
+		assertEquals Messages.INVALID_CONFIDENCE_RANGE, errorMapping.text
+	}
+	
+	@Test
+	public void validateInputInvalidConfidenceNegative() {
+				
+		def input = parseXml("""<input xmlns=\"urn:xmpp:rayo:input:1\" min-confidence="-1.0"><grammar content-type="vxml">sales,support</grammar></input>""")
+		
+		def errorMapping = assertValidationException(input)
+		assertNotNull errorMapping
+		assertEquals StanzaError.Type.MODIFY.toString(), errorMapping.type
+		assertEquals ExceptionMapper.toString(StanzaError.Condition.BAD_REQUEST), errorMapping.condition
+		assertEquals Messages.INVALID_CONFIDENCE_RANGE, errorMapping.text
+	}
+	
+	
+	@Test
+	public void validateInputInvalidSensitivityRange() {
+				
+		def input = parseXml("""<input xmlns=\"urn:xmpp:rayo:input:1\" sensitivity="1.2"><grammar content-type="vxml">sales,support</grammar></input>""")
+		
+		def errorMapping = assertValidationException(input)
+		assertNotNull errorMapping
+		assertEquals StanzaError.Type.MODIFY.toString(), errorMapping.type
+		assertEquals ExceptionMapper.toString(StanzaError.Condition.BAD_REQUEST), errorMapping.condition
+		assertEquals Messages.INVALID_SENSITIVITY_RANGE, errorMapping.text
+	}
+	
+	@Test
+	public void validateInputInvalidSensitivityNegative() {
+				
+		def input = parseXml("""<input xmlns=\"urn:xmpp:rayo:input:1\" sensitivity="-1.0"><grammar>sales,support</grammar></input>""")
+		
+		def errorMapping = assertValidationException(input)
+		assertNotNull errorMapping
+		assertEquals StanzaError.Type.MODIFY.toString(), errorMapping.type
+		assertEquals ExceptionMapper.toString(StanzaError.Condition.BAD_REQUEST), errorMapping.condition
+		assertEquals Messages.INVALID_SENSITIVITY_RANGE, errorMapping.text
+	}
+	
+	@Test
+	public void validateInputInvalidTerminator() {
+				
+		def input = parseXml("""<input xmlns=\"urn:xmpp:rayo:input:1\" terminator="abcd"><grammar>sales,support</grammar></input>""")
+		
+		def errorMapping = assertValidationException(input)
+		assertNotNull errorMapping
+		assertEquals StanzaError.Type.MODIFY.toString(), errorMapping.type
+		assertEquals ExceptionMapper.toString(StanzaError.Condition.BAD_REQUEST), errorMapping.condition
+		assertEquals Messages.INVALID_TERMINATOR, errorMapping.text
 	}
 	
 	// DTMF
