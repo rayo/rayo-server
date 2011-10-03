@@ -1,5 +1,6 @@
 package com.rayo.server.lookup;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,16 +17,17 @@ public class InMemoryMetaDataLookupService implements RayoJIDLookupService<Offer
 		this.metadataMappings = new HashMap<String, Map<String, String>>();
 	}
 
-	public String lookup(OfferEvent key) {
-		Map<String, String> metadata = null;
-		if (key instanceof OfferEvent) {
-			metadata = metadataMappings.get(new SipURI(((OfferEvent) key)
-					.getTo().toString()).getUser());
-		} else {
-			throw new IllegalArgumentException("Lookup via " + key
-					+ " is not supported.");
-		}
+	@Override
+	public String lookup(URI uri) {
+
+		Map<String, String> metadata = 
+				metadataMappings.get(new SipURI(uri.toString()).getUser());
 		return metadata.get(JID_LOOKUP_KEY);
+	}
+	
+	public String lookup(OfferEvent key) {
+		
+		return lookup(key.getTo());
 	}
 
 	public void addMapping(String key, Map<String, String> metadata) {

@@ -1,6 +1,7 @@
 package com.rayo.server.lookup;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -49,18 +50,25 @@ public class RegexpJIDLookupService implements RayoJIDLookupService<OfferEvent> 
 	@Override
 	public String lookup(OfferEvent event) {
 		
+		return lookup(event.getTo());
+	}
+	
+
+	@Override
+	public String lookup(URI uri) {
+		
 		for (Pattern pattern: patterns.keySet()) {
-			Matcher matcher = pattern.matcher(event.getTo().toString());
+			Matcher matcher = pattern.matcher(uri.toString());
 			if (matcher.matches()) {
 				String value = patterns.get(pattern);
 				if (logger.isDebugEnabled()) {
-					logger.debug("Found a match for %s : %s", event.getTo().toString(), value);
+					logger.debug("Found a match for %s : %s", uri.toString(), value);
 				}
 				return value;
 			}
 		}
 		if (logger.isDebugEnabled()) {
-			logger.debug("We didn't find any Regexp match for %s", event.getTo().toString());
+			logger.debug("We didn't find any Regexp match for %s", uri.toString());
 		}
 		return null;
 	}
