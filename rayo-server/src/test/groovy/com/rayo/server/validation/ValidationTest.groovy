@@ -1052,7 +1052,7 @@ class ValidationTest {
 	@Test
 	public void validateInputInvalidSensitivityNegative() {
 				
-		def input = parseXml("""<input xmlns=\"urn:xmpp:rayo:input:1\" sensitivity="-1.0"><grammar>sales,support</grammar></input>""")
+		def input = parseXml("""<input xmlns=\"urn:xmpp:rayo:input:1\" sensitivity="-1.0"><grammar content-type="vxml">sales,support</grammar></input>""")
 		
 		def errorMapping = assertValidationException(input)
 		assertNotNull errorMapping
@@ -1064,7 +1064,7 @@ class ValidationTest {
 	@Test
 	public void validateInputInvalidTerminator() {
 				
-		def input = parseXml("""<input xmlns=\"urn:xmpp:rayo:input:1\" terminator="abcd"><grammar>sales,support</grammar></input>""")
+		def input = parseXml("""<input xmlns=\"urn:xmpp:rayo:input:1\" terminator="abcd"><grammar content-type="vxml">sales,support</grammar></input>""")
 		
 		def errorMapping = assertValidationException(input)
 		assertNotNull errorMapping
