@@ -131,7 +131,7 @@ public class InputProvider extends BaseProvider {
         	root.addAttribute("confidence", String.valueOf(input.getMinConfidence()));        	
         }
         if (input.getInitialTimeout() != null ) {
-        	root.addAttribute("initial-timeout", String.valueOf(input.getInitialTimeout()));        	
+        	root.addAttribute("initial-timeout", Long.toString(input.getInitialTimeout().getMillis()));        	
         }
         if (input.getMode() != null ) {
         	root.addAttribute("mode", input.getMode().toString());        	
