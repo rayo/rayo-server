@@ -75,7 +75,9 @@ public class InputHandler extends AbstractLocalVerbHandler<Input, Participant> {
             complete(new InputCompleteEvent(model, Reason.NOMATCH));
         }
         else {
-            input.stop();
+        	if (input != null) {
+        		input.stop();
+        	}
         }
 	}
 	

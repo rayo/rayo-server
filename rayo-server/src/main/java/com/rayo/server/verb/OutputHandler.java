@@ -92,7 +92,9 @@ public class OutputHandler extends AbstractLocalVerbHandler<Output, Participant>
         if (hangup) {
             complete(new OutputCompleteEvent(model, VerbCompleteEvent.Reason.HANGUP));
         } else {
-            output.stop();
+        	if (output != null) {
+        		output.stop();
+        	}
         }
     }
 

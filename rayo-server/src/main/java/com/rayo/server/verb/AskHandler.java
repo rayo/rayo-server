@@ -98,8 +98,10 @@ public class AskHandler extends AbstractLocalVerbHandler<Ask,Participant> {
             complete(new AskCompleteEvent(model, Reason.NOMATCH));
         }
         else {
-            prompt.getOutput().stop();
-            prompt.getInput().stop();
+        	if (prompt != null) {
+	            prompt.getOutput().stop();
+	            prompt.getInput().stop();
+        	}
         }
     }
 

@@ -71,7 +71,9 @@ public class SayHandler extends AbstractLocalVerbHandler<Say, Participant> {
             complete(new SayCompleteEvent(model, VerbCompleteEvent.Reason.HANGUP));
         }
         else {
-            output.stop();
+        	if (output != null) {
+        		output.stop();
+        	}
         }
     }
 
