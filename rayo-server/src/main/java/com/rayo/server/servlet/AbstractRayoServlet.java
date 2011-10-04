@@ -36,8 +36,9 @@ public abstract class AbstractRayoServlet extends XmppServlet implements AdminLi
 
 	private static final Loggerf WIRE = Loggerf.getLogger("com.tropo.ozone.wire");
 	
-    protected static final QName BIND_QNAME = new QName("bind", new Namespace("", "urn:ietf:params:xml:ns:xmpp-bind"));
-    protected static final QName PING_QNAME = new QName("ping", new Namespace("", "urn:xmpp:ping"));
+    private static final QName SESSION_QNAME = new QName("session", new Namespace("", "urn:ietf:params:xml:ns:xmpp-session"));
+    private static final QName BIND_QNAME = new QName("bind", new Namespace("", "urn:ietf:params:xml:ns:xmpp-bind"));
+    private static final QName PING_QNAME = new QName("ping", new Namespace("", "urn:xmpp:ping"));
 
 	private XmppFactory xmppFactory;
 
@@ -77,7 +78,7 @@ public abstract class AbstractRayoServlet extends XmppServlet implements AdminLi
                     sendIqResult(request, bindElement);
                     getLog().info("Bound client resource [jid=%s]", boundJid); 
                     return;
-                } else if (qname.equals(PING_QNAME)) {
+                } else if (qname.equals(PING_QNAME) || qname.equals(SESSION_QNAME)) {
                 	sendIqResult(request);
                 	return;
                 }
