@@ -66,7 +66,6 @@ public class RayoServlet extends XmppServlet implements AdminListener {
     private static final Loggerf WIRE = Loggerf.getLogger("com.rayo.rayo.wire");
 
     private static final QName BIND_QNAME = new QName("bind", new Namespace("", "urn:ietf:params:xml:ns:xmpp-bind"));
-    private static final QName SESSION_QNAME = new QName("session", new Namespace("", "urn:ietf:params:xml:ns:xmpp-session"));
     private static final QName PING_QNAME = new QName("ping", new Namespace("", "urn:xmpp:ping"));
 
     public static final String GATEWAY_DOMAIN = "gateway-domain";
@@ -343,9 +342,6 @@ public class RayoServlet extends XmppServlet implements AdminListener {
                     bindElement.addElement("jid").setText(boundJid);
                     sendIqResult(request, bindElement);
                     log.info("Bound client resource [jid=%s]", boundJid);    
-                } else if (qname.equals(SESSION_QNAME)) {
-                	// Session binding
-                	sendIqResult(request);   
                 } else if (qname.equals(PING_QNAME)) {
                 	sendIqResult(request);
                 }
