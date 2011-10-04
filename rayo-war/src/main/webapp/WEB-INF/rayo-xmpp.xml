@@ -11,7 +11,7 @@
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd"
     default-autowire="byName">
 	
-	<bean id="rayo" class="com.rayo.server.RayoServlet" init-method="start">
+	<bean id="rayo" class="com.rayo.server.servlet.RayoServlet" init-method="start">
 		<!-- These dependencies come from the parent: rayo-context.xml -->
 		<property name="provider" ref="xmlProviderManager" />
 		<property name="callManager" ref="callManager" />
