@@ -15,6 +15,7 @@
 	<xmpp:serv-domains>
 		<xmpp:servdomain>127.0.0.1</xmpp:servdomain>
 		<xmpp:servdomain>localhost</xmpp:servdomain>
+		<xmpp:servdomain>192.168.1.33</xmpp:servdomain>
 	</xmpp:serv-domains>
 
 	<xmpp:servlet-selection>

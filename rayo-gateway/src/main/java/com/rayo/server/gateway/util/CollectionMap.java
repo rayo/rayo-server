@@ -4,14 +4,15 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class CollectionMap<T, U extends Collection<V>, V> {
 
-	private Map<T, U> entries;
-	private Map<T, SelectionStrategy<V>> selectionStrategies;
+	private Map<T, U> entries = new ConcurrentHashMap<T,U>();
+	private Map<T, SelectionStrategy<V>> selectionStrategies = new ConcurrentHashMap<T, SelectionStrategy<V>>();
 	private ReadWriteLock lock;
 	private SelectionStrategyFactory<V> selectionStrategyFactory;
 	private CollectionFactory<U, V> collectionFactory;

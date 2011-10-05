@@ -7,558 +7,542 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import com.rayo.server.gateway.util.CollectionMap;
-import com.voxeo.guido.Guido;
-import com.voxeo.guido.GuidoException;
+import com.rayo.server.gateway.exception.GatewayException;
+import com.rayo.server.gateway.exception.RayoNodeAlreadyExistsException;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.servlet.xmpp.JID;
 
-public class InMemoryGatewayDatastore implements GatewayDatastore
-{
-	private static final Loggerf LOG = Loggerf.getLogger(InMemoryGatewayDatastore.class);
 
-	private Map<String, TropoNode> hostnameMap = new HashMap<String, TropoNode>();
-	private Map<String, TropoNode> addressMap = new HashMap<String, TropoNode>();
-	private Map<JID, TropoNode> nodeMap = new HashMap<JID, TropoNode>();
-	private ReadWriteLock tropoNodeLock = new ReentrantReadWriteLock();
-	private CollectionMap<String, ArrayList<TropoNode>, TropoNode> platformMap = new CollectionMap<String, ArrayList<TropoNode>, TropoNode>();
+/**
+ * <p>This class implements the {@link GatewayDatastore} on a single node. It will 
+ * use a number of {@link Map} structures holding all the data required by a single
+ * Gateway instance</p>
+ * 
+ *  <p>Please note that <strong>this implementation is not intended for production 
+ *  usage</strong> as it does not have any replication system built-in. It is only 
+ *  suitable for a single gateway scenario.</p>
+ * 
+ * @see GatewayDatastore
+ * 
+ * @author martin
+ *
+ */
+public class InMemoryGatewayDatastore implements GatewayDatastore {
+	
+	private static final Loggerf log = Loggerf.getLogger(InMemoryGatewayDatastore.class);
 
-	private CollectionMap<JID, ArrayList<JID>, JID> clientJIDs = new CollectionMap<JID, ArrayList<JID>, JID>();
+	//private Map<String, TropoNode> hostnameMap = new HashMap<String, TropoNode>();
+	
+	/*
+	 * This map maps Rayo Nodes by their IP addresses. It is used to quickly obtain 
+	 * a Rayo Node from a call id which has the IP Address encoded in.   
+	 */
+	private Map<String, RayoNode> addressMap = new HashMap<String, RayoNode>();
+	
+	/**
+	 * This data structure maps Rayo Nodes with their JIDs for quick access.
+	 */
+	private Map<JID, RayoNode> nodeMap = new HashMap<JID, RayoNode>();
+	private ReadWriteLock rayoNodeLock = new ReentrantReadWriteLock();
+	
+	/*
+	 * This data structure lets us to quickly find all the Rayo nodes belonging to a 
+	 * specific platform.
+	 */
+	private Map<String, List<RayoNode>> platformMap = new HashMap<String, List<RayoNode>>();
+
+	/*
+	 * This data structure maps client JIDs to actual platforms, so we know which 
+	 * platform will be a client jid (rayo application) will be linked to
+	 */
 	private Map<JID, String> jidToPlatformMap = new HashMap<JID, String>();
-	private ReadWriteLock jidLock = new ReentrantReadWriteLock();
 
+	/*
+	 * This data structure maps calls to JIDs so at any point you can find all the calls 
+	 * handled by a JID which could be a Client JID (application) or a Rayo Node JID
+	 */
+	private Map<JID, Collection<String>> jidToCallMap = new HashMap<JID, Collection<String>>();
+
+	/*
+	 * This data structure directly maps a call with its JID
+	 */
 	private Map<String, JID> callToClientMap = new HashMap<String, JID>();
-	private Map<JID, Collection<String>> clientToCallMap = new HashMap<JID, Collection<String>>();
-	private Map<String, TropoNode> callToNodeMap = new HashMap<String, TropoNode>();
-	private Map<TropoNode, Collection<String>> nodeToCallMap = new HashMap<TropoNode, Collection<String>>();
+
+	/*
+	 * This data structure directly maps a call with its owning Rayo Node
+	 */
+	private Map<String, RayoNode> callToNodeMap = new HashMap<String, RayoNode>();
+
+	/*
+	 * This data structure stores all the resources linked with a Client JID
+	 */
+	private Map<JID, List<String>> resourcesMap = new ConcurrentHashMap<JID, List<String>>();
+
+	//private CollectionMap<JID, ArrayList<JID>, JID> clientJIDs = new CollectionMap<JID, ArrayList<JID>, JID>();
+	private ReadWriteLock jidLock = new ReentrantReadWriteLock();
 	private ReadWriteLock callLock = new ReentrantReadWriteLock();
+	private ReadWriteLock resourcesLock = new ReentrantReadWriteLock();
+	
+	@Override
+	public String getPlatformForClient(JID clientJid) {
 
-	public InMemoryGatewayDatastore () {}
-
-	public String lookupPlatformID (JID clientJid)
-	{
 		Lock readLock = jidLock.readLock();
 		readLock.lock();
-		try
-		{
-			String platformId = jidToPlatformMap.get(clientJid);
-			LOG.debug("Platform lookup for %s found %s", clientJid, platformId);
+		try {
+			String platformId = jidToPlatformMap.get(clientJid.getBareJID());
+			log.debug("Platform lookup for %s found %s", clientJid, platformId);
 			return platformId;
-		}
-		finally
-		{
+		} finally {
 			readLock.unlock();
 		}
 	}
 
-	public String getDomainName (String ipAddress)
-	{
-		String domain = ipAddress;
-		Lock readLock = tropoNodeLock.readLock();
+	@Override
+	public String getDomainName(String ipAddress) {
+		
+		String domain = null;
+		Lock readLock = rayoNodeLock.readLock();
 		readLock.lock();
-		try
-		{
-			TropoNode node = addressMap.get(ipAddress);
-			if (node == null)
-			{
-				try
-				{
+		try {
+			RayoNode node = addressMap.get(ipAddress);
+			if (node == null) {
+				try {
 					domain = InetAddress.getByName(ipAddress).getHostName();
+				} catch (UnknownHostException weTried) {
+					log.debug("No domain name could be found for " + ipAddress);
 				}
-				catch (UnknownHostException weTried)
-				{
-					LOG.debug("No domain name could be found for " + ipAddress);
-				}
-			}
-			else
-			{
+			} else {
 				domain = node.getHostname();
 			}
-			LOG.debug("%s mapped to domain %s", ipAddress, domain);
+			log.debug("%s mapped to domain %s", ipAddress, domain);
 			return domain;
-		}
-		finally
-		{
+		} finally {
 			readLock.unlock();
 		}
 	}
 
-	public Collection<JID> getClients (JID appJid)
-	{
+	/*
+	public Collection<JID> getClients(JID appJid) {
 		Lock readLock = jidLock.readLock();
 		readLock.lock();
-		try
-		{
+		try {
 			Collection<JID> clients = clientJIDs.lookupAll(appJid);
-			LOG.debug("Clients for %s found: %s", appJid, clients);
+			log.debug("Clients for %s found: %s", appJid, clients);
 			return clients;
-		}
-		finally
-		{
+		} finally {
 			readLock.unlock();
 		}
 	}
-
-	public void addClient (JID clientJid, String platformID) throws UnknownApplicationException
-	{
+	*/
+	
+	@Override
+	public void bindClientToPlatform(JID clientJid, String platformId) throws GatewayException {
+		
 		Lock writeLock = jidLock.writeLock();
 		writeLock.lock();
-		try
-		{
-			clientJIDs.add(clientJid.getBareJID(), clientJid);
-			jidToPlatformMap.put(clientJid, platformID);
-			LOG.debug("Client %s added for platform %s", clientJid, platformID);
-		}
-		finally
-		{
+		try {
+			//clientJIDs.add(clientJid.getBareJID(), clientJid);
+			jidToPlatformMap.put(clientJid.getBareJID(), platformId);			
+			log.debug("Client %s added for platform %s", clientJid, platformId);
+		} finally {
 			writeLock.unlock();
 		}
 	}
 
-	public void removeClient (JID clientJid)
-	{
+	@Override
+	public void unbindClientFromPlatform(JID clientJid) throws GatewayException {
+	
 		Lock writeLock = jidLock.writeLock();
 		writeLock.lock();
-		try
-		{
-			clientJIDs.remove(clientJid.getBareJID(), clientJid);
-			jidToPlatformMap.remove(clientJid);
-			LOG.debug("Client %s removed", clientJid);
-		}
-		finally
-		{
+		try {
+			//clientJIDs.remove(clientJid.getBareJID(), clientJid);
+			jidToPlatformMap.remove(clientJid.getBareJID());
+			log.debug("Client %s removed", clientJid);
+			
+		} finally {
 			writeLock.unlock();
 		}
 	}
-
-	public void removeApplication (JID appJid)
-	{
+	
+	/*
+	public void removeApplication(JID appJid) {
 		Lock writeLock = jidLock.writeLock();
 		writeLock.lock();
-		try
-		{
+		try {
 			Collection<JID> jids = clientJIDs.removeAll(appJid);
-			if (jids != null)
-			{
-				for (JID jid : jids)
-				{
+			if (jids != null) {
+				for (JID jid : jids) {
 					String platformId = jidToPlatformMap.remove(jid);
-					LOG.debug("Removed %s from platform %s", jid, platformId);
+					log.debug("Removed %s from platform %s", jid, platformId);
 				}
 			}
-			LOG.debug("Removed application %s", appJid);
-		}
-		finally
-		{
+			log.debug("Removed application %s", appJid);
+		} finally {
 			writeLock.unlock();
 		}
 	}
+	*/
 
-	public Collection<JID> getTropoNodes (String platformID)
-	{
-		Lock readLock = tropoNodeLock.readLock();
+	@Override
+	public java.util.Collection<JID> getRayoNodes(String platformId) {
+	
+		Lock readLock = rayoNodeLock.readLock();
 		readLock.lock();
-		try
-		{
+		try {
 			Set<JID> jids = new HashSet<JID>();
-			for (TropoNode node : platformMap.lookupAll(platformID, readLock))
-			{
-				jids.add(node.getJID());
+			List<RayoNode> nodes = platformMap.get(platformId);
+			if (nodes != null) {
+				for (RayoNode node: nodes) {
+					jids.add(node.getJid());
+				}
 			}
-			LOG.debug("Tropo nodes found for %s: %s", platformID, jids);
+			log.debug("Rayo nodes found for %s: %s", platformId, jids);
 			return jids;
-		}
-		finally
-		{
+		} finally {
 			readLock.unlock();
 		}
 	}
 
-	public String selectTropoNodeJID (String platformID)
-	{
-		Lock readLock = tropoNodeLock.readLock();
-		readLock.lock();
-		try
-		{
-			TropoNode node = platformMap.lookup(platformID, readLock);
-			String nodeJid = node.getJID().toString();
-			LOG.debug("Selected Tropo node %s for platform %s", nodeJid, platformID);
-			return nodeJid;
-		}
-		finally
-		{
-			readLock.unlock();
-		}
-	}
-
-	public Collection<String> getPlatformIDs (JID nodeJid)
-	{
-		Lock lock = tropoNodeLock.readLock();
-		lock.lock();
-		try
-		{
-			TropoNode node = nodeMap.get(nodeJid);
-			Collection<String> platformIDs = Collections.unmodifiableSet(node.getPlatformIds());
-			LOG.debug("Platform IDs found for %s: %s", nodeJid, platformIDs);
-			return platformIDs;
-		}
-		finally
-		{
-			lock.unlock();
-		}
-	}
-
-	public void setPlatformIDs (JID nodeJid, Collection<String> platformIDs) throws UnknownHostException
-	{
-		Lock writeLock = tropoNodeLock.writeLock();
+	@Override
+	public void registerRayoNode(JID rayoNode, Collection<String> platformIds) throws GatewayException {
+		
+		Lock writeLock = rayoNodeLock.writeLock();
 		writeLock.lock();
-		try
-		{
-			LOG.debug("Adding %s to platforms %s", nodeJid, platformIDs);
-			TropoNode node = nodeMap.get(nodeJid);
-			if (node == null)
-			{
-				String hostname = nodeJid.getDomain();
-				String ipAddress = InetAddress.getByName(hostname).getHostAddress();
-				node = new TropoNode(hostname, ipAddress, nodeJid, new HashSet<String>(platformIDs));
-				hostnameMap.put(hostname, node);
-				addressMap.put(ipAddress, node);
-				nodeMap.put(nodeJid, node);
-				LOG.debug("Created: %s", node);
+		try {
+			log.debug("Adding %s to platforms %s", rayoNode, platformIds);
+			RayoNode node = nodeMap.get(rayoNode);
+			if (node != null) {
+				throw new RayoNodeAlreadyExistsException();
 			}
-			else
-			{
-				// Not checking hostname or IP since JID would not have matched
-				for (String platformID : platformIDs)
-				{
-					platformMap.remove(platformID, node, writeLock);
-					LOG.debug("Removed %s from platform %s", node, platformID);
-				}
-				node.setPlatformIds(new HashSet<String>(platformIDs));
-			}
+			
+			String hostname = rayoNode.getDomain();
+			String ipAddress = InetAddress.getByName(hostname)
+					.getHostAddress();
+			node = new RayoNode(hostname, ipAddress, rayoNode,new HashSet<String>(platformIds));
+			//hostnameMap.put(hostname, node);
+			addressMap.put(ipAddress, node);
+			nodeMap.put(rayoNode, node);
+			log.debug("Created: %s", node);
 
-			for (String platformID : platformIDs)
-			{
-				platformMap.add(platformID, node);
-				LOG.debug("Added %s to platform %s", node, platformID);
+			for (String platformId : platformIds) {
+				addNodeToPlatform(node, platformId);
 			}
-		}
-		finally
-		{
+		} catch (UnknownHostException uhe) {
+			throw new GatewayException("Unknown host", uhe);
+		} finally {
 			writeLock.unlock();
 		}
 	}
 
-	public void removeTropoNode (JID nodeJid)
-	{
-		Lock writeLock = tropoNodeLock.writeLock();
+	/**
+	 * Adds a rayo node to a given platform
+	 * 
+	 * @param rayoNode Rayo Node to be added
+	 * @param platformId Id of the platform
+	 */
+	private void addNodeToPlatform(RayoNode rayoNode, String platformId) {
+
+		List<RayoNode> nodes = platformMap.get(platformId);
+		if (nodes == null) {
+			nodes = new ArrayList<RayoNode>();
+			platformMap.put(platformId, nodes);
+		}
+		nodes.add(rayoNode);
+		log.debug("Added %s to platform %s", rayoNode, platformId);
+		
+	}
+	
+
+	/**
+	 * Removes a rayo node from a given platform
+	 * 
+	 * @param rayoNode Rayo Node to be removed
+	 * @param platformId Id of the platform
+	 */
+	private void removeNodeFromPlatform(RayoNode rayoNode, String platformId) {
+
+		List<RayoNode> nodes = platformMap.get(platformId);
+		if (nodes != null) {
+			nodes.remove(rayoNode);
+			if (nodes.isEmpty()) {
+				platformMap.remove(platformId);
+			}
+		}
+		log.debug("Removed %s from platform %s", rayoNode, platformId);
+		
+	}
+
+	@Override
+	public void unregisterRayoNode(JID rayoNode) throws GatewayException {
+
+		Lock writeLock = rayoNodeLock.writeLock();
 		writeLock.lock();
-		try
-		{
-			TropoNode node = nodeMap.remove(nodeJid);
-			if (node != null)
-			{
-				hostnameMap.remove(node.getHostname());
-				addressMap.remove(node.getAddress());
-				for (String platformID : node.getPlatformIds())
-				{
-					platformMap.remove(platformID, node, writeLock);
-					LOG.debug("Removed %s from platform %s", node, platformID);
+		try {
+			RayoNode node = nodeMap.remove(rayoNode);
+			if (node != null) {
+				//hostnameMap.remove(node.getHostname());
+				addressMap.remove(node.getIpAddress());
+				for (String platformId : node.getPlatforms()) {
+					removeNodeFromPlatform(node, platformId);
+					log.debug("Removed %s from platform %s", node, platformId);
 				}
 			}
-			LOG.debug("Removed node %s", nodeJid);
-		}
-		finally
-		{
+			log.debug("Removed node %s", rayoNode);
+		} finally {
 			writeLock.unlock();
 		}
 	}
-
-	public String getClientJID (String callID)
-	{
+	
+	/*
+	public String getClientJID(String callID) {
 		Lock readLock = callLock.readLock();
 		readLock.lock();
-		try
-		{
+		try {
 			String clientJid = callToClientMap.get(callID).toString();
-			LOG.debug("Call ID %s mapped to client JID %s", callID, clientJid);
+			log.debug("Call ID %s mapped to client JID %s", callID, clientJid);
 			return clientJid;
-		}
-		finally
-		{
+		} finally {
 			readLock.unlock();
 		}
 	}
-
+	*/
+	
 	@SuppressWarnings("unchecked")
-	public Collection<String> getCalls (JID clientJid)
-	{
+	@Override
+	public Collection<String> getCalls(JID jid) {
+		
 		Lock readLock = callLock.readLock();
 		readLock.lock();
-		try
-		{
-			Collection<String> calls = clientToCallMap.get(clientJid);
-			if (calls == null)
-			{
+		try {
+			Collection<String> calls = jidToCallMap.get(jid);
+			if (calls == null) {
 				calls = Collections.EMPTY_SET;
 			}
-			LOG.debug("Found calls for %s: %s", clientJid, calls);
+			log.debug("Found calls for %s: %s", jid, calls);
 			return Collections.unmodifiableCollection(calls);
-		}
-		finally
-		{
+		} finally {
 			readLock.unlock();
 		}
 	}
 
-	public void mapCallToClient (String callID, JID clientJid)
-	{
-		Lock readLock = tropoNodeLock.readLock();
-		Lock writeLock = callLock.writeLock();
-		lockAll(readLock, writeLock);
-		try
-		{
-			String host = null;
-			try
-			{
-				Guido guido = new Guido(callID, false, null);
-				host = guido.decodeHost();
-			}
-			catch (GuidoException cannotDecode)
-			{
-				LOG.warn("Could not decode callID " + callID, cannotDecode);
-			}
-
-			if (host == null)
-			{
-				throw new IllegalArgumentException("callID " + callID + " does not map to a known host");
-			}
-
-			TropoNode node = hostnameMap.get(host);
-			if (node == null)
-			{
-				throw new IllegalArgumentException(host + " does not map to a known Tropo node");
-			}
-
-			callToClientMap.put(callID, clientJid);
-			LOG.debug("Call %s mapped to client %s", callID, clientJid);
-
-			Collection<String> clientCalls = clientToCallMap.get(clientJid);
-			if (clientCalls == null)
-			{
-				clientCalls = new HashSet<String>();
-				clientToCallMap.put(clientJid, clientCalls);
-			}
-			clientCalls.add(callID);
-			LOG.debug("Client %s is mapped to calls %s", clientJid, clientCalls);
-
-			callToNodeMap.put(callID, node);
-
-			Collection<String> nodeCalls = nodeToCallMap.get(node);
-			if (nodeCalls == null)
-			{
-				nodeCalls = new HashSet<String>();
-				nodeToCallMap.put(node, nodeCalls);
-			}
-			nodeCalls.add(callID);
-			LOG.debug("Node %s is mapped to calls %s", node, nodeCalls);
-		}
-		finally
-		{
-			writeLock.unlock();
-			readLock.unlock();
-		}
-	}
-
-	public void removeCall (String callID)
-	{
+	@Override
+	public void registerCall(String callId, JID clientJid) throws GatewayException {
+		
+//		Lock readLock = tropoNodeLock.readLock();
 		Lock writeLock = callLock.writeLock();
 		writeLock.lock();
-		try
-		{
-			JID client = callToClientMap.remove(callID);
-			if (client != null)
-			{
-				LOG.debug("Call %s removed from client %s", callID, client);
-				Collection<String> calls = clientToCallMap.get(client);
-				if (calls != null)
-				{
-					calls.remove(callID);
-					LOG.debug("Client %s mapped to calls %s", client, calls);
-					if (calls.isEmpty())
-					{
-						clientToCallMap.remove(client);
-					}
-				}
+		//lockAll(readLock, writeLock);
+		try {
+			//String ipAddress = decode it from the callId
+			String ipAddress = "192.168.1.35";
+			
+			RayoNode node = addressMap.get(ipAddress);
+			if (node == null) {
+				throw new GatewayException(String.format("Node not found for callId %s", callId));
 			}
+			
+			callToClientMap.put(callId, clientJid);
+			log.debug("Call %s mapped to client %s", callId, clientJid);
 
-			TropoNode node = callToNodeMap.remove(callID);
-			if (node != null)
-			{
-				LOG.debug("Call %s removed from Tropo node %s", callID, node);
-				Collection<String> calls = nodeToCallMap.get(client);
-				if (calls != null)
-				{
-					calls.remove(callID);
-					LOG.debug("Node %s mapped to call %s", node, calls);
-					if (calls.isEmpty())
-					{
-						nodeToCallMap.remove(node);
-					}
-				}
+			callToNodeMap.put(callId, node);
+			log.debug("Call %s mapped to Rayo node %s", callId, node.getJid());
+			
+			addCallToJid(callId, clientJid);
+			addCallToJid(callId, node.getJid());
+
+		} finally {
+			writeLock.unlock();
+			//readLock.unlock();
+		}
+	}
+
+	/**
+	 * Adds a call to the list of calls mapped to a client JID
+	 * 
+	 * @param callId Id of the call
+	 * @param rayoNode Rayo Node to be added
+	 */
+	private void addCallToJid(String callId, JID clientJid) {
+
+		Collection<String> calls = jidToCallMap.get(clientJid);
+		if (calls == null) {
+			calls = new HashSet<String>();
+			jidToCallMap.put(clientJid, calls);
+		}
+		calls.add(callId);
+		log.debug("Added %s to client JID %s", callId, clientJid);
+		
+	}
+	
+
+	/**
+	 * Removes a call from the list of calls handled by a client JID
+	 * 
+	 * @param callId Call id to be removed
+	 * @param clientJid Client JID
+	 */
+	private void removeCallFromJid(String callId, JID clientJid) {
+
+		Collection<String> calls = jidToCallMap.get(clientJid);
+		if (calls != null) {
+			calls.remove(callId);
+			if (calls.isEmpty()) {
+				jidToCallMap.remove(clientJid);
 			}
 		}
-		finally
-		{
+		log.debug("Removed %s from client JID %s", callId, clientJid);
+		
+	}
+	
+	@Override
+	public void unregistercall(String callId) throws GatewayException {
+
+		Lock writeLock = callLock.writeLock();
+		writeLock.lock();
+		try {
+			JID clientJid = callToClientMap.remove(callId);
+			if (clientJid != null) {
+				removeCallFromJid(callId, clientJid);
+			}
+			
+			RayoNode node = callToNodeMap.remove(callId);
+			if (node != null) {
+				removeCallFromJid(callId, node.getJid());
+			}
+		} finally {
 			writeLock.unlock();
 		}
 	}
-
-	public Collection<String> getCallsForNode (JID nodeJid)
-	{
-		Lock readLock1 = tropoNodeLock.readLock();
-		Lock readLock2 = callLock.readLock();
-		lockAll(readLock1, readLock2);
-		try
-		{
-			@SuppressWarnings("unchecked")
-			Collection<String> retval = Collections.EMPTY_SET;
-			TropoNode node = nodeMap.get(nodeJid);
-			if (node != null)
-			{
-				Collection<String> calls = nodeToCallMap.get(node);
-				if (calls != null)
-				{
-					retval = Collections.unmodifiableCollection(calls);
-				}
-			}
-			LOG.debug("Node %s has calls %s", nodeJid, retval);
-			return retval;
-		}
-		finally
-		{
-			readLock1.unlock();
-			readLock2.unlock();
-		}
+	
+	@Override
+	public Collection<String> getCallsForRayoNode(JID nodeJid) {
+		
+		return getCalls(nodeJid);
 	}
 
-	private void lockAll (Lock... locks)
-	{
+	private void lockAll(Lock... locks) {
 		boolean success = true;
-		do
-		{
+		do {
 			int i = 0;
-			try
-			{
-				while (i < locks.length && success)
-				{
+			try {
+				while (i < locks.length && success) {
 					success = locks[i].tryLock(10, TimeUnit.MILLISECONDS);
 					++i;
 				}
-			}
-			catch (InterruptedException restart)
-			{
+			} catch (InterruptedException restart) {
 				success = false;
-			}
-			catch (Exception ex)
-			{
+			} catch (Exception ex) {
 				success = false;
-				LOG.warn("Exception caught while locking locks", ex);
-				if (ex instanceof RuntimeException)
-				{
+				log.warn("Exception caught while locking locks", ex);
+				if (ex instanceof RuntimeException) {
 					throw (RuntimeException) ex;
+				} else {
+					throw new RuntimeException("Unexpected checked exception",
+							ex);
 				}
-				else
-				{
-					throw new RuntimeException("Unexpected checked exception", ex);
-				}
-			}
-			finally
-			{
-				if (!success)
-				{
-					for (int j = 0; j < 1; ++j)
-					{
+			} finally {
+				if (!success) {
+					for (int j = 0; j < 1; ++j) {
 						locks[j].unlock();
 					}
 				}
 			}
+		} while (!success);
+	}
+	
+	@Override
+	public void registerClientResource(JID clientJid) throws GatewayException {
+		
+		Lock writeLock = resourcesLock.writeLock();
+		writeLock.lock();
+		try {
+			registerResourceToJID(clientJid.getResource(), clientJid);
+			log.debug("Client resource %s added for client JID %s", clientJid.getResource(), clientJid.getBareJID());
+		} finally {
+			writeLock.unlock();
 		}
-		while (!success);
 	}
 
-	private static class TropoNode
-	{
-		private String hostname;
-		private String address;
-		private JID jid;
-		private Set<String> platformIds;
-		private String toString;
-		private int hashCode;
+	@Override
+	public void unregisterClientResource(JID clientJid) throws GatewayException {
 
-		TropoNode (String hostname, String address, JID jid, Set<String> platformIds)
-		{
-			this.hostname = hostname;
-			this.address = address;
-			this.jid = jid;
-			this.platformIds = platformIds;
-			this.toString = new StringBuilder(super.toString()).append("[hostname=").append(hostname).append(" address=").append(address).append(" jid=")
-					.append(jid).append(" platformIds=").append(platformIds).append("]").toString();
-			hashCode = hostname.hashCode();
+		Lock writeLock = resourcesLock.writeLock();
+		writeLock.lock();
+		try {
+			unregisterResourceFromJID(clientJid.getResource(), clientJid);
+			log.debug("Client resource %s removed from client JID %s", clientJid.getResource(), clientJid.getBareJID());
+			
+		} finally {
+			writeLock.unlock();
 		}
-
-		String getHostname ()
-		{
-			return hostname;
-		}
-
-		String getAddress ()
-		{
-			return address;
-		}
-
-		JID getJID ()
-		{
-			return jid;
-		}
-
-		Set<String> getPlatformIds ()
-		{
-			return platformIds;
-		}
-
-		void setPlatformIds (Set<String> platformIds)
-		{
-			this.platformIds = platformIds;
-		}
-
-		public String toString ()
-		{
-			return toString;
-		}
-
-		public int hashCode ()
-		{
-			return hashCode;
-		}
-
-		public boolean equals (Object that)
-		{
-			boolean isEqual = that instanceof TropoNode;
-			if (isEqual)
-			{
-				TropoNode thatTropoNode = (TropoNode) that;
-				isEqual = this.hostname.equals(thatTropoNode.hostname) && this.address.equals(thatTropoNode.address);
+	}
+	
+	/**
+	 * <p>Maps a resource to a client JID. </p>
+	 * 
+	 * @param resource Resource
+	 * @param jid JID
+	 */
+	private void registerResourceToJID(String resource, JID jid) {
+		
+		log.debug("Adding resource [%s] to the set of available resources for JID [%s]", resource, jid.getBareJID());
+		resourcesLock.writeLock().lock();
+		try {
+			List<String> resources = resourcesMap.get(jid);
+			if (resources == null) {
+				resources = new ArrayList<String>();
+				resourcesMap.put(jid, resources);
 			}
-			return isEqual;
+			resources.add(resource);
+		} finally {
+			resourcesLock.writeLock().unlock();
+		}
+	}
+	
+	/**
+	 * Unmaps a resource from the list of available resources for a client jid
+	 * 
+	 * @param resource Resource to be unmapped
+	 * @param jid JID
+	 */
+	private void unregisterResourceFromJID(String resource, JID jid) {
+		
+		log.debug("Removing resource [%s] from the set of available resources for JID [%s]", resource, jid.getBareJID());
+		resourcesLock.writeLock().lock();
+		try {
+			List<String> resources = resourcesMap.get(jid);
+			if (resources != null) {
+				resources.remove(resource);
+				if (resources.isEmpty()) {
+					resourcesMap.remove(jid);
+				}
+			}
+		} finally {
+			resourcesLock.writeLock().unlock();
+		}
+	}
+	
+	@Override
+	public Collection<String> getResourcesForClient(JID jid) {
+		
+		resourcesLock.readLock().lock();
+		try {
+			Collection<String> resources = resourcesMap.get(jid);
+			if (resources == null) {
+				resources = new ArrayList<String>();
+			}
+			return Collections.unmodifiableCollection(resources);
+		} finally {
+			resourcesLock.readLock().unlock();
 		}
 	}
 }
-
