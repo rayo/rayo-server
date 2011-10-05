@@ -45,8 +45,25 @@ public interface GatewayDatastore {
 	void unregisterRayoNode(JID rayoNode) throws GatewayException;
 	
 	/**
+	 * <p>Returns a collection of Rayo Nodes that are linked to a given platform or 
+	 * an empty colleciton if no Rayo Nodes are linked to that platform of if the 
+	 * platform does not exist.</p>
+	 * 
+	 * <p>This method is typically invoked when a Rayo Gateway receives a message 
+	 * from a Rayo Client. The Rayo Gateway will find which platform is that client 
+	 * in and it will query which Rayo Nodes are linked to that platform so the message
+	 * can be delivered to one of those nodes.</p> 
+	 *  
+	 * @param platformId Id of the platform for which we want to query the nodes
+	 * 
+	 * @return Collection<JID> Collection or Rayo Nodes linked to the platform
+	 *
+	 */
+	Collection<JID> getRayoNodes(String platformId);
+	
+	/**
 	 * <p>Returns the domain name for a given IP Address or <code>null</code> if the domain
-	 * cannot be found.</p>
+	 * cannot be found in the DHT.</p>
 	 * 
 	 *  <p>This method is commonly used to find host names which will be able to process a 
 	 *  call id on Rayo, as Rayo encodes the IP Address information within the call id itself.</p>
@@ -101,23 +118,6 @@ public interface GatewayDatastore {
 	 * @return String Platform id or <code>null</code> if no platform can be found
 	 */
 	String getPlatformForClient(JID clientJid);
-	
-	/**
-	 * <p>Returns a collection of Rayo Nodes that are linked to a given platform or 
-	 * an empty colleciton if no Rayo Nodes are linked to that platform of if the 
-	 * platform does not exist.</p>
-	 * 
-	 * <p>This method is typically invoked when a Rayo Gateway receives a message 
-	 * from a Rayo Client. The Rayo Gateway will find which platform is that client 
-	 * in and it will query which Rayo Nodes are linked to that platform so the message
-	 * can be delivered to one of those nodes.</p> 
-	 *  
-	 * @param platformId Id of the platform for which we want to query the nodes
-	 * 
-	 * @return Collection<JID> Collection or Rayo Nodes linked to the platform
-	 *
-	 */
-	Collection<JID> getRayoNodes(String platformId);
 
 	/**
 	 * <p>Returns a collection of calls that are currently being linked with an 

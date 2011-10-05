@@ -63,7 +63,8 @@ public class RayoNode {
 	@Override
 	public boolean equals(Object obj) {
 
-		return jid.equals(obj);
+		if (!(obj instanceof RayoNode)) return false;
+		return jid.equals(((RayoNode)obj).getJid());
 	}
 	
 	@Override

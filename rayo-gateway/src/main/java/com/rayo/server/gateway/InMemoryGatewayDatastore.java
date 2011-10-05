@@ -18,6 +18,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.rayo.server.gateway.exception.GatewayException;
 import com.rayo.server.gateway.exception.RayoNodeAlreadyExistsException;
+import com.rayo.server.gateway.exception.RayoNodeNotFoundException;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.servlet.xmpp.JID;
 
@@ -38,7 +39,7 @@ import com.voxeo.servlet.xmpp.JID;
  */
 public class InMemoryGatewayDatastore implements GatewayDatastore {
 	
-	private static final Loggerf log = Loggerf.getLogger(InMemoryGatewayDatastore.class);
+	protected static final Loggerf log = Loggerf.getLogger(InMemoryGatewayDatastore.class);
 
 	//private Map<String, TropoNode> hostnameMap = new HashMap<String, TropoNode>();
 	
@@ -46,51 +47,51 @@ public class InMemoryGatewayDatastore implements GatewayDatastore {
 	 * This map maps Rayo Nodes by their IP addresses. It is used to quickly obtain 
 	 * a Rayo Node from a call id which has the IP Address encoded in.   
 	 */
-	private Map<String, RayoNode> addressMap = new HashMap<String, RayoNode>();
+	protected Map<String, RayoNode> addressMap = new HashMap<String, RayoNode>();
 	
 	/**
 	 * This data structure maps Rayo Nodes with their JIDs for quick access.
 	 */
-	private Map<JID, RayoNode> nodeMap = new HashMap<JID, RayoNode>();
-	private ReadWriteLock rayoNodeLock = new ReentrantReadWriteLock();
+	protected Map<JID, RayoNode> nodeMap = new HashMap<JID, RayoNode>();
+	protected ReadWriteLock rayoNodeLock = new ReentrantReadWriteLock();
 	
 	/*
 	 * This data structure lets us to quickly find all the Rayo nodes belonging to a 
 	 * specific platform.
 	 */
-	private Map<String, List<RayoNode>> platformMap = new HashMap<String, List<RayoNode>>();
+	protected Map<String, List<RayoNode>> platformMap = new HashMap<String, List<RayoNode>>();
 
 	/*
 	 * This data structure maps client JIDs to actual platforms, so we know which 
 	 * platform will be a client jid (rayo application) will be linked to
 	 */
-	private Map<JID, String> jidToPlatformMap = new HashMap<JID, String>();
+	protected Map<JID, String> jidToPlatformMap = new HashMap<JID, String>();
 
 	/*
 	 * This data structure maps calls to JIDs so at any point you can find all the calls 
 	 * handled by a JID which could be a Client JID (application) or a Rayo Node JID
 	 */
-	private Map<JID, Collection<String>> jidToCallMap = new HashMap<JID, Collection<String>>();
+	protected Map<JID, Collection<String>> jidToCallMap = new HashMap<JID, Collection<String>>();
 
 	/*
 	 * This data structure directly maps a call with its JID
 	 */
-	private Map<String, JID> callToClientMap = new HashMap<String, JID>();
+	protected Map<String, JID> callToClientMap = new HashMap<String, JID>();
 
 	/*
 	 * This data structure directly maps a call with its owning Rayo Node
 	 */
-	private Map<String, RayoNode> callToNodeMap = new HashMap<String, RayoNode>();
+	protected Map<String, RayoNode> callToNodeMap = new HashMap<String, RayoNode>();
 
 	/*
 	 * This data structure stores all the resources linked with a Client JID
 	 */
-	private Map<JID, List<String>> resourcesMap = new ConcurrentHashMap<JID, List<String>>();
+	protected Map<JID, List<String>> resourcesMap = new ConcurrentHashMap<JID, List<String>>();
 
 	//private CollectionMap<JID, ArrayList<JID>, JID> clientJIDs = new CollectionMap<JID, ArrayList<JID>, JID>();
-	private ReadWriteLock jidLock = new ReentrantReadWriteLock();
-	private ReadWriteLock callLock = new ReentrantReadWriteLock();
-	private ReadWriteLock resourcesLock = new ReentrantReadWriteLock();
+	protected ReadWriteLock jidLock = new ReentrantReadWriteLock();
+	protected ReadWriteLock callLock = new ReentrantReadWriteLock();
+	protected ReadWriteLock resourcesLock = new ReentrantReadWriteLock();
 	
 	@Override
 	public String getPlatformForClient(JID clientJid) {
@@ -115,11 +116,7 @@ public class InMemoryGatewayDatastore implements GatewayDatastore {
 		try {
 			RayoNode node = addressMap.get(ipAddress);
 			if (node == null) {
-				try {
-					domain = InetAddress.getByName(ipAddress).getHostName();
-				} catch (UnknownHostException weTried) {
-					log.debug("No domain name could be found for " + ipAddress);
-				}
+				return null;
 			} else {
 				domain = node.getHostname();
 			}
@@ -347,7 +344,7 @@ public class InMemoryGatewayDatastore implements GatewayDatastore {
 			
 			RayoNode node = addressMap.get(ipAddress);
 			if (node == null) {
-				throw new GatewayException(String.format("Node not found for callId %s", callId));
+				throw new RayoNodeNotFoundException(String.format("Node not found for callId %s", callId));
 			}
 			
 			callToClientMap.put(callId, clientJid);
@@ -465,7 +462,7 @@ public class InMemoryGatewayDatastore implements GatewayDatastore {
 		Lock writeLock = resourcesLock.writeLock();
 		writeLock.lock();
 		try {
-			registerResourceToJID(clientJid.getResource(), clientJid);
+			registerResourceToJID(clientJid.getResource(), clientJid.getBareJID());
 			log.debug("Client resource %s added for client JID %s", clientJid.getResource(), clientJid.getBareJID());
 		} finally {
 			writeLock.unlock();
@@ -478,7 +475,7 @@ public class InMemoryGatewayDatastore implements GatewayDatastore {
 		Lock writeLock = resourcesLock.writeLock();
 		writeLock.lock();
 		try {
-			unregisterResourceFromJID(clientJid.getResource(), clientJid);
+			unregisterResourceFromJID(clientJid.getResource(), clientJid.getBareJID());
 			log.debug("Client resource %s removed from client JID %s", clientJid.getResource(), clientJid.getBareJID());
 			
 		} finally {
@@ -544,5 +541,5 @@ public class InMemoryGatewayDatastore implements GatewayDatastore {
 		} finally {
 			resourcesLock.readLock().unlock();
 		}
-	}
+	}	
 }
