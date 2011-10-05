@@ -28,6 +28,25 @@ import com.voxeo.servlet.xmpp.StanzaError.Type;
 import com.voxeo.servlet.xmpp.XmppServletRequest;
 import com.voxeo.servlet.xmpp.XmppServletResponse;
 
+/**
+ * <p>A Gateway Servlet is a particular type of Rayo Servlet that receives 
+ * messages from client applications and redirects those messages to Rayo 
+ * Nodes, and that receives Calls from Rayo Nodes and redirect those calls 
+ * to the corresponding client applications.</p>
+ * 
+ * <p>A Gateway Servlet acts like a mere proxy as it does not modify the 
+ * content of the XMPP messages. The Gateway will modify and adjust the 
+ * different 'from' and 'to' attributes do distribute the calls across all 
+ * the different client applications and Rayo Nodes.</p>
+ * 
+ * <p>To support its functionality and have a good performance the Rayo 
+ * Gateway uses a DHT (Distributed Hash Table) instance in which several 
+ * mappings are stored like which calls are being hosted in which nodes, or 
+ * which client resources can handle which calls.</p> 
+ * 
+ * @author martin
+ *
+ */
 public class GatewayServlet extends AbstractRayoServlet {
 	
 	private static final long serialVersionUID = 1L;
