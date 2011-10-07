@@ -3,6 +3,7 @@ package com.rayo.server.gateway;
 import java.util.Collection;
 
 import com.rayo.server.gateway.exception.GatewayException;
+import com.rayo.server.gateway.lb.GatewayLoadBalancingStrategy;
 import com.voxeo.servlet.xmpp.JID;
 
 /**
@@ -15,7 +16,7 @@ import com.voxeo.servlet.xmpp.JID;
  * @author martin
  *
  */
-public interface GatewayDatastore {
+public interface GatewayDatastore extends GatewayLoadBalancingStrategy {
 
 	/**
 	 * <p>Registers a new Rayo Node on the DHT. Commonly, a Rayo Node will broadcast its presence

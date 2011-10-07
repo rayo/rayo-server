@@ -7,11 +7,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -59,7 +59,7 @@ public class InMemoryGatewayDatastore implements GatewayDatastore {
 	 * This data structure lets us to quickly find all the Rayo nodes belonging to a 
 	 * specific platform.
 	 */
-	protected Map<String, List<RayoNode>> platformMap = new HashMap<String, List<RayoNode>>();
+	protected Map<String, Queue<RayoNode>> platformMap = new HashMap<String, Queue<RayoNode>>();
 
 	/*
 	 * This data structure maps client JIDs to actual platforms, so we know which 
@@ -86,7 +86,7 @@ public class InMemoryGatewayDatastore implements GatewayDatastore {
 	/*
 	 * This data structure stores all the resources linked with a Client JID
 	 */
-	protected Map<JID, List<String>> resourcesMap = new ConcurrentHashMap<JID, List<String>>();
+	protected Map<JID, Queue<String>> resourcesMap = new ConcurrentHashMap<JID, Queue<String>>();
 
 	//private CollectionMap<JID, ArrayList<JID>, JID> clientJIDs = new CollectionMap<JID, ArrayList<JID>, JID>();
 	protected ReadWriteLock jidLock = new ReentrantReadWriteLock();
@@ -196,7 +196,7 @@ public class InMemoryGatewayDatastore implements GatewayDatastore {
 		readLock.lock();
 		try {
 			Set<JID> jids = new HashSet<JID>();
-			List<RayoNode> nodes = platformMap.get(platformId);
+			Queue<RayoNode> nodes = platformMap.get(platformId);
 			if (nodes != null) {
 				for (RayoNode node: nodes) {
 					jids.add(node.getJid());
@@ -248,9 +248,9 @@ public class InMemoryGatewayDatastore implements GatewayDatastore {
 	 */
 	private void addNodeToPlatform(RayoNode rayoNode, String platformId) {
 
-		List<RayoNode> nodes = platformMap.get(platformId);
+		Queue<RayoNode> nodes = platformMap.get(platformId);
 		if (nodes == null) {
-			nodes = new ArrayList<RayoNode>();
+			nodes = new ConcurrentLinkedQueue<RayoNode>();
 			platformMap.put(platformId, nodes);
 		}
 		nodes.add(rayoNode);
@@ -267,7 +267,7 @@ public class InMemoryGatewayDatastore implements GatewayDatastore {
 	 */
 	private void removeNodeFromPlatform(RayoNode rayoNode, String platformId) {
 
-		List<RayoNode> nodes = platformMap.get(platformId);
+		Queue<RayoNode> nodes = platformMap.get(platformId);
 		if (nodes != null) {
 			nodes.remove(rayoNode);
 			if (nodes.isEmpty()) {
@@ -425,36 +425,6 @@ public class InMemoryGatewayDatastore implements GatewayDatastore {
 		
 		return getCalls(nodeJid);
 	}
-
-	private void lockAll(Lock... locks) {
-		boolean success = true;
-		do {
-			int i = 0;
-			try {
-				while (i < locks.length && success) {
-					success = locks[i].tryLock(10, TimeUnit.MILLISECONDS);
-					++i;
-				}
-			} catch (InterruptedException restart) {
-				success = false;
-			} catch (Exception ex) {
-				success = false;
-				log.warn("Exception caught while locking locks", ex);
-				if (ex instanceof RuntimeException) {
-					throw (RuntimeException) ex;
-				} else {
-					throw new RuntimeException("Unexpected checked exception",
-							ex);
-				}
-			} finally {
-				if (!success) {
-					for (int j = 0; j < 1; ++j) {
-						locks[j].unlock();
-					}
-				}
-			}
-		} while (!success);
-	}
 	
 	@Override
 	public void registerClientResource(JID clientJid) throws GatewayException {
@@ -494,9 +464,9 @@ public class InMemoryGatewayDatastore implements GatewayDatastore {
 		log.debug("Adding resource [%s] to the set of available resources for JID [%s]", resource, jid.getBareJID());
 		resourcesLock.writeLock().lock();
 		try {
-			List<String> resources = resourcesMap.get(jid);
+			Queue<String> resources = resourcesMap.get(jid);
 			if (resources == null) {
-				resources = new ArrayList<String>();
+				resources = new ConcurrentLinkedQueue<String>();
 				resourcesMap.put(jid, resources);
 			}
 			resources.add(resource);
@@ -516,7 +486,7 @@ public class InMemoryGatewayDatastore implements GatewayDatastore {
 		log.debug("Removing resource [%s] from the set of available resources for JID [%s]", resource, jid.getBareJID());
 		resourcesLock.writeLock().lock();
 		try {
-			List<String> resources = resourcesMap.get(jid);
+			Queue<String> resources = resourcesMap.get(jid);
 			if (resources != null) {
 				resources.remove(resource);
 				if (resources.isEmpty()) {
@@ -542,4 +512,46 @@ public class InMemoryGatewayDatastore implements GatewayDatastore {
 			resourcesLock.readLock().unlock();
 		}
 	}	
+	
+	@Override
+	public JID pickRayoNode(String platformId) {
+
+		RayoNode node = null;
+		Lock writeLock = rayoNodeLock.writeLock();
+		writeLock.lock();
+		try {
+			Queue<RayoNode> nodes = platformMap.get(platformId);
+			if (nodes != null) {
+				node = nodes.poll();
+				if (node != null) {
+					nodes.add(node);
+					return node.getJid();
+				}
+			}
+		} finally {
+			writeLock.unlock();
+		}
+		return null;
+	}
+	
+	@Override
+	public String pickClientResource(JID jid) {
+
+		String resource = null;
+		Lock writeLock = resourcesLock.writeLock();
+		writeLock.lock();
+		try {
+			Queue<String> resources = resourcesMap.get(jid);
+			if (resources != null) {
+				resource = resources.poll();
+				if (resource != null) {
+					resources.add(resource);
+					return resource;
+				}
+			}
+		} finally {
+			writeLock.unlock();
+		}
+		return null;
+	}
 }

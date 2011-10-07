@@ -209,11 +209,8 @@ public class GatewayServlet extends AbstractRayoServlet {
     		// Register call in DHT and Rayo Node origin
     		gatewayDatastore.registerCall(callId, fromJid);
     		
-    		Collection<String> resources = gatewayDatastore.getResourcesForClient(callTo.getBareJID());
-			if (resources != null && !resources.isEmpty()) {
-				//TODO: Load balancing strategy
-				resource = resources.iterator().next();
-			} else {
+    		resource = gatewayDatastore.pickClientResource(callTo.getBareJID()); // picks and load balances
+    		if (resource == null) {
 				sendPresenceError(toJid, fromJid, Condition.RECIPIENT_UNAVAILABLE);
 			}
 		} else {
@@ -363,15 +360,13 @@ public class GatewayServlet extends AbstractRayoServlet {
 		JID fromJidInternal = getXmppFactory().createJID(request.getTo().getDomain());
 		
 		String platformId = gatewayDatastore.getPlatformForClient(request.getFrom());
-		if (platformId != null) {
-			Collection<JID> rayoNodes = gatewayDatastore.getRayoNodes(platformId);
-			if (!rayoNodes.isEmpty()) {
-				JID toJidInternal = rayoNodes.iterator().next();
-				//TODO: Load balancing strategy
-				forwardIQRequest(fromJidInternal, toJidInternal, request, payload);				
+		if (platformId != null) {	
+			JID rayoNode = gatewayDatastore.pickRayoNode(platformId); // picks and load balances
+			if (rayoNode != null) {
+				forwardIQRequest(fromJidInternal, rayoNode, request, payload);								
 			} else {
 				sendIqError(request, Type.CANCEL, Condition.SERVICE_UNAVAILABLE, 
-						String.format("Could not find an available Rayo Node in platform %s", platformId));
+						String.format("Could not find an available Rayo Node in platform %s", platformId));				
 			}
 		} else {
 			sendIqError(request, Type.CANCEL, Condition.SERVICE_UNAVAILABLE, 

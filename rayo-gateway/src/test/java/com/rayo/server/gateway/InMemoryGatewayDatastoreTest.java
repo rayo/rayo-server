@@ -148,6 +148,59 @@ public class InMemoryGatewayDatastoreTest {
 		assertEquals(0, dataStore.getResourcesForClient(clientJid1.getBareJID()).size());
 	}
 	
+	@Test
+	public void testRayoNodesLoadBalancing() throws Exception {
+
+		assertNull(dataStore.pickRayoNode("staging"));
+
+		String[] platforms = new String[]{"staging"};
+		RayoNode node1 = buildRayoNode("usera@localhost", platforms);		
+		dataStore.registerRayoNode(node1.getJid(), Arrays.asList(platforms));
+		RayoNode node2 = buildRayoNode("userb@localhost", platforms);
+		dataStore.registerRayoNode(node2.getJid(), Arrays.asList(platforms));
+		RayoNode node3 = buildRayoNode("userc@localhost", platforms);
+		dataStore.registerRayoNode(node3.getJid(), Arrays.asList(platforms));
+		
+		assertEquals(dataStore.pickRayoNode("staging"), node1.getJid());
+		assertEquals(dataStore.pickRayoNode("staging"), node2.getJid());
+		assertEquals(dataStore.pickRayoNode("staging"), node3.getJid());
+		assertEquals(dataStore.pickRayoNode("staging"), node1.getJid());
+		assertEquals(dataStore.pickRayoNode("staging"), node2.getJid());
+		assertEquals(dataStore.pickRayoNode("staging"), node3.getJid());
+		
+		dataStore.unregisterRayoNode(node2.getJid());
+		assertEquals(dataStore.pickRayoNode("staging"), node1.getJid());
+		assertEquals(dataStore.pickRayoNode("staging"), node3.getJid());
+		assertEquals(dataStore.pickRayoNode("staging"), node1.getJid());
+		assertEquals(dataStore.pickRayoNode("staging"), node3.getJid());
+	}
+	
+	@Test
+	public void testClientResourcesLoadBalancing() throws Exception{
+		
+		JID clientJid = new JIDImpl("test@jabber.org/a");
+		assertNull(dataStore.pickClientResource(clientJid.getBareJID()));		
+		dataStore.registerClientResource(clientJid);
+		
+		JID clientJid2 = new JIDImpl("test@jabber.org/b");
+		dataStore.registerClientResource(clientJid2);
+		JID clientJid3 = new JIDImpl("test@jabber.org/c");
+		dataStore.registerClientResource(clientJid3);
+
+		assertEquals(dataStore.pickClientResource(clientJid.getBareJID()),"a");
+		assertEquals(dataStore.pickClientResource(clientJid.getBareJID()),"b");
+		assertEquals(dataStore.pickClientResource(clientJid.getBareJID()),"c");
+		assertEquals(dataStore.pickClientResource(clientJid.getBareJID()),"a");
+		assertEquals(dataStore.pickClientResource(clientJid.getBareJID()),"b");
+		assertEquals(dataStore.pickClientResource(clientJid.getBareJID()),"c");
+		
+		dataStore.unregisterClientResource(clientJid2);
+		assertEquals(dataStore.pickClientResource(clientJid.getBareJID()),"a");
+		assertEquals(dataStore.pickClientResource(clientJid.getBareJID()),"c");
+		assertEquals(dataStore.pickClientResource(clientJid.getBareJID()),"a");
+		assertEquals(dataStore.pickClientResource(clientJid.getBareJID()),"c");
+	}
+	
 	private RayoNode buildRayoNode(String jid, String[] platforms) {
 
 		List<String> list = Arrays.asList(platforms);
