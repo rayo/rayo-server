@@ -1,44 +1,79 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schema xmlns="http://www.w3.org/2001/XMLSchema" 
-	targetNamespace="urn:xmpp:rayo:1" 
-	xmlns:tns="urn:xmpp:rayo:1" 
-	elementFormDefault="qualified">
-
-	<!-- Offer Event -->
-	<element name="offer" type="tns:offerType" />
-	<complexType name="offerType">
-		<sequence>
-			<element name="header" type="tns:headerType" minOccurs="0" maxOccurs="unbounded" />
-		</sequence>
-		<attribute name="timestamp" type="dateTime" use="required" />
-		<attribute name="to" type="anyURI" use="required" />
-		<attribute name="from" type="anyURI" use="optional" />
-	</complexType>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:tns="urn:xmpp:rayo:1" 
+    targetNamespace="urn:xmpp:rayo:1" 
+    elementFormDefault="qualified">
+    
+    <!-- Offer Event -->
+    <element name="offer" type="tns:offerType">
+        <annotation>
+            <documentation>
+                Notifies of an incoming call
+            </documentation>
+        </annotation>        
+    </element>
+    <complexType name="offerType">
+        <sequence>
+            <element name="header" type="tns:headerType" minOccurs="0" maxOccurs="unbounded"/>
+        </sequence>
+        <attribute name="to" type="anyURI" use="required">
+            <annotation>
+                <documentation>
+                    The phone number or address use to dial the application (e.g. 'tel:+14155551212', 'sip:demo@rayo.org')
+                </documentation>
+            </annotation>
+        </attribute>
+        <attribute name="from" type="anyURI" use="optional">
+            <annotation>
+                <documentation>
+                    The caller's phone number or address (e.g. 'tel:+14155551212', 'sip:romeo@montague.lit')
+                </documentation>
+            </annotation>
+        </attribute>
+    </complexType>
     <complexType name="headerType">
-        <attribute name="name" type="string" />
-        <attribute name="value" type="string" />
+        <annotation>
+            <documentation>
+                A key/value pair used to drive call routing and or carry meta-data about the caller or application
+            </documentation>
+        </annotation>
+        <attribute name="name" type="string">
+            <annotation>
+                <documentation>
+                    A string containing the header name (e.g. 'Via' or 'x-agent-skill')
+                </documentation>
+            </annotation>
+        </attribute>
+        <attribute name="value" type="string">
+            <annotation>
+                <documentation>
+                    A string containing the header value
+                </documentation>
+            </annotation>
+        </attribute>
     </complexType>
-	
+    
     <!-- Answered Event -->
-    <element name="answered" type="tns:answeredType" />
-    <complexType name="answeredType">
-        <sequence>
-            <element name="header" type="tns:headerType" minOccurs="0" maxOccurs="unbounded" />
-        </sequence>    
-    </complexType>
-
+    <element name="answered" type="tns:empty">
+        <annotation>
+            <documentation>
+                For outgoing calls only. Indicates that the remote party has answered the call.
+            </documentation>
+        </annotation>
+    </element>
+    
     <!-- Ringing Event -->
-    <element name="ringing" type="tns:ringingType" />
-    <complexType name="ringingType">
-        <sequence>
-            <element name="header" type="tns:headerType" minOccurs="0" maxOccurs="unbounded" />
-        </sequence>    
-    </complexType>
-
+    <element name="ringing" type="tns:empty">
+        <annotation>
+            <documentation>
+                For outgoing calls only. Indicates that the remote party's phone has started ringing.
+            </documentation>
+        </annotation>
+    </element>
+    
     <!-- DTMF Event -->
-    <element name="dtmf" type="tns:dtmfType" />
+    <element name="dtmf" type="tns:dtmfType"/>
     <complexType name="dtmfType">
-        <attribute name="signal" type="string" />
+        <attribute name="signal" type="string"/>
         <attribute name="duration" type="long">
             <annotation>
                 <documentation>
@@ -47,81 +82,187 @@
             </annotation>
         </attribute>
     </complexType>
-
+    
     <!-- End Event -->
-    <element name="end" type="tns:endType" />
-	<complexType name="endType">
-		<sequence>
-			<choice>
-				<element name="hungup" type="tns:empty" />
-				<element name="timeout" type="tns:empty" />
-				<element name="busy" type="tns:empty" />
-				<element name="rejected" type="tns:empty" />
-				<element name="error" type="tns:empty" />
-			</choice>
-			<element name="header" type="tns:headerType" minOccurs="0" maxOccurs="unbounded" />
-		</sequence>
-	</complexType>
-
-	<!-- Answer Command -->
-	<element name="answer" type="tns:answerType" />
-    <complexType name="answerType">
+    <element name="end" type="tns:endType"/>
+    <complexType name="endType">
+        <annotation>
+            <documentation>
+                Indicates that the call has ended. The child element provides the reason.
+            </documentation>
+        </annotation>
         <sequence>
-            <element name="header" type="tns:headerType" minOccurs="0" maxOccurs="unbounded" />
+            <choice>
+                <annotation>
+                    <documentation>
+                        Reasons for the call ending
+                    </documentation>
+                </annotation>
+                <element name="hungup" type="tns:empty">
+			        <annotation>
+			            <documentation>
+			                The remote party ended the call
+			            </documentation>
+			        </annotation>
+                </element>
+                <element name="timeout" type="tns:empty">
+                    <annotation>
+                        <documentation>
+                            The outgoing call timed out.
+                        </documentation>
+                    </annotation>
+                </element>
+                <element name="busy" type="tns:empty">
+                    <annotation>
+                        <documentation>
+                            For outgoing calls only. The remote party returned a busy signal
+                        </documentation>
+                    </annotation>
+                </element>
+                <element name="rejected" type="tns:empty">
+                    <annotation>
+                        <documentation>
+                            For outgoing calls only. The remote party rejected the call.
+                        </documentation>
+                    </annotation>
+                </element>                
+                <element name="error" type="tns:empty">
+                    <annotation>
+                        <documentation>
+                            The call ended due to a network or system error.
+                        </documentation>
+                    </annotation>
+                </element>
+            </choice>
+            <element name="header" type="tns:headerType" minOccurs="0" maxOccurs="unbounded"/>
+        </sequence>
+    </complexType>
+    
+    <!-- Answer Command -->
+    <element name="answer" type="tns:answerType"/>
+    <complexType name="answerType">
+        <annotation>
+            <documentation>
+                Answers an incoming call.
+            </documentation>
+        </annotation>
+        <sequence>
+            <element name="header" type="tns:headerType" minOccurs="0" maxOccurs="unbounded"/>
         </sequence>
     </complexType>
     
     <!-- Redirect Command -->
-	<element name="redirect" type="tns:redirectType" />
-	<complexType name="redirectType">
-		<sequence>
-			<element name="header" type="tns:headerType" minOccurs="0" maxOccurs="unbounded" />
-		</sequence>
-		<attribute name="to" type="anyURI" />
-	</complexType>
-	
+    <element name="redirect" type="tns:redirectType"/>
+    <complexType name="redirectType">
+        <annotation>
+            <documentation>
+                Redirects an incoming call.
+            </documentation>
+        </annotation>
+        <sequence>
+            <element name="header" type="tns:headerType" minOccurs="0" maxOccurs="unbounded"/>
+        </sequence>
+        <attribute name="to" type="anyURI">
+	        <annotation>
+	            <documentation>
+	                The redirect destination (e.g. 'sip:demo@rayo.org')
+	            </documentation>
+	        </annotation>
+        </attribute>
+    </complexType>
+    
     <!-- Reject Command -->
-	<element name="reject" type="tns:rejectType" />
+    <element name="reject" type="tns:rejectType"/>
     <complexType name="rejectType" mixed="true">
+        <annotation>
+            <documentation>
+                Rejects an incoming call
+            </documentation>
+        </annotation>
         <sequence>
             <choice>
-                <element name="decline" type="tns:empty" />
-                <element name="busy" type="tns:empty" />
-                <element name="error" type="tns:empty" />
+                <annotation>
+                    <documentation>
+                        Reasons for rejecting the call
+                    </documentation>
+                </annotation>
+                <element name="decline" type="tns:empty">
+	                <annotation>
+	                    <documentation>
+	                        Decline the call
+	                    </documentation>
+	                </annotation>
+                </element>
+                <element name="busy" type="tns:empty">
+                    <annotation>
+                        <documentation>
+                            Informs the caller that the application is busy
+                        </documentation>
+                    </annotation>
+                </element>
+                <element name="error" type="tns:empty">
+                    <annotation>
+                        <documentation>
+                            Informs the caller that a system error has occurred
+                        </documentation>
+                    </annotation>
+                </element>
             </choice>
-            <element name="header" type="tns:headerType" minOccurs="0" maxOccurs="unbounded" />
+            <element name="header" type="tns:headerType" minOccurs="0" maxOccurs="unbounded"/>
         </sequence>
     </complexType>
-
+    
     <!-- Hangup Command -->
-	<element name="hangup" type="tns:hangupType" />
+    <element name="hangup" type="tns:hangupType"/>
     <complexType name="hangupType">
+         <annotation>
+             <documentation>
+                 Instructs the Rayo Server to end the call
+             </documentation>
+         </annotation>
         <sequence>
-            <element name="header" type="tns:headerType" minOccurs="0" maxOccurs="unbounded" />
+            <element name="header" type="tns:headerType" minOccurs="0" maxOccurs="unbounded"/>
         </sequence>
     </complexType>
-
+    
     <!-- Dial Command -->
-	<element name="dial" type="tns:callType" />
+    <element name="dial" type="tns:callType"/>
     <complexType name="callType">
+         <annotation>
+             <documentation>
+                 Creates an outgoing call
+             </documentation>
+         </annotation>
         <sequence>
-            <element name="header" type="tns:headerType" minOccurs="0" maxOccurs="unbounded" />
-        </sequence>     
-        <attribute name="to" type="anyURI" use="required" />
-        <attribute name="from" type="anyURI" use="optional" />
+            <element name="header" type="tns:headerType" minOccurs="0" maxOccurs="unbounded"/>
+        </sequence>
+        <attribute name="to" type="anyURI" use="required">
+	        <annotation>
+	            <documentation>
+	                The number or address to dial (e.g. 'tel:+14155551212', 'sip:demo@rayo.org')
+	            </documentation>
+	        </annotation>
+        </attribute>
+        <attribute name="from" type="anyURI" use="optional">
+            <annotation>
+                <documentation>
+                    The 'caller id' presented to the remote destination (e.g. 'tel:+14155551212')
+                </documentation>
+            </annotation>
+        </attribute>
     </complexType>
-
+    
     <!-- Resource Reference -->
-    <element name="ref" type="tns:ref" />
+    <element name="ref" type="tns:ref"/>
     <complexType name="ref">
-        <attribute name="id" type="string" use="required" />
+        <attribute name="id" type="string" use="required"/>
     </complexType>
-	
-	<!-- Utility: Empty Type -->
-	<simpleType name="empty">
-		<restriction base="string">
-			<enumeration value='' />
-		</restriction>
-	</simpleType>
-
+    
+    <!-- Utility: Empty Type -->
+    <simpleType name="empty">
+        <restriction base="string">
+            <enumeration value=""/>
+        </restriction>
+    </simpleType>
+    
 </schema>
