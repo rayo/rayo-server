@@ -8,7 +8,7 @@ import java.util.Locale;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
-import com.rayo.server.AdminService;
+import com.rayo.server.admin.AdminService;
 
 @ManagedResource(objectName="com.rayo:Type=Info", description="Application Information")
 public class Info implements InfoMXBean {

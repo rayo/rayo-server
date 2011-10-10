@@ -1,4 +1,4 @@
-package com.rayo.server.gateway.exception;
+package com.rayo.gateway.exception;
 
 @SuppressWarnings("serial")
 public class GatewayException extends Exception {

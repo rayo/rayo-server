@@ -6,7 +6,7 @@ import javax.servlet.ServletContextEvent;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
 
-import com.rayo.server.AdminService;
+import com.rayo.server.admin.AdminService;
 import com.rayo.server.jmx.Info;
 
 public class ContextLoaderListener extends org.springframework.web.context.ContextLoaderListener {

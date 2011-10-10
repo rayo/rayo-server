@@ -1,4 +1,4 @@
-package com.rayo.server.util;
+package com.rayo.gateway.util;
 
 import java.io.Serializable;
 

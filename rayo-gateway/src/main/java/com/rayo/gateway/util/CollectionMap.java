@@ -1,4 +1,4 @@
-package com.rayo.server.gateway.util;
+package com.rayo.gateway.util;
 
 import java.util.Collection;
 import java.util.HashSet;

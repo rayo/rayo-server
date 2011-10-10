@@ -18,6 +18,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSSerializer;
 
+import com.rayo.server.admin.AdminService;
 import com.rayo.server.listener.AdminListener;
 import com.rayo.server.util.DomUtils;
 import com.voxeo.logging.Loggerf;
@@ -26,10 +27,10 @@ import com.voxeo.servlet.xmpp.IQResponse;
 import com.voxeo.servlet.xmpp.JID;
 import com.voxeo.servlet.xmpp.PresenceMessage;
 import com.voxeo.servlet.xmpp.StanzaError;
+import com.voxeo.servlet.xmpp.StanzaError.Condition;
 import com.voxeo.servlet.xmpp.XmppFactory;
 import com.voxeo.servlet.xmpp.XmppServlet;
 import com.voxeo.servlet.xmpp.XmppSession;
-import com.voxeo.servlet.xmpp.StanzaError.Condition;
 
 @SuppressWarnings("serial")
 public abstract class AbstractRayoServlet extends XmppServlet implements AdminListener {
@@ -41,13 +42,28 @@ public abstract class AbstractRayoServlet extends XmppServlet implements AdminLi
     private static final QName PING_QNAME = new QName("ping", new Namespace("", "urn:xmpp:ping"));
 
 	private XmppFactory xmppFactory;
+    private AdminService adminService;
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
 		
 		super.init(config);
 		xmppFactory = (XmppFactory) config.getServletContext().getAttribute(XMPP_FACTORY);
+		
+        adminService.readConfigurationFromContext(getServletConfig().getServletContext());     
+        adminService.addAdminListener(this);
 	}
+	
+    /**
+     * Called by Spring on component initialization
+     * 
+     * Cannot be called 'init' since it would override super.init() and ultimately be 
+     * called twice: once by Spring and once by super.init(context)
+     */
+    public void start() {
+
+    	getLog().info("Initializing %s. Build number: %s", adminService.getServerName(), adminService.getBuildNumber());
+    }
 	
     @Override
     protected void doIQRequest(IQRequest request) throws ServletException,IOException {
@@ -231,4 +247,12 @@ public abstract class AbstractRayoServlet extends XmppServlet implements AdminLi
 	}
 	
 	protected abstract Loggerf getLog();
+
+	public AdminService getAdminService() {
+		return adminService;
+	}
+
+	public void setAdminService(AdminService adminService) {
+		this.adminService = adminService;
+	}	
 }

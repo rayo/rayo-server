@@ -3,6 +3,7 @@ package com.rayo.server;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 
+import com.rayo.server.admin.RayoAdminService;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.Application;
 import com.voxeo.moho.ApplicationContext;
@@ -15,7 +16,7 @@ public class MohoDriver implements Application {
 	private static final Loggerf log = Loggerf.getLogger(MohoDriver.class);
 
     private CallManager callManager;
-    private AdminService adminService;
+    private RayoAdminService adminService;
     private CallStatistics callStatistics;
     private CdrManager cdrManager;
 
@@ -33,7 +34,7 @@ public class MohoDriver implements Application {
         callManager.setApplicationContext(context);
         callManager.start();
         
-        adminService = wac.getBean(AdminService.class);
+        adminService = wac.getBean(RayoAdminService.class);
         callStatistics = wac.getBean(CallStatistics.class);
         cdrManager = wac.getBean(CdrManager.class);
     }

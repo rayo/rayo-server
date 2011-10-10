@@ -6,14 +6,14 @@ import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
-import com.rayo.server.AdminService;
+import com.rayo.server.admin.RayoAdminService;
 import com.voxeo.logging.Loggerf;
 
 @ManagedResource(objectName = "com.rayo:Type=Admin,name=Admin", description = "Admin Interface")
 public class Admin implements AdminMXBean {
 
 	private Loggerf log = Loggerf.getLogger(Admin.class);
-	private AdminService adminService;
+	private RayoAdminService adminService;
 
 	@Override
 	@ManagedOperation(description = "Send a fake dtmf tone")
@@ -71,8 +71,15 @@ public class Admin implements AdminMXBean {
 			log.warn("Logger %s not found", loggerName);
 		}
 	}
+	
+	@Override
+	@ManagedAttribute(description = "Server Name")
+	public String getServerName() {
 
-	public void setAdminService(AdminService adminService) {
+		return adminService.getServerName();
+	}
+
+	public void setAdminService(RayoAdminService adminService) {
 		this.adminService = adminService;
 	}
 }

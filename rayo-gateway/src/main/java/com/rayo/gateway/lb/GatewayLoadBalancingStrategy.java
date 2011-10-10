@@ -1,4 +1,4 @@
-package com.rayo.server.gateway.lb;
+package com.rayo.gateway.lb;
 
 import com.voxeo.servlet.xmpp.JID;
 

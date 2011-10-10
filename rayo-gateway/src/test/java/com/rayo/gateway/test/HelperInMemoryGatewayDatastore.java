@@ -1,7 +1,7 @@
-package com.rayo.server.gateway.test;
+package com.rayo.gateway.test;
 
-import com.rayo.server.gateway.InMemoryGatewayDatastore;
-import com.rayo.server.gateway.RayoNode;
+import com.rayo.gateway.InMemoryGatewayDatastore;
+import com.rayo.gateway.RayoNode;
 
 public class HelperInMemoryGatewayDatastore extends InMemoryGatewayDatastore {
 

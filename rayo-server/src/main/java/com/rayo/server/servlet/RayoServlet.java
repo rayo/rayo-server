@@ -31,7 +31,6 @@ import com.rayo.core.verb.VerbEvent;
 import com.rayo.core.verb.VerbRef;
 import com.rayo.core.xml.XmlProvider;
 import com.rayo.server.AbstractActor;
-import com.rayo.server.AdminService;
 import com.rayo.server.CallActor;
 import com.rayo.server.CallManager;
 import com.rayo.server.CallRegistry;
@@ -44,6 +43,7 @@ import com.rayo.server.RayoStatistics;
 import com.rayo.server.Request;
 import com.rayo.server.Response;
 import com.rayo.server.ResponseHandler;
+import com.rayo.server.admin.RayoAdminService;
 import com.rayo.server.exception.ErrorMapping;
 import com.rayo.server.exception.ExceptionMapper;
 import com.rayo.server.filter.FilterChain;
@@ -79,7 +79,6 @@ public class RayoServlet extends AbstractRayoServlet {
     private MixerRegistry mixerRegistry;
     private ExceptionMapper exceptionMapper;
     private RayoStatistics rayoStatistics;
-    private AdminService adminService;
     private CdrManager cdrManager;
     
     private FilterChain filtersChain;
@@ -99,11 +98,7 @@ public class RayoServlet extends AbstractRayoServlet {
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-        
-        // Read Manifest information and pass it to the admin service
-        adminService.readConfigurationFromContext(getServletConfig().getServletContext());     
-        adminService.addAdminListener(this);
-        
+                
         gatewayDomain = config.getInitParameter(GATEWAY_DOMAIN);
         defaultPlatform = config.getInitParameter(DEFAULT_PLATFORM_ID);
         localDomain = config.getInitParameter(LOCAL_DOMAIN);
@@ -165,15 +160,9 @@ public class RayoServlet extends AbstractRayoServlet {
         }    	
     }
 
-    /**
-     * Called by Spring on component initialization
-     * 
-     * Cannot be called 'init' since it would override super.init() and ultimately be 
-     * called twice: once by Spring and once by super.init(context)
-     */
+    @Override
     public void start() {
 
-    	log.info("Initializing Rayo Server. Build number: %s", adminService.getBuildNumber());
         log.info("Registering Rayo Event Handler");
 
         callManager.addEventHandler(new EventHandler() {
@@ -314,7 +303,7 @@ public class RayoServlet extends AbstractRayoServlet {
             
             // Handle outbound 'dial' command
             if (command instanceof DialCommand) {
-            	if (adminService.isQuiesceMode()) {
+            	if (((RayoAdminService)getAdminService()).isQuiesceMode()) {
                     log.debug("Quiesce Mode ON. Dropping incoming call: %s :: %s", request.toString(), request.getSession().getId());
                     sendIqError(request, StanzaError.Type.WAIT, StanzaError.Condition.SERVICE_UNAVAILABLE, "Quiesce Mode ON.");
             		return;
@@ -524,10 +513,6 @@ public class RayoServlet extends AbstractRayoServlet {
 
 	public void setRayoStatistics(RayoStatistics rayoStatistics) {
 		this.rayoStatistics = rayoStatistics;
-	}
-
-	public void setAdminService(AdminService adminService) {
-		this.adminService = adminService;
 	}
 	
 	public void setCdrManager(CdrManager cdrManager) {

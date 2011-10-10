@@ -1,4 +1,4 @@
-package com.rayo.server.gateway;
+package com.rayo.gateway;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -16,9 +16,9 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import com.rayo.server.gateway.exception.GatewayException;
-import com.rayo.server.gateway.exception.RayoNodeAlreadyExistsException;
-import com.rayo.server.gateway.exception.RayoNodeNotFoundException;
+import com.rayo.gateway.exception.GatewayException;
+import com.rayo.gateway.exception.RayoNodeAlreadyExistsException;
+import com.rayo.gateway.exception.RayoNodeNotFoundException;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.servlet.xmpp.JID;
 

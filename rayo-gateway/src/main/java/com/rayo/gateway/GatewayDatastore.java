@@ -1,9 +1,9 @@
-package com.rayo.server.gateway;
+package com.rayo.gateway;
 
 import java.util.Collection;
 
-import com.rayo.server.gateway.exception.GatewayException;
-import com.rayo.server.gateway.lb.GatewayLoadBalancingStrategy;
+import com.rayo.gateway.exception.GatewayException;
+import com.rayo.gateway.lb.GatewayLoadBalancingStrategy;
 import com.voxeo.servlet.xmpp.JID;
 
 /**

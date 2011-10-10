@@ -2,9 +2,10 @@ package com.rayo.server.jmx;
 
 public interface AdminMXBean {
 
-	public void sendDtmf(String callId, String dtmf);
-	public void enableQuiesce();
-	public void disableQuiesce();
-	public boolean getQuiesceMode();
-	public void setLogLevel(String loggerName, String logLevel);
+	void sendDtmf(String callId, String dtmf);
+	void enableQuiesce();
+	void disableQuiesce();
+	boolean getQuiesceMode();
+	void setLogLevel(String loggerName, String logLevel);
+	String getServerName();
 }

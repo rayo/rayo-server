@@ -292,7 +292,7 @@
 	</bean>
 
 	<!-- Admin Service -->
-	<bean id="adminService" class="com.rayo.server.AdminService">
+	<bean id="adminService" class="com.rayo.server.admin.RayoAdminService">
 		<property name="callRegistry" ref="callRegistry"/>
 	</bean>
 	

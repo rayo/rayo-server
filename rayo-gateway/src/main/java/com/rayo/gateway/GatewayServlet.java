@@ -1,4 +1,4 @@
-package com.rayo.server.gateway;
+package com.rayo.gateway;
 
 import java.io.IOException;
 import java.net.URI;

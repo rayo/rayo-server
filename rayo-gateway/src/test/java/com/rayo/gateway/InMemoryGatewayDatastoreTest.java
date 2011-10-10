@@ -1,4 +1,4 @@
-package com.rayo.server.gateway;
+package com.rayo.gateway;
 
 import static org.junit.Assert.*;
 
@@ -9,8 +9,10 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.rayo.server.gateway.test.HelperInMemoryGatewayDatastore;
-import com.rayo.server.util.JIDImpl;
+import com.rayo.gateway.GatewayDatastore;
+import com.rayo.gateway.RayoNode;
+import com.rayo.gateway.test.HelperInMemoryGatewayDatastore;
+import com.rayo.gateway.util.JIDImpl;
 import com.voxeo.servlet.xmpp.JID;
 
 public class InMemoryGatewayDatastoreTest {

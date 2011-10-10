@@ -1,4 +1,4 @@
-package com.rayo.server.gateway;
+package com.rayo.gateway;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;

@@ -72,7 +72,13 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-web</artifactId>
-		</dependency>		
+		</dependency>	
+		<!-- JMX Management Console -->
+        <dependency>
+          <groupId>org.jolokia</groupId>
+          <artifactId>jolokia-core</artifactId>
+          <version>0.90</version>
+        </dependency>			
 	</dependencies>
     <profiles>
 	  <profile> 
