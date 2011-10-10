@@ -2,6 +2,6 @@
 <!DOCTYPE sip-app PUBLIC "-//Java Community Process//DTD SIP Application 1.0//EN" "http://www.jcp.org/dtd/sip-app_1_0.dtd">
 <sip-app id="rayo">
 	<listener>
-		<listener-class>com.rayo.server.gateway.ContextLoaderListener</listener-class>
+		<listener-class>com.rayo.gateway.ContextLoaderListener</listener-class>
 	</listener>
 </sip-app>
