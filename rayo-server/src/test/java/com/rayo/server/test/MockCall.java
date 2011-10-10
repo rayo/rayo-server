@@ -568,11 +568,11 @@ public class MockCall implements IncomingCall {
     }
     
     @Override
-    public boolean getAsync() {
-    	return false;
+    public void setAsync(boolean async) {
     }
     
     @Override
-    public void setAsync(boolean async) {
+    public boolean isAsync() {
+    	return false;
     }
 }
