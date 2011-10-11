@@ -17,7 +17,6 @@ import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.rayo.gateway.exception.GatewayException;
-import com.rayo.gateway.exception.RayoNodeAlreadyExistsException;
 import com.rayo.gateway.exception.RayoNodeNotFoundException;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.servlet.xmpp.JID;
@@ -218,7 +217,7 @@ public class InMemoryGatewayDatastore implements GatewayDatastore {
 			log.debug("Adding %s to platforms %s", rayoNode, platformIds);
 			RayoNode node = nodeMap.get(rayoNode);
 			if (node != null) {
-				throw new RayoNodeAlreadyExistsException();
+				log.warn("Rayo Node [%s] already exists. Ignoring status update.", rayoNode);
 			}
 			
 			String hostname = rayoNode.getDomain();
