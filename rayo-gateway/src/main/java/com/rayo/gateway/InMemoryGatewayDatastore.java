@@ -218,6 +218,7 @@ public class InMemoryGatewayDatastore implements GatewayDatastore {
 			RayoNode node = nodeMap.get(rayoNode);
 			if (node != null) {
 				log.warn("Rayo Node [%s] already exists. Ignoring status update.", rayoNode);
+				return;
 			}
 			
 			String hostname = rayoNode.getDomain();
