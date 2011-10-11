@@ -103,6 +103,7 @@ public class RayoServlet extends AbstractRayoServlet {
         localDomain = config.getInitParameter(LOCAL_DOMAIN);
         
         if (gatewayDomain != null) {
+        	        	
 	        Timer timer = new Timer();
 	        timer.schedule(new TimerTask() {
 				
@@ -111,7 +112,7 @@ public class RayoServlet extends AbstractRayoServlet {
 					
 					broadcastPresence("chat");
 				}
-			}, 20000);
+			}, 20000, 20000);
         }
     }
     
@@ -133,6 +134,11 @@ public class RayoServlet extends AbstractRayoServlet {
     	broadcastPresence("unavailable");
     }
     
+    /**
+     * Broadcasts presence of this Rayo Node to the configured Rayo Gateway
+     * 
+     * @param status Presence status to be broadcasted
+     */
     private void broadcastPresence(String status) {
     	
     	//TODO: Make private
