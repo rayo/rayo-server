@@ -24,36 +24,12 @@
 		<dependency>
 			<groupId>com.rayo</groupId> 
 			<artifactId>rayo-core</artifactId>
-			<version>${project.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.voxeo.moho</groupId>
-					<artifactId>moho-api</artifactId>
-				</exclusion>
-			</exclusions>			
+			<version>${project.version}</version>		
 		</dependency>	
 		<dependency>
 			<groupId>com.rayo</groupId> 
 			<artifactId>rayo-server</artifactId>
-			<version>${project.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.voxeo.moho</groupId>
-					<artifactId>moho-api</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.voxeo.moho</groupId>
-					<artifactId>moho-impl</artifactId>
-				</exclusion>			
-				<exclusion>
-					<groupId>com.voxeo.moho</groupId>
-					<artifactId>moho-presence</artifactId>
-				</exclusion>
-				<exclusion>
-					<groupId>com.voxeo.moho</groupId>
-					<artifactId>moho-reg</artifactId>
-				</exclusion>						
-			</exclusions>				
+			<version>${project.version}</version>			
 		</dependency>
 		<dependency>
 			<groupId>com.voxeo</groupId>
