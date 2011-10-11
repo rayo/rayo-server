@@ -20,6 +20,7 @@ import com.rayo.server.JIDRegistry;
 import com.rayo.server.lookup.RayoJIDLookupService;
 import com.rayo.server.servlet.AbstractRayoServlet;
 import com.voxeo.logging.Loggerf;
+import com.voxeo.moho.util.ParticipantIDParser;
 import com.voxeo.servlet.xmpp.IQRequest;
 import com.voxeo.servlet.xmpp.JID;
 import com.voxeo.servlet.xmpp.PresenceMessage;
@@ -458,10 +459,13 @@ public class GatewayServlet extends AbstractRayoServlet {
 	
 	private String getDomainName(String callId) {
 
-		//String ipAddress = 
-		//TODO: Pending from guido
-		String ipAddress = "192.168.1.35";
-		return gatewayDatastore.getDomainName(ipAddress);
+		String ipAddress = ParticipantIDParser.getIpAddress(callId);
+		if (ipAddress != null) {
+			return gatewayDatastore.getDomainName(ipAddress);
+		} else {
+			log.error("Could not decode IP Address from call id [%s]", callId);
+			return null;
+		}
 	}
 
 	public void setGatewayDatastore(GatewayDatastore gatewayDatastore) {
