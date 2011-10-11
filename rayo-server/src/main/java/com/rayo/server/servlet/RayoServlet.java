@@ -87,7 +87,6 @@ public class RayoServlet extends AbstractRayoServlet {
     
     private XmppMessageListenerGroup xmppMessageListenersGroup;
     
-    //TODO: This declarations are in the xmpp.xml Should they be elsewhere?
     private String gatewayDomain;
     private String defaultPlatform;
     private String localDomain;
@@ -142,7 +141,7 @@ public class RayoServlet extends AbstractRayoServlet {
         	CoreDocumentImpl document = new CoreDocumentImpl(false);
         	
         	org.w3c.dom.Element showElement = document.createElement("show");
-        	showElement.setTextContent(status);
+        	showElement.setTextContent(status.toUpperCase());
         	org.w3c.dom.Element nodeInfoElement = 
         			document.createElementNS("urn:xmpp:rayo:cluster:1", "node-info");
         	org.w3c.dom.Element platform = document.createElement("platform");
@@ -155,7 +154,7 @@ public class RayoServlet extends AbstractRayoServlet {
 	
 				presence.send();
         	} catch (Exception e) {
-        		log.error("Could not broadcast presence to gateway [%s]", gatewayDomain);
+        		log.error("Could not broadcast presence to gateway [%s]", gatewayDomain, e);
         	}
         }    	
     }
