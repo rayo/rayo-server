@@ -270,7 +270,7 @@
 
 
 	<!-- Admin Service -->
-	<bean id="adminService" class="com.rayo.server.admin.AdminService"/>
+	<bean id="adminService" class="com.rayo.server.admin.RayoAdminService"/>
 	
 	<!-- JMX Configuration -->
   	<bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
