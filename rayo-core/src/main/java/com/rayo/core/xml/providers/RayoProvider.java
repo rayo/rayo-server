@@ -22,7 +22,6 @@ import com.rayo.core.EndEvent;
 import com.rayo.core.FinishedSpeakingEvent;
 import com.rayo.core.HangupCommand;
 import com.rayo.core.JoinCommand;
-import com.rayo.core.JoinCommand.Strategy;
 import com.rayo.core.JoinDestinationType;
 import com.rayo.core.JoinedEvent;
 import com.rayo.core.OfferEvent;
@@ -218,10 +217,6 @@ public class RayoProvider extends BaseProvider {
     	
     	if (element.attribute("direction") != null) {
     		join.setDirection(toEnum(Direction.class, "direction", element));
-    	}
-    	
-    	if (element.attribute("strategy") != null) {
-    		join.setStrategy(toEnum(Strategy.class, "strategy", element));
     	}
     	
     	if (element.attribute("call-id") != null) {
@@ -464,9 +459,6 @@ public class RayoProvider extends BaseProvider {
         }
         if (join.getMedia() != null) {
         	joinElement.addAttribute("media", join.getMedia().name().toLowerCase());
-        }
-        if (join.getStrategy() != null) {
-        	joinElement.addAttribute("strategy", join.getStrategy().toString());
         }
         if (join.getTo() != null) {
         	if (join.getType() == JoinDestinationType.CALL) {
