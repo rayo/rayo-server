@@ -498,37 +498,6 @@ class ValidationTest {
 		def dial = parseXml("""<dial xmlns="urn:xmpp:rayo:1" to="tel:+447976224017 " from="sip:442035149248@173.255.241.49"></dial>""")
 		assertNotNull fromXML(dial)
 	}	
-
-	@Test
-	public void validateJoinHasDefaultStrategy() {
-				
-		def message = parseXml("""<join xmlns="urn:xmpp:rayo:1" direction="duplex" media="bridge" call-id="1234"/>""")
-		def join = fromXML(message)
-		assertNotNull join
-		assertEquals join.strategy, JoinCommand.Strategy.MULTIPLE
-	}
-	
-	@Test
-	public void validateJoinLowercaseStrategy() {
-				
-		def message = parseXml("""<join xmlns="urn:xmpp:rayo:1" direction="duplex" media="bridge" call-id="1234" strategy="exclusive_keep"/>""")
-		def join = fromXML(message)
-		assertNotNull join
-		assertEquals join.strategy, JoinCommand.Strategy.EXCLUSIVE_KEEP
-	}
-	
-	
-	@Test
-	public void validateJoinInvalidStrategy() {
-				
-		def join = parseXml("""<join xmlns="urn:xmpp:rayo:1" direction="duplex" media="bridge" call-id="1234" strategy="aaa"/>""")
-		
-		def errorMapping = assertValidationException(join)
-		assertNotNull errorMapping
-		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
-		assertEquals errorMapping.condition, ExceptionMapper.toString(StanzaError.Condition.BAD_REQUEST)
-		assertEquals errorMapping.text, String.format(Messages.INVALID_ENUM, 'strategy')
-	}
 	
 	@Test
 	public void validateNestedJoinInvalidDirection() {
