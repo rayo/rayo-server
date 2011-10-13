@@ -19,6 +19,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import com.rayo.gateway.exception.GatewayException;
 import com.rayo.gateway.exception.RayoNodeNotFoundException;
 import com.voxeo.logging.Loggerf;
+import com.voxeo.moho.util.ParticipantIDParser;
 import com.voxeo.servlet.xmpp.JID;
 
 
@@ -334,13 +335,11 @@ public class InMemoryGatewayDatastore implements GatewayDatastore {
 	@Override
 	public void registerCall(String callId, JID clientJid) throws GatewayException {
 		
-//		Lock readLock = tropoNodeLock.readLock();
 		Lock writeLock = callLock.writeLock();
 		writeLock.lock();
-		//lockAll(readLock, writeLock);
+
 		try {
-			//String ipAddress = decode it from the callId
-			String ipAddress = "192.168.1.35";
+			String ipAddress = ParticipantIDParser.getIpAddress(callId);
 			
 			RayoNode node = addressMap.get(ipAddress);
 			if (node == null) {
@@ -358,7 +357,6 @@ public class InMemoryGatewayDatastore implements GatewayDatastore {
 
 		} finally {
 			writeLock.unlock();
-			//readLock.unlock();
 		}
 	}
 
@@ -469,7 +467,11 @@ public class InMemoryGatewayDatastore implements GatewayDatastore {
 				resources = new ConcurrentLinkedQueue<String>();
 				resourcesMap.put(jid, resources);
 			}
-			resources.add(resource);
+			if (!resources.contains(resource)) {
+				resources.add(resource);
+			} else {
+				log.debug("Resource [%s] is already registered for Client JID [%s]. Ignoring request.", resource, jid.getBareJID());
+			}
 		} finally {
 			resourcesLock.writeLock().unlock();
 		}
