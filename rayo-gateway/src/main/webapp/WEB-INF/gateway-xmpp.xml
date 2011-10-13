@@ -13,15 +13,15 @@
 
 	<bean id="gatewayDatastore" class="com.rayo.gateway.InMemoryGatewayDatastore"/>
 	
-	<util:set id="internalDomains" set-class="java.util.HashSet">
+	<util:list id="internalDomains" list-class="java.util.ArrayList">
 		<value>internal.tropo.local</value>
-	</util:set>
+	</util:list>
 
-	<util:set id="externalDomains" set-class="java.util.HashSet">
+	<util:list id="externalDomains" list-class="java.util.ArrayList">
 		<value>gw.tropo.local</value>
 		<value>192.168.1.33</value>
 		<value>localhost</value>
-	</util:set>
+	</util:list>
 	
 	<!-- Global JIDs Registry -->
 	<bean id="jidRegistry" class="com.rayo.server.JIDRegistry" />
