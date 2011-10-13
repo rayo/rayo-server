@@ -262,7 +262,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 		JID toJid = message.getTo();
 		JID fromJid = message.getFrom();
 		
-		if (message.getType() == null) { // client comes online
+		if (message.getType() == null || message.getType().isEmpty()) { // client comes online
 			if (validApplicationJid(message.getFrom())) {
 				switch (message.getShow()) {
 					case CHAT: 
