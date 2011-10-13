@@ -207,8 +207,8 @@ public class GatewayServlet extends AbstractRayoServlet {
     		// We set the call domain to the Gateway. All outbound messages will use that domain as 'from'
     		jidRegistry.put(callId, callTo, toJid.getDomain());			
     		
-    		// Register call in DHT and Rayo Node origin
-    		gatewayDatastore.registerCall(callId, fromJid);
+    		// Register call in DHT 
+    		gatewayDatastore.registerCall(callId, callTo);
     		
     		resource = gatewayDatastore.pickClientResource(callTo.getBareJID()); // picks and load balances
     		if (resource == null) {
