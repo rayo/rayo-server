@@ -9,6 +9,10 @@
 		<javaee:servlet-class>
 			com.rayo.server.SpringXmppServlet
 		</javaee:servlet-class>
+		<javaee:init-param>
+     		<javaee:param-name>local-domain</javaee:param-name>
+     		<javaee:param-value>localhost</javaee:param-value>
+   		</javaee:init-param>		
 		<javaee:load-on-startup>1</javaee:load-on-startup>
 	</xmpp:servlet>
 	<xmpp:defaultxmppapp />
