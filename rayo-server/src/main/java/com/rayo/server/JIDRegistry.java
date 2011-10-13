@@ -143,6 +143,10 @@ public class JIDRegistry {
 	
 	public List<String> getCallsByJID(JID jid) {
 		
+		if (jid == null) {
+			log.warn("Trying to find calls for a null JID");
+			return new ArrayList<String>();
+		}
 		callsByJidLock.readLock().lock();
 		try {
 			List<String> values = callsByJid.get(jid.getBareJID().toString());
