@@ -68,7 +68,6 @@ public class RayoServlet extends AbstractRayoServlet {
 
     public static final String GATEWAY_DOMAIN = "gateway-domain";
     public static final String DEFAULT_PLATFORM_ID = "default-platform-id";
-    public static final String LOCAL_DOMAIN = "local-domain";
     
     private JIDRegistry jidRegistry;
     
@@ -89,7 +88,6 @@ public class RayoServlet extends AbstractRayoServlet {
     
     private String gatewayDomain;
     private String defaultPlatform;
-    private String localDomain;
 	
     // Setup
     // ================================================================================
@@ -99,8 +97,7 @@ public class RayoServlet extends AbstractRayoServlet {
         super.init(config);
                 
         gatewayDomain = config.getInitParameter(GATEWAY_DOMAIN);
-        defaultPlatform = config.getInitParameter(DEFAULT_PLATFORM_ID);
-        localDomain = config.getInitParameter(LOCAL_DOMAIN);
+        defaultPlatform = config.getInitParameter(DEFAULT_PLATFORM_ID);        
         
         if (gatewayDomain != null) {
         	        	
@@ -112,7 +109,7 @@ public class RayoServlet extends AbstractRayoServlet {
 					
 					broadcastPresence("chat");
 				}
-			}, 20000, 20000);
+			}, 20000, 60000);
         }
     }
     
@@ -156,7 +153,7 @@ public class RayoServlet extends AbstractRayoServlet {
         	
         	try {
 				PresenceMessage presence = getXmppFactory().createPresence(
-						localDomain, gatewayDomain, null, showElement, nodeInfoElement);
+						getLocalDomain(), gatewayDomain, null, showElement, nodeInfoElement);
 	
 				presence.send();
         	} catch (Exception e) {
@@ -231,15 +228,16 @@ public class RayoServlet extends AbstractRayoServlet {
 		} catch (ServletException se) {
 			//TODO: Pending of internal ticket: https://evolution.voxeo.com/ticket/1536300
 			if (se.getMessage().startsWith("can't find corresponding client session")) {
-				CallActor<Call> actor = findCallActor(event.getCallId());
-				if (actor != null) {
-					log.error("An event has been received but there is no active call control session for handling JID %s. " + 
-							  "We will disconnect call with id %s", jid, event.getCallId());
+				
+				try {
+					CallActor<Call> actor = findCallActor(event.getCallId());
 					cdrManager.store(event.getCallId());
-					callRegistry.remove(event.getCallId());
 					if (actor.getCall().getCallState() != State.DISCONNECTED || actor.getCall().getCallState() != State.FAILED) {
 						actor.getCall().disconnect();
 					}
+				} catch (NotFoundException nfe) {
+					log.error("An event has been received but there is no active call control session for handling JID %s. " + 
+							  "We will disconnect call with id %s", jid, event.getCallId());
 				}
 			}
 		} catch (Exception e) {
