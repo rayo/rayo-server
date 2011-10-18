@@ -13,6 +13,7 @@ import com.rayo.gateway.GatewayDatastore;
 import com.rayo.gateway.RayoNode;
 import com.rayo.gateway.test.HelperInMemoryGatewayDatastore;
 import com.rayo.gateway.util.JIDImpl;
+import com.voxeo.moho.util.ParticipantIDParser;
 import com.voxeo.servlet.xmpp.JID;
 
 public class InMemoryGatewayDatastoreTest {
@@ -88,18 +89,16 @@ public class InMemoryGatewayDatastoreTest {
 		
 		String[] platforms = new String[]{"staging"};
 		RayoNode node = buildRayoNode("usera@localhost", platforms);
+		dataStore.registerRayoNode(node.getJid(), Arrays.asList(platforms));
 		
-		//TODO: Needed until we add Guido support
-		((HelperInMemoryGatewayDatastore)dataStore).addIpAddressMapping("192.168.1.35", node);
+		//  moho://ip:port/<type>/<callid>
+		String uid = String.valueOf(Math.abs(new com.eaio.uuid.UUID().getTime()));
+		String callId = ParticipantIDParser.encode("moho://127.0.0.1:5060/1/" + uid);
 				
-		dataStore.registerCall("1234", clientJid);
+		dataStore.registerCall(callId, clientJid);
 		assertEquals(1, dataStore.getCalls(clientJid).size());
 		
-		dataStore.registerCall("123456", clientJid);
-		assertEquals(2, dataStore.getCalls(clientJid).size());
-		
-		dataStore.unregistercall("1234");
-		dataStore.unregistercall("123456");
+		dataStore.unregistercall(callId);
 		assertEquals(0, dataStore.getCalls(clientJid).size());		
 	}
 	
@@ -113,17 +112,16 @@ public class InMemoryGatewayDatastoreTest {
 		RayoNode node = buildRayoNode("usera@localhost", platforms);
 		assertEquals(0, dataStore.getCallsForRayoNode(node.getJid()).size());
 
-		//TODO: Needed until we add Guido support
-		((HelperInMemoryGatewayDatastore)dataStore).addIpAddressMapping("192.168.1.35", node);
-				
-		dataStore.registerCall("1234", clientJid);
+		dataStore.registerRayoNode(node.getJid(), Arrays.asList(platforms));
+		
+		//  moho://ip:port/<type>/<callid>
+		String uid = String.valueOf(Math.abs(new com.eaio.uuid.UUID().getTime()));
+		String callId = ParticipantIDParser.encode("moho://127.0.0.1:5060/1/" + uid);
+		
+		dataStore.registerCall(callId, clientJid);
 		assertEquals(1, dataStore.getCallsForRayoNode(node.getJid()).size());
 		
-		dataStore.registerCall("123456", clientJid);
-		assertEquals(2, dataStore.getCallsForRayoNode(node.getJid()).size());
-		
-		dataStore.unregistercall("1234");
-		dataStore.unregistercall("123456");
+		dataStore.unregistercall(callId);
 		assertEquals(0, dataStore.getCallsForRayoNode(node.getJid()).size());
 	}
 	
