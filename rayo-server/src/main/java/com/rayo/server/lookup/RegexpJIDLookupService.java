@@ -6,6 +6,10 @@ import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -21,9 +25,27 @@ public class RegexpJIDLookupService implements RayoJIDLookupService<OfferEvent> 
 	
 	private Map<Pattern, String> patterns = new LinkedHashMap<Pattern, String>();
 	
-	public RegexpJIDLookupService(Resource properties) throws IOException {
+	private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+	
+	public RegexpJIDLookupService(final Resource properties) throws IOException {
 		
-		read(properties);
+		TimerTask readTask = new TimerTask() {
+			
+			@Override
+			public void run() {
+
+				Lock lock = RegexpJIDLookupService.this.lock.writeLock();
+				try {
+					lock.lock();
+					read(properties);
+				} catch (IOException e) {
+					logger.error(e.getMessage(),e);
+				} finally {
+					lock.unlock();
+				}
+			}
+		};
+		new Timer().schedule(readTask, 0, 60000);
 	}
 	
 	private void read(Resource properties) throws IOException {
@@ -57,19 +79,25 @@ public class RegexpJIDLookupService implements RayoJIDLookupService<OfferEvent> 
 	@Override
 	public String lookup(URI uri) {
 		
-		for (Pattern pattern: patterns.keySet()) {
-			Matcher matcher = pattern.matcher(uri.toString());
-			if (matcher.matches()) {
-				String value = patterns.get(pattern);
-				if (logger.isDebugEnabled()) {
-					logger.debug("Found a match for %s : %s", uri.toString(), value);
+		Lock lock = RegexpJIDLookupService.this.lock.readLock();
+		try {
+			lock.lock();
+			for (Pattern pattern: patterns.keySet()) {
+				Matcher matcher = pattern.matcher(uri.toString());
+				if (matcher.matches()) {
+					String value = patterns.get(pattern);
+					if (logger.isDebugEnabled()) {
+						logger.debug("Found a match for %s : %s", uri.toString(), value);
+					}
+					return value;
 				}
-				return value;
 			}
+			if (logger.isDebugEnabled()) {
+				logger.debug("We didn't find any Regexp match for %s", uri.toString());
+			}
+			return null;
+		} finally {
+			lock.unlock();
 		}
-		if (logger.isDebugEnabled()) {
-			logger.debug("We didn't find any Regexp match for %s", uri.toString());
-		}
-		return null;
 	}
 }
