@@ -82,7 +82,12 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 	            javax.media.mscontrol.join.Joinable.Direction direction = participant.getAttribute(JoinCommand.DIRECTION);
 	            JoinType mediaType = participant.getAttribute(JoinCommand.MEDIA_TYPE);                        
 	            Participant destination = getDestinationParticipant(dest, type);
-	            
+	        	
+	            if (destination == null) {
+	        		// Remote join
+	        		destination = participant.getApplicationContext().getParticipant(dest);
+	        	}
+	        	
 	            joinees.add(destination);
 	            
         		participant.join(destination, mediaType, direction);
