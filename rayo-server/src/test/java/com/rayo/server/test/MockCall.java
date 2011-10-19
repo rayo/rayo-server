@@ -575,4 +575,10 @@ public class MockCall implements IncomingCall {
     public boolean isAsync() {
     	return false;
     }
+    
+    @Override
+    public Joint join(Participant other, JoinType type, boolean force,
+    		Direction direction) {
+    	return null;
+    }
 }
