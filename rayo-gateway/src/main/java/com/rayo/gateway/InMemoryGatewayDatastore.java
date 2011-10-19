@@ -16,6 +16,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import javax.xml.crypto.NodeSetData;
+
 import com.rayo.gateway.exception.GatewayException;
 import com.rayo.gateway.exception.RayoNodeNotFoundException;
 import com.voxeo.logging.Loggerf;
@@ -555,5 +557,21 @@ public class InMemoryGatewayDatastore implements GatewayDatastore {
 			writeLock.unlock();
 		}
 		return null;
+	}
+	
+	@Override
+	public JID getRayoNode(String callId) {
+
+		Lock readLock = callLock.readLock();
+		readLock.lock();
+		try {
+			RayoNode node = callToNodeMap.get(callId);
+			if (node != null) {
+				return node.getJid();
+			}
+			return null;
+		} finally {
+			readLock.unlock();
+		}
 	}
 }

@@ -1,6 +1,8 @@
 package com.rayo.server.servlet;
 
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -40,15 +42,29 @@ public abstract class AbstractRayoServlet extends XmppServlet implements AdminLi
     private static final QName SESSION_QNAME = new QName("session", new Namespace("", "urn:ietf:params:xml:ns:xmpp-session"));
     private static final QName BIND_QNAME = new QName("bind", new Namespace("", "urn:ietf:params:xml:ns:xmpp-bind"));
     private static final QName PING_QNAME = new QName("ping", new Namespace("", "urn:xmpp:ping"));
+    
+    private static final String LOCAL_DOMAIN = "local-domain";
 
 	private XmppFactory xmppFactory;
     private AdminService adminService;
+    
+    private String localDomain;
 
 	@Override
 	public void init(ServletConfig config) throws ServletException {
 		
 		super.init(config);
 		xmppFactory = (XmppFactory) config.getServletContext().getAttribute(XMPP_FACTORY);
+		
+		localDomain = config.getInitParameter(LOCAL_DOMAIN);
+		if (localDomain == null) {
+			try {
+				localDomain = InetAddress.getLocalHost().getHostName();
+			} catch (UnknownHostException e) {
+				getLog().warn(e.getMessage());
+				localDomain = "localhost";
+			}
+		}
 		
         adminService.readConfigurationFromContext(getServletConfig().getServletContext());     
         adminService.addAdminListener(this);
@@ -255,4 +271,9 @@ public abstract class AbstractRayoServlet extends XmppServlet implements AdminLi
 	public void setAdminService(AdminService adminService) {
 		this.adminService = adminService;
 	}	
+	
+	public String getLocalDomain() {
+		
+		return localDomain;
+	}
 }

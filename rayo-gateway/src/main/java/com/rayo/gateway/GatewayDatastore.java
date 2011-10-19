@@ -179,6 +179,17 @@ public interface GatewayDatastore extends GatewayLoadBalancingStrategy {
 	 */
 	Collection<String> getCallsForRayoNode(JID nodeJid);
 	
+	/**
+	 * <p>Returns the JID of the Rayo Node that is currently handling a given call or 
+	 * <code>null</code> if no Rayo Node can be found for the specified call id.</p>
+	 *  
+	 * @param callId Call Id
+	 * 
+	 * @return {@link JID} of the Rayo Node that is currently handling the call or 
+	 * <code>null</code> if no Rayo Node could be found. 
+	 */
+	JID getRayoNode(String callId);
+	
 	
 	//void removeApplication(JID appJid);
 

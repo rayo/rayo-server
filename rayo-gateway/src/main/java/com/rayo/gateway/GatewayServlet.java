@@ -142,7 +142,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 		
 		Collection<String> calls = gatewayDatastore.getCalls(message.getFrom());
 		for (String callId : calls) {
-			JID fromJid = createCallJid(callId);
+			JID fromJid = createInternalCallJid(callId);
 			JID targetJid = jidRegistry.getJID(callId);
 			CoreDocumentImpl document = new CoreDocumentImpl(false);
 			org.w3c.dom.Element endElement = document.createElementNS("urn:xmpp:rayo:1", "end");
@@ -214,24 +214,20 @@ public class GatewayServlet extends AbstractRayoServlet {
     		if (resource == null) {
 				sendPresenceError(toJid, fromJid, Condition.RECIPIENT_UNAVAILABLE);
 			}
-		} else {
-			Element endElement = message.getElement("end", "urn:xmpp:rayo:1");
-			if (endElement != null) {
-				gatewayDatastore.unregistercall(callId);
-				jidRegistry.remove(callId);
-			}
 		}
-		
-    	
+		  	
     	JID jid = jidRegistry.getJID(callId);  
     	if (resource != null) {
     		jid.setResource(resource);
     	}
     	
-    	JID from = createCallJid(callId);
-		if (fromJid.getResource() != null) {
-			from.setResource(fromJid.getResource());
+    	JID from = createExternalCallJid(callId, fromJid.getResource());
+		
+		if (message.getElement("end", "urn:xmpp:rayo:1") != null) {
+			gatewayDatastore.unregistercall(callId);
+			jidRegistry.remove(callId);
 		}
+		
 		try {
 			// Send presence
 			PresenceMessage presence = getXmppFactory().createPresence(from, jid, null, 
@@ -248,12 +244,25 @@ public class GatewayServlet extends AbstractRayoServlet {
 		}					
 	}
 	
-	private JID createCallJid(String callId) {
+	private JID createInternalCallJid(String callId) {
 		
-		String callDomain = jidRegistry.getOriginDomain(callId);
-		return getXmppFactory().createJID(callId + "@" + callDomain);
+		JID rayoNode = gatewayDatastore.getRayoNode(callId);
+		if (rayoNode != null) {
+			return getXmppFactory().createJID(callId + "@" + rayoNode.getDomain());
+		}
+		throw new IllegalStateException(String.format("Could not find Rayo Node for call id [%s]", callId));
 	}
 
+	
+	private JID createExternalCallJid(String callId, String resource) {
+		
+		JID jid = getXmppFactory().createJID(callId + "@" + getExternalDomain());
+		if (resource != null) {
+			jid.setResource(resource);
+		}
+		return jid;
+	}
+	
 	/*
 	 * Processes a Presence Message from a Rayo Client
 	 */
@@ -342,8 +351,8 @@ public class GatewayServlet extends AbstractRayoServlet {
 		String callId = request.getTo().getNode();
 		Element payload = request.getElement();
 		
-		JID fromJidInternal = getXmppFactory().createJID(request.getTo().getDomain());
-		JID toJidInternal = createCallJid(callId);
+		JID fromJidInternal = getXmppFactory().createJID(getInternalDomain());
+		JID toJidInternal = createInternalCallJid(callId);
 
 		forwardIQRequest(fromJidInternal, toJidInternal, request, payload);
 	}
@@ -468,6 +477,16 @@ public class GatewayServlet extends AbstractRayoServlet {
 		}
 	}
 
+	private String getInternalDomain() {
+
+		return internalDomains.iterator().next(); 
+	}
+	
+	public String getExternalDomain() {
+		
+		return externalDomains.iterator().next();
+	}
+	
 	public void setGatewayDatastore(GatewayDatastore gatewayDatastore) {
 		this.gatewayDatastore = gatewayDatastore;
 	}

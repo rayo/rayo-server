@@ -37,6 +37,9 @@ public class CdrManager {
 	
 	public Cdr create(Call call) {
 
+		if (logger.isDebugEnabled()) {
+			logger.debug("Creating CDR for call id [%s]", call.getId());
+		}
 		Cdr cdr = new Cdr();
 		cdr.setStartTime(System.currentTimeMillis());
 		cdr.setCallId(call.getId());
@@ -90,7 +93,10 @@ public class CdrManager {
 			logger.error("Could not find CDR for call id %s", callId);
 			return;
 		}
-
+		
+		if (logger.isDebugEnabled()) {
+			logger.debug("Storing CDR record for call id [%s]", callId);
+		}
 		for(CdrStorageStrategy storageStrategy: storageStrategies) {
 			try {
 				storageStrategy.store(cdr);
@@ -99,6 +105,9 @@ public class CdrManager {
 			}
 		}
 		
+		if (logger.isDebugEnabled()) {
+			logger.debug("Removing CDR record from memory for call id [%s]", callId);
+		}
 		cdrs.remove(callId);
 	}
 	
@@ -114,6 +123,9 @@ public class CdrManager {
 	
 	public List<Cdr> getActiveCdrs() {
 		
+		if (logger.isDebugEnabled()) {
+			logger.debug("Retrieving list of active CDRs [%s]", cdrs.keySet().toString());
+		}
 		return sort(cdrs.values());
 	}
 	
