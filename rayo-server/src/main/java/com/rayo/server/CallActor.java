@@ -146,7 +146,12 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     
     @Message
     public void join(JoinCommand message) throws Exception {
+    	
     	Participant destination = getDestinationParticipant(message.getTo(), message.getType());
+    	if (destination == null) {
+    		// Remote join
+    		destination = participant.getApplicationContext().getParticipant(message.getTo());
+    	}
 		Joint joint = participant.join(destination, message.getMedia(), message.getDirection());
         waitForJoin(joint);	
         joinees.add(destination);
@@ -175,16 +180,13 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 
     	Participant participant = null;
     	if (type == JoinDestinationType.CALL) {
-    		participant = callRegistry.get(destination).getCall();
-    		if (participant == null) {
-    			throw new IllegalStateException(String.format("Call with id %s not found", destination));
+    		CallActor<?> actor = callRegistry.get(destination);
+    		if (actor != null) {
+    			participant = actor.getCall();
     		}
     	} else if (type == JoinDestinationType.MIXER) {
 			ConferenceManager conferenceManager = this.participant.getApplicationContext().getConferenceManager();
     		participant = conferenceManager.getConference(destination);
-    		if (participant == null) {
-    			throw new IllegalStateException(String.format("Mixer with id %s not found", destination));
-    		}
     	}
     	return participant;
 	}
