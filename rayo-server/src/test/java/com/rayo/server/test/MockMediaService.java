@@ -28,21 +28,21 @@ public class MockMediaService implements MediaService<EventSource> {
 	@Override
 	public Output<EventSource> output(String text) {
 
-		eventSource.dispatch(new MohoOutputCompleteEvent<EventSource>(eventSource, Cause.END));
+		eventSource.dispatch(new MohoOutputCompleteEvent<EventSource>(eventSource, Cause.END, null));
 		return null;
 	}
 
 	@Override
 	public Output<EventSource> output(URI media) {
 
-		eventSource.dispatch(new MohoOutputCompleteEvent<EventSource>(eventSource, Cause.END));
+		eventSource.dispatch(new MohoOutputCompleteEvent<EventSource>(eventSource, Cause.END, null));
 		return null;
 	}
 
 	@Override
 	public Output<EventSource> output(OutputCommand output) {
 
-		eventSource.dispatch(new MohoOutputCompleteEvent<EventSource>(eventSource, Cause.END));
+		eventSource.dispatch(new MohoOutputCompleteEvent<EventSource>(eventSource, Cause.END, null));
 		return null;
 	}
 
