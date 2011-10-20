@@ -269,7 +269,7 @@ public class IntegrationTest {
                     pause:{messageQueue.add "pause"},
                     resume:{messageQueue.add "resume"},
 					record:{messageQueue.add "record"},
-                    stop:{ mohoCall.dispatch(new MohoOutputCompleteEvent(mohoCall, Cause.CANCEL)) }
+                    stop:{ mohoCall.dispatch(new MohoOutputCompleteEvent(mohoCall, Cause.CANCEL, null)) }
                 ] as Output
             }
         ] as MediaService
@@ -329,7 +329,7 @@ public class IntegrationTest {
 			   return [
 				   pause:{messageQueue.add "pause"},
 				   resume:{messageQueue.add "resume"},
-				   stop:{ mohoCall.dispatch(new MohoRecordCompleteEvent(mohoCall, com.voxeo.moho.event.RecordCompleteEvent.Cause.CANCEL, 1000)) }
+				   stop:{ mohoCall.dispatch(new MohoRecordCompleteEvent(mohoCall, com.voxeo.moho.event.RecordCompleteEvent.Cause.CANCEL, 1000, null)) }
 			   ] as Recording
 		   }
 	   ] as MediaService
@@ -381,7 +381,7 @@ public class IntegrationTest {
 			  return [
 				  pause:{messageQueue.add "pause"},
 				  resume:{messageQueue.add "resume"},
-				  stop:{ mohoCall.dispatch(new MohoRecordCompleteEvent(mohoCall, com.voxeo.moho.event.RecordCompleteEvent.Cause.CANCEL, 1000)) }
+				  stop:{ mohoCall.dispatch(new MohoRecordCompleteEvent(mohoCall, com.voxeo.moho.event.RecordCompleteEvent.Cause.CANCEL, 1000, null)) }
 			  ] as Recording
 		  }
 	  ] as MediaService
@@ -437,7 +437,7 @@ public class IntegrationTest {
        mohoCall.mediaService = [
            output: { OutputCommand command ->
                return [
-                   stop:{ mohoCall.dispatch(new MohoOutputCompleteEvent(mohoCall, Cause.CANCEL)) }
+                   stop:{ mohoCall.dispatch(new MohoOutputCompleteEvent(mohoCall, Cause.CANCEL, null)) }
                ] as Output
            }
        ] as MediaService
@@ -475,8 +475,8 @@ public class IntegrationTest {
       // Mock MediaService
       mohoCall.mediaService = [
           output: { OutputCommand command ->
-              mohoCall.dispatch(new MohoOutputCompleteEvent(mohoCall, Cause.END))
-              mohoCall.dispatch(new MohoOutputCompleteEvent(mohoCall, Cause.END))
+              mohoCall.dispatch(new MohoOutputCompleteEvent(mohoCall, Cause.END, null))
+              mohoCall.dispatch(new MohoOutputCompleteEvent(mohoCall, Cause.END, null))
               return null
           }
       ] as MediaService
@@ -519,7 +519,7 @@ public class IntegrationTest {
       mohoCall.mediaService = [
           output: { OutputCommand command ->
               return [
-                  stop:{ mohoCall.dispatch(new MohoOutputCompleteEvent(mohoCall, Cause.CANCEL)) }
+                  stop:{ mohoCall.dispatch(new MohoOutputCompleteEvent(mohoCall, Cause.CANCEL, null)) }
               ] as Output
           }
       ] as MediaService
