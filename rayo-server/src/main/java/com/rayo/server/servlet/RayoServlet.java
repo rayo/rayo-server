@@ -457,18 +457,18 @@ public class RayoServlet extends AbstractRayoServlet {
     	return (CallActor<Call>)findActor(callId);
     }
     
-    private AbstractActor<?> findActor(String callId) throws NotFoundException {
+    private AbstractActor<?> findActor(String id) throws NotFoundException {
     	
-        CallActor<?> callActor = callRegistry.get(callId);
+        CallActor<?> callActor = callRegistry.get(id);
         if (callActor != null) {
             return callActor;
         }
-        MixerActor mixerActor = mixerRegistry.get(callId);
+        MixerActor mixerActor = mixerRegistry.get(id);
         if (mixerActor != null) {
             return mixerActor;
         }
         
-        throw new NotFoundException("Could not find a matching call or conference [id=%s]", callId);
+        throw new NotFoundException("Could not find a matching call or mixer [id=%s]", id);
     }
     
     private String callId(JID jid) {
