@@ -212,7 +212,10 @@ public class RayoServlet extends AbstractRayoServlet {
     		jidRegistry.put(event.getCallId(), callTo, sipUriTo.getHost());
     	}
     	
-    	String callDomain = jidRegistry.getOriginDomain(event.getCallId());
+    	String callDomain = getLocalDomain();
+    	if (callDomain == null) {
+    		jidRegistry.getOriginDomain(event.getCallId());
+    	}
     	JID jid = jidRegistry.getJID(event.getCallId());    	
     	JID from = getXmppFactory().createJID(event.getCallId() + "@" + callDomain);
 		if (event instanceof VerbEvent) {
