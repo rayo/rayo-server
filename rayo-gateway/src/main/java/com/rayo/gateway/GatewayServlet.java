@@ -204,6 +204,9 @@ public class GatewayServlet extends AbstractRayoServlet {
     		if (forwardDestination != null) {
     			callTo = getXmppFactory().createJID(forwardDestination);
     		}
+    		if (log.isDebugEnabled()) {
+    			log.debug("Received Offer. Offer will be delivered to [%s]", callTo);
+    		}
     		// We set the call domain to the Gateway. All outbound messages will use that domain as 'from'
     		jidRegistry.put(callId, callTo, toJid.getDomain());			
     		
