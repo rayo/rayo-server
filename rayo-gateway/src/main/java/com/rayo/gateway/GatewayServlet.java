@@ -271,6 +271,9 @@ public class GatewayServlet extends AbstractRayoServlet {
 	 */
 	private void processClientPresence(PresenceMessage message) throws Exception {
 
+		if (log.isDebugEnabled()) {
+			log.debug("Received client presence message [%s]", message);
+		}
 		JID toJid = message.getTo();
 		JID fromJid = message.getFrom();
 		
@@ -287,6 +290,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 						break;
 				}
 			} else {
+				log.warn("Application [%s] is not registered as a valid Rayo application", message.getFrom());
 				sendPresenceError(message.getTo(), message.getFrom(), Condition.RECIPIENT_UNAVAILABLE);
 			}
 		} else if (message.getType().equals("unavailable")) {
