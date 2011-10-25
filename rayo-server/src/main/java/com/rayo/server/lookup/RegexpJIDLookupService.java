@@ -50,6 +50,9 @@ public class RegexpJIDLookupService implements RayoJIDLookupService<OfferEvent> 
 	
 	private void read(Resource properties) throws IOException {
 		
+		if (logger.isDebugEnabled()) {
+			logger.debug("Reading JID Lookup Service configuration from disk [%s]", properties.getFilename());
+		}
 		if (properties.exists()) {
 			Properties props = new LinkedProperties();
 			props.load(properties.getInputStream());
