@@ -33,7 +33,7 @@ import com.rayo.server.verb.VerbManager;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.NegotiateException;
 import com.voxeo.moho.Participant;
-import com.voxeo.moho.event.AutowiredEventListener;
+import com.voxeo.moho.common.event.AutowiredEventListener;
 import com.voxeo.moho.event.Event;
 import com.voxeo.moho.event.EventSource;
 import com.voxeo.moho.event.Observer;

@@ -525,6 +525,18 @@ class ValidationTest {
 	}
 	
 	@Test
+	public void validateNestedJoinInvalidForce() {
+				
+		def dial = parseXml("""<dial xmlns=\"urn:xmpp:rayo:1\" to=\"tel:34637710708\" from="tel:34637710708"><join xmlns="urn:xmpp:rayo:join:1" call-id="abcd" force="123" direction="duplex" media="bridge"/></dial>""")
+		
+		def errorMapping = assertValidationException(dial)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, ExceptionMapper.toString(StanzaError.Condition.BAD_REQUEST)
+		assertEquals errorMapping.text, String.format(Messages.INVALID_BOOLEAN, 'force')
+	}
+	
+	@Test
 	public void validateNestedJoinMissingId() {
 				
 		def dial = parseXml("""<dial xmlns=\"urn:xmpp:rayo:1\" to=\"tel:34637710708\" from="tel:34637710708"><join xmlns="urn:xmpp:rayo:join:1" direction="duplex" media="bridge"/></dial>""")
@@ -586,6 +598,18 @@ class ValidationTest {
 		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
 		assertEquals errorMapping.condition, ExceptionMapper.toString(StanzaError.Condition.BAD_REQUEST)
 		assertEquals errorMapping.text, String.format(Messages.INVALID_ENUM, 'media')
+	}
+	
+	@Test
+	public void validateJoinInvalidForce() {
+				
+		def join = parseXml("""<join xmlns="urn:xmpp:rayo:1" call-id="abcd" direction="duplex" media="bridge" force="123"/>""")
+		
+		def errorMapping = assertValidationException(join)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, ExceptionMapper.toString(StanzaError.Condition.BAD_REQUEST)
+		assertEquals errorMapping.text, String.format(Messages.INVALID_BOOLEAN, 'force')
 	}
 	
 	@Test
@@ -1092,7 +1116,7 @@ class ValidationTest {
 	@Test
 	public void validateSpeakingMissingCallId() {
 				
-		def output = parseXml("""<speaking xmlns="urn:xmpp:tropo:conference:1"/>""")
+		def output = parseXml("""<started-speaking xmlns="urn:xmpp:tropo:conference:1"/>""")
 		
 		def errorMapping = assertValidationException(output)
 		assertNotNull errorMapping
@@ -1104,7 +1128,7 @@ class ValidationTest {
 	@Test
 	public void validateFinishedSpeakingMissingCallId() {
 				
-		def output = parseXml("""<finished-speaking xmlns="urn:xmpp:tropo:conference:1"/>""")
+		def output = parseXml("""<stopped-speaking xmlns="urn:xmpp:tropo:conference:1"/>""")
 		
 		def errorMapping = assertValidationException(output)
 		assertNotNull errorMapping

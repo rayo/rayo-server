@@ -541,6 +541,9 @@ public class InMemoryGatewayDatastore implements GatewayDatastore {
 	@Override
 	public String pickClientResource(JID jid) {
 
+		if (log.isDebugEnabled()) {
+			log.debug("Picking up client resource for JID [%s]", jid);
+		}
 		String resource = null;
 		Lock writeLock = resourcesLock.writeLock();
 		writeLock.lock();
@@ -550,12 +553,16 @@ public class InMemoryGatewayDatastore implements GatewayDatastore {
 				resource = resources.poll();
 				if (resource != null) {
 					resources.add(resource);
+					if (log.isDebugEnabled()) {
+						log.debug("Returning client resource [%s] for JID [%s]", resource, jid);
+					}
 					return resource;
 				}
 			}
 		} finally {
 			writeLock.unlock();
 		}
+		log.warn("Could not find any client resource available for JID [%s]", jid);
 		return null;
 	}
 	

@@ -2,9 +2,9 @@ package com.rayo.server;
 
 import java.util.concurrent.TimeUnit;
 
+import com.voxeo.moho.common.util.SettableResultFuture;
 import com.voxeo.moho.event.Event;
 import com.voxeo.moho.event.EventSource;
-import com.voxeo.moho.util.SettableResultFuture;
 import com.voxeo.moho.utils.EventListener;
 
 public class ActorEventListener implements EventListener<Event<EventSource>> {

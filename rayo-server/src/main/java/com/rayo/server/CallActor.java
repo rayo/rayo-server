@@ -26,14 +26,15 @@ import com.rayo.core.verb.MuteCommand;
 import com.rayo.core.verb.Ssml;
 import com.rayo.core.verb.UnholdCommand;
 import com.rayo.core.verb.UnmuteCommand;
+import com.voxeo.exceptions.NotFoundException;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.Call;
 import com.voxeo.moho.Joint;
 import com.voxeo.moho.Mixer;
 import com.voxeo.moho.Participant;
 import com.voxeo.moho.Participant.JoinType;
+import com.voxeo.moho.common.event.AutowiredEventListener;
 import com.voxeo.moho.conference.ConferenceManager;
-import com.voxeo.moho.event.AutowiredEventListener;
 import com.voxeo.moho.event.CallCompleteEvent;
 import com.voxeo.moho.event.HangupEvent;
 import com.voxeo.moho.event.InputDetectedEvent;
@@ -53,7 +54,8 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     private CallStatistics callStatistics;
     private CdrManager cdrManager;
     private CallRegistry callRegistry;
-
+    private MixerManager mixerManager;
+    
     // This is used to synchronize Answered event with media join as Moho may send you 
     // an answered event before the media is joined
     // Also note that no further synchronization is needed as we are within an Actor
@@ -82,6 +84,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 	            javax.media.mscontrol.join.Joinable.Direction direction = participant.getAttribute(JoinCommand.DIRECTION);
 	            JoinType mediaType = participant.getAttribute(JoinCommand.MEDIA_TYPE);                        
 	            Participant destination = getDestinationParticipant(dest, type);
+	            Boolean force = participant.getAttribute(JoinCommand.FORCE);
 	        	
 	            if (destination == null) {
 	        		// Remote join
@@ -90,7 +93,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 	        	
 	            joinees.add(destination);
 	            
-        		participant.join(destination, mediaType, direction);
+        		participant.join(destination, mediaType, force, direction);
             } else {
             	participant.join();
             }
@@ -155,9 +158,26 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     	Participant destination = getDestinationParticipant(message.getTo(), message.getType());
     	if (destination == null) {
     		// Remote join
-    		destination = participant.getApplicationContext().getParticipant(message.getTo());
+    		try {
+    			destination = participant.getApplicationContext().getParticipant(message.getTo());
+    		} catch (Exception e) {
+        		if (message.getType() == JoinDestinationType.MIXER) {
+        			log.warn("Trying to join a mixer by raw name [%s] : %s",message.getTo(),e.getMessage());
+        		}    			
+    		}
     	}
-		Joint joint = participant.join(destination, message.getMedia(), message.getDirection());
+    	if (destination == null) {
+    		if (message.getType() == JoinDestinationType.MIXER) {
+    			// mixer creation
+    			destination = mixerManager.create(getCall().getApplicationContext());
+    			
+    		} else {
+    			throw new NotFoundException("Participant " + message.getTo() + " not found");
+    		}
+    	}
+    	Boolean force = message.getForce() == null ? Boolean.FALSE : message.getForce();
+
+		Joint joint = participant.join(destination, message.getMedia(), force, message.getDirection());
         waitForJoin(joint);	
         joinees.add(destination);
     }
@@ -402,4 +422,9 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 	public void setCallRegistry(CallRegistry callRegistry) {
 		this.callRegistry = callRegistry;
 	}
+
+	public void setMixerManager(MixerManager mixerManager) {
+		this.mixerManager = mixerManager;
+	}
+	
 }

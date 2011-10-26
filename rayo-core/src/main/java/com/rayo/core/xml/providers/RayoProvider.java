@@ -218,12 +218,16 @@ public class RayoProvider extends BaseProvider {
     	if (element.attribute("direction") != null) {
     		join.setDirection(toEnum(Direction.class, "direction", element));
     	}
-    	
+
+    	if (element.attribute("force") != null) {
+    		join.setForce(toBoolean("force", element));
+    	}
+
     	if (element.attribute("call-id") != null) {
     		join.setTo(element.attributeValue("call-id"));
     		join.setType(JoinDestinationType.CALL);
-    	} else if (element.attribute("mixer-id") != null) {
-    		join.setTo(element.attributeValue("mixer-id"));
+    	} else if (element.attribute("mixer-name") != null) {
+    		join.setTo(element.attributeValue("mixer-name"));
     		join.setType(JoinDestinationType.MIXER);    		
     	} 
 
@@ -237,8 +241,8 @@ public class RayoProvider extends BaseProvider {
     	if (element.attribute("call-id") != null) {
     		unjoin.setFrom(element.attributeValue("call-id"));
     		unjoin.setType(JoinDestinationType.CALL);
-    	} else if (element.attribute("mixer-id") != null) {
-    		unjoin.setFrom(element.attributeValue("mixer-id"));
+    	} else if (element.attribute("mixer-name") != null) {
+    		unjoin.setFrom(element.attributeValue("mixer-name"));
     		unjoin.setType(JoinDestinationType.MIXER);    		
     	}
         return unjoin;
@@ -460,11 +464,14 @@ public class RayoProvider extends BaseProvider {
         if (join.getMedia() != null) {
         	joinElement.addAttribute("media", join.getMedia().name().toLowerCase());
         }
+        if (join.getForce() != null) {
+        	joinElement.addAttribute("force", join.getForce().toString());
+        }
         if (join.getTo() != null) {
         	if (join.getType() == JoinDestinationType.CALL) {
         		joinElement.addAttribute("call-id", join.getTo());
         	} else {
-        		joinElement.addAttribute("mixer-id", join.getTo());        		
+        		joinElement.addAttribute("mixer-name", join.getTo());        		
         	}
         }
     }
@@ -477,7 +484,7 @@ public class RayoProvider extends BaseProvider {
         	if (unjoin.getType() == JoinDestinationType.CALL) {
         		unjoinElement.addAttribute("call-id", unjoin.getFrom());
         	} else {
-        		unjoinElement.addAttribute("mixer-id", unjoin.getFrom());        		
+        		unjoinElement.addAttribute("mixer-name", unjoin.getFrom());        		
         	}
         }
 

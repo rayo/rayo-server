@@ -18,6 +18,7 @@ import com.rayo.core.verb.VerbCommand;
 import com.rayo.core.verb.VerbCompleteEvent;
 import com.rayo.core.verb.VolumeDownCommand;
 import com.rayo.core.verb.VolumeUpCommand;
+import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.Participant;
 import com.voxeo.moho.State;
 import com.voxeo.moho.media.output.AudibleResource;
@@ -27,6 +28,8 @@ import com.voxeo.servlet.xmpp.StanzaError;
 
 public class OutputHandler extends AbstractLocalVerbHandler<Output, Participant> {
 
+	private static final Loggerf logger = Loggerf.getLogger(OutputHandler.class);
+	
     private com.voxeo.moho.media.Output<Participant> output;
     private SsmlValidator ssmlValidator;
 
@@ -161,6 +164,12 @@ public class OutputHandler extends AbstractLocalVerbHandler<Output, Participant>
 
     @State
     public void onSpeakComplete(com.voxeo.moho.event.OutputCompleteEvent<Participant> event) {
+    	
+    	if (!event.getMediaOperation().equals(output)) {
+    		logger.debug("Ignoring complete event as it is targeted to a different media operation");
+    		return;
+    	}
+    	
         switch (event.getCause()) {
         case BARGEIN:
         case END:

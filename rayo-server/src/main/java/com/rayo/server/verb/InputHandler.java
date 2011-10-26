@@ -7,6 +7,7 @@ import com.rayo.core.verb.Input;
 import com.rayo.core.verb.InputCompleteEvent;
 import com.rayo.core.verb.InputCompleteEvent.Reason;
 import com.rayo.core.verb.VerbCompleteEvent;
+import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.Call;
 import com.voxeo.moho.Participant;
 import com.voxeo.moho.State;
@@ -17,6 +18,8 @@ import com.voxeo.moho.media.input.InputCommand;
 public class InputHandler extends AbstractLocalVerbHandler<Input, Participant> {
 
 	private com.voxeo.moho.media.Input<Participant> input;
+	
+	private static final Loggerf logger = Loggerf.getLogger(InputHandler.class);
 	
 	@Override
 	public void start() {
@@ -85,6 +88,11 @@ public class InputHandler extends AbstractLocalVerbHandler<Input, Participant> {
     @State
     public void onInputComplete(com.voxeo.moho.event.InputCompleteEvent<Participant> event) {
         
+    	if (!event.getMediaOperation().equals(input)) {
+    		logger.debug("Ignoring complete event as it is targeted to a different media operation");
+    		return;
+    	}
+
         InputCompleteEvent completeEvent = null;
         
         switch (event.getCause()) {

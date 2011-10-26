@@ -15,10 +15,13 @@ public class JoinCommand extends AbstractCallCommand {
 	public static final String DIRECTION = "DIRECTION";
 	public static final String TO = "TO";
 	public static final String TYPE = "TYPE";
+	public static final String FORCE = "FORCE";
 	
 	private Direction direction = Direction.DUPLEX;
 
 	private JoinType media = JoinType.BRIDGE;
+	
+	private Boolean force;
 
 	@NotNull(message=Messages.MISSING_JOIN_ID)
 	private String to;
@@ -58,6 +61,14 @@ public class JoinCommand extends AbstractCallCommand {
 		return type;
 	}
 	
+	public Boolean getForce() {
+		return force;
+	}
+
+	public void setForce(Boolean force) {
+		this.force = force;
+	}
+
 	@Override
 	public String toString() {
 

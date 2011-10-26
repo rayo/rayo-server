@@ -148,35 +148,36 @@ public class RayoProviderTest {
 	@Test
 	public void joinToXmlWithCallId() {
 		
-		def join = new JoinCommand(direction:Joinable.Direction.DUPLEX, media:JoinType.BRIDGE, to:"1234", type: JoinDestinationType.CALL);
+		def join = new JoinCommand(direction:Joinable.Direction.DUPLEX, media:JoinType.BRIDGE, force:"true", to:"1234", type: JoinDestinationType.CALL);
 		
-		assertEquals("""<join xmlns="urn:xmpp:rayo:1" direction="duplex" media="bridge" call-id="1234"/>""", toXml(join));
+		assertEquals("""<join xmlns="urn:xmpp:rayo:1" direction="duplex" media="bridge" force="true" call-id="1234"/>""", toXml(join));
 	}
 	
 	@Test
-	public void joinToXmlWithMixerId() {
+	public void joinToXmlWithMixerName() {
 		
 		def join = new JoinCommand(direction:Joinable.Direction.DUPLEX, media:JoinType.BRIDGE, to:"1234", type: JoinDestinationType.MIXER);
 		
-		assertEquals("""<join xmlns="urn:xmpp:rayo:1" direction="duplex" media="bridge" mixer-id="1234"/>""", toXml(join));
+		assertEquals("""<join xmlns="urn:xmpp:rayo:1" direction="duplex" media="bridge" mixer-name="1234"/>""", toXml(join));
 	}
 		
 	@Test
 	public void joinCallIdFromXml() {
 
-		def join = fromXml("""<join xmlns="urn:xmpp:rayo:1" direction="duplex" media="bridge" call-id="1234"/>""")
+		def join = fromXml("""<join xmlns="urn:xmpp:rayo:1" direction="duplex" media="bridge" force="true" call-id="1234"/>""")
 		assertProperties(join, [
 			direction: Joinable.Direction.DUPLEX,
 			media: JoinType.BRIDGE,
 			to:"1234",
+			force: Boolean.TRUE,
 			type: JoinDestinationType.CALL
 		])
 	}
 	
 	@Test
-	public void joinMixerIdFromXml() {
+	public void joinMixerNameFromXml() {
 
-		def join = fromXml("""<join xmlns="urn:xmpp:rayo:1" direction="duplex" media="bridge" mixer-id="1234"/>""")
+		def join = fromXml("""<join xmlns="urn:xmpp:rayo:1" direction="duplex" media="bridge" mixer-name="1234"/>""")
 		assertProperties(join, [
 			direction: Joinable.Direction.DUPLEX,
 			media: JoinType.BRIDGE,
@@ -197,11 +198,32 @@ public class RayoProviderTest {
 	}
 	
 	@Test
-	public void unjoinMixerIdToXml() {
+	public void unjoinCallIdFromXml() {
+		
+		def unjoin = fromXml("""<unjoin xmlns="urn:xmpp:rayo:1" call-id="1234"/>""")
+		assertProperties(unjoin, [
+			from:"1234",
+			type: JoinDestinationType.CALL
+		])
+	}
+	
+	@Test
+	public void unjoinMixerNameToXml() {
 		
 		def unjoin = new UnjoinCommand(from:"1234", type:JoinDestinationType.MIXER);
 		
-		assertEquals("""<unjoin xmlns="urn:xmpp:rayo:1" mixer-id="1234"/>""", toXml(unjoin));
+		assertEquals("""<unjoin xmlns="urn:xmpp:rayo:1" mixer-name="1234"/>""", toXml(unjoin));
+	}
+	
+	
+	@Test
+	public void unjoinMixerNameFromXml() {
+		
+		def unjoin = fromXml("""<unjoin xmlns="urn:xmpp:rayo:1" mixer-name="1234"/>""")
+		assertProperties(unjoin, [
+			from:"1234",
+			type: JoinDestinationType.MIXER
+		])
 	}
 	
 	// Unjoined Event
@@ -328,7 +350,7 @@ public class RayoProviderTest {
 		def join = new JoinCommand(direction:Joinable.Direction.DUPLEX, media:JoinType.BRIDGE, to:"1234", type:JoinDestinationType.MIXER);
 		command.join = join
 		
-		assertEquals("""<dial xmlns="urn:xmpp:rayo:1" to="tel:44477773333333" from="tel:34637710708"><join direction="duplex" media="bridge" mixer-id="1234"/></dial>""", toXml(command));
+		assertEquals("""<dial xmlns="urn:xmpp:rayo:1" to="tel:44477773333333" from="tel:34637710708"><join direction="duplex" media="bridge" mixer-name="1234"/></dial>""", toXml(command));
 	}
 	
 	@Test
@@ -363,7 +385,7 @@ public class RayoProviderTest {
 	@Test
 	public void dialWithNestedMixerFromXml() {
 
-		def dial = fromXml("""<dial xmlns="urn:xmpp:rayo:1" to="tel:44477773333333" from="tel:34637710708"><join xmlns="urn:xmpp:rayo:join:1" mixer-id="abcd"/></dial>""")
+		def dial = fromXml("""<dial xmlns="urn:xmpp:rayo:1" to="tel:44477773333333" from="tel:34637710708"><join xmlns="urn:xmpp:rayo:join:1" mixer-name="abcd"/></dial>""")
 		assertProperties(dial, [
 			to: new URI("tel:44477773333333"),
 			from: new URI("tel:34637710708"),
@@ -395,7 +417,7 @@ public class RayoProviderTest {
 	@Test
 	public void dialWithNestedJoinMixerFullFromXml() {
 
-		def dial = fromXml("""<dial xmlns="urn:xmpp:rayo:1" to="tel:44477773333333" from="tel:34637710708"><join direction="duplex" media="bridge" mixer-id="1234"/></dial>""")
+		def dial = fromXml("""<dial xmlns="urn:xmpp:rayo:1" to="tel:44477773333333" from="tel:34637710708"><join direction="duplex" media="bridge" mixer-name="1234"/></dial>""")
 		assertProperties(dial, [
 			to: new URI("tel:44477773333333"),
 			from: new URI("tel:34637710708"),
@@ -1786,12 +1808,12 @@ public class RayoProviderTest {
 	@Test
 	public void speakingToXml() {
 		SpeakingEvent speaking = new SpeakingEvent(new Conference(callId:'12', verbId:'13'),"1234");
-		assertEquals("""<speaking xmlns="urn:xmpp:tropo:conference:1" call-id="1234"/>""", toXml(speaking));
+		assertEquals("""<started-speaking xmlns="urn:xmpp:tropo:conference:1" call-id="1234"/>""", toXml(speaking));
 	}
 	
 	@Test
 	public void speakingFromXml() {
-		def speaking = fromXml("""<speaking xmlns="urn:xmpp:tropo:conference:1" call-id="1234"></speaking>""")
+		def speaking = fromXml("""<started-speaking xmlns="urn:xmpp:tropo:conference:1" call-id="1234"></started-speaking>""")
 		assertNotNull speaking
 		assertTrue speaking instanceof SpeakingEvent
 		assertEquals speaking.speakerId,"1234"
@@ -1800,12 +1822,12 @@ public class RayoProviderTest {
 	@Test
 	public void finishedSpeakingToXml() {
 		FinishedSpeakingEvent speaking = new FinishedSpeakingEvent(new Conference(callId:'12', verbId:'13'),"1234");
-		assertEquals("""<finished-speaking xmlns="urn:xmpp:tropo:conference:1" call-id="1234"/>""", toXml(speaking));
+		assertEquals("""<stopped-speaking xmlns="urn:xmpp:tropo:conference:1" call-id="1234"/>""", toXml(speaking));
 	}
 	
 	@Test
 	public void finishedSpeakingFromXml() {
-		def speaking = fromXml("""<finished-speaking xmlns="urn:xmpp:tropo:conference:1" call-id="1234"></finished-speaking>""")
+		def speaking = fromXml("""<stopped-speaking xmlns="urn:xmpp:tropo:conference:1" call-id="1234"></stopped-speaking>""")
 		assertNotNull speaking			
 		assertTrue speaking instanceof FinishedSpeakingEvent
 		assertEquals speaking.speakerId,"1234"

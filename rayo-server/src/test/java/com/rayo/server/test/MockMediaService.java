@@ -5,8 +5,8 @@ import java.net.URI;
 import javax.media.mscontrol.mediagroup.MediaGroup;
 
 import com.voxeo.moho.MediaService;
+import com.voxeo.moho.common.event.MohoOutputCompleteEvent;
 import com.voxeo.moho.event.EventSource;
-import com.voxeo.moho.event.MohoOutputCompleteEvent;
 import com.voxeo.moho.event.OutputCompleteEvent.Cause;
 import com.voxeo.moho.media.Input;
 import com.voxeo.moho.media.Output;

@@ -13,6 +13,7 @@ import com.rayo.core.verb.SayCompleteEvent.Reason;
 import com.rayo.core.verb.Ssml;
 import com.rayo.core.verb.VerbCommand;
 import com.rayo.core.verb.VerbCompleteEvent;
+import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.Participant;
 import com.voxeo.moho.State;
 import com.voxeo.moho.event.OutputCompleteEvent;
@@ -27,6 +28,8 @@ public class SayHandler extends AbstractLocalVerbHandler<Say, Participant> {
     private Output<Participant> output;
     private SsmlValidator ssmlValidator;
 
+    private static final Loggerf logger = Loggerf.getLogger(SayHandler.class);
+    
     // Verb Lifecycle
     // ================================================================================
 
@@ -101,6 +104,12 @@ public class SayHandler extends AbstractLocalVerbHandler<Say, Participant> {
 
     @State
     public void onSpeakComplete(OutputCompleteEvent<Participant> event) {
+    	
+    	if (event.getMediaOperation() != null && !event.getMediaOperation().equals(this)) {
+    		logger.debug("Ignoring complete event as it is targeted to a different media operation");
+    		return;
+    	}
+
         switch(event.getCause()) {
         case BARGEIN:
         case END:

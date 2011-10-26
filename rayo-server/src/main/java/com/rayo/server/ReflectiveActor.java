@@ -21,8 +21,6 @@ import org.jetlang.fibers.PoolFiberFactory;
 
 import com.voxeo.exceptions.NotFoundException;
 import com.voxeo.logging.Loggerf;
-import com.voxeo.moho.event.HangupEvent;
-import com.voxeo.moho.event.MohoCallCompleteEvent;
 
 public abstract class ReflectiveActor implements Actor, Callback<Object> {
 

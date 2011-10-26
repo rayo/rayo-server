@@ -13,6 +13,7 @@ import com.rayo.core.verb.AskCompleteEvent.Reason;
 import com.rayo.core.verb.Choices;
 import com.rayo.core.verb.Ssml;
 import com.rayo.core.verb.VerbCompleteEvent;
+import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.Participant;
 import com.voxeo.moho.State;
 import com.voxeo.moho.event.InputCompleteEvent;
@@ -28,6 +29,8 @@ public class AskHandler extends AbstractLocalVerbHandler<Ask,Participant> {
     private Prompt<Participant> prompt;
     
     private SsmlValidator ssmlValidator;
+    
+    private static final Loggerf logger = Loggerf.getLogger(AskHandler.class);
     
     @Override
     public void start() {
@@ -111,6 +114,11 @@ public class AskHandler extends AbstractLocalVerbHandler<Ask,Participant> {
     @State
     public void onAskComplete(InputCompleteEvent<Participant> event) {
         
+    	if (!event.getMediaOperation().equals(prompt.getInput())) {
+    		logger.debug("Ignoring complete event as it is targeted to a different media operation");
+    		return;
+    	}
+
         AskCompleteEvent completeEvent = null;
         
         switch (event.getCause()) {

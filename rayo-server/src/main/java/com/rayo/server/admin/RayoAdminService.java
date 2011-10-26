@@ -7,8 +7,8 @@ import com.rayo.server.CallRegistry;
 import com.rayo.server.listener.AdminListener;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.Call;
+import com.voxeo.moho.common.event.MohoInputDetectedEvent;
 import com.voxeo.moho.event.InputDetectedEvent;
-import com.voxeo.moho.event.MohoInputDetectedEvent;
 
 public class RayoAdminService extends AdminService {
 

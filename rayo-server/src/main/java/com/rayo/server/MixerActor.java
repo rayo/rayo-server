@@ -2,8 +2,8 @@ package com.rayo.server;
 
 import com.rayo.server.verb.ConferenceHandler;
 import com.voxeo.moho.Mixer;
+import com.voxeo.moho.common.event.AutowiredEventListener;
 import com.voxeo.moho.conference.Conference;
-import com.voxeo.moho.event.AutowiredEventListener;
 
 public class MixerActor extends AbstractActor<Mixer> {
 
@@ -20,6 +20,12 @@ public class MixerActor extends AbstractActor<Mixer> {
         // Now we setup the moho handlers
         mohoListeners.add(new AutowiredEventListener(handler));
         mohoConference.addObserver(new ActorEventListener(this));
+    }
+    
+    public void setupMohoListeners(Mixer mixer) {
+    	
+        //mohoListeners.add(new AutowiredEventListener(handler));
+        mixer.addObserver(new ActorEventListener(this));
     }
     
     public Mixer getMixer() {

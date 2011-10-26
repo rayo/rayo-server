@@ -36,9 +36,9 @@ public class ConferenceProvider extends BaseProvider {
 			return new OnHoldEvent();
 		} else if (element.getName().equals("off-hold")) {
 			return new OffHoldEvent();
-		} else if (element.getName().equals("speaking")) {
+		} else if (element.getName().equals("started-speaking")) {
 			return buildSpeakingEvent(element);
-		} else if (element.getName().equals("finished-speaking")) {
+		} else if (element.getName().equals("stopped-speaking")) {
 			return buildFinishedSpeakingEvent(element);
 		}
 		return null;
@@ -202,12 +202,12 @@ public class ConferenceProvider extends BaseProvider {
 
 	private void createSpeakingEvent(SpeakingEvent event, Document document) {
 		
-		Element element = document.addElement(new QName("speaking", NAMESPACE));
+		Element element = document.addElement(new QName("started-speaking", NAMESPACE));
 		element.addAttribute("call-id", event.getSpeakerId());
 	}
 
 	private void createFinishedSpeakingEvent(FinishedSpeakingEvent event, Document document) {
-		Element element = document.addElement(new QName("finished-speaking", NAMESPACE));
+		Element element = document.addElement(new QName("stopped-speaking", NAMESPACE));
 		element.addAttribute("call-id", event.getSpeakerId());
 	}
 

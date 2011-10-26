@@ -140,6 +140,11 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
 	@State
 	public synchronized void onRecordComplete(com.voxeo.moho.event.RecordCompleteEvent<Participant> event) {
 		
+    	if (event.getMediaOperation() != null && !event.getMediaOperation().equals(recording)) {
+    		log.debug("Ignoring complete event as it is targeted to a different media operation");
+    		return;
+    	}
+
 		switch(event.getCause()) {
 			case ERROR:
 			case UNKNOWN:

@@ -7,9 +7,6 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.LinkedBlockingQueue
 import java.util.concurrent.TimeUnit
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
-
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -18,19 +15,13 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 
-import com.rayo.server.CallActor;
-import com.rayo.server.CallManager;
-import com.rayo.server.CallRegistry;
-import com.rayo.server.EventHandler;
-import com.rayo.server.Response;
-import com.rayo.server.ResponseHandler;
 import com.rayo.core.CallRejectReason
 import com.rayo.core.EndCommand
 import com.rayo.core.EndEvent
 import com.rayo.core.OfferEvent
 import com.rayo.core.RejectCommand
 import com.rayo.core.EndEvent.Reason
-import com.rayo.core.recording.StorageService;
+import com.rayo.core.recording.StorageService
 import com.rayo.core.verb.PauseCommand
 import com.rayo.core.verb.Record
 import com.rayo.core.verb.ResumeCommand
@@ -44,10 +35,10 @@ import com.rayo.server.test.MockMediaService
 import com.voxeo.exceptions.NotFoundException
 import com.voxeo.moho.Call
 import com.voxeo.moho.MediaService
+import com.voxeo.moho.common.event.MohoCallCompleteEvent;
+import com.voxeo.moho.common.event.MohoOutputCompleteEvent;
+import com.voxeo.moho.common.event.MohoRecordCompleteEvent;
 import com.voxeo.moho.event.CallCompleteEvent
-import com.voxeo.moho.event.MohoCallCompleteEvent
-import com.voxeo.moho.event.MohoOutputCompleteEvent
-import com.voxeo.moho.event.MohoRecordCompleteEvent
 import com.voxeo.moho.event.OutputCompleteEvent
 import com.voxeo.moho.event.RecordCompleteEvent
 import com.voxeo.moho.event.OutputCompleteEvent.Cause
@@ -55,9 +46,6 @@ import com.voxeo.moho.media.Output
 import com.voxeo.moho.media.Recording
 import com.voxeo.moho.media.output.OutputCommand
 import com.voxeo.moho.media.record.RecordCommand
-import com.voxeo.servlet.xmpp.JID;
-import com.voxeo.servlet.xmpp.XmppFactory;
-import com.voxeo.servlet.xmpp.XmppServlet;
 
 
 
