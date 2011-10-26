@@ -13,6 +13,7 @@ public class DefaultCallActorFactory implements CallActorFactory {
     private CallStatistics callStatistics;
     private CdrManager cdrManager;
     private CallRegistry callRegistry;
+    private MixerManager mixerManager;
 
     @Override
     public CallActor<?> create(Call call) {
@@ -28,6 +29,7 @@ public class DefaultCallActorFactory implements CallActorFactory {
         actor.setCallStatistics(callStatistics);
         actor.setCdrManager(cdrManager);
         actor.setCallRegistry(callRegistry);
+        actor.setMixerManager(mixerManager);
         return actor;
     }
 
@@ -62,5 +64,9 @@ public class DefaultCallActorFactory implements CallActorFactory {
 	public void setCallRegistry(CallRegistry callRegistry) {
 		this.callRegistry = callRegistry;
 	}
-	
+
+	public void setMixerManager(MixerManager mixerManager) {
+		
+		this.mixerManager = mixerManager;
+	}
 }

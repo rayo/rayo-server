@@ -110,11 +110,12 @@ public class Call {
 		return builder.toString();
 	}
 	
-	public List<String> getPeers() {
+	public List<Peer> getPeers() {
 		
-		List<String> peers = new ArrayList<String>();
+		List<Peer> peers = new ArrayList<Peer>();
 		for(com.voxeo.moho.Call peer: call.getPeers()) {
-			peers.add(peer.getAddress().toString());
+			peers.add(new Peer(peer.getAddress().toString()));
+			
 		}
 		return peers;
 	}

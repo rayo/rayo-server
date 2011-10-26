@@ -50,6 +50,7 @@
 		<property name="callStatistics" ref="callStatistics" />
 		<property name="cdrManager" ref="cdrManager" />
 		<property name="callRegistry" ref="callRegistry" />
+		<property name="mixerManager" ref="mixerManager" />
 	</bean>	
 
 	<!-- Call Manager: Responsible for maintaining the Call Registry and creating new CallActors -->
@@ -63,6 +64,14 @@
 	<bean id="mixerActorFactory" class="com.rayo.server.DefaultMixerActorFactory">
 		<property name="fiberFactory" ref="fiberFactory" />
 		<property name="verbManager" ref="mixerVerbManager" />
+	</bean>
+	
+	<!-- Mixer Manager: Responsible for maintaining the Mixer Registry and creating new MixerActors -->
+	<bean id="mixerManager" class="com.rayo.server.MixerManager">
+		<property name="mixerRegistry" ref="mixerRegistry" />
+		<property name="mixerActorFactory" ref="mixerActorFactory" />
+		<property name="mixerStatistics" ref="mixerStatistics" />
+		<property name="callManager" ref="callManager" />
 	</bean>	
 	
 	<!-- Conference Manager -->	
@@ -306,6 +315,12 @@
   	<bean id="callsBean" class="com.rayo.server.jmx.Calls">
   		<property name="callRegistry" ref="callRegistry" />
   		<property name="callStatistics" ref="callStatistics" />
+  		<property name="cdrManager" ref="cdrManager" />
+  	</bean>
+
+  	<bean id="mixersBean" class="com.rayo.server.jmx.Mixers">
+  		<property name="callRegistry" ref="callRegistry" />
+  		<property name="mixerRegistry" ref="mixerRegistry" />
   		<property name="cdrManager" ref="cdrManager" />
   	</bean>
   	

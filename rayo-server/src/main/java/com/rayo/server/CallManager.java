@@ -47,6 +47,11 @@ public class CallManager extends ReflectiveActor {
 	        	mohoCall.setAttribute(JoinCommand.TO, command.getJoin().getTo());
 	        	mohoCall.setAttribute(JoinCommand.TYPE, command.getJoin().getType());
 	        }
+	        if (command.getJoin().getForce() != null) {
+	        	mohoCall.setAttribute(JoinCommand.FORCE, command.getJoin().getForce());
+	        } else {
+	        	mohoCall.setAttribute(JoinCommand.FORCE, Boolean.FALSE);
+	        }
         }
         
         // Store the CDR

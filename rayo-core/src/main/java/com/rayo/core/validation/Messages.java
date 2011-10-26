@@ -14,7 +14,7 @@ public class Messages {
 	public static final String MISSING_SSML = "Missing SSML content.";
 	public static final String MISSING_DESTINATION = "Missing destination.";
     public static final String MISSING_COMPLETE_REASON = "Complete event with no reason!";
-    public static final String MISSING_JOIN_ID = "Missing Join id. You need to specify either a valid call-id or mixer-id";
+    public static final String MISSING_JOIN_ID = "Missing Join id. You need to specify either a valid call-id or mixer-name";
 	public static final String MISSING_AMOUNT = "Amount is a mandatory field.";
 	public static final String MISSING_DIRECTION = "Direction is a mandatory field.";
 	public static final String MISSING_DTMF_KEY = "DTMF key is a mandatory field.";
