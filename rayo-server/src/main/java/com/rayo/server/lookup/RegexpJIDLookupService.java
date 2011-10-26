@@ -29,6 +29,8 @@ public class RegexpJIDLookupService implements RayoJIDLookupService<OfferEvent> 
 	
 	public RegexpJIDLookupService(final Resource properties) throws IOException {
 		
+		read(properties);
+		
 		TimerTask readTask = new TimerTask() {
 			
 			@Override
@@ -45,14 +47,17 @@ public class RegexpJIDLookupService implements RayoJIDLookupService<OfferEvent> 
 				}
 			}
 		};
-		new Timer().schedule(readTask, 0, 60000);
+		new Timer().schedule(readTask, 60000, 60000);
 	}
 	
 	private void read(Resource properties) throws IOException {
 		
-		if (logger.isDebugEnabled()) {
+		try {
 			logger.debug("Reading JID Lookup Service configuration from disk [%s]", properties.getFilename());
+		} catch (IllegalStateException ise) {
+			// Ignore. On testing a byte array does not have a filename property and throws an exception
 		}
+		
 		if (properties.exists()) {
 			Properties props = new LinkedProperties();
 			props.load(properties.getInputStream());

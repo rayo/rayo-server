@@ -7,7 +7,7 @@ import org.springframework.core.io.ByteArrayResource;
 
 import com.rayo.core.OfferEvent;
 
-class RegexpJIDLookupServiceTests {
+class RegexpJIDLookupServiceTest {
 
 	def regexpJIDLookupService
 		
