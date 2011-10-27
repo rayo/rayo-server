@@ -16,8 +16,6 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import javax.xml.crypto.NodeSetData;
-
 import com.rayo.gateway.exception.GatewayException;
 import com.rayo.gateway.exception.RayoNodeNotFoundException;
 import com.voxeo.logging.Loggerf;
@@ -94,6 +92,8 @@ public class InMemoryGatewayDatastore implements GatewayDatastore {
 	protected ReadWriteLock jidLock = new ReentrantReadWriteLock();
 	protected ReadWriteLock callLock = new ReentrantReadWriteLock();
 	protected ReadWriteLock resourcesLock = new ReentrantReadWriteLock();
+
+	private String DEFAULT_PLATFORM = "staging";
 	
 	@Override
 	public String getPlatformForClient(JID clientJid) {
@@ -352,11 +352,14 @@ public class InMemoryGatewayDatastore implements GatewayDatastore {
 			log.debug("Call %s mapped to client %s", callId, clientJid);
 
 			callToNodeMap.put(callId, node);
-			log.debug("Call %s mapped to Rayo node %s", callId, node.getJid());
+			log.debug("Call %s mapped to Rayo node %s", callId, node.getJid());			
 			
 			addCallToJid(callId, clientJid);
 			addCallToJid(callId, node.getJid());
 
+			//TODO: This bind must be launched from an external administrative tool
+			bindClientToPlatform(clientJid, DEFAULT_PLATFORM);
+			
 		} finally {
 			writeLock.unlock();
 		}
