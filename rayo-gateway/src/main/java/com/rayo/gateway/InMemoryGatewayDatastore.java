@@ -356,9 +356,6 @@ public class InMemoryGatewayDatastore implements GatewayDatastore {
 			
 			addCallToJid(callId, clientJid);
 			addCallToJid(callId, node.getJid());
-
-			//TODO: This bind must be launched from an external administrative tool
-			bindClientToPlatform(clientJid, DEFAULT_PLATFORM);
 			
 		} finally {
 			writeLock.unlock();
@@ -435,6 +432,9 @@ public class InMemoryGatewayDatastore implements GatewayDatastore {
 		Lock writeLock = resourcesLock.writeLock();
 		writeLock.lock();
 		try {
+			//TODO: This bind must be launched from an external administrative tool
+			bindClientToPlatform(clientJid, DEFAULT_PLATFORM);
+			
 			registerResourceToJID(clientJid.getResource(), clientJid.getBareJID());
 			log.debug("Client resource %s added for client JID %s", clientJid.getResource(), clientJid.getBareJID());
 		} finally {
