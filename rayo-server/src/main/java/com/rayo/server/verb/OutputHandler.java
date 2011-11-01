@@ -5,7 +5,6 @@ import javax.validation.ConstraintValidatorContext;
 
 import com.rayo.server.exception.ExceptionMapper;
 import com.rayo.server.validation.SsmlValidator;
-import com.rayo.core.exception.MediaNotAllowedException;
 import com.rayo.core.validation.ValidationException;
 import com.rayo.core.verb.Output;
 import com.rayo.core.verb.OutputCompleteEvent;
