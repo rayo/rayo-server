@@ -1,9 +1,11 @@
 package com.rayo.server.verb;
 
+import javax.jms.IllegalStateException;
 import javax.validation.ConstraintValidatorContext;
 
 import com.rayo.server.exception.ExceptionMapper;
 import com.rayo.server.validation.SsmlValidator;
+import com.rayo.core.exception.MediaNotAllowedException;
 import com.rayo.core.validation.ValidationException;
 import com.rayo.core.verb.Output;
 import com.rayo.core.verb.OutputCompleteEvent;
@@ -38,7 +40,7 @@ public class OutputHandler extends AbstractLocalVerbHandler<Output, Participant>
 
     @Override
     public void start() {
-
+    	
         Ssml prompt = model.getPrompt();
         AudibleResource audibleResource = resolveAudio(prompt);
         OutputCommand outcommand = new OutputCommand(audibleResource);
@@ -85,6 +87,13 @@ public class OutputHandler extends AbstractLocalVerbHandler<Output, Participant>
             		.addConstraintViolation();
             return false;
         }
+        if (!canManipulateMedia()) {
+            context.buildConstraintViolationWithTemplate("Media operations are not allowed in the current call status.")
+            	.addNode(ExceptionMapper.toString(StanzaError.Condition.RESOURCE_CONSTRAINT))
+            		.addConstraintViolation();
+            return false;
+        }
+
         return true;
     }
 

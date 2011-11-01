@@ -2,11 +2,14 @@ package com.rayo.server.verb;
 
 import java.util.List;
 
+import javax.validation.ConstraintValidatorContext;
+
 import com.rayo.core.verb.Choices;
 import com.rayo.core.verb.Input;
 import com.rayo.core.verb.InputCompleteEvent;
 import com.rayo.core.verb.InputCompleteEvent.Reason;
 import com.rayo.core.verb.VerbCompleteEvent;
+import com.rayo.server.exception.ExceptionMapper;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.Call;
 import com.voxeo.moho.Participant;
@@ -14,6 +17,7 @@ import com.voxeo.moho.State;
 import com.voxeo.moho.event.InputDetectedEvent;
 import com.voxeo.moho.media.input.Grammar;
 import com.voxeo.moho.media.input.InputCommand;
+import com.voxeo.servlet.xmpp.StanzaError;
 
 public class InputHandler extends AbstractLocalVerbHandler<Input, Participant> {
 
@@ -84,7 +88,18 @@ public class InputHandler extends AbstractLocalVerbHandler<Input, Participant> {
         }
 	}
 	
+	@Override
+	public boolean isStateValid(ConstraintValidatorContext context) {
 
+        if (!canManipulateMedia()) {
+            context.buildConstraintViolationWithTemplate("Media operations are not allowed in the current call status.")
+            	.addNode(ExceptionMapper.toString(StanzaError.Condition.RESOURCE_CONSTRAINT))
+            		.addConstraintViolation();
+            return false;
+        }
+        return true;
+	}
+	
     @State
     public void onInputComplete(com.voxeo.moho.event.InputCompleteEvent<Participant> event) {
         

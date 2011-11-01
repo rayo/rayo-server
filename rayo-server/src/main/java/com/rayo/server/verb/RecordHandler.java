@@ -8,6 +8,7 @@ import java.util.List;
 import javax.media.mscontrol.Value;
 import javax.media.mscontrol.mediagroup.CodecConstants;
 import javax.media.mscontrol.mediagroup.FileFormatConstants;
+import javax.validation.ConstraintValidatorContext;
 
 import org.joda.time.Duration;
 
@@ -20,12 +21,14 @@ import com.rayo.core.verb.RecordResumeCommand;
 import com.rayo.core.verb.VerbCommand;
 import com.rayo.core.verb.VerbCompleteEvent;
 import com.rayo.core.verb.VerbCompleteReason;
+import com.rayo.server.exception.ExceptionMapper;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.MediaException;
 import com.voxeo.moho.Participant;
 import com.voxeo.moho.State;
 import com.voxeo.moho.media.Recording;
 import com.voxeo.moho.media.record.RecordCommand;
+import com.voxeo.servlet.xmpp.StanzaError;
 
 public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant> {
 
@@ -136,6 +139,18 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
 	
     	recording.resume();
     }
+    
+	@Override
+	public boolean isStateValid(ConstraintValidatorContext context) {
+
+        if (!canManipulateMedia()) {
+            context.buildConstraintViolationWithTemplate("Media operations are not allowed in the current call status.")
+            	.addNode(ExceptionMapper.toString(StanzaError.Condition.RESOURCE_CONSTRAINT))
+            		.addConstraintViolation();
+            return false;
+        }
+        return true;
+	}
     
 	@State
 	public synchronized void onRecordComplete(com.voxeo.moho.event.RecordCompleteEvent<Participant> event) {
