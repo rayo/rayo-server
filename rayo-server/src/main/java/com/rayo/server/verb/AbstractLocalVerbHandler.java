@@ -15,6 +15,7 @@ import com.rayo.core.verb.VerbEvent;
 import com.voxeo.moho.Call;
 import com.voxeo.moho.MediaService;
 import com.voxeo.moho.Participant;
+import com.voxeo.moho.Participant.JoinType;
 import com.voxeo.moho.media.output.AudibleResource;
 import com.voxeo.moho.media.output.OutputCommand;
 
@@ -147,6 +148,18 @@ public abstract class AbstractLocalVerbHandler<T extends Verb, S extends Partici
     	return false;
     }
 
+    boolean canManipulateMedia() {
+    	
+    	Participant[] joinees = participant.getParticipants();
+    	for(Participant joinee: joinees) {
+    		if (participant.getJoinType(joinee) == JoinType.DIRECT) {
+    			// On DIRECT mode media is not bridged, so no media operations are allowed
+    			return false;
+    		}
+    	}
+    	return true;
+    }
+    
     public void setActor(Actor actor) {
         this.actor = actor;
     }
@@ -154,5 +167,4 @@ public abstract class AbstractLocalVerbHandler<T extends Verb, S extends Partici
     public Actor getActor() {
         return actor;
     }
-
 }
