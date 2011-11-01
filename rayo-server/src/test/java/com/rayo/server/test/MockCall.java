@@ -581,4 +581,9 @@ public class MockCall implements IncomingCall {
     		Direction direction) {
     	return null;
     }
+    
+    @Override
+    public JoinType getJoinType(Participant participant) {
+    	return null;
+    }
 }
