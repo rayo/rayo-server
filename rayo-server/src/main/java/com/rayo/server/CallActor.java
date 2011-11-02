@@ -72,8 +72,12 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 
     @Message
     public void onCall(Call call) throws Exception {
-        try {
-
+        
+    	try {
+        	if (log.isDebugEnabled()) {
+        		log.debug("Received call event [%s]", call.getId());
+        	}
+        	
             // Now we setup the moho handlers
             mohoListeners.add(new AutowiredEventListener(this));
             participant.addObserver(new ActorEventListener(this));
@@ -87,20 +91,30 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 	            Boolean force = participant.getAttribute(JoinCommand.FORCE);
 	        	
 	            if (destination == null) {
+	            	if (log.isDebugEnabled()) {
+	            		log.debug("Detected Remote Join. Call [%s] will be joined to [%s].", participant.getId(), dest);
+	            	}
 	        		// Remote join
 	        		destination = participant.getApplicationContext().getParticipant(dest);
 	        	}
 	        	
 	            joinees.add(destination);
-	            
+
+            	if (log.isDebugEnabled()) {
+            		log.debug("Executing join operation. Call: [%s]. Join type: [%s]. Direction: [%s]. Participant: [%s].", participant.getId(), mediaType, direction, destination);
+            	}	            
         		participant.join(destination, mediaType, force, direction);
             } else {
+            	if (log.isDebugEnabled()) {
+            		log.debug("Joining call [%s] to media mixer.", participant.getId());
+            	}
             	participant.join();
             }
             
             callStatistics.outgoingCall();
 
         } catch (Exception e) {
+        	log.error(e.getMessage());
             end(Reason.ERROR, e.getMessage());
         }
     }
@@ -169,7 +183,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     	if (destination == null) {
     		if (message.getType() == JoinDestinationType.MIXER) {
     			// mixer creation
-    			destination = mixerManager.create(getCall().getApplicationContext());
+    			destination = mixerManager.create(getCall().getApplicationContext(), message.getTo());
     			
     		} else {
     			throw new NotFoundException("Participant " + message.getTo() + " not found");
@@ -210,8 +224,12 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     			participant = actor.getCall();
     		}
     	} else if (type == JoinDestinationType.MIXER) {
-			ConferenceManager conferenceManager = this.participant.getApplicationContext().getConferenceManager();
-    		participant = conferenceManager.getConference(destination);
+    		participant = mixerManager.getMixer(destination);
+    		if (participant == null) {
+    			//TODO: Backwards compatibility. Remove
+				ConferenceManager conferenceManager = this.participant.getApplicationContext().getConferenceManager();
+	    		participant = conferenceManager.getConference(destination);
+    		}
     	}
     	return participant;
 	}

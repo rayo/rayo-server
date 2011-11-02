@@ -7,9 +7,13 @@ import com.voxeo.moho.conference.Conference;
 
 public class MixerActor extends AbstractActor<Mixer> {
 
-    public MixerActor(Mixer mixer) {
+	private String mixerName;
+	
+    public MixerActor(Mixer mixer, String mixerName) {
 
     	super(mixer);
+    	
+    	this.mixerName = mixerName;
     }
         
     @Override
@@ -33,4 +37,8 @@ public class MixerActor extends AbstractActor<Mixer> {
     	return participant;
     }
 
+    public String getMixerName() {
+    	
+    	return mixerName;
+    }
 }

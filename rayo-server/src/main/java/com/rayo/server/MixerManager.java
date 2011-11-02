@@ -25,7 +25,7 @@ public class MixerManager {
 	private MixerStatistics mixerStatistics;
 	private CallManager callManager;
 	
-	public Mixer create(ApplicationContext ctx) {
+	public Mixer create(ApplicationContext ctx, String mixerName) {
 		
 		// mixer creation
 		MixerEndpoint endpoint = (MixerEndpoint)ctx
@@ -36,7 +36,7 @@ public class MixerManager {
 		
         //TODO: This is the only place I found to create the actual conference actor. I didn't find events for 
         // conference/mixer creation
-        MixerActor actor = mixerActorFactory.create(mixer);
+        MixerActor actor = mixerActorFactory.create(mixer, mixerName);
         actor.setupMohoListeners(mixer);
         // Wire up default call handlers
         for (EventHandler handler : callManager.getEventHandlers()) {
@@ -47,6 +47,15 @@ public class MixerManager {
         mixerStatistics.mixerCreated();
         
         return mixer;
+	}
+	
+	public Mixer getMixer(String mixerName) {
+		
+		MixerActor actor = mixerRegistry.get(mixerName);
+		if (actor != null) {
+			return actor.getMixer();
+		}
+		return null;
 	}
 
 	public void setMixerActorFactory(MixerActorFactory mixerActorFactory) {

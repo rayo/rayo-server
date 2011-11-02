@@ -313,7 +313,10 @@ public class RayoServlet extends AbstractRayoServlet {
                     log.debug("Quiesce Mode ON. Dropping incoming call: %s :: %s", request.toString(), request.getSession().getId());
                     sendIqError(request, StanzaError.Type.WAIT, StanzaError.Condition.SERVICE_UNAVAILABLE, "Quiesce Mode ON.");
             		return;
-            	}        
+            	} 
+            	if (log.isDebugEnabled()) {
+            		log.debug("Received dial command");
+            	}
             
                 callManager.publish(new Request(command, new ResponseHandler() {
                     public void handle(Response response) throws Exception {

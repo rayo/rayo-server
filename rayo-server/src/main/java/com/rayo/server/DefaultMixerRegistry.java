@@ -11,7 +11,7 @@ public class DefaultMixerRegistry implements MixerRegistry {
 
     @Override
     public void add(MixerActor actor) {
-        mixers.put(actor.getMixer().getId(), actor);
+        mixers.put(actor.getMixerName(), actor);
     }
 
     @Override

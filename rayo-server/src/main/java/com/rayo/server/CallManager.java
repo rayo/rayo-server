@@ -26,6 +26,9 @@ public class CallManager extends ReflectiveActor {
     @Message
     public CallRef onDial(DialCommand command) throws Exception {
         
+    	if (log.isDebugEnabled()) {
+    		log.debug("Creating endpoint to [%s]", command.getTo());
+    	}
         CallableEndpoint toEndpoint = (CallableEndpoint) applicationContext.createEndpoint(command.getTo().toString());
         
         URI from = command.getFrom();
@@ -33,10 +36,17 @@ public class CallManager extends ReflectiveActor {
         if(from != null) {
             fromEndpoint = applicationContext.createEndpoint(from.toString());
         }
-        
+
+        if (log.isDebugEnabled()) {
+    		log.debug("Creating call to [%s] from [%s]", toEndpoint, fromEndpoint);
+    	}        
         final Call mohoCall = toEndpoint.createCall(fromEndpoint, command.getHeaders());
         
-        if (command.getJoin() != null) {        	
+        if (command.getJoin() != null) {   
+        	if (log.isDebugEnabled()) {
+        		log.debug("Nested join operation detected. Setting join parameters [%s]", command.getJoin());
+        	}
+        	
 	        if (command.getJoin().getMedia() != null) {
 	        	mohoCall.setAttribute(JoinCommand.MEDIA_TYPE, command.getJoin().getMedia());
 	        }
@@ -59,7 +69,11 @@ public class CallManager extends ReflectiveActor {
         
         startCallActor(mohoCall);
         
-        return new CallRef(mohoCall.getId());
+    	if (log.isDebugEnabled()) {
+    		log.debug("Call actor started for call [%s]", mohoCall.getId());
+    	}
+        
+    	return new CallRef(mohoCall.getId());
     }
 
     @Message
@@ -69,7 +83,7 @@ public class CallManager extends ReflectiveActor {
     }
 
     private void startCallActor(final Call call) {
-
+    	
         if(getEventHandlers().isEmpty()) {
             log.warn("If an INVITE arrives and noone's there to handle it; does it make a sound? [call=%s]", call);
             call.disconnect();

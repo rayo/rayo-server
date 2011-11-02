@@ -21,8 +21,11 @@ public interface MessageFilter {
 	 * 
 	 * @param command Call command that has been intercepted
 	 * @param context Context data that can be shared across message filters
+	 * 
+	 * @return boolean Indicates whether the command request should be processed or not. 
+	 * Filters have a last chance to prevence undesired requests from being processed.
 	 */
-	public void handleCommandRequest(CallCommand command, FilterContext context);
+	public boolean handleCommandRequest(CallCommand command, FilterContext context);
 	
 	/**
 	 * Intercepts and handles a Rayo command response. This message filter method is 
@@ -31,8 +34,11 @@ public interface MessageFilter {
 	 * 
 	 * @param response Response object that has been intercepted
 	 * @param context Context data that can be shared across message filters
+	 * 
+	 * @return boolean Indicates whether the command response should be sent or not. Filters 
+	 * therefore have a last chance to stop processing a response.
 	 */
-	public void handleCommandResponse(Object response, FilterContext context);
+	public boolean handleCommandResponse(Object response, FilterContext context);
 	
 	/**
 	 * Intercepts and handles any Rayo event. This message filter method is being invoked
@@ -40,6 +46,9 @@ public interface MessageFilter {
 	 * 
 	 * @param event CAll event that has been intercepted
 	 * @param context Context data that can be shared across message filters
+	 * 
+	 * @return boolean Indicates whether the event should be sent or not. Filters 
+	 * there have a last chance to stop processing an event
 	 */
-	public void handleEvent(CallEvent event, FilterContext context);
+	public boolean handleEvent(CallEvent event, FilterContext context);
 }

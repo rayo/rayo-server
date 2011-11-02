@@ -54,7 +54,9 @@ public abstract class ReflectiveActor implements Actor, Callback<Object> {
                 Request request = (Request) message;
                 Object command = request.getCommand();
 
-                log.info("Request [%s]", request);
+                if (log.isDebugEnabled()) {
+                	log.debug("[%s] : Request [%s]", this, request);
+                }
 
                 try {
 

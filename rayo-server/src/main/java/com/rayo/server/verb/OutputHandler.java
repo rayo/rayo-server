@@ -1,10 +1,7 @@
 package com.rayo.server.verb;
 
-import javax.jms.IllegalStateException;
 import javax.validation.ConstraintValidatorContext;
 
-import com.rayo.server.exception.ExceptionMapper;
-import com.rayo.server.validation.SsmlValidator;
 import com.rayo.core.validation.ValidationException;
 import com.rayo.core.verb.Output;
 import com.rayo.core.verb.OutputCompleteEvent;
@@ -19,6 +16,8 @@ import com.rayo.core.verb.VerbCommand;
 import com.rayo.core.verb.VerbCompleteEvent;
 import com.rayo.core.verb.VolumeDownCommand;
 import com.rayo.core.verb.VolumeUpCommand;
+import com.rayo.server.exception.ExceptionMapper;
+import com.rayo.server.validation.SsmlValidator;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.Participant;
 import com.voxeo.moho.State;

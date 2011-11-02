@@ -11,9 +11,9 @@ public class DefaultMixerActorFactory implements MixerActorFactory {
 	private VerbManager verbManager;
 	
     @Override
-    public MixerActor create(Mixer mixer) {
+    public MixerActor create(Mixer mixer, String mixerName) {
 
-    	MixerActor actor = new MixerActor(mixer);
+    	MixerActor actor = new MixerActor(mixer, mixerName);
         actor.setFiberFactory(fiberFactory);
         actor.setVerbManager(verbManager);
         return actor;

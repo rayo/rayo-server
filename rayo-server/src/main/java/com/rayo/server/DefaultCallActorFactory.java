@@ -3,11 +3,14 @@ package com.rayo.server;
 import org.jetlang.fibers.PoolFiberFactory;
 
 import com.rayo.server.verb.VerbManager;
+import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.Call;
 import com.voxeo.moho.IncomingCall;
 
 public class DefaultCallActorFactory implements CallActorFactory {
 
+	private static final Loggerf log = Loggerf.getLogger(DefaultCallActorFactory.class);
+	
     private VerbManager verbManager;
     private PoolFiberFactory fiberFactory;
     private CallStatistics callStatistics;
@@ -17,6 +20,11 @@ public class DefaultCallActorFactory implements CallActorFactory {
 
     @Override
     public CallActor<?> create(Call call) {
+    	
+    	if (log.isDebugEnabled()) {
+    		log.debug("Creating call actor for call [%s]", call.getId());
+    	}
+    	
         CallActor<?> actor = null;
         if(call instanceof IncomingCall) {
             actor = new IncomingCallActor((IncomingCall)call);
