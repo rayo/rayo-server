@@ -14,9 +14,8 @@ import org.dom4j.QName;
 import com.rayo.core.verb.Choices;
 import com.rayo.core.verb.Input;
 import com.rayo.core.verb.InputCompleteEvent;
-import com.rayo.core.verb.InputMode;
-import com.rayo.core.verb.OutputCompleteEvent;
 import com.rayo.core.verb.InputCompleteEvent.Reason;
+import com.rayo.core.verb.InputMode;
 
 public class InputProvider extends BaseProvider {
 
@@ -168,7 +167,8 @@ public class InputProvider extends BaseProvider {
                     elementGrammar.addAttribute("url", choice.getUri().toString());
                 }
                 if (choice.getContent() != null) {
-                    elementGrammar.setText(choice.getContent());
+                    //elementGrammar.setText(choice.getContent());
+                    elementGrammar.addCDATA(choice.getContent());
                 }
             }
         }
