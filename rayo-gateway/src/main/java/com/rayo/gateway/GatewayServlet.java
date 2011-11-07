@@ -91,6 +91,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 				sendPresenceError(message.getTo(), message.getFrom(), Condition.BAD_REQUEST);
 			}
 		} catch (Exception e) {
+		    log.error(e.getMessage(),e);
 			// TODO: Use some exception mapper like in a Rayo Node (probably can share some code)
 			sendPresenceError(message.getTo(), message.getFrom());
 		}
