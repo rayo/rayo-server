@@ -16,6 +16,7 @@ import com.rayo.core.recording.StorageService;
 import com.rayo.core.verb.Output;
 import com.rayo.core.verb.Record;
 import com.rayo.core.verb.RecordCompleteEvent;
+import com.rayo.core.verb.RecordCompleteEvent.Reason;
 import com.rayo.core.verb.RecordPauseCommand;
 import com.rayo.core.verb.RecordResumeCommand;
 import com.rayo.core.verb.VerbCommand;
@@ -174,8 +175,10 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
 				}
 				break;
 			case TIMEOUT:
+				complete(Reason.TIMEOUT, event.getDuration());
+				break;
 			case INI_TIMEOUT:
-				complete(VerbCompleteEvent.Reason.STOP, event.getDuration());
+				complete(Reason.INI_TIMEOUT, event.getDuration());
 				break;
 			case DISCONNECT:
 				complete(VerbCompleteEvent.Reason.HANGUP, event.getDuration());

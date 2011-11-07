@@ -7,7 +7,7 @@ import org.joda.time.Duration;
 public class RecordCompleteEvent extends VerbCompleteEvent {
 
     public enum Reason implements VerbCompleteReason {
-        SUCCESS
+        SUCCESS, INI_TIMEOUT, TIMEOUT
     }
 
     private URI uri;
