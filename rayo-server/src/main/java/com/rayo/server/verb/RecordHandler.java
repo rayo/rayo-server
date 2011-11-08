@@ -65,6 +65,8 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
         }
         if (model.getFinalTimeout() != null) {
         	command.setFinalTimeout(model.getFinalTimeout().getMillis());
+        } else {
+            command.setFinalTimeout(10000);        	
         }
         if (model.getFormat() != null) {
         	command.setFileFormat(Output.toFileFormat(model.getFormat()));
@@ -76,14 +78,14 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
         }
         if (model.getInitialTimeout() != null) {
         	command.setInitialTimeout(model.getInitialTimeout().getMillis());
+        } else {
+            command.setInitialTimeout(10000);        	
         }
         if (model.getMaxDuration() != null) {
         	command.setMaxDuration(model.getMaxDuration().getMillis());
         }
         
         command.setSilenceTerminationOn(false);
-        command.setInitialTimeout(10000);
-        command.setFinalTimeout(10000);
         
 		recording = getMediaService().record(command);
 	}
