@@ -362,6 +362,9 @@ public class GatewayServlet extends AbstractRayoServlet {
 		
 		JID fromJidInternal = getXmppFactory().createJID(getInternalDomain());
 		JID toJidInternal = createInternalCallJid(callId);
+		if (request.getTo().getResource() != null) {
+			toJidInternal.setResource(request.getTo().getResource());
+		}
 
 		forwardIQRequest(fromJidInternal, toJidInternal, request, payload);
 	}
