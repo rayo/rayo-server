@@ -44,8 +44,6 @@ import com.rayo.server.Request;
 import com.rayo.server.Response;
 import com.rayo.server.ResponseHandler;
 import com.rayo.server.admin.RayoAdminService;
-import com.rayo.server.exception.ErrorMapping;
-import com.rayo.server.exception.ExceptionMapper;
 import com.rayo.server.filter.FilterChain;
 import com.rayo.server.listener.XmppMessageListenerGroup;
 import com.rayo.server.lookup.RayoJIDLookupService;
@@ -76,7 +74,6 @@ public class RayoServlet extends AbstractRayoServlet {
     private CallManager callManager;
     private CallRegistry callRegistry;
     private MixerRegistry mixerRegistry;
-    private ExceptionMapper exceptionMapper;
     private RayoStatistics rayoStatistics;
     private CdrManager cdrManager;
     
@@ -422,11 +419,6 @@ public class RayoServlet extends AbstractRayoServlet {
     // Util
     // ================================================================================
 
-    private void sendIqError(IQRequest request, Exception e) throws IOException {
-        ErrorMapping error = exceptionMapper.toXmppError(e);
-        sendIqError(request, error.getType(), error.getCondition(), error.getText());
-    }
-
     @Override
     protected void sendIqError(IQRequest request, IQResponse response) throws IOException {
     	
@@ -527,10 +519,6 @@ public class RayoServlet extends AbstractRayoServlet {
 	public void setMixerRegistry(MixerRegistry mixerRegistry) {
 		this.mixerRegistry = mixerRegistry;
 	}
-
-	public void setExceptionMapper(ExceptionMapper exceptionMapper) {
-        this.exceptionMapper = exceptionMapper;
-    }
 
 	public void setRayoStatistics(RayoStatistics rayoStatistics) {
 		this.rayoStatistics = rayoStatistics;

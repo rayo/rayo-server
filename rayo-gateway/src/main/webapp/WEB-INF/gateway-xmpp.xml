@@ -28,6 +28,7 @@
 	
 	<bean id="gateway" class="com.rayo.gateway.GatewayServlet" init-method="start">
 		<property name="jidRegistry" ref="jidRegistry"/>	
+		<property name="exceptionMapper" ref="exceptionMapper" />
 		<property name="rayoLookupService">
 		  	<!-- JID Redirection --> 
 			<bean id="rayoJIDLookupService" class="com.rayo.server.lookup.RegexpJIDLookupService">

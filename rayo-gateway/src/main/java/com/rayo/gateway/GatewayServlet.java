@@ -20,6 +20,7 @@ import com.rayo.gateway.exception.GatewayException;
 import com.rayo.server.JIDRegistry;
 import com.rayo.server.lookup.RayoJIDLookupService;
 import com.rayo.server.servlet.AbstractRayoServlet;
+import com.voxeo.exceptions.NotFoundException;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.util.ParticipantIDParser;
 import com.voxeo.servlet.xmpp.IQRequest;
@@ -255,7 +256,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 		if (rayoNode != null) {
 			return getXmppFactory().createJID(callId + "@" + rayoNode.getDomain());
 		}
-		throw new IllegalStateException(String.format("Could not find Rayo Node for call id [%s]", callId));
+		throw new NotFoundException(String.format("Could not find Rayo Node for call id [%s]", callId));
 	}
 
 	
@@ -342,10 +343,9 @@ public class GatewayServlet extends AbstractRayoServlet {
 			} else {
 				sendIqError(request, Type.CANCEL, Condition.RECIPIENT_UNAVAILABLE, "Unknown domain");
 			}
-		} catch (Exception e) {
-			// TODO: Use some exception mapper like in a Rayo Node (probably can share some code)
+		} catch (Exception e) {					
 			try {
-				sendIqError(request, Type.CANCEL, Condition.INTERNAL_SERVER_ERROR, e.getMessage());
+				sendIqError(request, e);
 			} catch (IOException ioe) {
 				log.error(ioe.getMessage(),ioe);
 			}

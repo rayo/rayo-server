@@ -21,6 +21,8 @@ import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSSerializer;
 
 import com.rayo.server.admin.AdminService;
+import com.rayo.server.exception.ErrorMapping;
+import com.rayo.server.exception.ExceptionMapper;
 import com.rayo.server.listener.AdminListener;
 import com.rayo.server.util.DomUtils;
 import com.voxeo.logging.Loggerf;
@@ -47,6 +49,7 @@ public abstract class AbstractRayoServlet extends XmppServlet implements AdminLi
 
 	private XmppFactory xmppFactory;
     private AdminService adminService;
+    private ExceptionMapper exceptionMapper;
     
     private String localDomain;
 
@@ -261,6 +264,12 @@ public abstract class AbstractRayoServlet extends XmppServlet implements AdminLi
     	return address;
 	}
 	
+    protected void sendIqError(IQRequest request, Exception e) throws IOException {
+    	
+        ErrorMapping error = exceptionMapper.toXmppError(e);
+        sendIqError(request, error.getType(), error.getCondition(), error.getText());
+    }
+    
 	protected static Loggerf getWireLogger() {
 		return WIRE;
 	}
@@ -283,4 +292,8 @@ public abstract class AbstractRayoServlet extends XmppServlet implements AdminLi
 		
 		return localDomain;
 	}
+	
+	public void setExceptionMapper(ExceptionMapper exceptionMapper) {
+        this.exceptionMapper = exceptionMapper;
+    }
 }
