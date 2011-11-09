@@ -16,6 +16,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import com.rayo.core.OfferEvent;
+import com.rayo.gateway.exception.GatewayException;
 import com.rayo.server.JIDRegistry;
 import com.rayo.server.lookup.RayoJIDLookupService;
 import com.rayo.server.servlet.AbstractRayoServlet;
@@ -431,6 +432,13 @@ public class GatewayServlet extends AbstractRayoServlet {
 		if (isDial(originalRequest)) {
 			// fetch call id and add it to the registry
 			String callId = response.getElement("ref").getAttribute("id");
+    		try {
+				gatewayDatastore.registerCall(callId, originalRequest.getFrom());
+			} catch (GatewayException e) {
+				log.error("Could not register call for dial");
+				log.error(e.getMessage(),e);
+			}
+
             jidRegistry.put(callId, originalRequest.getFrom().getBareJID(), originalRequest.getTo().getDomain());			
 		}
 
