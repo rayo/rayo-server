@@ -202,25 +202,37 @@ public class RayoServlet extends AbstractRayoServlet {
     	// Invoke filters
     	filtersChain.handleEvent(event);
     	
-    	if (event instanceof OfferEvent) {
-    		SipURI sipUriTo = new SipURI(((OfferEvent)event).getTo().toString());
-    		JID callTo = getXmppFactory().createJID(getBareJID(((OfferEvent)event).getTo().toString()));
-    		String forwardDestination = rayoLookupService.lookup((OfferEvent)event);
-    		if (forwardDestination != null) {
-    			callTo = getXmppFactory().createJID(forwardDestination);
-    		}
-    		jidRegistry.put(event.getCallId(), callTo, sipUriTo.getHost());
+    	JID jid = null; 
+    	JID from = null;
+    	if (gatewayDomain == null) {
+    		// Single server. This code needs a bit of refactoring specially as 
+    		// the gateway servlet shares some of this stuff. 
+	    	if (event instanceof OfferEvent) {
+	    		SipURI sipUriTo = new SipURI(((OfferEvent)event).getTo().toString());
+	    		JID callTo = getXmppFactory().createJID(getBareJID(((OfferEvent)event).getTo().toString()));
+	    		String forwardDestination = rayoLookupService.lookup((OfferEvent)event);
+	    		if (forwardDestination != null) {
+	    			callTo = getXmppFactory().createJID(forwardDestination);
+	    		}
+	    		jidRegistry.put(event.getCallId(), callTo, sipUriTo.getHost());
+	    	}
+    	
+	    	String callDomain = getLocalDomain();
+	    	if (callDomain == null) {
+	    		jidRegistry.getOriginDomain(event.getCallId());
+	    	}
+	    	jid = jidRegistry.getJID(event.getCallId());    	
+	    	from = getXmppFactory().createJID(event.getCallId() + "@" + callDomain);
+    	} else {
+    		// Clustered setup. Everything is forwarded to the gateway
+	    	from = getXmppFactory().createJID(event.getCallId() + "@" + getLocalDomain());
+    		jid = getXmppFactory().createJID(gatewayDomain);
     	}
     	
-    	String callDomain = getLocalDomain();
-    	if (callDomain == null) {
-    		jidRegistry.getOriginDomain(event.getCallId());
-    	}
-    	JID jid = jidRegistry.getJID(event.getCallId());    	
-    	JID from = getXmppFactory().createJID(event.getCallId() + "@" + callDomain);
-		if (event instanceof VerbEvent) {
-			from.setResource(((VerbEvent) event).getVerbId());
+	    if (event instanceof VerbEvent) {
+	    	from.setResource(((VerbEvent) event).getVerbId());
 		}
+	    
 		try {
 			// Send presence
 			PresenceMessage presence = getXmppFactory().createPresence(from, jid, null,
