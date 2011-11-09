@@ -144,7 +144,7 @@ public class RayoServlet extends AbstractRayoServlet {
         	CoreDocumentImpl document = new CoreDocumentImpl(false);
         	
         	org.w3c.dom.Element showElement = document.createElement("show");
-        	showElement.setTextContent(status.toUpperCase());
+        	showElement.setTextContent(status.toLowerCase());
         	org.w3c.dom.Element nodeInfoElement = 
         			document.createElementNS("urn:xmpp:rayo:cluster:1", "node-info");
         	org.w3c.dom.Element platform = document.createElement("platform");
