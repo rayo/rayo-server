@@ -110,11 +110,18 @@ public abstract class AbstractRayoServlet extends XmppServlet implements AdminLi
                     sendIqResult(request, bindElement);
                     getLog().info("Bound client resource [jid=%s]", boundJid); 
                     return;
-                } else if (qname.equals(PING_QNAME) || qname.equals(SESSION_QNAME)) {
+                } 
+                
+                if (qname.equals(SESSION_QNAME)) {
                 	sendIqResult(request);
                 	return;
                 }
     		}
+    		
+    		if (qname.equals(PING_QNAME) || qname.equals(SESSION_QNAME)) {
+            	sendIqResult(request);
+            	return;
+            }
     		
     		if (DomUtils.isSupportedNamespace(payload)) {
     			processIQRequest(request, payload);
