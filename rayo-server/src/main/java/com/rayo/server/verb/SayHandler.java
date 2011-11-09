@@ -112,7 +112,7 @@ public class SayHandler extends AbstractLocalVerbHandler<Say, Participant> {
     @State
     public void onSpeakComplete(OutputCompleteEvent<Participant> event) {
     	
-    	if (event.getMediaOperation() != null && !event.getMediaOperation().equals(this)) {
+    	if (event.getMediaOperation() != null && !event.getMediaOperation().equals(output)) {
     		logger.debug("Ignoring complete event as it is targeted to a different media operation");
     		return;
     	}
