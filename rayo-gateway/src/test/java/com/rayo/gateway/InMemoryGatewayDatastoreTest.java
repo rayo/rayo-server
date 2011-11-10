@@ -201,6 +201,23 @@ public class InMemoryGatewayDatastoreTest {
 		assertEquals(dataStore.pickClientResource(clientJid.getBareJID()),"c");
 	}
 	
+	@Test
+	public void testFindPlatforms() throws Exception {
+		
+		String[] platforms = new String[]{"staging", "production"};
+		RayoNode node1 = buildRayoNode("usera@localhost", platforms);
+		
+		dataStore.registerRayoNode(node1.getJid(), Arrays.asList(platforms));
+
+		assertEquals(dataStore.getRegisteredPlatforms().size(), 2);
+		assertTrue(dataStore.getRegisteredPlatforms().contains("staging"));
+		assertTrue(dataStore.getRegisteredPlatforms().contains("production"));
+		
+		dataStore.unregisterRayoNode(node1.getJid());
+
+		assertEquals(dataStore.getRegisteredPlatforms().size(), 0);
+	}
+	
 	private RayoNode buildRayoNode(String jid, String[] platforms) {
 
 		List<String> list = Arrays.asList(platforms);
