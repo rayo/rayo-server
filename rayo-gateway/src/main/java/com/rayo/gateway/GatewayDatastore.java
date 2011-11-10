@@ -63,6 +63,13 @@ public interface GatewayDatastore extends GatewayLoadBalancingStrategy {
 	Collection<JID> getRayoNodes(String platformId);
 	
 	/**
+	 * <p>Returns the list of registered platforms on this DHT.</p>
+	 * 
+	 * @return {@link Collection} Collection of platforms that have been registered.
+	 */
+	Collection<String> getRegisteredPlatforms();
+	
+	/**
 	 * <p>Returns the domain name for a given IP Address or <code>null</code> if the domain
 	 * cannot be found in the DHT.</p>
 	 * 

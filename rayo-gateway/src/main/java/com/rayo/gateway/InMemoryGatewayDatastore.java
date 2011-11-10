@@ -277,8 +277,19 @@ public class InMemoryGatewayDatastore implements GatewayDatastore {
 				platformMap.remove(platformId);
 			}
 		}
-		log.debug("Removed %s from platform %s", rayoNode, platformId);
-		
+		log.debug("Removed %s from platform %s", rayoNode, platformId);		
+	}
+	
+	@Override
+	public Collection<String> getRegisteredPlatforms() {
+
+		Lock readLock = rayoNodeLock.readLock();
+		readLock.lock();
+		try {
+			return platformMap.keySet();
+		} finally {
+			readLock.unlock();
+		}
 	}
 
 	@Override
