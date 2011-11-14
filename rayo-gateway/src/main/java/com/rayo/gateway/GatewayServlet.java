@@ -308,7 +308,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 
 					JID toJidInternal = getXmppFactory().createJID(
 							callId + "@" + domainName);
-					JID fromJidInternal = getXmppFactory().createJID(toJid.getDomain());								
+					JID fromJidInternal = getXmppFactory().createJID(getInternalDomain());								
                 	sendPresenceError(fromJidInternal, toJidInternal);
 				} catch (Exception e) {
 					log.error("Could not hang up call with id [%s]", callId);
