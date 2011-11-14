@@ -107,7 +107,7 @@ public abstract class AbstractRayoServlet extends XmppServlet implements AdminLi
     		if (request.getSession().getType() == XmppSession.Type.INBOUNDCLIENT) {
                 // Resource Binding
                 if (qname.equals(BIND_QNAME)) {
-                    String boundJid = request.getFrom().getNode() + "@" + request.getFrom().getDomain() + "/voxeo";
+                    String boundJid = request.getFrom().getNode() + "@" + request.getFrom().getDomain() + "/" + request.getFrom().getResource();
                     DOMElement bindElement = (DOMElement) DOMDocumentFactory.getInstance().createElement(BIND_QNAME);
                     bindElement.addElement("jid").setText(boundJid);
                     sendIqResult(request, bindElement);
