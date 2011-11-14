@@ -245,4 +245,11 @@ public interface GatewayDatastore extends GatewayLoadBalancingStrategy {
 	 * @return
 	 */
 	public Collection<String> getResourcesForClient(JID clientJid);
+	
+	/**
+	 * <p>Returns a collection with all the registered client resources on this DHT.</p>
+	 * 
+	 * @return {@link Collection} Collection of registered client resources
+	 */
+	public Collection<JID> getClientResources();
 }

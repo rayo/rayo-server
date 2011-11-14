@@ -532,6 +532,17 @@ public class InMemoryGatewayDatastore implements GatewayDatastore {
 	}	
 	
 	@Override
+	public Collection<JID> getClientResources() {
+
+		resourcesLock.readLock().lock();
+		try {
+			return Collections.unmodifiableCollection(resourcesMap.keySet());
+		} finally {
+			resourcesLock.readLock().unlock();
+		}
+	}
+	
+	@Override
 	public JID pickRayoNode(String platformId) {
 
 		RayoNode node = null;

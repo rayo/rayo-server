@@ -65,5 +65,8 @@
   	<bean id="infoBean" class="com.rayo.server.jmx.Info">
   		<property name="adminService" ref="adminService" />
   	</bean>
-
+  	
+  	<bean id="gatewayBean" class="com.rayo.gateway.jmx.Gateway">
+  		<property name="gatewayDatastore" ref="gatewayDatastore" />
+  	</bean>
 </beans>
