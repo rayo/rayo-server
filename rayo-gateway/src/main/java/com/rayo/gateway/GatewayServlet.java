@@ -379,7 +379,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 		//TODO: Build full jid as in the doc. Currently blocked on Prism issue.
 		//fromJidInternal = getXmppFactory().createJID(
 		//		toJidExternal.getDomain()+"/"+fromJidExternal.getBareJID());
-		JID fromJidInternal = getXmppFactory().createJID(request.getTo().getDomain());
+		JID fromJidInternal = getXmppFactory().createJID(getInternalDomain());
 		
 		String platformId = gatewayDatastore.getPlatformForClient(request.getFrom());
 		if (platformId != null) {	
