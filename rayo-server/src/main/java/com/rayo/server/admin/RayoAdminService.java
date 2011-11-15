@@ -1,6 +1,8 @@
 package com.rayo.server.admin;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import com.rayo.server.CallActor;
 import com.rayo.server.CallRegistry;
@@ -15,11 +17,18 @@ public class RayoAdminService extends AdminService {
 	private static final Loggerf log = Loggerf.getLogger(RayoAdminService.class);
 	private AtomicBoolean quiesceMode = new AtomicBoolean(false);
 		
+	private ReentrantReadWriteLock adminLock = new ReentrantReadWriteLock();
+	
 	private CallRegistry callRegistry;
 	
 	public boolean isQuiesceMode() {
 		
-		return quiesceMode.get();
+		Lock lock = adminLock.readLock();
+		try {
+			return quiesceMode.get();
+		} finally {
+			lock.unlock();
+		}
 	}
 	
 	public void sendDtmf(String callId, String dtmf) {
@@ -36,25 +45,35 @@ public class RayoAdminService extends AdminService {
 
 	public void disableQuiesce() {
 		
-		log.debug("Quiesce Mode has been DISABLED");
-		quiesceMode.set(false);
-		for (AdminListener listener: getAdminListeners()) {
-			listener.onQuiesceModeExited();
+		Lock lock = adminLock.writeLock();
+		try {
+			log.debug("Quiesce Mode has been DISABLED");
+			quiesceMode.set(false);
+			for (AdminListener listener: getAdminListeners()) {
+				listener.onQuiesceModeExited();
+			}
+		} finally {
+			lock.unlock();
 		}
 	}
 	
 	public void enableQuiesce() {
 
-		log.debug("Quiesce Mode has been ENABLED");
-		quiesceMode.set(true);
-		for (AdminListener listener: getAdminListeners()) {
-			listener.onQuiesceModeEntered();
+		Lock lock = adminLock.writeLock();
+		try {
+			log.debug("Quiesce Mode has been ENABLED");
+			quiesceMode.set(true);
+			for (AdminListener listener: getAdminListeners()) {
+				listener.onQuiesceModeEntered();
+			}
+		} finally {
+			lock.unlock();
 		}
 	}
 	
 	public boolean getQuiesceMode() {
 		
-		return quiesceMode.get();
+		return isQuiesceMode();
 	}
 	
 	public void setCallRegistry(CallRegistry callRegistry) {
