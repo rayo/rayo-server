@@ -22,6 +22,7 @@ public class RayoStatistics implements RayoStatisticsMXBean {
 	private AtomicLong validationErrors = new AtomicLong(0);
 	private AtomicLong messagesReceived = new AtomicLong(0);
 	private AtomicLong presencesReceived = new AtomicLong(0);
+	private AtomicLong presenceErrorsReceived = new AtomicLong(0);
 	
 	private Map<String, AtomicLong> commands = new ConcurrentHashMap<String, AtomicLong>();
 	private AtomicLong totalCommands = new AtomicLong(0);
@@ -112,6 +113,17 @@ public class RayoStatistics implements RayoStatisticsMXBean {
 	public void presenceStanzaReceived() {
 		
 		presencesReceived.incrementAndGet();
+	}
+	
+	@ManagedAttribute(description="Presence Errors Received Count")
+	public long getPresenceErrorsReceived() {
+		
+		return presenceErrorsReceived.longValue();
+	}
+	
+	public void presenceErrorReceived() {
+		
+		presenceErrorsReceived.incrementAndGet();
 	}
 	
 	@ManagedAttribute(description="Validation Errors Count")

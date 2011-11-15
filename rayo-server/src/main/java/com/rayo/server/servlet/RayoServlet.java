@@ -283,6 +283,7 @@ public class RayoServlet extends AbstractRayoServlet {
 		if (fromJid.getNode() == null) {
 			if (gatewayDomain != null && fromJid.getDomain().equals(gatewayDomain)) {
 				if (presence.getType().equals("error")) {
+					rayoStatistics.presenceErrorReceived();
 					String callId = toJid.getNode();
 					if (callId != null) {
 						CallActor actor = callRegistry.get(callId);

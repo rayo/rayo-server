@@ -15,5 +15,6 @@ public interface RayoStatisticsMXBean {
 	public long getValidationErrors();
 	public long getMessageStanzasReceived();
 	public long getPresenceStanzasReceived();
+	public long getPresenceErrorsReceived();
 	public long getTotalCommands();
 }
