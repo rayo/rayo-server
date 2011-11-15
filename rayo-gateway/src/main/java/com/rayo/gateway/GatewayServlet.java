@@ -428,7 +428,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 		XmppServletRequest nattedRequest = response.getRequest();
 		IQRequest originalRequest = (IQRequest)nattedRequest.getAttribute("com.tropo.ozone.gateway.originaRequest");
 		if (isDial(originalRequest)) {
-			if (response.getElement("error") != null) {
+			if (response.getElement("error") == null) {
 				// fetch call id and add it to the registry
 				String callId = response.getElement("ref").getAttribute("id");
 	    		try {
