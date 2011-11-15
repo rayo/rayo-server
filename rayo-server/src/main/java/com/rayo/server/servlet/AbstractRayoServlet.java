@@ -197,8 +197,11 @@ public abstract class AbstractRayoServlet extends XmppServlet implements AdminLi
     protected void sendPresenceError(JID fromJid, JID toJid, Condition condition) throws IOException, ServletException {
     	
 		CoreDocumentImpl document = new CoreDocumentImpl(false);
+		org.w3c.dom.Element errorElement = document.createElement("error");
 		org.w3c.dom.Element conditionElement = document.createElement(condition.toString());
-		sendPresenceError(fromJid, toJid, conditionElement);
+		errorElement.appendChild(conditionElement);		
+		
+		sendPresenceError(fromJid, toJid, errorElement);
     }   
     
     protected void sendPresenceError(JID fromJid, JID toJid, Element... elements) throws IOException, ServletException {
