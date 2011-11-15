@@ -24,6 +24,7 @@ public class RayoAdminService extends AdminService {
 	public boolean isQuiesceMode() {
 		
 		Lock lock = adminLock.readLock();
+		lock.lock();
 		try {
 			return quiesceMode.get();
 		} finally {
@@ -46,6 +47,7 @@ public class RayoAdminService extends AdminService {
 	public void disableQuiesce() {
 		
 		Lock lock = adminLock.writeLock();
+		lock.lock();
 		try {
 			log.debug("Quiesce Mode has been DISABLED");
 			quiesceMode.set(false);
@@ -60,6 +62,7 @@ public class RayoAdminService extends AdminService {
 	public void enableQuiesce() {
 
 		Lock lock = adminLock.writeLock();
+		lock.lock();
 		try {
 			log.debug("Quiesce Mode has been ENABLED");
 			quiesceMode.set(true);
