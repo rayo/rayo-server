@@ -103,8 +103,10 @@ public class RayoServlet extends AbstractRayoServlet {
 				
 				@Override
 				public void run() {
-					
-					broadcastPresence("chat");
+					RayoAdminService adminService = (RayoAdminService)getAdminService();
+					if (!adminService.isQuiesceMode()) {
+						broadcastPresence("chat");
+					}
 				}
 			}, 20000, 60000);
         }
