@@ -113,7 +113,7 @@ public class RayoServlet extends AbstractRayoServlet {
     @Override
     public void onQuiesceModeEntered() {
     
-    	broadcastPresence("busy");
+    	broadcastPresence("away");
     }
     
     @Override
