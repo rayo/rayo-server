@@ -410,7 +410,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 			Element dialElement = request
 					.getElement("dial", "urn:xmpp:rayo:1");
 			if (dialElement != null) {
-				if (request.getElement("error") != null) {
+				if (request.getElement("error") == null) {
 					return true;
 				}
 			}
