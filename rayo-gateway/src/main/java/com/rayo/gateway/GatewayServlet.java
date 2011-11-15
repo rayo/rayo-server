@@ -17,7 +17,6 @@ import org.w3c.dom.NodeList;
 
 import com.rayo.core.OfferEvent;
 import com.rayo.gateway.exception.GatewayException;
-import com.rayo.server.JIDRegistry;
 import com.rayo.server.lookup.RayoJIDLookupService;
 import com.rayo.server.servlet.AbstractRayoServlet;
 import com.voxeo.exceptions.NotFoundException;
@@ -63,7 +62,6 @@ public class GatewayServlet extends AbstractRayoServlet {
 	private Set<String> externalDomains;
 	
 	protected RayoJIDLookupService<OfferEvent> rayoLookupService;
-	protected JIDRegistry jidRegistry;
 	
 	@Override
 	public void init(ServletConfig config) throws ServletException {
@@ -146,7 +144,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 		Collection<String> calls = gatewayDatastore.getCalls(message.getFrom());
 		for (String callId : calls) {
 			JID fromJid = createInternalCallJid(callId);
-			JID targetJid = jidRegistry.getJID(callId);
+			JID targetJid = gatewayDatastore.getclientJID(callId);
 			CoreDocumentImpl document = new CoreDocumentImpl(false);
 			org.w3c.dom.Element endElement = document.createElementNS("urn:xmpp:rayo:1", "end");
 			org.w3c.dom.Element errorElement = document.createElement("error");
@@ -210,28 +208,23 @@ public class GatewayServlet extends AbstractRayoServlet {
     		if (log.isDebugEnabled()) {
     			log.debug("Received Offer. Offer will be delivered to [%s]", callTo);
     		}
-    		// We set the call domain to the Gateway. All outbound messages will use that domain as 'from'
-    		jidRegistry.put(callId, callTo, toJid.getDomain());			
-    		
-    		// Register call in DHT 
-    		gatewayDatastore.registerCall(callId, callTo);
     		
     		resource = gatewayDatastore.pickClientResource(callTo.getBareJID()); // picks and load balances
     		if (resource == null) {
 				sendPresenceError(toJid, fromJid, Condition.RECIPIENT_UNAVAILABLE);
 			}
+
+    		callTo.setResource(resource);
+    		
+    		// Register call in DHT 
+    		gatewayDatastore.registerCall(callId, callTo);    		
 		}
 		  	
-    	JID jid = jidRegistry.getJID(callId);  
-    	if (resource != null) {
-    		jid.setResource(resource);
-    	}
-    	
+    	JID jid = gatewayDatastore.getclientJID(callId);    	
     	JID from = createExternalCallJid(callId, fromJid.getResource());
 		
 		if (message.getElement("end", "urn:xmpp:rayo:1") != null) {
 			gatewayDatastore.unregistercall(callId);
-			jidRegistry.remove(callId);
 		}
 		
 		try {
@@ -417,7 +410,9 @@ public class GatewayServlet extends AbstractRayoServlet {
 			Element dialElement = request
 					.getElement("dial", "urn:xmpp:rayo:1");
 			if (dialElement != null) {
-				return true;
+				if (request.getElement("error") != null) {
+					return true;
+				}
 			}
 		}
 		return false;
@@ -436,13 +431,13 @@ public class GatewayServlet extends AbstractRayoServlet {
 			// fetch call id and add it to the registry
 			String callId = response.getElement("ref").getAttribute("id");
     		try {
+    			// Note that the original request always has a resource assigned. So this outgoing call
+    			// will be linked to that resourc
 				gatewayDatastore.registerCall(callId, originalRequest.getFrom());
 			} catch (GatewayException e) {
 				log.error("Could not register call for dial");
 				log.error(e.getMessage(),e);
 			}
-
-            jidRegistry.put(callId, originalRequest.getFrom().getBareJID(), originalRequest.getTo().getDomain());			
 		}
 
 		forwardResponse(response, originalRequest);
@@ -521,9 +516,5 @@ public class GatewayServlet extends AbstractRayoServlet {
 	public void setRayoLookupService(
 			RayoJIDLookupService<OfferEvent> rayoLookupService) {
 		this.rayoLookupService = rayoLookupService;
-	}
-
-	public void setJidRegistry(JIDRegistry jidRegistry) {
-		this.jidRegistry = jidRegistry;
 	}
 }
