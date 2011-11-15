@@ -428,15 +428,17 @@ public class GatewayServlet extends AbstractRayoServlet {
 		XmppServletRequest nattedRequest = response.getRequest();
 		IQRequest originalRequest = (IQRequest)nattedRequest.getAttribute("com.tropo.ozone.gateway.originaRequest");
 		if (isDial(originalRequest)) {
-			// fetch call id and add it to the registry
-			String callId = response.getElement("ref").getAttribute("id");
-    		try {
-    			// Note that the original request always has a resource assigned. So this outgoing call
-    			// will be linked to that resourc
-				gatewayDatastore.registerCall(callId, originalRequest.getFrom());
-			} catch (GatewayException e) {
-				log.error("Could not register call for dial");
-				log.error(e.getMessage(),e);
+			if (response.getElement("error") != null) {
+				// fetch call id and add it to the registry
+				String callId = response.getElement("ref").getAttribute("id");
+	    		try {
+	    			// Note that the original request always has a resource assigned. So this outgoing call
+	    			// will be linked to that resourc
+					gatewayDatastore.registerCall(callId, originalRequest.getFrom());
+				} catch (GatewayException e) {
+					log.error("Could not register call for dial");
+					log.error(e.getMessage(),e);
+				}
 			}
 		}
 
