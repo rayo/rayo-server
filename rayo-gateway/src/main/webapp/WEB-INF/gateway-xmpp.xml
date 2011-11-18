@@ -23,15 +23,12 @@
 		<value>localhost</value>
 	</util:list>
 	
-	<!-- Global JIDs Registry -->
-	<bean id="jidRegistry" class="com.rayo.server.JIDRegistry" />
-	
 	<!-- Exception Mapper -->
   	<bean id="exceptionMapper" class="com.rayo.server.exception.ExceptionMapper"/>
 	
 	<bean id="gateway" class="com.rayo.gateway.GatewayServlet" init-method="start">
-		<property name="jidRegistry" ref="jidRegistry"/>	
 		<property name="exceptionMapper" ref="exceptionMapper" />
+		<property name="gatewayStatistics" ref="gatewayStatistics" />
 		<property name="rayoLookupService">
 		  	<!-- JID Redirection --> 
 			<bean id="rayoJIDLookupService" class="com.rayo.server.lookup.RegexpJIDLookupService">
@@ -67,6 +64,11 @@
   	</bean>
   	
   	<bean id="gatewayBean" class="com.rayo.gateway.jmx.Gateway">
+  		<property name="gatewayDatastore" ref="gatewayDatastore" />
+  		<property name="gatewayServlet" ref="gateway" />
+  	</bean>
+  	
+  	<bean id="gatewayStatistics" class="com.rayo.gateway.jmx.GatewayStatistics">
   		<property name="gatewayDatastore" ref="gatewayDatastore" />
   	</bean>
 </beans>

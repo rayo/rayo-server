@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.jmx.export.annotation.ManagedResource;
 
+import com.rayo.gateway.GatewayDatastore;
 import com.voxeo.servlet.xmpp.JID;
 
 /**
@@ -18,6 +19,7 @@ public class Node implements RayoNodeMXBean {
 
 	private JID jid;
 	private List<String> platforms = new ArrayList<String>();
+	private GatewayDatastore gatewayDatastore;
 
 	public Node(JID jid) {
 		this.jid = jid;
@@ -41,6 +43,17 @@ public class Node implements RayoNodeMXBean {
 	}
 	
 	@Override
+	public List<Call> getCalls() {
+
+		List<Call> calls = new ArrayList<Call>();
+		for(String callId : gatewayDatastore.getCallsForRayoNode(jid)) {
+			Call call = new Call(callId, jid, gatewayDatastore.getclientJID(callId));
+			calls.add(call);
+		}
+		return calls;
+	}
+	
+	@Override
 	public boolean equals(Object obj) {
 		
 		if (!(obj instanceof Node)) return false;
@@ -51,5 +64,10 @@ public class Node implements RayoNodeMXBean {
 	public int hashCode() {
 
 		return jid.toString().hashCode();
+	}
+
+	public void setGatewayDatastore(GatewayDatastore gatewayDatastore) {
+
+		this.gatewayDatastore = gatewayDatastore;
 	}
 }

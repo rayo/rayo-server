@@ -17,12 +17,14 @@ import org.w3c.dom.NodeList;
 
 import com.rayo.core.OfferEvent;
 import com.rayo.gateway.exception.GatewayException;
+import com.rayo.gateway.jmx.GatewayStatistics;
 import com.rayo.server.lookup.RayoJIDLookupService;
 import com.rayo.server.servlet.AbstractRayoServlet;
 import com.voxeo.exceptions.NotFoundException;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.util.ParticipantIDParser;
 import com.voxeo.servlet.xmpp.IQRequest;
+import com.voxeo.servlet.xmpp.IQResponse;
 import com.voxeo.servlet.xmpp.JID;
 import com.voxeo.servlet.xmpp.PresenceMessage;
 import com.voxeo.servlet.xmpp.StanzaError.Condition;
@@ -60,9 +62,12 @@ public class GatewayServlet extends AbstractRayoServlet {
 
 	private Set<String> internalDomains;
 	private Set<String> externalDomains;
+		
+	private List<String> bannedJids = new ArrayList<String>();
 	
 	protected RayoJIDLookupService<OfferEvent> rayoLookupService;
-	
+	private GatewayStatistics gatewayStatistics;
+
 	@Override
 	public void init(ServletConfig config) throws ServletException {
 		
@@ -76,7 +81,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 	@Override
 	protected void doPresence(PresenceMessage message) throws ServletException, IOException {
 		
-		// getOzoneStatistics().presenceStanzaReceived();
+		gatewayStatistics.messageProcessed();
 		if (getWireLogger().isDebugEnabled()) {
 			getWireLogger().debug("%s :: %s", message,
 					message.getSession().getId());
@@ -154,6 +159,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 				PresenceMessage presence = getXmppFactory().createPresence(
 						fromJid, targetJid, null, endElement);
 				presence.send();
+				gatewayStatistics.errorProcessed();
 			} catch (Exception e) {	                            		
 				log.error("Could not send End event to Jid [%s]", targetJid);
 				log.error(e.getMessage(),e);
@@ -217,10 +223,16 @@ public class GatewayServlet extends AbstractRayoServlet {
     		callTo.setResource(resource);
     		
     		// Register call in DHT 
-    		gatewayDatastore.registerCall(callId, callTo);    		
+    		gatewayDatastore.registerCall(callId, callTo);
+    		gatewayStatistics.callRegistered();
 		}
 		  	
-    	JID jid = gatewayDatastore.getclientJID(callId);    	
+    	JID jid = gatewayDatastore.getclientJID(callId);  
+    	if (jid == null) {
+    		log.error("Could not find registered client JID for call id [%s]", callId);
+    		sendPresenceError(toJid, fromJid, Condition.RECIPIENT_UNAVAILABLE);
+    		return;
+    	}
     	JID from = createExternalCallJid(callId, fromJid.getResource());
 		
 		if (message.getElement("end", "urn:xmpp:rayo:1") != null) {
@@ -231,7 +243,12 @@ public class GatewayServlet extends AbstractRayoServlet {
 			// Send presence
 			PresenceMessage presence = getXmppFactory().createPresence(from, jid, null, 
 					message.getElement());
-				
+			
+	    	if (presence == null) {
+	    		log.error("Could not find registered client session for call id [%s]", callId);
+	    		sendPresenceError(toJid, fromJid, Condition.RECIPIENT_UNAVAILABLE);
+	    		return;
+	    	}
 			presence.send();
 		} catch (ServletException se) {
 			if (se.getMessage().startsWith("can't find corresponding client session")) {
@@ -278,6 +295,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 				switch (message.getShow()) {
 					case CHAT: 
 						gatewayDatastore.registerClientResource(message.getFrom());
+						gatewayStatistics.clientRegistered(message.getFrom().getBareJID());
 						break;
 					case AWAY:
 					case DND:
@@ -318,12 +336,16 @@ public class GatewayServlet extends AbstractRayoServlet {
 	private boolean validApplicationJid(JID fromJid) {
 
 		//TODO: Lookup bare JID in DNS to confirm it belongs to a valid app
+		if (bannedJids.contains(fromJid.getBareJID().toString())) {
+			return false;
+		}
 		return true;
 	}
 
 	@Override
 	protected void processIQRequest(IQRequest request, DOMElement payload) {
     	
+		gatewayStatistics.messageProcessed();
 		try {
 			if (isMyExternalDomain(request.getTo())) {
 				if (isDial(request)) {
@@ -421,6 +443,8 @@ public class GatewayServlet extends AbstractRayoServlet {
 	@Override
 	protected void doResponse(XmppServletResponse response) throws ServletException, IOException {
 
+		gatewayStatistics.messageProcessed();
+		
 		// Each Rayo Node will send an IQ Response to the Rayo Gateway for each IQ Request sent
 		super.doResponse(response);
 		
@@ -435,6 +459,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 	    			// Note that the original request always has a resource assigned. So this outgoing call
 	    			// will be linked to that resourc
 					gatewayDatastore.registerCall(callId, originalRequest.getFrom());
+					gatewayStatistics.callRegistered();
 				} catch (GatewayException e) {
 					log.error("Could not register call for dial");
 					log.error(e.getMessage(),e);
@@ -468,6 +493,66 @@ public class GatewayServlet extends AbstractRayoServlet {
 		}
 	}
     
+	@Override
+	protected void sendIqError(IQRequest request, Exception e) throws IOException {
+
+		super.sendIqError(request, e);
+		gatewayStatistics.errorProcessed();
+	}
+
+	@Override
+	protected void sendIqError(IQRequest request, IQResponse response) throws IOException {
+
+		super.sendIqError(request, response);
+		gatewayStatistics.errorProcessed();
+	}
+
+	@Override
+	protected void sendIqError(IQRequest request, String type, String error, String text) throws IOException {
+
+		super.sendIqError(request, type, error, text);
+		gatewayStatistics.errorProcessed();
+	}
+
+	@Override
+	protected void sendIqError(IQRequest request, Type type, Condition error,String text) throws IOException {
+
+		super.sendIqError(request, type, error, text);
+		gatewayStatistics.errorProcessed();
+	}
+	
+	@Override
+	protected void sendPresenceError(JID fromJid, JID toJid) throws IOException, ServletException {
+
+		super.sendPresenceError(fromJid, toJid);
+		gatewayStatistics.errorProcessed();
+	}
+
+	@Override
+	protected void sendPresenceError(JID fromJid, JID toJid, Condition condition) throws IOException, ServletException {
+
+		super.sendPresenceError(fromJid, toJid, condition);
+		gatewayStatistics.errorProcessed();
+	}
+
+	@Override
+	protected void sendPresenceError(JID fromJid, JID toJid, Element... elements) throws IOException, ServletException {
+
+		super.sendPresenceError(fromJid, toJid, elements);
+		gatewayStatistics.errorProcessed();
+	}
+	
+	//TODO: Move ban/unban stuff to an admin service
+	public void ban(String jid) {
+		
+		bannedJids.add(jid);
+	}
+	
+	public void unban(String jid) {
+		
+		bannedJids.remove(jid);
+	}
+	
     @Override
     protected Loggerf getLog() {
 
@@ -518,5 +603,9 @@ public class GatewayServlet extends AbstractRayoServlet {
 	public void setRayoLookupService(
 			RayoJIDLookupService<OfferEvent> rayoLookupService) {
 		this.rayoLookupService = rayoLookupService;
+	}
+
+	public void setGatewayStatistics(GatewayStatistics gatewayStatistics) {
+		this.gatewayStatistics = gatewayStatistics;
 	}
 }

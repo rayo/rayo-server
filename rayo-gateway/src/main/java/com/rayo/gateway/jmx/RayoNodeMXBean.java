@@ -7,4 +7,6 @@ public interface RayoNodeMXBean {
 	String getJID();
 	
 	List<String> getPlatforms();
+	
+	List<Call> getCalls();
 }

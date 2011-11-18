@@ -432,6 +432,18 @@ public class InMemoryGatewayDatastore implements GatewayDatastore {
 	}
 	
 	@Override
+	public JID getclientJID(String callId) {
+
+		Lock readLock = callLock.readLock();
+		readLock.lock();
+		try {
+			return callToClientMap.get(callId);
+		} finally {
+			readLock.unlock();
+		}
+	}
+	
+	@Override
 	public Collection<String> getCallsForRayoNode(JID nodeJid) {
 		
 		return getCalls(nodeJid);

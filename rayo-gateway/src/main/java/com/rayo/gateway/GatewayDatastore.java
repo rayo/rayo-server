@@ -200,8 +200,18 @@ public interface GatewayDatastore extends GatewayLoadBalancingStrategy {
 	
 	//void removeApplication(JID appJid);
 
-
-	//String getClientJID(String callID);
+	/**
+	 * <p>This method returns the client full JID associated with each call. When 
+	 * a call is registered on a Rayo Gateway, if it is an incoming call then the 
+	 * rayo gateway will load balance the call across all the different resources 
+	 * registered for the client application. On an outgoing call, the registered 
+	 * JID will always be the resource used by the client application to dial.</p>
+	 * 
+	 * @param callId Id of the call for which we want to find the client full JId
+	 * 
+	 * @return {@link JID} Client full JID
+	 */
+	JID getclientJID(String callId);
 
 	/**
 	 * <p>Registers a client resource on the DHT.</p>
