@@ -29,6 +29,8 @@ public class Input extends BaseVerb {
 	private Character terminator;
 	private InputMode mode = InputMode.ANY;
 
+	private Duration maxSilence;
+	
 	public Duration getInitialTimeout() {
 		return initialTimeout;
 	}
@@ -103,6 +105,19 @@ public class Input extends BaseVerb {
     public boolean isSensitivityWithinRange() {
         return sensitivity == null || (sensitivity >= 0f && sensitivity <= 1f);
     }
+    
+    @AssertTrue(message=Messages.INVALID_MAX_SILENCE)
+    public boolean isMaxSilenceWithinRange() {
+        return maxSilence == null || (maxSilence.getMillis() >= 0);
+    }
+    
+	public Duration getMaxSilence() {
+		return maxSilence;
+	}
+
+	public void setMaxSilence(Duration maxSilence) {
+		this.maxSilence = maxSilence;
+	}
 
 	@Override
 	public String toString() {
@@ -116,6 +131,7 @@ public class Input extends BaseVerb {
 				.append("recognizer", getRecognizer())
 				.append("sensitivity", getSensitivity())
 				.append("terminator", getTerminator())
+				.append("maxSilence", getMaxSilence())
 				.append("grammars", grammars).toString();
 	}
 

@@ -49,6 +49,14 @@ public class SayHandler extends AbstractLocalVerbHandler<Say, Participant> {
     @Override
     public boolean isStateValid(ConstraintValidatorContext context) {
 
+    	if (!isReady(participant)) {
+            context.buildConstraintViolationWithTemplate("Call is not ready yet.")
+        		.addNode(ExceptionMapper.toString(StanzaError.Condition.RESOURCE_CONSTRAINT))
+        		.addConstraintViolation();
+            return false;
+    		
+    	}
+    	
         if (isOnConference(participant)) {
         	context.buildConstraintViolationWithTemplate(
         			"Call is joined to a conference.")

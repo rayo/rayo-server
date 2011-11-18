@@ -33,6 +33,7 @@ public class Messages {
 	public static final String INVALID_TERMINATOR = "Invalid terminator character.";
 	public static final String INVALID_CONFIDENCE_RANGE = "Confidence must be a value between 0 and 1.";
 	public static final String INVALID_SENSITIVITY_RANGE = "Sensitivity must be a value between 0 and 1.";
+	public static final String INVALID_MAX_SILENCE = "Max Silence needs to be greater or equal to 0.";
 	public static final String INVALID_REASON = "Invalid reason";
     public static final String INVALID_MEDIA = "Invalid media.";
     public static final String INVALID_DIRECTION = "Invalid direction. Should be either true or false.";

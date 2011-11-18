@@ -1055,6 +1055,18 @@ class ValidationTest {
 	}
 	
 	@Test
+	public void validateInvalidMaxSilence() {
+				
+		def input = parseXml("""<input xmlns=\"urn:xmpp:rayo:input:1\" max-silence="-1"><grammar content-type="vxml">sales,support</grammar></input>""")
+		
+		def errorMapping = assertValidationException(input)
+		assertNotNull errorMapping
+		assertEquals StanzaError.Type.MODIFY.toString(), errorMapping.type
+		assertEquals ExceptionMapper.toString(StanzaError.Condition.BAD_REQUEST), errorMapping.condition
+		assertEquals Messages.INVALID_MAX_SILENCE, errorMapping.text
+	}
+	
+	@Test
 	public void validateInputInvalidTerminator() {
 				
 		def input = parseXml("""<input xmlns=\"urn:xmpp:rayo:input:1\" terminator="abcd"><grammar content-type="vxml">sales,support</grammar></input>""")

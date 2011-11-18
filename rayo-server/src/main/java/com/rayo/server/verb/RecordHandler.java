@@ -146,6 +146,14 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
 	@Override
 	public boolean isStateValid(ConstraintValidatorContext context) {
 
+    	if (!isReady(participant)) {
+            context.buildConstraintViolationWithTemplate("Call is not ready yet.")
+        		.addNode(ExceptionMapper.toString(StanzaError.Condition.RESOURCE_CONSTRAINT))
+        		.addConstraintViolation();
+            return false;
+    		
+    	}
+    	
         if (!canManipulateMedia()) {
             context.buildConstraintViolationWithTemplate("Media operations are not allowed in the current call status.")
             	.addNode(ExceptionMapper.toString(StanzaError.Condition.RESOURCE_CONSTRAINT))

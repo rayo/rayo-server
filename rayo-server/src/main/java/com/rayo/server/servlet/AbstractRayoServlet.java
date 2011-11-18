@@ -198,6 +198,7 @@ public abstract class AbstractRayoServlet extends XmppServlet implements AdminLi
     	
 		CoreDocumentImpl document = new CoreDocumentImpl(false);
 		org.w3c.dom.Element errorElement = document.createElement("error");
+		errorElement.setAttribute("type", "cancel");
 		org.w3c.dom.Element conditionElement = document.createElement(condition.toString());
 		errorElement.appendChild(conditionElement);		
 		

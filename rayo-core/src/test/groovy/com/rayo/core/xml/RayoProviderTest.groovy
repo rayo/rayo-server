@@ -1423,14 +1423,15 @@ public class RayoProviderTest {
 	@Test
 	public void inputFromXml() {
 		
-		def input = fromXml("""<input xmlns="urn:xmpp:rayo:input:1" min-confidence="0.8" sensitivity="0.3" mode="dtmf" recognizer="en-us" terminator="#" initial-timeout="3000" inter-digit-timeout="1000"><grammar content-type="application/grammar+voxeo">a,b</grammar></input>""")
+		def input = fromXml("""<input xmlns="urn:xmpp:rayo:input:1" min-confidence="0.8" sensitivity="0.3" mode="dtmf" recognizer="en-us" max-silence="2000" terminator="#" initial-timeout="3000" inter-digit-timeout="1000"><grammar content-type="application/grammar+voxeo">a,b</grammar></input>""")
 		assertNotNull input
 		assertProperties(input, [
 			mode:InputMode.DTMF,
 			recognizer:"en-us",
 			terminator:Character.valueOf('#' as char), 
 			initialTimeout: new Duration(3000),
-			interDigitTimeout: new Duration(1000)
+			interDigitTimeout: new Duration(1000),
+			maxSilence: new Duration(2000)
 		])
 		assertEquals input.minConfidence, 0.8f, 0
 		assertEquals input.sensitivity, 0.3f, 0
@@ -1485,8 +1486,9 @@ public class RayoProviderTest {
 		input.terminator = '#' as char
 		input.initialTimeout = new Duration(3000)
 		input.interDigitTimeout = new Duration(1000)
+		input.maxSilence = new Duration(2000)
 		
-		assertEquals("""<input xmlns="urn:xmpp:rayo:input:1" min-confidence="0.8" initial-timeout="3000" mode="DTMF" inter-digit-timeout="1000" recognizer="en-us" sensitivity="0.3" terminator="#"/>""", toXml(input));
+		assertEquals("""<input xmlns="urn:xmpp:rayo:input:1" min-confidence="0.8" initial-timeout="3000" mode="DTMF" inter-digit-timeout="1000" recognizer="en-us" sensitivity="0.3" max-silence="2000" terminator="#"/>""", toXml(input));
 	}
 	
 	@Test

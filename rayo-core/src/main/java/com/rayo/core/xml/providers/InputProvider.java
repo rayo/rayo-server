@@ -96,6 +96,9 @@ public class InputProvider extends BaseProvider {
         if (element.attribute("sensitivity") != null) {
         	input.setSensitivity(toFloat("sensitivity", element));
         }
+        if (element.attribute("max-silence") != null) {
+        	input.setMaxSilence(toDuration("max-silence", element));
+        }
         if (element.attribute("terminator") != null) {
         	input.setTerminator(toTerminator(element.attributeValue("terminator")));
         }
@@ -152,6 +155,9 @@ public class InputProvider extends BaseProvider {
         }
         if (input.getSensitivity() != null ) {
         	root.addAttribute("sensitivity", String.valueOf(input.getSensitivity()));        	
+        }
+        if (input.getMaxSilence() != null ) {
+        	root.addAttribute("max-silence", Long.toString(input.getMaxSilence().getMillis()));        	
         }
         if (input.getTerminator() != null ) {
         	root.addAttribute("terminator", String.valueOf(input.getTerminator()));        	

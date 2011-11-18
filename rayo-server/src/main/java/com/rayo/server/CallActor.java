@@ -21,6 +21,7 @@ import com.rayo.core.JoinedEvent;
 import com.rayo.core.RingingEvent;
 import com.rayo.core.UnjoinCommand;
 import com.rayo.core.UnjoinedEvent;
+import com.rayo.core.exception.NotAnsweredException;
 import com.rayo.core.verb.HoldCommand;
 import com.rayo.core.verb.MuteCommand;
 import com.rayo.core.verb.Ssml;
@@ -29,6 +30,7 @@ import com.rayo.core.verb.UnmuteCommand;
 import com.voxeo.exceptions.NotFoundException;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.Call;
+import com.voxeo.moho.Call.State;
 import com.voxeo.moho.Joint;
 import com.voxeo.moho.Mixer;
 import com.voxeo.moho.Participant;
@@ -129,26 +131,50 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 
     @Message
     public void hold(HoldCommand message) {
-    	participant.hold();
+
+    	if (isAnswered(participant)) {
+    		participant.hold();
+    	} else{
+    		throw new NotAnsweredException("Call has not been answered yet");
+    	}
     }
     
     @Message
     public void unhold(UnholdCommand message) {
-    	participant.unhold();
+
+    	if (isAnswered(participant)) {
+    		participant.unhold();
+    	} else{
+    		throw new NotAnsweredException("Call has not been answered yet");
+    	}    		
     }
 
     @Message
     public void mute(MuteCommand message) {
-    	participant.mute();
+    	
+    	if (isAnswered(participant)) {
+    		participant.mute();
+    	} else{
+    		throw new NotAnsweredException("Call has not been answered yet");
+    	}
     }
     
     @Message
     public void unmute(UnmuteCommand message) {
-    	participant.unmute();
+    	
+    	if (isAnswered(participant)) {
+    		participant.unmute();
+    	} else{
+    		throw new NotAnsweredException("Call has not been answered yet");
+    	}    		
     }
     
     @Message
     public void dtmf(DtmfCommand message) {
+    
+    	if(!isAnswered(participant)) {
+    		throw new NotAnsweredException("Call has not been answered yet");
+    	}
     	
     	Ssml ssml = new Ssml(String.format(
     			"<audio src=\"dtmf:%s\"/>",message.getTones()));
@@ -236,6 +262,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     
     @Message
     public void hangup(HangupCommand message) {
+    	
         // Unjoin app participants before hanging up to get around Moho B2BUA thing
         unjoinAll();
     	participant.hangup(message.getHeaders());
@@ -410,6 +437,17 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
         if(event.getSource().equals(participant)) {
             unjoinAll();
         }
+    }
+    
+    boolean isAnswered(Participant participant) {
+    	
+    	if (participant instanceof Call) {
+    		Call call = (Call)participant;
+    		if (call.getCallState() == State.CONNECTED) {
+    			return true;
+    		}
+    	}
+    	return false;
     }
     
     // Properties

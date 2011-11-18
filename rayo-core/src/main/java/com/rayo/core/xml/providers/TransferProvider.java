@@ -15,6 +15,7 @@ import com.rayo.core.validation.ValidationException;
 import com.rayo.core.verb.MediaType;
 import com.rayo.core.verb.Transfer;
 import com.rayo.core.verb.TransferCompleteEvent;
+import com.rayo.core.verb.TransferCompleteEvent.Reason;
 
 public class TransferProvider extends BaseProvider {
 
@@ -26,7 +27,9 @@ public class TransferProvider extends BaseProvider {
 		
 		if (element.getName().equals("transfer")) {
             return buildTransfer(element);
-		}
+		} else if (element.getNamespace().equals(RAYO_COMPONENT_NAMESPACE)) {
+            return buildCompleteCommand(element);
+        }
 		
 		return null;
 	}
@@ -95,6 +98,20 @@ public class TransferProvider extends BaseProvider {
     //	
     //	return transferComplete;
     //}	
+    
+    private Object buildCompleteCommand(Element element) {
+    	
+        Element reasonElement = (Element)element.elements().get(0);
+    	String reasonValue = reasonElement.getName().toUpperCase();
+        Reason reason = Reason.valueOf(reasonValue);
+        
+        TransferCompleteEvent complete = new TransferCompleteEvent();
+        complete.setReason(reason);
+        if (element.element("error") != null) {
+            complete.setErrorText(element.elementText("error"));
+        }
+        return complete;
+    }
 
 	@Override
 	protected void generateDocument(Object object, Document document) throws Exception {

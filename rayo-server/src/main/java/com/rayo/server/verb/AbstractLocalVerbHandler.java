@@ -13,11 +13,13 @@ import com.rayo.core.verb.VerbCommand;
 import com.rayo.core.verb.VerbCompleteEvent;
 import com.rayo.core.verb.VerbEvent;
 import com.voxeo.moho.Call;
+import com.voxeo.moho.Call.State;
 import com.voxeo.moho.MediaService;
 import com.voxeo.moho.Participant;
 import com.voxeo.moho.Participant.JoinType;
 import com.voxeo.moho.media.output.AudibleResource;
 import com.voxeo.moho.media.output.OutputCommand;
+import com.voxeo.moho.sip.SIPCallImpl;
 
 @ValidHandlerState
 public abstract class AbstractLocalVerbHandler<T extends Verb, S extends Participant> implements VerbHandler<T, S> {
@@ -144,6 +146,17 @@ public abstract class AbstractLocalVerbHandler<T extends Verb, S extends Partici
     	if (participant instanceof Call) {
     		Call call = (Call)participant;
     		return call.isHold();
+    	}
+    	return false;
+    }
+    
+    boolean isReady(Participant participant) {
+    	
+    	if (participant instanceof Call) {
+    		Call call = (Call)participant;
+    		if (call.getCallState() == State.ACCEPTED || call.getCallState() == State.CONNECTED) {
+    			return true;
+    		}
     	}
     	return false;
     }
