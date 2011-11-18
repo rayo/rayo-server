@@ -82,13 +82,6 @@ public class TransferHandler extends AbstractLocalVerbHandler<Transfer, Call> im
                 dial((CallableEndpoint) endpoint);
             }
         }
-
-        Character terminator = model.getTerminator();
-        if(terminator != null) {
-            InputCommand inputCommand = new DigitInputCommand(terminator);
-            input = getMediaService().input(inputCommand);
-        }
-
     }
 
     // Commands
@@ -162,6 +155,7 @@ public class TransferHandler extends AbstractLocalVerbHandler<Transfer, Call> im
                 peer = (Call)event.getSource();
                 participant.join(peer, resolveJoinType(), Direction.DUPLEX);
                 stopDialing();
+                startInputIfNeeded();
                 break;
             case TIMEOUT:
                 if (joints.size() == 0) {
@@ -201,7 +195,16 @@ public class TransferHandler extends AbstractLocalVerbHandler<Transfer, Call> im
         }
     }
 
-    @State
+    private void startInputIfNeeded() {
+    	
+        Character terminator = model.getTerminator();
+        if(terminator != null) {
+            InputCommand inputCommand = new DigitInputCommand(terminator);
+            input = getMediaService().input(inputCommand);
+        }
+	}
+
+	@State
     public synchronized void onTermChar(InputCompleteEvent<Participant> event) {
         if (event.getSource() == participant) {
             switch (event.getCause()) {

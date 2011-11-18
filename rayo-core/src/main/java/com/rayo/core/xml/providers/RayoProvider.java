@@ -89,7 +89,11 @@ public class RayoProvider extends BaseProvider {
         } else if (element.getName().equals("complete")) {
             return buildCompleteEvent(element);
         } else if (element.getName().equals("dtmf")) {
-            return buildDtmfCommand(element);
+        	if (element.attribute("tones") != null) {
+        		return buildDtmfCommand(element);
+        	} else if (element.attribute("signal") != null) {
+        		return buildDtmfEvent(element);
+        	}
         }
         
         return null;
@@ -177,7 +181,11 @@ public class RayoProvider extends BaseProvider {
     private Object buildDtmfCommand(Element element) {
         return new DtmfCommand(element.attributeValue("tones"));
     }
-
+    
+    private Object buildDtmfEvent(Element element) {
+        return new DtmfEvent(null, element.attributeValue("signal"));
+    }
+    
     private Object buildAcceptCommand(Element element) throws URISyntaxException {
 
         AcceptCommand accept = new AcceptCommand(null);
