@@ -89,11 +89,10 @@ public class RayoProvider extends BaseProvider {
         } else if (element.getName().equals("complete")) {
             return buildCompleteEvent(element);
         } else if (element.getName().equals("dtmf")) {
-        	if (element.attribute("tones") != null) {
-        		return buildDtmfCommand(element);
-        	} else if (element.attribute("signal") != null) {
+        	if (element.attribute("signal") != null) {
         		return buildDtmfEvent(element);
         	}
+        	return buildDtmfCommand(element);
         }
         
         return null;
