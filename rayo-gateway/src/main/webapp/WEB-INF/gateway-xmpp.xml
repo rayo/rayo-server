@@ -10,8 +10,6 @@
 		http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-3.0.xsd
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd"
     default-autowire="byName">
-
-	<bean id="gatewayDatastore" class="com.rayo.gateway.InMemoryGatewayDatastore"/>
 	
 	<util:list id="internalDomains" list-class="java.util.ArrayList">
 		<value>internal.tropo.local</value>
@@ -37,6 +35,7 @@
 		</property>
 		<property name="internalDomains" ref="internalDomains"/>
 		<property name="externalDomains" ref="externalDomains"/>
+		<property name="gatewayDatastore" ref="gatewayStorageService"/>
 	</bean>
 	
 	<!-- Admin Service -->
@@ -64,11 +63,54 @@
   	</bean>
   	
   	<bean id="gatewayBean" class="com.rayo.gateway.jmx.Gateway">
-  		<property name="gatewayDatastore" ref="gatewayDatastore" />
+  		<property name="gatewayDatastore" ref="gatewayStorageService" />
   		<property name="gatewayServlet" ref="gateway" />
   	</bean>
   	
   	<bean id="gatewayStatistics" class="com.rayo.gateway.jmx.GatewayStatistics">
-  		<property name="gatewayDatastore" ref="gatewayDatastore" />
+  		<property name="gatewayDatastore" ref="gatewayStorageService" />
   	</bean>
+  	
+  	<!-- In-Memory based HashTables -->
+	<bean id="inMemoryNodesStore" class="com.rayo.gateway.memory.InMemoryStore"/>
+	<bean id="inMemoryCallsStore" class="com.rayo.gateway.memory.InMemoryStore"/>
+	<bean id="inMemoryApplicationsStore" class="com.rayo.gateway.memory.InMemoryStore"/>
+	
+  	<!-- EHCache-based Distributed HashTables -->
+  	<bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
+        <property name="configLocation"  value="/WEB-INF/ehcache.xml"/>        
+    </bean>
+
+	<bean id="abstractEhcacheStore" abstract="true" class="com.rayo.gateway.ehcache.AbstractEHCacheStore" init-method="init">
+  		<property name="cacheManager" ref="cacheManager"/>
+	</bean>
+
+  	<bean id="ehcacheNodesStore" class="com.rayo.gateway.ehcache.EHCacheStore" parent="abstractEhcacheStore">
+  		<property name="name" value="nodesCache"/>
+  	</bean>
+  	<bean id="ehcacheCallsStore" class="com.rayo.gateway.ehcache.EHCacheStore" parent="abstractEhcacheStore">
+  		<property name="name" value="callsCache"/>
+  	</bean>    
+  	<bean id="ehcacheApplicationsStore" class="com.rayo.gateway.ehcache.EHCacheStore" parent="abstractEhcacheStore">
+  		<property name="name" value="applicationsCache"/>
+  	</bean>
+  	
+  	<!-- Gateway Storage Service -->
+  	<bean id="gatewayStorageService" class="com.rayo.gateway.GatewayStorageService">
+  		<property name="nodesDatastore" ref="nodesDatastore"/>
+  		<property name="callsDatastore" ref="callsDatastore"/>
+  		<property name="applicationsDatastore" ref="applicationsDatastore"/>
+  	</bean>
+  	
+	<bean id="nodesDatastore" class="com.rayo.gateway.store.NodesDatastore">
+		<property name="store" ref="inMemoryNodesStore"/>
+	</bean>
+	<bean id="callsDatastore" class="com.rayo.gateway.store.CallsDatastore">
+		<property name="store" ref="inMemoryCallsStore"/>
+	</bean>
+	<bean id="applicationsDatastore" class="com.rayo.gateway.store.ApplicationsDatastore">
+		<property name="store" ref="inMemoryApplicationsStore"/>
+	</bean>
+		
+   	    
 </beans>

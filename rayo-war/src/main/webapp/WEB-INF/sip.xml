@@ -6,7 +6,7 @@
 		<param-value>classpath:rayo-context.xml</param-value>
 	</context-param>
 	<listener>
-		<listener-class>com.rayo.web.ContextLoaderListener</listener-class>
+		<listener-class>com.rayo.server.web.ContextLoaderListener</listener-class>
 	</listener>
 	<servlet>
 		<servlet-name>Controller</servlet-name>

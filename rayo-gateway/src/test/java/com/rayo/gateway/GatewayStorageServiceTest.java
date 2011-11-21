@@ -1,6 +1,8 @@
 package com.rayo.gateway;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -9,21 +11,20 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.rayo.gateway.GatewayDatastore;
-import com.rayo.gateway.RayoNode;
-import com.rayo.gateway.test.HelperInMemoryGatewayDatastore;
+import com.rayo.gateway.model.RayoNode;
+import com.rayo.gateway.test.HelperGatewayStorageService;
 import com.rayo.gateway.util.JIDImpl;
 import com.voxeo.moho.util.ParticipantIDParser;
 import com.voxeo.servlet.xmpp.JID;
 
-public class InMemoryGatewayDatastoreTest {
+public class GatewayStorageServiceTest {
 
 	GatewayDatastore dataStore;
 	
 	@Before
 	public void setup() {
 		
-		dataStore = new HelperInMemoryGatewayDatastore();
+		dataStore = new HelperGatewayStorageService();
 	}
 	
 	@Test

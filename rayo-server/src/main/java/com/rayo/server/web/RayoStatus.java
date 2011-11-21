@@ -1,4 +1,4 @@
-package com.rayo.web;
+package com.rayo.server.web;
 
 public enum RayoStatus {
 
