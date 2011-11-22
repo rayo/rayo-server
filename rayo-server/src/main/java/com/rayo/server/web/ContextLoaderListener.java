@@ -3,15 +3,19 @@ package com.rayo.server.web;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletContextEvent;
 
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.web.context.WebApplicationContext;
 
 import com.rayo.server.admin.AdminService;
 import com.rayo.server.jmx.Info;
 import com.rayo.server.web.RayoStatus;
+import com.voxeo.logging.Loggerf;
 
 public class ContextLoaderListener extends org.springframework.web.context.ContextLoaderListener {
 
+	private static final Loggerf log = Loggerf.getLogger(ContextLoaderListener.class);
+	
 	public static final String RAYO_STATUS = "rayo.status";
 	
 	private AdminService adminService;
@@ -24,9 +28,13 @@ public class ContextLoaderListener extends org.springframework.web.context.Conte
 		
 	    WebApplicationContext context = (WebApplicationContext)
 	    	event.getServletContext().getAttribute(WebApplicationContext.ROOT_WEB_APPLICATION_CONTEXT_ATTRIBUTE); 
-	    Info info = (Info)context.getBean(Info.class);
-	    info.applicationStarted();
-	    adminService = (AdminService)context.getBean(AdminService.class);
+	    try {
+		    Info info = (Info)context.getBean(Info.class);
+		    info.applicationStarted();
+		    adminService = (AdminService)context.getBean(AdminService.class);
+	    } catch (NoSuchBeanDefinitionException e) {
+	    	log.error("Spring Configuration is not ready yet.");
+	    }
 	}
 	
 	@Override
@@ -44,7 +52,9 @@ public class ContextLoaderListener extends org.springframework.web.context.Conte
 	@Override
 	public void contextDestroyed(ServletContextEvent event) {
 		
-		adminService.shutdown();
-		super.contextDestroyed(event);
+		if (adminService != null) {
+			adminService.shutdown();
+			super.contextDestroyed(event);
+		}
 	}
 }
