@@ -5,13 +5,14 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
+import java.util.Scanner;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 
 import org.apache.xerces.dom.CoreDocumentImpl;
 import org.dom4j.dom.DOMElement;
+import org.springframework.core.io.Resource;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
@@ -60,8 +61,8 @@ public class GatewayServlet extends AbstractRayoServlet {
 
 	private GatewayDatastore gatewayDatastore;
 
-	private Set<String> internalDomains;
-	private Set<String> externalDomains;
+	private List<String> internalDomains;
+	private List<String> externalDomains;
 		
 	private List<String> bannedJids = new ArrayList<String>();
 	
@@ -592,12 +593,40 @@ public class GatewayServlet extends AbstractRayoServlet {
 		this.gatewayDatastore = gatewayDatastore;
 	}
 
-	public void setInternalDomains(Set<String> internalDomains) {
-		this.internalDomains = internalDomains;
+	public void setInternalDomains(Resource internalDomains) {
+
+		this.internalDomains = new ArrayList<String>();
+		
+        readFile(this.internalDomains, internalDomains);		
+		if (log.isDebugEnabled()) {
+			log.debug("List of supported internal domains: [%s]", this.internalDomains);
+		}
+	}
+	
+	public void setExternalDomains(Resource externalDomains) {
+		
+		this.externalDomains = new ArrayList<String>();
+	
+        readFile(this.externalDomains, externalDomains);		
+
+		if (log.isDebugEnabled()) {
+			log.debug("List of supported external domains: [%s]", this.externalDomains);
+		}
 	}
 
-	public void setExternalDomains(Set<String> externalDomains) {
-		this.externalDomains = externalDomains;
+	private void readFile(List<String> list, Resource resource) {
+		
+		try {
+            Scanner scanner = new Scanner(resource.getFile());
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                if (line != null && !line.trim().isEmpty() && !line.startsWith("#")) {
+                	list.add(line.trim());
+                }
+            }
+        } catch (Exception e) {
+        	log.error(e.getMessage(),e);
+        }
 	}
 
 	public void setRayoLookupService(

@@ -10,17 +10,7 @@
 		http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-3.0.xsd
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd"
     default-autowire="byName">
-	
-	<util:list id="internalDomains" list-class="java.util.ArrayList">
-		<value>internal.tropo.local</value>
-	</util:list>
-
-	<util:list id="externalDomains" list-class="java.util.ArrayList">
-		<value>gw.tropo.local</value>
-		<value>192.168.1.33</value>
-		<value>localhost</value>
-	</util:list>
-	
+		
 	<!-- Exception Mapper -->
   	<bean id="exceptionMapper" class="com.rayo.server.exception.ExceptionMapper"/>
 	
@@ -33,8 +23,8 @@
 				<constructor-arg value="classpath:rayo-routing.properties"/>
 			</bean>  		
 		</property>
-		<property name="internalDomains" ref="internalDomains"/>
-		<property name="externalDomains" ref="externalDomains"/>
+		<property name="internalDomains" value="/WEB-INF/internal-domains.properties"/>
+		<property name="externalDomains" value="/WEB-INF/external-domains.properties"/>		
 		<property name="gatewayDatastore" ref="gatewayStorageService"/>
 	</bean>
 	
