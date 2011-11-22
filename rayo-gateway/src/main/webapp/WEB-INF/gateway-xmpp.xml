@@ -67,6 +67,7 @@
 	<bean id="inMemoryApplicationsStore" class="com.rayo.gateway.memory.InMemoryStore"/>
 	
   	<!-- EHCache-based Distributed HashTables -->
+  	<!--
   	<bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
         <property name="configLocation"  value="/WEB-INF/ehcache.xml"/>        
     </bean>
@@ -84,7 +85,7 @@
   	<bean id="ehcacheApplicationsStore" class="com.rayo.gateway.ehcache.EHCacheStore" parent="abstractEhcacheStore">
   		<property name="name" value="applicationsCache"/>
   	</bean>
-  	
+  	-->
   	<!-- Gateway Storage Service -->
   	<bean id="gatewayStorageService" class="com.rayo.gateway.GatewayStorageService">
   		<property name="nodesDatastore" ref="nodesDatastore"/>
