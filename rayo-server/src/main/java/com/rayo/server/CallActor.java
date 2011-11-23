@@ -46,7 +46,6 @@ import com.voxeo.moho.event.JoinCompleteEvent.Cause;
 import com.voxeo.moho.event.UnjoinCompleteEvent;
 import com.voxeo.moho.media.output.AudibleResource;
 import com.voxeo.moho.media.output.OutputCommand;
-import com.voxeo.moho.sip.SIPCallImpl;
 
 public class CallActor <T extends Call> extends AbstractActor<T> {
 
