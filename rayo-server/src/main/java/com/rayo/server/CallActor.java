@@ -5,6 +5,8 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
+import javax.jms.IllegalStateException;
+
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
@@ -44,6 +46,7 @@ import com.voxeo.moho.event.JoinCompleteEvent.Cause;
 import com.voxeo.moho.event.UnjoinCompleteEvent;
 import com.voxeo.moho.media.output.AudibleResource;
 import com.voxeo.moho.media.output.OutputCommand;
+import com.voxeo.moho.sip.SIPCallImpl;
 
 public class CallActor <T extends Call> extends AbstractActor<T> {
 
@@ -217,6 +220,13 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     	}
     	Boolean force = message.getForce() == null ? Boolean.FALSE : message.getForce();
 
+    	//#1579867. This may change in the future. 
+    	if (destination instanceof Call) {    		
+    		if (!isAnswered(destination) && !isAnswered(participant)) {
+    			throw new IllegalStateException("None of the calls you are trying to join have been answered.");
+    		}
+    	}
+    	
 		Joint joint = participant.join(destination, message.getMedia(), force, message.getDirection());
         waitForJoin(joint);	
         joinees.add(destination);
