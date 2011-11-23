@@ -91,6 +91,10 @@ public class IncomingCallActor extends CallActor<IncomingCall> {
     @Message
     public void redirect(RedirectCommand message) throws Exception {
         
+    	if (isAnswered(participant)) {
+    		throw new IllegalStateException("You can't redirect a call that has already been answered");
+    	}
+    	
     	ApplicationContext applicationContext = participant.getApplicationContext();
         Endpoint destination = applicationContext.createEndpoint(message.getTo().toString());
         
