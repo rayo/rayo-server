@@ -143,9 +143,12 @@ public abstract class AdminService {
 			String buildNumber = attributes.getValue("Hudson-Build-Number");
 			if (buildNumber !=  null) {
 				this.buildNumber = Long.parseLong(buildNumber);
+				log.info("Build Number: %s", buildNumber);
 			}
 			this.buildId = attributes.getValue("Build-Id");
+			log.info("Build Id: %s", buildId);
 			this.versionNumber = attributes.getValue("Specification-Version");
+			log.info("Build Version Number: %s", versionNumber);
 		} catch (IOException e) {
 			log.warn("Could not red MANIFEST.MF file. Application information won't be available in Admin Service.");
 		} 
