@@ -195,6 +195,11 @@ public class GatewayServlet extends AbstractRayoServlet {
 	 * @param message Presence Message
 	 */
 	private void processCallPresence(PresenceMessage message) throws Exception {
+				
+		if (getAdminService().isQuiesceMode()) {
+			sendPresenceError(message.getTo(), message.getFrom(), Condition.SERVICE_UNAVAILABLE);
+			return;
+		}
 		
 		JID toJid = message.getTo();
 		JID fromJid = message.getFrom();		
@@ -288,7 +293,6 @@ public class GatewayServlet extends AbstractRayoServlet {
 		if (log.isDebugEnabled()) {
 			log.debug("Received client presence message [%s]", message);
 		}
-		JID toJid = message.getTo();
 		JID fromJid = message.getFrom();
 		
 		if (message.getType() == null || message.getType().isEmpty()) { // client comes online
@@ -389,7 +393,12 @@ public class GatewayServlet extends AbstractRayoServlet {
 	 * Processes a dial request from a Rayo Client
 	 */
 	private void processDialRequest(IQRequest request) throws Exception {
-
+		
+		if (getAdminService().isQuiesceMode()) {
+			sendIqError(request, Type.CANCEL, Condition.SERVICE_UNAVAILABLE, "Gateway Server is on Quiesce Mode");
+			return;
+		}
+		
 		Element payload = request.getElement();
 		
 		//TODO: Build full jid as in the doc. Currently blocked on Prism issue.

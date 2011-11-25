@@ -52,6 +52,10 @@
   		<property name="adminService" ref="adminService" />
   	</bean>
   	
+  	<bean id="adminBean" class="com.rayo.gateway.jmx.Admin">
+  		<property name="adminService" ref="adminService" />
+  	</bean>
+  	
   	<bean id="gatewayBean" class="com.rayo.gateway.jmx.Gateway">
   		<property name="gatewayDatastore" ref="gatewayStorageService" />
   		<property name="gatewayServlet" ref="gateway" />
