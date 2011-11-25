@@ -108,7 +108,7 @@ public class RayoServlet extends AbstractRayoServlet {
 						broadcastPresence("chat");
 					}
 				}
-			}, 20000, 60000);
+			}, 10000, 60000);
         }
     }
     
