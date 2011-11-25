@@ -303,9 +303,19 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
         
     @com.voxeo.moho.State
     public void onJoinComplete(com.voxeo.moho.event.JoinCompleteEvent event) {
+    	
+    	if (log.isDebugEnabled()) {
+    		log.debug("Received Join Complete Event. Is initiator: [%s]", event.isInitiator());
+    	}    	
         if(event.getSource().equals(participant)) {
             Participant peer = event.getParticipant();
+        	if (log.isDebugEnabled()) {
+        		log.debug("Join Complete Event source: [%s]. Peer: [%s]", participant, peer);
+        	}
         	if (event.getCause() == Cause.JOINED) {
+            	if (log.isDebugEnabled()) {
+            		log.debug("Validating media on join");
+            	}
         		validateMediaOnJoin(peer);
         	}
             // If the join was successful and either:
@@ -320,8 +330,15 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
                         type = JoinDestinationType.CALL;
                     }
                     joinees.add(peer);
+                	if (log.isDebugEnabled()) {
+                		log.debug("Firing Joined event. Participant id: [%s]. Peer id: [%s]. Join type: [%s]", participant.getId(), peer.getId(), type);
+                	}
                     fire(new JoinedEvent(participant.getId(), peer.getId(), type));
                 }
+            } else {
+            	if (log.isDebugEnabled()) {
+            		log.debug("Joined Event not fired. Join cause [%s]. Joinees: [%s]", event.getCause(), joinees);
+            	}
             }
         }
     }
