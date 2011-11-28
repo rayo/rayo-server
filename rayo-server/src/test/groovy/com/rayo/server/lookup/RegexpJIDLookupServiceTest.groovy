@@ -124,6 +124,19 @@ class RegexpJIDLookupServiceTest {
 		assertEquals domain, "all@anotherone.jabber.org"
 	}
 	
+	@Test
+	public void testNonStandardPort() {
+		
+		buildLookupService("""
+			.*=all@conference.jabber.org		
+		""")
+
+		def offer = new OfferEvent()
+		offer.setTo(new URI("sip:usera@localhost:5061"))
+		def domain = regexpJIDLookupService.lookup(offer)
+		assertEquals domain, "all@conference.jabber.org"
+	}
+	
 	def buildLookupService(String config) {
 		
 		def resource = new ByteArrayResource(config.getBytes())
