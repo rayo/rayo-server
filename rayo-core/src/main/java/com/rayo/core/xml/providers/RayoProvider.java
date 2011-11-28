@@ -259,8 +259,8 @@ public class RayoProvider extends BaseProvider {
 
     	if (element.attribute("call-id") != null) {
     		return new JoinedEvent(null,element.attributeValue("call-id"), JoinDestinationType.CALL);
-    	} else if (element.attribute("mixer-id") != null) {
-    		return new JoinedEvent(null,element.attributeValue("mixer-id"), JoinDestinationType.MIXER);
+    	} else if (element.attribute("mixer-name") != null) {
+    		return new JoinedEvent(null,element.attributeValue("mixer-name"), JoinDestinationType.MIXER);
     	} else return new JoinedEvent(null,null,null);
     }
 
@@ -268,8 +268,8 @@ public class RayoProvider extends BaseProvider {
 
     	if (element.attribute("call-id") != null) {
     		return new UnjoinedEvent(null,element.attributeValue("call-id"), JoinDestinationType.CALL);
-    	} else if (element.attribute("mixer-id") != null) {
-    		return new UnjoinedEvent(null,element.attributeValue("mixer-id"), JoinDestinationType.MIXER);
+    	} else if (element.attribute("mixer-name") != null) {
+    		return new UnjoinedEvent(null,element.attributeValue("mixer-name"), JoinDestinationType.MIXER);
     	} else return new JoinedEvent(null,null,null);
     }
     
@@ -506,7 +506,7 @@ public class RayoProvider extends BaseProvider {
         	if (event.getType() == JoinDestinationType.CALL) {
         		unjoined.addAttribute("call-id", event.getFrom());
         	} else {
-        		unjoined.addAttribute("mixer-id", event.getFrom());        		
+        		unjoined.addAttribute("mixer-name", event.getFrom());        		
         	}
         }
 
@@ -521,7 +521,7 @@ public class RayoProvider extends BaseProvider {
         	if (event.getType() == JoinDestinationType.CALL) {
         		joined.addAttribute("call-id", event.getTo());
         	} else {
-        		joined.addAttribute("mixer-id", event.getTo());        		
+        		joined.addAttribute("mixer-name", event.getTo());        		
         	}
         }
 

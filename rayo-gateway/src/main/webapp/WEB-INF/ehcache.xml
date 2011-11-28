@@ -7,13 +7,28 @@
     <cacheManagerPeerListenerFactory     
                class="net.sf.ehcache.distribution.RMICacheManagerPeerListenerFactory"/>
 
+	<!-- Multicast peer discovery configuration -->  	
     <cacheManagerPeerProviderFactory
                 class="net.sf.ehcache.distribution.RMICacheManagerPeerProviderFactory"
       			properties="peerDiscovery=automatic, 
                    			multicastGroupAddress=230.0.0.1, 
                    			multicastGroupPort=4446, 
                    			timeToLive=32"/>
- 
+                   			
+    <!-- Manual peer discovery configuration  -->
+    <!-- server one example                			
+ 	<cacheManagerPeerProviderFactory
+		class="net.sf.ehcache.distribution.RMICacheManagerPeerProviderFactory"
+		properties="peerDiscovery=manual,
+		rmiUrls=//server2:40001/callscache|//server2:40001/nodesCache|//server2:40001/applicationsCache"/>
+ 	-->
+    <!-- server two example                			
+ 	<cacheManagerPeerProviderFactory
+		class="net.sf.ehcache.distribution.RMICacheManagerPeerProviderFactory"
+		properties="peerDiscovery=manual,
+		rmiUrls=//server1:40001/callscache|//server1:40001/nodesCache|//server1:40001/applicationsCache"/>
+ 	-->
+ 	
     <cache name="callsCache"
            maxElementsInMemory="1000000"
            eternal="true"

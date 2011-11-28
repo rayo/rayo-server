@@ -240,7 +240,7 @@ public class RayoProviderTest {
 	public void unjoinedMixerToXml() {
 
 		def unjoined = new UnjoinedEvent(null, 'abcd', JoinDestinationType.MIXER)
-		assertEquals("""<unjoined xmlns="urn:xmpp:rayo:1" mixer-id="abcd"/>""", toXml(unjoined));
+		assertEquals("""<unjoined xmlns="urn:xmpp:rayo:1" mixer-name="abcd"/>""", toXml(unjoined));
 	}
 	
 	@Test
@@ -256,7 +256,7 @@ public class RayoProviderTest {
 	@Test
 	public void unjoinedMixerFromXml() {
 
-		def unjoined = fromXml("""<unjoined xmlns="urn:xmpp:rayo:1" mixer-id="abcd"/>""")
+		def unjoined = fromXml("""<unjoined xmlns="urn:xmpp:rayo:1" mixer-name="abcd"/>""")
 		assertProperties(unjoined, [
 			from: "abcd",
 			type: JoinDestinationType.MIXER
@@ -277,7 +277,7 @@ public class RayoProviderTest {
 	public void joinedMixerToXml() {
 
 		def joined = new JoinedEvent(null, 'abcd', JoinDestinationType.MIXER)
-		assertEquals("""<joined xmlns="urn:xmpp:rayo:1" mixer-id="abcd"/>""", toXml(joined));
+		assertEquals("""<joined xmlns="urn:xmpp:rayo:1" mixer-name="abcd"/>""", toXml(joined));
 	}
 	
 	@Test
@@ -293,7 +293,7 @@ public class RayoProviderTest {
 	@Test
 	public void joinedMixerFromXml() {
 
-		def joined = fromXml("""<joined xmlns="urn:xmpp:rayo:1" mixer-id="abcd"/>""")
+		def joined = fromXml("""<joined xmlns="urn:xmpp:rayo:1" mixer-name="abcd"/>""")
 		assertProperties(joined, [
 			to: "abcd",
 			type: JoinDestinationType.MIXER

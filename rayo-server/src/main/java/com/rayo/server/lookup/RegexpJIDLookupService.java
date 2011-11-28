@@ -58,6 +58,8 @@ public class RegexpJIDLookupService implements RayoJIDLookupService<OfferEvent> 
 			// Ignore. On testing a byte array does not have a filename property and throws an exception
 		}
 		
+		patterns.clear();
+		
 		if (properties.exists()) {
 			Properties props = new LinkedProperties();
 			props.load(properties.getInputStream());
