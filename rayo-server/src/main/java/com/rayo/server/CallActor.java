@@ -323,9 +323,11 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
             //    b) initiated by a remote call
             if (event.getCause() == Cause.JOINED && (joinees.contains(peer) || !event.isInitiator())) {            	
                 if (peer != null) {
+                	String destination = peer.getId();
                     JoinDestinationType type = null;
                     if (peer instanceof Mixer) {
                         type = JoinDestinationType.MIXER;
+                        destination = ((Mixer)peer).getName();
                     } else if (peer instanceof Call) {
                         type = JoinDestinationType.CALL;
                     }
@@ -333,7 +335,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
                 	if (log.isDebugEnabled()) {
                 		log.debug("Firing Joined event. Participant id: [%s]. Peer id: [%s]. Join type: [%s]", participant.getId(), peer.getId(), type);
                 	}
-                    fire(new JoinedEvent(participant.getId(), peer.getId(), type));
+                    fire(new JoinedEvent(participant.getId(), destination, type));
                 }
             } else {
             	if (log.isDebugEnabled()) {
@@ -390,8 +392,10 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 		
 		if (event.getParticipant() != null) {
 			JoinDestinationType type = null;
+			String destination = event.getParticipant().getId();
 			if (event.getParticipant() instanceof Mixer) {
 				type = JoinDestinationType.MIXER;
+				destination = ((Mixer)event.getParticipant()).getName();
 			} else if (event.getParticipant() instanceof Call) {
 				type = JoinDestinationType.CALL;
 			}
