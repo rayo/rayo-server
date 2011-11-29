@@ -32,7 +32,7 @@ public class MixerManager {
 				.createEndpoint(MixerEndpoint.DEFAULT_MIXER_ENDPOINT);
 		Map<Object, Object> parameters = new HashMap<Object, Object>();
 		parameters.put(MediaMixer.ENABLED_EVENTS, new EventType[]{MixerEvent.ACTIVE_INPUTS_CHANGED});    			
-		Mixer mixer = endpoint.create(parameters);
+		Mixer mixer = endpoint.create(mixerName, parameters);
 		
         //TODO: This is the only place I found to create the actual conference actor. I didn't find events for 
         // conference/mixer creation
