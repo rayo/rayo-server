@@ -399,7 +399,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 			} else if (event.getParticipant() instanceof Call) {
 				type = JoinDestinationType.CALL;
 			}
-			fire(new UnjoinedEvent(participant.getId(), event.getParticipant().getId(), type));
+			fire(new UnjoinedEvent(participant.getId(), destination, type));
 		}
 	}
 
