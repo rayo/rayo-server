@@ -17,10 +17,12 @@ class RegexpJIDLookupServiceTest {
 		buildLookupService("""
 			.*@localhost.*=rayo-test@conference.jabber.org
 		""")
-	
+		
+		
+		
 		assertNotNull regexpJIDLookupService
 	}
-	
+		
 	@Test
 	public void testLookup() {
 		
@@ -136,7 +138,29 @@ class RegexpJIDLookupServiceTest {
 		def domain = regexpJIDLookupService.lookup(offer)
 		assertEquals domain, "all@conference.jabber.org"
 	}
-	
+
+	@Test
+	public void testReload() {
+		
+		buildLookupService("""
+			.*=domain1.com
+		""")
+
+		def uri = new URI("sip:usera@localhost")
+		def offer = new OfferEvent()
+		offer.setTo(uri)
+		def domain = regexpJIDLookupService.lookup(offer)
+		assertEquals domain, "domain1.com"
+
+		def resource = new ByteArrayResource("""
+			.*=domain2.com
+		""".getBytes())
+		regexpJIDLookupService.read(resource)
+
+		domain = regexpJIDLookupService.lookup(offer)
+		assertEquals domain, "domain2.com"
+	}
+
 	def buildLookupService(String config) {
 		
 		def resource = new ByteArrayResource(config.getBytes())

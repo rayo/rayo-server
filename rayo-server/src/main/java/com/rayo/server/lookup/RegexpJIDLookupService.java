@@ -1,6 +1,9 @@
 package com.rayo.server.lookup;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
@@ -50,7 +53,7 @@ public class RegexpJIDLookupService implements RayoJIDLookupService<OfferEvent> 
 		new Timer().schedule(readTask, 60000, 60000);
 	}
 	
-	private void read(Resource properties) throws IOException {
+	void read(Resource properties) throws IOException {
 		
 		try {
 			logger.debug("Reading JID Lookup Service configuration from disk [%s]", properties.getFilename());
@@ -59,10 +62,22 @@ public class RegexpJIDLookupService implements RayoJIDLookupService<OfferEvent> 
 		}
 		
 		patterns.clear();
-		
-		if (properties.exists()) {
+		if (properties.isReadable()) {
 			Properties props = new LinkedProperties();
-			props.load(properties.getInputStream());
+			InputStream is = null;
+			try {
+				File file = properties.getFile();
+				if (file.exists()) {
+					is = new FileInputStream(file);
+				}			
+			} catch (IOException e) {
+				is = properties.getInputStream();
+			}
+			try {
+				props.load(is);
+			} finally {
+				is.close();
+			}
 			@SuppressWarnings("rawtypes")
 			Enumeration en = props.keys();
 			while(en.hasMoreElements()) {
@@ -75,7 +90,7 @@ public class RegexpJIDLookupService implements RayoJIDLookupService<OfferEvent> 
 				}
 			}
 		} else {
-			logger.warn("Could not find JID lookup service configuration file");
+			logger.warn("Could not find JID lookup service configuration file [%s]", properties);
 		}
 	}
 
