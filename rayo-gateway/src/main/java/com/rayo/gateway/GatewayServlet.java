@@ -371,7 +371,8 @@ public class GatewayServlet extends AbstractRayoServlet {
 			} else {
 				sendIqError(request, Type.CANCEL, Condition.RECIPIENT_UNAVAILABLE, "Unknown domain");
 			}
-		} catch (Exception e) {					
+		} catch (Exception e) {		
+			log.error(e.getMessage(),e);
 			try {
 				sendIqError(request, e);
 			} catch (IOException ioe) {
