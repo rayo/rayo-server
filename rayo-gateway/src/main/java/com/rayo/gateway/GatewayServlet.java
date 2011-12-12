@@ -300,6 +300,10 @@ public class GatewayServlet extends AbstractRayoServlet {
 		JID fromJid = message.getFrom();
 		
 		if (message.getType() == null || message.getType().isEmpty()) { // client comes online
+			if (message.getShow() == null) {
+				log.warn("Received empty show presence from Client [%s]. Ignoring it.", fromJid);
+				return;
+			}
 			if (validApplicationJid(message.getFrom())) {
 				switch (message.getShow()) {
 					case CHAT: 
