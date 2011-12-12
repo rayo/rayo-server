@@ -19,6 +19,7 @@ import org.w3c.dom.NodeList;
 import com.rayo.core.OfferEvent;
 import com.rayo.gateway.exception.GatewayException;
 import com.rayo.gateway.jmx.GatewayStatistics;
+import com.rayo.gateway.lb.GatewayLoadBalancingStrategy;
 import com.rayo.server.lookup.RayoJIDLookupService;
 import com.rayo.server.servlet.AbstractRayoServlet;
 import com.voxeo.exceptions.NotFoundException;
@@ -59,7 +60,8 @@ public class GatewayServlet extends AbstractRayoServlet {
 	private static final Loggerf log = Loggerf
 			.getLogger(GatewayServlet.class);
 
-	private GatewayDatastore gatewayDatastore;
+	private GatewayStorageService gatewayStorageService;
+	private GatewayLoadBalancingStrategy loadBalancer;
 
 	private List<String> internalDomains;
 	private List<String> externalDomains;
@@ -130,7 +132,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 				case AWAY:
 				case DND:
 				case XA:
-					gatewayDatastore.unregisterRayoNode(message.getFrom());
+					gatewayStorageService.unregisterRayoNode(message.getFrom().toString());
 					break;
 			}
 		} else if (message.getType().equals("unavailable")) {			
@@ -147,10 +149,11 @@ public class GatewayServlet extends AbstractRayoServlet {
 	 */
 	private void broadcastEndEvent(PresenceMessage message) {
 		
-		Collection<String> calls = gatewayDatastore.getCalls(message.getFrom());
+		Collection<String> calls = gatewayStorageService.getCalls(message.getFrom().toString());
 		for (String callId : calls) {
 			JID fromJid = createInternalCallJid(callId);
-			JID targetJid = gatewayDatastore.getclientJID(callId);
+			String target = gatewayStorageService.getclientJID(callId);
+			JID targetJid = getXmppFactory().createJID(target);
 			CoreDocumentImpl document = new CoreDocumentImpl(false);
 			org.w3c.dom.Element endElement = document.createElementNS("urn:xmpp:rayo:1", "end");
 			org.w3c.dom.Element errorElement = document.createElement("error");
@@ -186,7 +189,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 			}
 		}
 		
-		gatewayDatastore.registerRayoNode(message.getFrom(), platforms);		
+		gatewayStorageService.registerRayoNode(message.getFrom().toString(), platforms);		
 	}
 
 	/*
@@ -221,7 +224,7 @@ public class GatewayServlet extends AbstractRayoServlet {
     			log.debug("Received Offer. Offer will be delivered to [%s]", callTo);
     		}
     		
-    		resource = gatewayDatastore.pickClientResource(callTo.getBareJID()); // picks and load balances
+    		resource = loadBalancer.pickClientResource(callTo.getBareJID().toString()); // picks and load balances
     		if (resource == null) {
 				sendPresenceError(toJid, fromJid, Condition.RECIPIENT_UNAVAILABLE);
 			}
@@ -229,25 +232,26 @@ public class GatewayServlet extends AbstractRayoServlet {
     		callTo.setResource(resource);
     		
     		// Register call in DHT 
-    		gatewayDatastore.registerCall(callId, callTo);
+    		gatewayStorageService.registerCall(callId, callTo.toString());
     		gatewayStatistics.callRegistered();
 		}
 		  	
-    	JID jid = gatewayDatastore.getclientJID(callId);  
+    	String jid = gatewayStorageService.getclientJID(callId);  
     	if (jid == null) {
     		log.error("Could not find registered client JID for call id [%s]", callId);
     		sendPresenceError(toJid, fromJid, Condition.RECIPIENT_UNAVAILABLE);
     		return;
     	}
+    	JID to = getXmppFactory().createJID(jid);
     	JID from = createExternalCallJid(callId, fromJid.getResource());
 		
 		if (message.getElement("end", "urn:xmpp:rayo:1") != null) {
-			gatewayDatastore.unregistercall(callId);
+			gatewayStorageService.unregistercall(callId);
 		}
 		
 		try {
 			// Send presence
-			PresenceMessage presence = getXmppFactory().createPresence(from, jid, null, 
+			PresenceMessage presence = getXmppFactory().createPresence(from, to, null, 
 					message.getElement());
 			
 	    	if (presence == null) {
@@ -268,9 +272,9 @@ public class GatewayServlet extends AbstractRayoServlet {
 	
 	private JID createInternalCallJid(String callId) {
 		
-		JID rayoNode = gatewayDatastore.getRayoNode(callId);
+		String rayoNode = gatewayStorageService.getRayoNode(callId);
 		if (rayoNode != null) {
-			return getXmppFactory().createJID(callId + "@" + rayoNode.getDomain());
+			return getXmppFactory().createJID(callId + "@" + rayoNode);
 		}
 		throw new NotFoundException(String.format("Could not find Rayo Node for call id [%s]", callId));
 	}
@@ -299,13 +303,13 @@ public class GatewayServlet extends AbstractRayoServlet {
 			if (validApplicationJid(message.getFrom())) {
 				switch (message.getShow()) {
 					case CHAT: 
-						gatewayDatastore.registerClientResource(message.getFrom());
+						gatewayStorageService.registerClientResource(message.getFrom());
 						gatewayStatistics.clientRegistered(message.getFrom().getBareJID());
 						break;
 					case AWAY:
 					case DND:
 					case XA:
-						gatewayDatastore.unregisterClientResource(message.getFrom());
+						gatewayStorageService.unregisterClientResource(message.getFrom());
 						break;
 				}
 			} else {
@@ -313,11 +317,11 @@ public class GatewayServlet extends AbstractRayoServlet {
 				sendPresenceError(message.getTo(), message.getFrom(), Condition.RECIPIENT_UNAVAILABLE);
 			}
 		} else if (message.getType().equals("unavailable")) {
-			gatewayDatastore.unregisterClientResource(message.getFrom());
+			gatewayStorageService.unregisterClientResource(message.getFrom());
 			
 			// Note that the following method does include the resource as we only want to 
 			// stop calls for the resource that goes offline
-			Collection<String> callIds = gatewayDatastore.getCalls(fromJid); 
+			Collection<String> callIds = gatewayStorageService.getCalls(fromJid.toString()); 
 			for (String callId: callIds) {
 				try {
 					String domainName = getDomainName(callId);
@@ -406,11 +410,12 @@ public class GatewayServlet extends AbstractRayoServlet {
 		//		toJidExternal.getDomain()+"/"+fromJidExternal.getBareJID());
 		JID fromJidInternal = getXmppFactory().createJID(getInternalDomain());
 		
-		String platformId = gatewayDatastore.getPlatformForClient(request.getFrom());
+		String platformId = gatewayStorageService.getPlatformForClient(request.getFrom());
 		if (platformId != null) {	
-			JID rayoNode = gatewayDatastore.pickRayoNode(platformId); // picks and load balances
+			String rayoNode = loadBalancer.pickRayoNode(platformId); // picks and load balances
 			if (rayoNode != null) {
-				forwardIQRequest(fromJidInternal, rayoNode, request, payload);								
+				JID to = getXmppFactory().createJID(rayoNode);
+				forwardIQRequest(fromJidInternal, to, request, payload);								
 			} else {
 				sendIqError(request, Type.CANCEL, Condition.SERVICE_UNAVAILABLE, 
 						String.format("Could not find an available Rayo Node in platform %s", platformId));				
@@ -468,7 +473,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 	    		try {
 	    			// Note that the original request always has a resource assigned. So this outgoing call
 	    			// will be linked to that resourc
-					gatewayDatastore.registerCall(callId, originalRequest.getFrom());
+					gatewayStorageService.registerCall(callId, originalRequest.getFrom().toString());
 					gatewayStatistics.callRegistered();
 				} catch (GatewayException e) {
 					log.error("Could not register call for dial");
@@ -581,7 +586,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 
 		String ipAddress = ParticipantIDParser.getIpAddress(callId);
 		if (ipAddress != null) {
-			return gatewayDatastore.getDomainName(ipAddress);
+			return gatewayStorageService.getDomainName(ipAddress);
 		} else {
 			log.error("Could not decode IP Address from call id [%s]", callId);
 			return null;
@@ -598,8 +603,8 @@ public class GatewayServlet extends AbstractRayoServlet {
 		return externalDomains.iterator().next();
 	}
 	
-	public void setGatewayDatastore(GatewayDatastore gatewayDatastore) {
-		this.gatewayDatastore = gatewayDatastore;
+	public void GatewayStorageService(GatewayStorageService gatewayStorageService) {
+		this.gatewayStorageService = gatewayStorageService;
 	}
 
 	public void setInternalDomains(Resource internalDomains) {
@@ -645,5 +650,13 @@ public class GatewayServlet extends AbstractRayoServlet {
 
 	public void setGatewayStatistics(GatewayStatistics gatewayStatistics) {
 		this.gatewayStatistics = gatewayStatistics;
+	}
+	
+	public void setLoadBalancer(GatewayLoadBalancingStrategy loadBalancer) {	
+		this.loadBalancer = loadBalancer;
+	}
+
+	public void setGatewayStorageService(GatewayStorageService gatewayStorageService) {
+		this.gatewayStorageService = gatewayStorageService;
 	}
 }

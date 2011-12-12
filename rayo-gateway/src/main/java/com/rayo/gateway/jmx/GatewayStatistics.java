@@ -7,13 +7,13 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
-import com.rayo.gateway.GatewayDatastore;
+import com.rayo.gateway.GatewayStorageService;
 import com.voxeo.servlet.xmpp.JID;
 
 @ManagedResource(objectName="com.rayo.gateway:Type=GatewayStatistics", description="Gateway Statistics")
 public class GatewayStatistics implements GatewayStatisticsMXBean {
 
-	private GatewayDatastore gatewayDatastore;
+	private GatewayStorageService gatewayStorageService;
 	
 	private AtomicLong totalCallsCount = new AtomicLong();
 	private AtomicLong messagesCount = new AtomicLong();
@@ -27,8 +27,8 @@ public class GatewayStatistics implements GatewayStatisticsMXBean {
 	public long getActiveCallsCount() {
 
 		long total = 0;
-		for (JID client : gatewayDatastore.getClientResources()) {
-			total+= gatewayDatastore.getCalls(client).size();
+		for (String client : gatewayStorageService.getClientResources()) {
+			total+= gatewayStorageService.getCalls(client).size();
 		}
 		return total;
 	}
@@ -44,7 +44,7 @@ public class GatewayStatistics implements GatewayStatisticsMXBean {
 	@ManagedAttribute(description="Active Clients")	
 	public long getActiveClientsCount() {
 
-		return gatewayDatastore.getClientResources().size();
+		return gatewayStorageService.getClientResources().size();
 	}
 
 	@Override
@@ -66,8 +66,8 @@ public class GatewayStatistics implements GatewayStatisticsMXBean {
 	public long getActiveRayoNodesCount() {
 
 		long total = 0;
-		for (String platform : gatewayDatastore.getRegisteredPlatforms()) {
-			total+= gatewayDatastore.getRayoNodes(platform).size();
+		for (String platform : gatewayStorageService.getRegisteredPlatforms()) {
+			total+= gatewayStorageService.getRayoNodes(platform).size();
 		}
 		return total;
 	}
@@ -107,7 +107,7 @@ public class GatewayStatistics implements GatewayStatisticsMXBean {
 		totalCallsCount.incrementAndGet();
 	}
 
-	public void setGatewayDatastore(GatewayDatastore gatewayDatastore) {
-		this.gatewayDatastore = gatewayDatastore;
+	public void setGatewayStorageService(GatewayStorageService gatewayStorageService) {
+		this.gatewayStorageService = gatewayStorageService;
 	}
 }

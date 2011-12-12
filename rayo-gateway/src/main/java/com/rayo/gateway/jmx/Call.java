@@ -2,8 +2,6 @@ package com.rayo.gateway.jmx;
 
 import org.springframework.jmx.export.annotation.ManagedResource;
 
-import com.voxeo.servlet.xmpp.JID;
-
 /**
  * <p>This MBean represents a call registered on the gateway.</p>
  * 
@@ -13,11 +11,11 @@ import com.voxeo.servlet.xmpp.JID;
 @ManagedResource(objectName="com.rayo.gateway:Type=Call", description="Calls")
 public class Call implements CallMXBean {
 
-	private JID rayoNode;
-	private JID clientJid;
+	private String rayoNode;
+	private String clientJid;
 	private String callId;
 
-	public Call(String callId, JID rayoNode, JID clientJid) {
+	public Call(String callId, String rayoNode, String clientJid) {
 
 		this.rayoNode = rayoNode;
 		this.callId = callId;

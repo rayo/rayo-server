@@ -7,8 +7,6 @@ import java.util.Set;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
-import com.voxeo.servlet.xmpp.JID;
-
 /**
  * <p>This model object represent an instance of a Rayo Server.</p>
  * 
@@ -20,7 +18,7 @@ public class RayoNode implements Serializable {
 
 	private static final long serialVersionUID = -3327026666287357013L;
 	
-	private JID jid;
+	private String jid;
 	private String ipAddress;
 	private String hostname;
 	private Set<String> platforms = new HashSet<String>();
@@ -35,12 +33,19 @@ public class RayoNode implements Serializable {
 	 * @param platforms Set of platforms that this rayo server will belong to. This Rayo node 
 	 * will only process messages targeted to these platforms. 
 	 */
-	public RayoNode(String hostname, String ipAddress, JID rayoNode, HashSet<String> platforms) {
+	public RayoNode(String hostname, String ipAddress, String rayoNode, Set<String> platforms) {
 		
 		this.hostname = hostname;
 		this.ipAddress = ipAddress;
 		this.jid = rayoNode;
 		this.platforms = platforms;
+	}
+	
+	/**
+	 * Empty constructor
+	 */
+	public RayoNode() {
+		
 	}
 
 	/**
@@ -115,9 +120,9 @@ public class RayoNode implements Serializable {
 	 * Returns the JID that external systems will use to refer to this 
 	 * rayo node
 	 * 
-	 * @return JID JID of this rayo node
+	 * @return String JID of this rayo node
 	 */
-	public JID getJid() {
+	public String getJid() {
 		return jid;
 	}
 	/**
@@ -125,7 +130,7 @@ public class RayoNode implements Serializable {
 	 * 
 	 * @param jid JID associated with this node
 	 */
-	public void setJid(JID jid) {
+	public void setJid(String jid) {
 		this.jid = jid;
 	}
 	

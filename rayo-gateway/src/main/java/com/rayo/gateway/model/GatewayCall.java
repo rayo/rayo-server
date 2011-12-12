@@ -5,8 +5,6 @@ import java.io.Serializable;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
-import com.voxeo.servlet.xmpp.JID;
-
 /**
  * <p>This is a class which simply holds information about a distributed call.</p>
  * 
@@ -20,7 +18,7 @@ public class GatewayCall implements Serializable {
 	
 	private String callId;
 	private RayoNode rayoNode;
-	private JID clientJid;
+	private String clientJid;
 
 	/**
 	 * Builds a new call object linked to both a rayo node and a client application. 
@@ -28,11 +26,18 @@ public class GatewayCall implements Serializable {
 	 * @param node Rayo Node that hosts the call
 	 * @param clientJid Client application that initiated the call
 	 */ 
-	public GatewayCall(String callId, RayoNode node, JID clientJid) {
+	public GatewayCall(String callId, RayoNode node, String clientJid) {
 		
 		this.rayoNode = node;
 		this.clientJid = clientJid;
 		this.callId = callId;
+	}
+	
+	/**
+	 * Empty constructor
+	 */
+	public GatewayCall() {
+		
 	}
 
 	/**
@@ -48,9 +53,9 @@ public class GatewayCall implements Serializable {
 	 * Return the client application that initiated the call. This is the 
 	 * application that will receive any events related with the call
 	 * 
-	 * @return {@link JID} Client application
+	 * @return {@link String} Client application
 	 */
-	public JID getClientJid() {
+	public String getClientJid() {
 		return clientJid;
 	}
 
@@ -71,6 +76,18 @@ public class GatewayCall implements Serializable {
 		return callId.hashCode();
 	}
 	
+	public void setCallId(String callId) {
+		this.callId = callId;
+	}
+
+	public void setRayoNode(RayoNode rayoNode) {
+		this.rayoNode = rayoNode;
+	}
+
+	public void setClientJid(String clientJid) {
+		this.clientJid = clientJid;
+	}
+
 	@Override
     public String toString() {
 

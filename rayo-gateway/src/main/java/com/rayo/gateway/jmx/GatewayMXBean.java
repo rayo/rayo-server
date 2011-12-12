@@ -2,8 +2,6 @@ package com.rayo.gateway.jmx;
 
 import java.util.List;
 
-import com.voxeo.servlet.xmpp.JID;
-
 public interface GatewayMXBean {
 
 	List<Platform> getPlatforms();

@@ -1,0 +1,15 @@
+package com.rayo.gateway.util;
+
+public class JIDUtils {
+
+	public static String getDomain(String jid) {
+		
+		if (jid.contains("@")) {
+			jid = jid.substring(jid.indexOf("@")+1, jid.length());
+		}
+		if (jid.contains("/")) {
+			jid = jid.substring(0, jid.indexOf("@"));
+		}
+		return jid;
+	}
+}

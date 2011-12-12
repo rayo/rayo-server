@@ -1,6 +1,5 @@
 package com.rayo.gateway.lb;
 
-import com.voxeo.servlet.xmpp.JID;
 
 
 /**
@@ -19,9 +18,9 @@ public interface GatewayLoadBalancingStrategy {
 	 * 
 	 * @param platformId Id of the platform
 	 * 
-	 * @return JID Next rayo node according to the load balancing strategy
+	 * @return String Next rayo node according to the load balancing strategy
 	 */
-	JID pickRayoNode(String platformId);
+	String pickRayoNode(String platformId);
 
 	/**
 	 * Picks the next client resource for a given JID
@@ -30,5 +29,5 @@ public interface GatewayLoadBalancingStrategy {
 	 * 
 	 * @return String Next client resource according to the load balancing strategy
 	 */
-	String pickClientResource(JID jid);
+	String pickClientResource(String jid);
 }

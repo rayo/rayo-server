@@ -5,8 +5,7 @@ import java.util.List;
 
 import org.springframework.jmx.export.annotation.ManagedResource;
 
-import com.rayo.gateway.GatewayDatastore;
-import com.voxeo.servlet.xmpp.JID;
+import com.rayo.gateway.GatewayStorageService;
 
 /**
  * <p>This MBean represents each of the Rayo Nodes.</p>
@@ -17,11 +16,11 @@ import com.voxeo.servlet.xmpp.JID;
 @ManagedResource(objectName="com.rayo.gateway:Type=Platform", description="Platform")
 public class Node implements RayoNodeMXBean {
 
-	private JID jid;
+	private String jid;
 	private List<String> platforms = new ArrayList<String>();
-	private GatewayDatastore gatewayDatastore;
+	private GatewayStorageService gatewayStorageService;
 
-	public Node(JID jid) {
+	public Node(String jid) {
 		this.jid = jid;
 	}
 	
@@ -46,8 +45,8 @@ public class Node implements RayoNodeMXBean {
 	public List<Call> getCalls() {
 
 		List<Call> calls = new ArrayList<Call>();
-		for(String callId : gatewayDatastore.getCallsForRayoNode(jid)) {
-			Call call = new Call(callId, jid, gatewayDatastore.getclientJID(callId));
+		for(String callId : gatewayStorageService.getCallsForRayoNode(jid)) {
+			Call call = new Call(callId, jid, gatewayStorageService.getclientJID(callId));
 			calls.add(call);
 		}
 		return calls;
@@ -66,8 +65,8 @@ public class Node implements RayoNodeMXBean {
 		return jid.toString().hashCode();
 	}
 
-	public void setGatewayDatastore(GatewayDatastore gatewayDatastore) {
+	public void setGatewayStorageService(GatewayStorageService gatewayStorageService) {
 
-		this.gatewayDatastore = gatewayDatastore;
+		this.gatewayStorageService = gatewayStorageService;
 	}
 }

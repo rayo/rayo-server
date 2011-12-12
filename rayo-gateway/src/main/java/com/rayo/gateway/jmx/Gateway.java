@@ -7,9 +7,8 @@ import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
-import com.rayo.gateway.GatewayDatastore;
 import com.rayo.gateway.GatewayServlet;
-import com.voxeo.servlet.xmpp.JID;
+import com.rayo.gateway.GatewayStorageService;
 
 /**
  * <p>This Mbean exposes relevant information on the Distributed hash table. It 
@@ -21,8 +20,8 @@ import com.voxeo.servlet.xmpp.JID;
  */
 @ManagedResource(objectName="com.rayo.gateway:Type=Gateway", description="Rayo Gateway")
 public class Gateway implements GatewayMXBean {
-
-	private GatewayDatastore gatewayDatastore;
+	
+	private GatewayStorageService gatewayStorageService;
 	private GatewayServlet gatewayServlet;
 
 	@Override
@@ -30,7 +29,7 @@ public class Gateway implements GatewayMXBean {
 	public List<Platform> getPlatforms() {
 		
 		List<Platform> platforms = new ArrayList<Platform>();
-		for(String platform: gatewayDatastore.getRegisteredPlatforms()) {
+		for(String platform: gatewayStorageService.getRegisteredPlatforms()) {
 			platforms.add(new Platform(platform));
 		}
 		return platforms;
@@ -41,10 +40,10 @@ public class Gateway implements GatewayMXBean {
 	public List<Node> getRayoNodes() {
 		
 		List<Node> nodes = new ArrayList<Node>();
-		for(String platform: gatewayDatastore.getRegisteredPlatforms()) {
-			for (JID jid: gatewayDatastore.getRayoNodes(platform)) {
+		for(String platform: gatewayStorageService.getRegisteredPlatforms()) {
+			for (String jid: gatewayStorageService.getRayoNodes(platform)) {
 				Node node = new Node(jid);
-				node.setGatewayDatastore(gatewayDatastore);
+				node.setGatewayStorageService(gatewayStorageService);
 				if (!nodes.contains(node)) {
 					nodes.add(node);
 					node.addPlatform(platform);					
@@ -63,9 +62,9 @@ public class Gateway implements GatewayMXBean {
 		
 		List<ClientApplication> clients = new ArrayList<ClientApplication>();
 
-		for(JID jid: gatewayDatastore.getClientResources()) {
+		for(String jid: gatewayStorageService.getClientResources()) {
 			ClientApplication client = new ClientApplication(jid);
-			client.addResources(gatewayDatastore.getResourcesForClient(jid));
+			client.addResources(gatewayStorageService.getResourcesForClient(jid));
 			clients.add(client);
 		}
 
@@ -75,8 +74,8 @@ public class Gateway implements GatewayMXBean {
 	@ManagedOperation(description = "Returns call information")
 	public Call callInfo(String callId) {
 		
-		JID rayoNode = gatewayDatastore.getRayoNode(callId);
-		JID clientJID = gatewayDatastore.getclientJID(callId);
+		String rayoNode = gatewayStorageService.getRayoNode(callId);
+		String clientJID = gatewayStorageService.getclientJID(callId);
 		
 		return new Call(callId, rayoNode, clientJID);
 	}
@@ -93,8 +92,8 @@ public class Gateway implements GatewayMXBean {
 		gatewayServlet.unban(jid);
 	}
 	
-	public void setGatewayDatastore(GatewayDatastore gatewayDatastore) {
-		this.gatewayDatastore = gatewayDatastore;
+	public void setGatewayStorageService(GatewayStorageService gatewayStorageService) {
+		this.gatewayStorageService = gatewayStorageService;
 	}
 
 	public void setGatewayServlet(GatewayServlet gatewayServlet) {

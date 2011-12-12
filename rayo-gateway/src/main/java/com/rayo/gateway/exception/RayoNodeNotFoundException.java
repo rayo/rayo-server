@@ -1,7 +1,14 @@
 package com.rayo.gateway.exception;
 
 @SuppressWarnings("serial")
-public class RayoNodeNotFoundException extends GatewayException {
+/**
+ * Exception thrown when an operation expects a rayo node to exist but the 
+ * rayo node does not exist.
+ * 
+ * @author martin
+ *
+ */
+public class RayoNodeNotFoundException extends DatastoreException {
 
 	public RayoNodeNotFoundException() {
 		super();

@@ -6,8 +6,6 @@ import java.util.List;
 
 import org.springframework.jmx.export.annotation.ManagedResource;
 
-import com.voxeo.servlet.xmpp.JID;
-
 /**
  * <p>This MBean represents a client application connected to the gateway.</p>
  * 
@@ -17,10 +15,10 @@ import com.voxeo.servlet.xmpp.JID;
 @ManagedResource(objectName="com.rayo.gateway:Type=ClientApplication", description="Client Applications")
 public class ClientApplication implements ClientApplicationMXBean {
 
-	private JID jid;
+	private String jid;
 	private List<String> resources = new ArrayList<String>();
 
-	public ClientApplication(JID jid) {
+	public ClientApplication(String jid) {
 
 		this.jid = jid;
 	}

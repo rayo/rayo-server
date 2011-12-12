@@ -1,7 +1,7 @@
 package com.rayo.gateway.exception;
 
 @SuppressWarnings("serial")
-public class RayoNodeAlreadyExistsException extends GatewayException {
+public class RayoNodeAlreadyExistsException extends DatastoreException {
 
 	public RayoNodeAlreadyExistsException() {
 		super();

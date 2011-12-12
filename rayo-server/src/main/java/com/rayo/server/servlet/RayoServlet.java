@@ -363,13 +363,14 @@ public class RayoServlet extends AbstractRayoServlet {
             if (callId == null) {
                 throw new IllegalArgumentException("Call id cannot be null");
             }
-            callCommand.setCallId(callId);
-
-            // Log the message
-            cdrManager.append(callId, payload.asXML());
-            
             // Find the call actor
-            AbstractActor<?> actor = findActor(callCommand.getCallId());
+            AbstractActor<?> actor = findActor(callId);
+            if (actor instanceof CallActor) {
+	            callCommand.setCallId(callId);	
+	            // Log the message
+	            cdrManager.append(callCommand.getCallId(), payload.asXML());
+            }
+            
 
             if (callCommand instanceof VerbCommand) {
                 VerbCommand verbCommand = (VerbCommand) callCommand;
