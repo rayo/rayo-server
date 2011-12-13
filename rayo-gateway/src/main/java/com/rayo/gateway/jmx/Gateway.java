@@ -9,6 +9,7 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 
 import com.rayo.gateway.GatewayServlet;
 import com.rayo.gateway.GatewayStorageService;
+import com.rayo.gateway.util.JIDUtils;
 
 /**
  * <p>This Mbean exposes relevant information on the Distributed hash table. It 
@@ -63,9 +64,12 @@ public class Gateway implements GatewayMXBean {
 		List<ClientApplication> clients = new ArrayList<ClientApplication>();
 
 		for(String jid: gatewayStorageService.getClientResources()) {
-			ClientApplication client = new ClientApplication(jid);
-			client.addResources(gatewayStorageService.getResourcesForClient(jid));
-			clients.add(client);
+			String bareJid = JIDUtils.getBareJid(jid);			
+			ClientApplication client = new ClientApplication(bareJid);
+			if (!clients.contains(client)) {
+				client.addResources(gatewayStorageService.getResourcesForClient(bareJid));
+				clients.add(client);
+			}
 		}
 
 		return clients;
