@@ -242,17 +242,24 @@ public class TransferHandler extends AbstractLocalVerbHandler<Transfer, Call> im
     }
 
     private void dial(CallableEndpoint to) {
-        Call destination = to.createCall(resolveFrom(), model.getHeaders());
+    	
+    	Endpoint from = resolveFrom();
+    	if (log.isDebugEnabled()) {
+    		log.debug("Dialing endpoint. To: [%s]. From: [%s]. Headers: [%s]",to,from,model.getHeaders());
+    	}
+    	
+        Call destination = to.createCall(from, model.getHeaders());
         destination.addObserver(new ActorEventListener(actor));
         Joint joint = destination.join();
         joints.put(destination, joint);
     }
 
     private Endpoint resolveFrom() {
+    	
         Endpoint fromEndpoint = null;
         URI from = model.getFrom();
         if (from != null) {
-        	participant.getApplicationContext().createEndpoint(from.toString());
+        	fromEndpoint = participant.getApplicationContext().createEndpoint(from.toString());
         }
         else {
             fromEndpoint = participant.getAddress();
