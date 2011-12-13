@@ -12,4 +12,12 @@ public class JIDUtils {
 		}
 		return jid;
 	}
+	
+	public static String getBareJid(String jid) {
+		
+		if (jid.contains("/")) {
+			jid = jid.substring(0, jid.indexOf("/"));
+		}
+		return jid;
+	}
 }
