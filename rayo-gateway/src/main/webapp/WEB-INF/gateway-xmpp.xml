@@ -81,7 +81,7 @@
 	<bean id="inMemoryDatastore" class="com.rayo.gateway.memory.InMemoryDatastore"/>
 	
 	<!-- Cassandra based Datastore -->  
-	<bean id="cassandraDatastore" class="com.rayo.gateway.cassandra.CassandraDatastore" init-method="init">
+	<bean id="cassandraDatastore" class="com.rayo.gateway.cassandra.CassandraDatastore">
 		<property name="hostname" value="localhost"/>
 		<property name="port" value="9160"/>
 	</bean>

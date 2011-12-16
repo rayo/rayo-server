@@ -51,99 +51,114 @@ public class CassandraDatastore implements GatewayDatastore {
 	
 	public void init() throws Exception {
 		
-		Cluster cluster = new Cluster(hostname, Integer.parseInt(port));
-		
-		KeyspaceManager keyspaceManager = Pelops.createKeyspaceManager(cluster);
-		
 		try {
-			keyspaceManager.dropKeyspace("rayo");
-		} catch (Exception e) {
-
-		}
-		
-		KsDef ksDef = null;
-		
-		try {
-			ksDef = keyspaceManager.getKeyspaceSchema("rayo");
-		} catch (Exception e) {
-			List<CfDef> cfDefs = new ArrayList<CfDef>();
-			Map<String, String> ksOptions = new HashMap<String, String>();
-			ksOptions.put("replication_factor", "1");
-	        ksDef = new KsDef("rayo","org.apache.cassandra.locator.SimpleStrategy", cfDefs);
-	        ksDef.strategy_options = ksOptions;
-			keyspaceManager.addKeyspace(ksDef);
-		}
-		
-		ColumnFamilyManager cfManager = Pelops.createColumnFamilyManager(cluster, "rayo");
-		CfDef nodes = getCfDef(ksDef, "nodes");
-		if (nodes == null) {
-			nodes = new CfDef("rayo", "nodes");
-			nodes.default_validation_class = "UTF8Type";
-			ksDef.addToCf_defs(nodes);
-			cfManager.addColumnFamily(nodes);
-		}
-
-		CfDef jids = getCfDef(ksDef, "jids");
-		if (jids == null) {
-			jids = new CfDef("rayo", "jids");
-			jids.default_validation_class = "UTF8Type";
-			ksDef.addToCf_defs(jids);
-			cfManager.addColumnFamily(jids);
-		}
-		
-		CfDef clientApplications = getCfDef(ksDef, "applications");
-		if (clientApplications == null) {
-			clientApplications = new CfDef("rayo", "applications");
-			clientApplications.default_validation_class = "UTF8Type";
-			ksDef.addToCf_defs(clientApplications);			
-			cfManager.addColumnFamily(clientApplications);
+			if (log.isDebugEnabled()) {
+				log.debug("Started Cassandra Datastore initialization");
+			}
+			Cluster cluster = new Cluster(hostname, Integer.parseInt(port));
 			
-			CfDef resources = new CfDef("rayo", "resources")
-				.setColumn_type("Super")
-				.setComparator_type(ColumnFamilyManager.CFDEF_COMPARATOR_BYTES)
-				.setSubcomparator_type(ColumnFamilyManager.CFDEF_COMPARATOR_BYTES);
-			resources.default_validation_class = "UTF8Type";
-			ksDef.addToCf_defs(resources);			
-			cfManager.addColumnFamily(resources);
+			KeyspaceManager keyspaceManager = Pelops.createKeyspaceManager(cluster);
+			
+			try {
+				if (log.isDebugEnabled()) {
+					log.debug("Dropping existing cassandra schema");
+				}
+				keyspaceManager.dropKeyspace("rayo");
+			} catch (Exception e) {
+	
+			}
+			if (log.isDebugEnabled()) {
+				log.debug("Creating new cassandra schema");
+			}
+			
+			KsDef ksDef = null;
+			
+			try {
+				ksDef = keyspaceManager.getKeyspaceSchema("rayo");
+			} catch (Exception e) {
+				List<CfDef> cfDefs = new ArrayList<CfDef>();
+				Map<String, String> ksOptions = new HashMap<String, String>();
+				ksOptions.put("replication_factor", "1");
+		        ksDef = new KsDef("rayo","org.apache.cassandra.locator.SimpleStrategy", cfDefs);
+		        ksDef.strategy_options = ksOptions;
+				keyspaceManager.addKeyspace(ksDef);
+			}
+			
+			ColumnFamilyManager cfManager = Pelops.createColumnFamilyManager(cluster, "rayo");
+			CfDef nodes = getCfDef(ksDef, "nodes");
+			if (nodes == null) {
+				nodes = new CfDef("rayo", "nodes");
+				nodes.default_validation_class = "UTF8Type";
+				ksDef.addToCf_defs(nodes);
+				cfManager.addColumnFamily(nodes);
+			}
+	
+			CfDef jids = getCfDef(ksDef, "jids");
+			if (jids == null) {
+				jids = new CfDef("rayo", "jids");
+				jids.default_validation_class = "UTF8Type";
+				ksDef.addToCf_defs(jids);
+				cfManager.addColumnFamily(jids);
+			}
+			
+			CfDef clientApplications = getCfDef(ksDef, "applications");
+			if (clientApplications == null) {
+				clientApplications = new CfDef("rayo", "applications");
+				clientApplications.default_validation_class = "UTF8Type";
+				ksDef.addToCf_defs(clientApplications);			
+				cfManager.addColumnFamily(clientApplications);
+				
+				CfDef resources = new CfDef("rayo", "resources")
+					.setColumn_type("Super")
+					.setComparator_type(ColumnFamilyManager.CFDEF_COMPARATOR_BYTES)
+					.setSubcomparator_type(ColumnFamilyManager.CFDEF_COMPARATOR_BYTES);
+				resources.default_validation_class = "UTF8Type";
+				ksDef.addToCf_defs(resources);			
+				cfManager.addColumnFamily(resources);
+			}
+			
+			CfDef calls = getCfDef(ksDef, "calls");
+			if (calls == null) {
+				calls = new CfDef("rayo", "calls");
+				//calls.addToColumn_metadata(new ColumnDef().setName("jid".getBytes()));
+				//calls.addToColumn_metadata(new ColumnDef().setName("node".getBytes()));
+				calls.default_validation_class = "UTF8Type";
+				ksDef.addToCf_defs(calls);			
+				cfManager.addColumnFamily(calls);
+			}
+	
+			CfDef ips = getCfDef(ksDef, "ips");
+			if (ips == null) {
+				ips = new CfDef("rayo", "ips");
+				ips.default_validation_class = "UTF8Type";
+				ksDef.addToCf_defs(ips);			
+				cfManager.addColumnFamily(ips);
+			}
+	
+			CfDef platforms = getCfDef(ksDef, "platforms");
+			if (platforms == null) {
+				platforms = new CfDef("rayo", "platforms");
+				platforms.default_validation_class = "UTF8Type";
+				ksDef.addToCf_defs(platforms);			
+				cfManager.addColumnFamily(platforms);
+			}
+			
+			Pelops.addPool("rayo", cluster, "rayo");
+			
+			Mutator mutator = Pelops.createMutator("rayo");
+			Column info = new Column();
+			info.setName("platforms".getBytes());
+			info.setValue("".getBytes());
+			info.setTimestamp(System.currentTimeMillis());
+			
+			mutator.writeColumn("platforms", "info", info);
+			mutator.execute(ConsistencyLevel.ONE);
+			if (log.isDebugEnabled()) {
+				log.debug("Cassandra initialization completed successfully");
+			}
+		} catch (Exception e) {
+			log.error("Could not initialize Cassandra Datastore", e);
 		}
-		
-		CfDef calls = getCfDef(ksDef, "calls");
-		if (calls == null) {
-			calls = new CfDef("rayo", "calls");
-			//calls.addToColumn_metadata(new ColumnDef().setName("jid".getBytes()));
-			//calls.addToColumn_metadata(new ColumnDef().setName("node".getBytes()));
-			calls.default_validation_class = "UTF8Type";
-			ksDef.addToCf_defs(calls);			
-			cfManager.addColumnFamily(calls);
-		}
-
-		CfDef ips = getCfDef(ksDef, "ips");
-		if (ips == null) {
-			ips = new CfDef("rayo", "ips");
-			ips.default_validation_class = "UTF8Type";
-			ksDef.addToCf_defs(ips);			
-			cfManager.addColumnFamily(ips);
-		}
-
-		CfDef platforms = getCfDef(ksDef, "platforms");
-		if (platforms == null) {
-			platforms = new CfDef("rayo", "platforms");
-			platforms.default_validation_class = "UTF8Type";
-			ksDef.addToCf_defs(platforms);			
-			cfManager.addColumnFamily(platforms);
-		}
-		
-		Pelops.addPool("rayo", cluster, "rayo");
-		
-		Mutator mutator = Pelops.createMutator("rayo");
-		Column info = new Column();
-		info.setName("platforms".getBytes());
-		info.setValue("".getBytes());
-		info.setTimestamp(System.currentTimeMillis());
-		
-		mutator.writeColumn("platforms", "info", info);
-		mutator.execute(ConsistencyLevel.ONE);
-
 	}
 
 	private CfDef getCfDef(KsDef def, String table) {
