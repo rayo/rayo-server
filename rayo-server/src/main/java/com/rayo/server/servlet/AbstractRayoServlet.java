@@ -32,6 +32,7 @@ import com.voxeo.servlet.xmpp.JID;
 import com.voxeo.servlet.xmpp.PresenceMessage;
 import com.voxeo.servlet.xmpp.StanzaError;
 import com.voxeo.servlet.xmpp.StanzaError.Condition;
+import com.voxeo.servlet.xmpp.StanzaError.Type;
 import com.voxeo.servlet.xmpp.XmppFactory;
 import com.voxeo.servlet.xmpp.XmppServlet;
 import com.voxeo.servlet.xmpp.XmppSession;
@@ -193,15 +194,29 @@ public abstract class AbstractRayoServlet extends XmppServlet implements AdminLi
 
 		sendPresenceError(fromJid, toJid, new Element[]{});
     }
-    
+
     protected void sendPresenceError(JID fromJid, JID toJid, Condition condition) throws IOException, ServletException {
+    
+    	sendPresenceError(fromJid,  toJid, condition, Type.CANCEL);
+    }
+
+    protected void sendPresenceError(JID fromJid, JID toJid, Condition condition, Type type) throws IOException, ServletException {
+        
+    	sendPresenceError(fromJid,  toJid, condition, Type.CANCEL, null);
+    }
+
+    protected void sendPresenceError(JID fromJid, JID toJid, Condition condition, Type type, String text) throws IOException, ServletException {
     	
 		CoreDocumentImpl document = new CoreDocumentImpl(false);
 		org.w3c.dom.Element errorElement = document.createElement("error");
-		errorElement.setAttribute("type", "cancel");
+		errorElement.setAttribute("type", type.toString());
 		org.w3c.dom.Element conditionElement = document.createElement(condition.toString());
-		errorElement.appendChild(conditionElement);		
-		
+		errorElement.appendChild(conditionElement);
+		if (text != null) {
+			org.w3c.dom.Element textElement = document.createElement("text");
+			textElement.setTextContent(text);
+			errorElement.appendChild(textElement);
+		}		
 		sendPresenceError(fromJid, toJid, errorElement);
     }   
     

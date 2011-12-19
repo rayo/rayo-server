@@ -19,9 +19,29 @@ import java.util.regex.Pattern;
 import org.springframework.core.io.Resource;
 
 import com.rayo.core.OfferEvent;
+import com.rayo.server.exception.RayoProtocolException;
 import com.rayo.server.util.LinkedProperties;
 import com.voxeo.logging.Loggerf;
 
+/**
+ * <p>Regexp based implementation of the {@link RayoJIDLookupService} interface.</p>
+ * 
+ * <p>This implementation uses a file named rayo-routing.properties to map incoming
+ * calls (offer events) to the actual client applications that will handle the calls.
+ * The format of the mapping file is very simple and basically matches regular expressions
+ * with hardcoded client applications:</p>
+ * <ul>
+ * <li>.*+13457800.*=usera@localhost</li>
+ * <li>.*sipusername.*=userb@localhost</li>
+ * <li>.*=userc@localhost</li>
+ * </ul>
+ * <p>The mappings on the rayo-routing.properties are reloaded each minute.</p>
+ * <p>Although you can use this implementation on any setup (staging, production) but 
+ * mainly it has been created for testing and as a reference implementation.</p>  
+ * 
+ * @author martin
+ *
+ */
 public class RegexpJIDLookupService implements RayoJIDLookupService<OfferEvent> {
 
 	private static final Loggerf logger = Loggerf.getLogger(RegexpJIDLookupService.class);
@@ -30,6 +50,12 @@ public class RegexpJIDLookupService implements RayoJIDLookupService<OfferEvent> 
 	
 	private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 	
+	/**
+	 * Creates the lookup service with the given properties file. 
+	 * 
+	 * @param properties Properties file with all the mappings
+	 * @throws IOException If the service cannot be created
+	 */
 	public RegexpJIDLookupService(final Resource properties) throws IOException {
 		
 		read(properties);
@@ -95,14 +121,14 @@ public class RegexpJIDLookupService implements RayoJIDLookupService<OfferEvent> 
 	}
 
 	@Override
-	public String lookup(OfferEvent event) {
+	public String lookup(OfferEvent event) throws RayoProtocolException {
 		
 		return lookup(event.getTo());
 	}
 	
 
 	@Override
-	public String lookup(URI uri) {
+	public String lookup(URI uri) throws RayoProtocolException {
 		
 		Lock lock = RegexpJIDLookupService.this.lock.readLock();
 		try {

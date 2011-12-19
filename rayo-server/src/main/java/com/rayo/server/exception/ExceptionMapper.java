@@ -58,6 +58,11 @@ public class ExceptionMapper {
 			errorCondition = toString(StanzaError.Condition.RESOURCE_CONSTRAINT);
 			errorMessage = "The requested resource is busy.";
 			errorType = StanzaError.Type.WAIT.toString();
+		} else if (e instanceof RayoProtocolException) {
+			RayoProtocolException re = (RayoProtocolException)e;
+			errorCondition = toString(re.getCondition());
+			errorMessage = re.getText();
+			errorType = re.getType().toString();
 		}
 		
 		log.debug("Mapping unknown exception [type=%s, message=%s]",e.getClass(), e.getMessage());

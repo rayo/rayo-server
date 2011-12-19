@@ -342,6 +342,13 @@ class ValidationTest {
 		assertNotNull fromXML(transfer)
 	}
 	
+	@Test
+	public void validateTransferOneToElementValid() {
+		
+		def transfer = parseXml("""<transfer xmlns="urn:xmpp:tropo:transfer:1" from="sip:name@connfu.com"><to>sip:8517c60c-39a6-4bce-8d21-9df2b6b1ad8c@gw113.phono.com</to></transfer>""")
+		assertNotNull fromXML(transfer)
+	}
+
 	// Conference
 	// ====================================================================================
 	

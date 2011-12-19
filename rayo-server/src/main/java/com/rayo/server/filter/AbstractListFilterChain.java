@@ -3,7 +3,15 @@ package com.rayo.server.filter;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class AbstractListFilterChain implements FilterChain {
+/**
+ * <p>Base class for a filter chain. A filter chain will concatenate multiple 
+ * message filters. Therefore, when executing a filter on the filter chain, 
+ * the chain will take care of executing all the individual filters.</p> 
+ * 
+ * @author martin
+ *
+ */
+abstract class AbstractListFilterChain implements FilterChain {
 	
 	List<MessageFilter> filters = new ArrayList<MessageFilter>();
 		

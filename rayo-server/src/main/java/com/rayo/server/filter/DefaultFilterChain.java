@@ -2,33 +2,58 @@ package com.rayo.server.filter;
 
 import com.rayo.core.CallCommand;
 import com.rayo.core.CallEvent;
+import com.rayo.server.exception.RayoProtocolException;
 
-public class DefaultFilterChain extends AbstractListFilterChain {
+/**
+ * <p>Default implementation of a filter chain. This implementation allows the 
+ * Rayo Server to easily concatenate multiple external message filters.</p>
+ * 
+ * <p>This class will invoke sequentially all the available message filters unless 
+ * a {@link RayoProtocolException} is thrown or any of the message filters returns 
+ * <code>null</code>, case in which the filter chain will stop further processing 
+ * as detailed in the {@link MessageFilter} interface.</p>
+ *  
+ * @author martin
+ *
+ */
+class DefaultFilterChain extends AbstractListFilterChain {
 	
 	@Override
-	public void handleCommandRequest(CallCommand command) {
+	public CallCommand handleCommandRequest(CallCommand command) throws RayoProtocolException {
 	
 		FilterContext context = new FilterContext();
 		for(MessageFilter filter: filters) {
-			filter.handleCommandRequest(command, context);
+			command = filter.handleCommandRequest(command, context);
+			if (command == null) {
+				return null;
+			}
 		}
+		return command;
 	}
 	
 	@Override
-	public void handleCommandResponse(Object response) {
+	public Object handleCommandResponse(Object response) throws RayoProtocolException {
 		
 		FilterContext context = new FilterContext();
 		for(MessageFilter filter: filters) {
-			filter.handleCommandResponse(response, context);
+			response = filter.handleCommandResponse(response, context);
+			if (response == null) {
+				return null;
+			}
 		}
+		return response;
 	}
 	
 	@Override
-	public void handleEvent(CallEvent event) {
+	public CallEvent handleEvent(CallEvent event) throws RayoProtocolException {
 		
 		FilterContext context = new FilterContext();
 		for(MessageFilter filter: filters) {
-			filter.handleEvent(event, context);
+			event = filter.handleEvent(event, context);
+			if (event == null) {
+				return null;
+			}
 		}
+		return event;
 	}
 }
