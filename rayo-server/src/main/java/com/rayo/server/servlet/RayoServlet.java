@@ -44,6 +44,7 @@ import com.rayo.server.Request;
 import com.rayo.server.Response;
 import com.rayo.server.ResponseHandler;
 import com.rayo.server.admin.RayoAdminService;
+import com.rayo.server.exception.RayoProtocolException;
 import com.rayo.server.filter.FilterChain;
 import com.rayo.server.listener.XmppMessageListenerGroup;
 import com.rayo.server.lookup.RayoJIDLookupService;
@@ -140,19 +141,24 @@ public class RayoServlet extends AbstractRayoServlet {
     	//TODO: Make private
         if (gatewayDomain != null) {
         	//TODO: Extract this logic elsewhere. Advertises presence and platform id preference.
-        	CoreDocumentImpl document = new CoreDocumentImpl(false);
-        	
-        	org.w3c.dom.Element showElement = document.createElement("show");
-        	showElement.setTextContent(status.toLowerCase());
-        	org.w3c.dom.Element nodeInfoElement = 
-        			document.createElementNS("urn:xmpp:rayo:cluster:1", "node-info");
-        	org.w3c.dom.Element platform = document.createElement("platform");
-        	platform.setTextContent(defaultPlatform);
-        	nodeInfoElement.appendChild(platform);
-        	
+        	PresenceMessage presence = null;        	
         	try {
-				PresenceMessage presence = getXmppFactory().createPresence(
-						getLocalDomain(), gatewayDomain, null, showElement, nodeInfoElement);
+	        	if (status.equalsIgnoreCase("unavailable")) {
+					presence = getXmppFactory().createPresence(
+							getLocalDomain(), gatewayDomain, "unavailable", (org.w3c.dom.Element)null);        		
+	        	} else {        	
+		        	CoreDocumentImpl document = new CoreDocumentImpl(false);
+		        	
+		        	org.w3c.dom.Element showElement = document.createElement("show");
+		        	showElement.setTextContent(status.toLowerCase());
+		        	org.w3c.dom.Element nodeInfoElement = 
+		        			document.createElementNS("urn:xmpp:rayo:cluster:1", "node-info");
+		        	org.w3c.dom.Element platform = document.createElement("platform");
+		        	platform.setTextContent(defaultPlatform);
+		        	nodeInfoElement.appendChild(platform);
+					presence = getXmppFactory().createPresence(
+							getLocalDomain(), gatewayDomain, null, showElement, nodeInfoElement);
+	        	}        	
 	
 				presence.send();
         	} catch (Exception e) {
@@ -197,19 +203,22 @@ public class RayoServlet extends AbstractRayoServlet {
     	if (event instanceof EndEvent) {
     		cdrManager.store(event.getCallId());
     	}
-    	
-    	// Invoke filters
-    	filtersChain.handleEvent(event);
-    	
+    	    	
     	JID jid = null; 
     	JID from = null;
+    	RayoProtocolException jidLookupError = null;
     	if (gatewayDomain == null) {
     		// Single server. This code needs a bit of refactoring specially as 
     		// the gateway servlet shares some of this stuff. 
 	    	if (event instanceof OfferEvent) {
 	    		SipURI sipUriTo = new SipURI(((OfferEvent)event).getTo().toString());
 	    		JID callTo = getXmppFactory().createJID(getBareJID(((OfferEvent)event).getTo().toString()));
-	    		String forwardDestination = rayoLookupService.lookup((OfferEvent)event);
+	    		String forwardDestination = null;
+				try {
+					forwardDestination = rayoLookupService.lookup((OfferEvent)event);
+				} catch (RayoProtocolException e) {
+					jidLookupError = e;
+				}
 	    		if (forwardDestination != null) {
 	    			callTo = getXmppFactory().createJID(forwardDestination);
 	    		}
@@ -233,12 +242,37 @@ public class RayoServlet extends AbstractRayoServlet {
 		}
 	    
 		try {
+			if (jidLookupError != null) {
+				log.error("JID lookup service threw an error: [%s]", jidLookupError.getText());
+				try {
+					JID to = getXmppFactory().createJID(jidLookupError.getTo());
+					sendPresenceError(from, to, jidLookupError.getCondition(), jidLookupError.getType(), jidLookupError.getText());
+				} catch (Exception e) {
+					log.error("Exception while trying to send error event: [%s]", e.getMessage());
+					log.error(e);
+				}
+			}
+			
+	    	// Invoke filters
+    		event = filtersChain.handleEvent(event);
+    		if (event == null) {
+    			log.warn("Event dispatching stopped by message filter. Call Event: [%s]", event);
+    			return;
+    		}
+			
 			// Send presence
 			PresenceMessage presence = getXmppFactory().createPresence(from, jid, null,
 					new DOMWriter().write(eventElement.getDocument()).getDocumentElement() // TODO: ouch
 				);
 			presence.send();
 			xmppMessageListenersGroup.onPresenceSent(presence);
+	    } catch (RayoProtocolException e) {
+	    	try {
+	    		log.error("Filters threw some exception: [%s]", e.getMessage());
+				sendPresenceError(from, jid, e.getCondition(), e.getType(), e.getText());
+			} catch (ServletException se) {
+				log.error(se.getMessage(), se);
+			}
 		} catch (ServletException se) {
 			//TODO: Pending of internal ticket: https://evolution.voxeo.com/ticket/1536300
 			if (se.getMessage().startsWith("can't find corresponding client session")) {
@@ -351,12 +385,14 @@ public class RayoServlet extends AbstractRayoServlet {
             }
 
             // If it's not dial then it must be a CallCommand
-            assertion(command instanceof CallCommand, "Is this a valid call command?");
-            
-            final CallCommand callCommand = (CallCommand) command;
-            
+            assertion(command instanceof CallCommand, "Is this a valid call command?");            
+            CallCommand callCommand = (CallCommand) command;            
         	// Invoke filters
-            filtersChain.handleCommandRequest(callCommand);
+            callCommand = filtersChain.handleCommandRequest(callCommand);
+    		if (callCommand == null) {
+    			log.warn("Command request processing stopped by message filter. Command: [%s]", callCommand);
+    			return;
+    		}
             
             // Extract Call ID
             final String callId = request.getTo().getNode();
@@ -389,7 +425,11 @@ public class RayoServlet extends AbstractRayoServlet {
                     Object value = commandResponse.getValue();
 
                 	// Invoke filters
-                    filtersChain.handleCommandResponse(value);
+                    value = filtersChain.handleCommandResponse(value);
+            		if (value == null) {
+            			log.warn("Response dispatching stopped by message filter. Response: [%s]", value);
+            			return;
+            		}
                     
                     if (value instanceof Exception) {
                         sendIqError(request, (Exception)value);
