@@ -20,6 +20,7 @@ import org.scale7.cassandra.pelops.ColumnFamilyManager;
 import org.scale7.cassandra.pelops.KeyspaceManager;
 import org.scale7.cassandra.pelops.Mutator;
 import org.scale7.cassandra.pelops.Pelops;
+import org.scale7.cassandra.pelops.RowDeletor;
 import org.scale7.cassandra.pelops.Selector;
 import org.scale7.cassandra.pelops.exceptions.PelopsException;
 
@@ -89,6 +90,7 @@ public class CassandraDatastore implements GatewayDatastore {
 			if (nodes == null) {
 				nodes = new CfDef("rayo", "nodes");
 				nodes.default_validation_class = "UTF8Type";
+				nodes.gc_grace_seconds = 0;
 				ksDef.addToCf_defs(nodes);
 				cfManager.addColumnFamily(nodes);
 			}
@@ -149,10 +151,10 @@ public class CassandraDatastore implements GatewayDatastore {
 			Column info = new Column();
 			info.setName("platforms".getBytes());
 			info.setValue("".getBytes());
-			info.setTimestamp(System.currentTimeMillis());
+			info.setTimestamp(createTimestamp());
 			
 			mutator.writeColumn("platforms", "info", info);
-			mutator.execute(ConsistencyLevel.ONE);
+			mutator.execute(ConsistencyLevel.QUORUM);
 			if (log.isDebugEnabled()) {
 				log.debug("Cassandra initialization completed successfully");
 			}
@@ -183,19 +185,19 @@ public class CassandraDatastore implements GatewayDatastore {
 		Column column0 = new Column();
 		column0.setName("jid".getBytes());
 		column0.setValue(node.getJid().getBytes());
-		column0.setTimestamp(System.currentTimeMillis());
+		column0.setTimestamp(createTimestamp());
 		Column column1 = new Column();
 		column1.setName("hostname".getBytes());
 		column1.setValue(node.getHostname().getBytes());
-		column1.setTimestamp(System.currentTimeMillis());
+		column1.setTimestamp(createTimestamp());
 		Column column2 = new Column();
 		column2.setName("ipaddress".getBytes());
 		column2.setValue(node.getIpAddress().getBytes());
-		column2.setTimestamp(System.currentTimeMillis());
+		column2.setTimestamp(createTimestamp());
 		Column column3 = new Column();
 		column3.setName("platforms".getBytes());
 		column3.setValue(StringUtils.join(node.getPlatforms(),",").getBytes());
-		column3.setTimestamp(System.currentTimeMillis());
+		column3.setTimestamp(createTimestamp());
 		
 		mutator.writeColumn("nodes", node.getJid(), column0);	
 		mutator.writeColumn("nodes", node.getJid(), column1);	
@@ -205,25 +207,25 @@ public class CassandraDatastore implements GatewayDatastore {
 		Column ip = new Column();
 		ip.setName("node".getBytes());
 		ip.setValue(node.getJid().getBytes());
-		ip.setTimestamp(System.currentTimeMillis());
+		ip.setTimestamp(createTimestamp());
 		mutator.writeColumn("ips", node.getIpAddress(), ip);
 		
 		Selector selector = Pelops.createSelector("rayo");
-		Column column = selector.getColumnFromRow("platforms", "info", "platforms", ConsistencyLevel.ONE);
+		Column column = selector.getColumnFromRow("platforms", "info", "platforms", ConsistencyLevel.QUORUM);
 		Set<String> platforms = new HashSet(Arrays.asList(StringUtils.split(new String(column.getValue()),",")));
 
 		for (String platform: node.getPlatforms()) {
 			Column c = new Column();
 			c.setName(node.getJid().getBytes());
 			c.setValue(node.getJid().getBytes());
-			c.setTimestamp(System.currentTimeMillis());
+			c.setTimestamp(createTimestamp());
 			mutator.writeColumn("platforms", platform, c);
 			platforms.add(platform);
 		}
 		writePlatforms(mutator, platforms);		
 		
 		try {
-			mutator.execute(ConsistencyLevel.ONE);
+			mutator.execute(ConsistencyLevel.QUORUM);
 		} catch (Exception e) {
 			log.error(e.getMessage(),e);
 			throw new DatastoreException("Could not store node");
@@ -238,7 +240,7 @@ public class CassandraDatastore implements GatewayDatastore {
 		Column info = new Column();
 		info.setName("platforms".getBytes());
 		info.setValue(p.getBytes());
-		info.setTimestamp(System.currentTimeMillis());
+		info.setTimestamp(createTimestamp());
 		
 		mutator.writeColumn("platforms", "info", info);
 	}
@@ -252,8 +254,10 @@ public class CassandraDatastore implements GatewayDatastore {
 		}
 		
 		Mutator mutator = Pelops.createMutator("rayo");
-		mutator.deleteColumns("nodes", id, "hostname","jid","ipaddress","platforms");
-		mutator.deleteColumns("ips", node.getIpAddress(), "node");
+		RowDeletor deletor = Pelops.createRowDeletor("rayo");
+		deletor.deleteRow("nodes", id, ConsistencyLevel.QUORUM);
+		deletor.deleteRow("ips", node.getIpAddress(), ConsistencyLevel.QUORUM);
+		
 		List<String> platforms = getPlatforms();
 		boolean platformsUpdated = false;
 		for (String platform: node.getPlatforms()) {
@@ -270,7 +274,7 @@ public class CassandraDatastore implements GatewayDatastore {
 		}
 		
 		try {
-			mutator.execute(ConsistencyLevel.ONE);
+			mutator.execute(ConsistencyLevel.QUORUM);
 		} catch (Exception e) {
 			log.error(e.getMessage(),e);
 			throw new DatastoreException("Could not remove node");
@@ -287,7 +291,7 @@ public class CassandraDatastore implements GatewayDatastore {
 			throw new RayoNodeNotFoundException();
 		}
 		
-		long timestamp = System.currentTimeMillis();
+		long timestamp = createTimestamp();
 		Mutator mutator = Pelops.createMutator("rayo");
 		Column column0 = new Column();
 		column0.setName("jid".getBytes());
@@ -309,7 +313,7 @@ public class CassandraDatastore implements GatewayDatastore {
 		mutator.writeColumn("jids", node.getJid(), column2);
 		
 		try {
-			mutator.execute(ConsistencyLevel.ONE);
+			mutator.execute(ConsistencyLevel.QUORUM);
 		} catch (Exception e) {
 			log.error(e.getMessage(),e);
 			throw new DatastoreException("Could not store call");
@@ -323,7 +327,7 @@ public class CassandraDatastore implements GatewayDatastore {
 		
 		Selector selector = Pelops.createSelector("rayo");
 		try {
-			List<Column> columns = selector.getColumnsFromRow("calls", id, false, ConsistencyLevel.ONE);
+			List<Column> columns = selector.getColumnsFromRow("calls", id, false, ConsistencyLevel.QUORUM);
 			
 			return buildCall(columns, id);
 		} catch (PelopsException pe) {
@@ -381,7 +385,7 @@ public class CassandraDatastore implements GatewayDatastore {
 		mutator.deleteColumns("jids", call.getRayoNode().getJid(), id);
 
 		try {
-			mutator.execute(ConsistencyLevel.ONE);
+			mutator.execute(ConsistencyLevel.QUORUM);
 		} catch (Exception e) {
 			log.error(e.getMessage(),e);
 			throw new DatastoreException("Could not remove call");
@@ -396,7 +400,7 @@ public class CassandraDatastore implements GatewayDatastore {
 		
 		try {
 			Selector selector = Pelops.createSelector("rayo");
-			List<Column> columns = selector.getColumnsFromRow("jids", jid, false, ConsistencyLevel.ONE);
+			List<Column> columns = selector.getColumnsFromRow("jids", jid, false, ConsistencyLevel.QUORUM);
 			List<String> calls = new ArrayList<String>();
 			for(Column column: columns) {
 				calls.add(new String(column.getValue()));
@@ -413,7 +417,7 @@ public class CassandraDatastore implements GatewayDatastore {
 		
 		try {
 			Selector selector = Pelops.createSelector("rayo");
-			List<Column> columns = selector.getColumnsFromRow("nodes", id, false, ConsistencyLevel.ONE);
+			List<Column> columns = selector.getColumnsFromRow("nodes", id, false, ConsistencyLevel.QUORUM);
 
 			return buildNode(columns);
 		} catch (PelopsException pe) {
@@ -438,7 +442,7 @@ public class CassandraDatastore implements GatewayDatastore {
 		
 		try {
 			Selector selector = Pelops.createSelector("rayo");
-			Column column = selector.getColumnFromRow("ips", ip, "node", ConsistencyLevel.ONE);
+			Column column = selector.getColumnFromRow("ips", ip, "node", ConsistencyLevel.QUORUM);
 			if (column != null) {
 				return getNode(new String(column.getValue()));
 			}
@@ -453,7 +457,7 @@ public class CassandraDatastore implements GatewayDatastore {
 
 		try {
 			Selector selector = Pelops.createSelector("rayo");
-			Column column = selector.getColumnFromRow("platforms", "info", "platforms", ConsistencyLevel.ONE);
+			Column column = selector.getColumnFromRow("platforms", "info", "platforms", ConsistencyLevel.QUORUM);
 			return new ArrayList(Arrays.asList(StringUtils.split(new String(column.getValue()),",")));
 		} catch (PelopsException pe) {
 			log.error(pe.getMessage(),pe);
@@ -467,7 +471,7 @@ public class CassandraDatastore implements GatewayDatastore {
 		try {
 			List<String> nodes = new ArrayList<String>();
 			Selector selector = Pelops.createSelector("rayo");
-			List<Column> columns = selector.getColumnsFromRow("platforms", platformId, false, ConsistencyLevel.ONE);
+			List<Column> columns = selector.getColumnsFromRow("platforms", platformId, false, ConsistencyLevel.QUORUM);
 			for(Column column: columns) {
 				String id = new String(column.getName());
 				nodes.add(id);
@@ -486,11 +490,11 @@ public class CassandraDatastore implements GatewayDatastore {
 		Column column0 = new Column();
 		column0.setName("jid".getBytes());
 		column0.setValue(client.getJid().getBytes());
-		column0.setTimestamp(System.currentTimeMillis());
+		column0.setTimestamp(createTimestamp());
 		Column column1 = new Column();
 		column1.setName("platform".getBytes());
 		column1.setValue(client.getPlatform().getBytes());
-		column1.setTimestamp(System.currentTimeMillis());
+		column1.setTimestamp(createTimestamp());
 		
 		mutator.writeColumn("applications", client.getJid(), column0);	
 		mutator.writeColumn("applications", client.getJid(), column1);	
@@ -498,14 +502,14 @@ public class CassandraDatastore implements GatewayDatastore {
 		Column column2 = new Column();
 		column2.setName(client.getJid().getBytes());
 		column2.setValue(client.getJid().getBytes());
-		column2.setTimestamp(System.currentTimeMillis());
+		column2.setTimestamp(createTimestamp());
 		mutator.writeColumn("applications", "resources", column2);	
 
 		Column resourceColumn = mutator.newColumn(client.getResource(), client.getResource());		
 		mutator.writeSubColumn("resources", client.getBareJid(), client.getBareJid(), resourceColumn);
 
 		try {
-			mutator.execute(ConsistencyLevel.ONE);
+			mutator.execute(ConsistencyLevel.QUORUM);
 		} catch (Exception e) {
 			log.error(e.getMessage(),e);
 			throw new DatastoreException("Could not create client application");
@@ -525,7 +529,7 @@ public class CassandraDatastore implements GatewayDatastore {
 		mutator.deleteColumns("applications", "resources", client.getJid());	
 
 		try {
-			mutator.execute(ConsistencyLevel.ONE);
+			mutator.execute(ConsistencyLevel.QUORUM);
 		} catch (Exception e) {
 			log.error(e.getMessage(),e);
 			throw new DatastoreException("Could not client application");
@@ -547,8 +551,8 @@ public class CassandraDatastore implements GatewayDatastore {
 			String resource = jid.substring(jid.indexOf("/") + 1, jid.length());
 			
 			Selector selector = Pelops.createSelector("rayo");
-			List<Column> columns = selector.getColumnsFromRow("applications", jid, false, ConsistencyLevel.ONE);
-			Column resourceColumn = selector.getSubColumnFromRow("resources", bareJid, bareJid, resource, ConsistencyLevel.ONE);
+			List<Column> columns = selector.getColumnsFromRow("applications", jid, false, ConsistencyLevel.QUORUM);
+			Column resourceColumn = selector.getSubColumnFromRow("resources", bareJid, bareJid, resource, ConsistencyLevel.QUORUM);
 			return buildClientApplication(columns, resourceColumn);
 		} catch (PelopsException pe) {
 			log.error(pe.getMessage(),pe);
@@ -562,7 +566,7 @@ public class CassandraDatastore implements GatewayDatastore {
 						
 		try {
 			Selector selector = Pelops.createSelector("rayo");
-			List<Column> resourceColumn = selector.getSubColumnsFromRow("resources", bareJid, bareJid, false, ConsistencyLevel.ONE);
+			List<Column> resourceColumn = selector.getSubColumnsFromRow("resources", bareJid, bareJid, false, ConsistencyLevel.QUORUM);
 			List<String> resources = new ArrayList<String>();
 			for(Column column: resourceColumn) {
 				resources.add(new String(column.getValue()));
@@ -602,7 +606,7 @@ public class CassandraDatastore implements GatewayDatastore {
 	public List<String> getClientApplications() {
 	
 		Selector selector = Pelops.createSelector("rayo");
-		List<Column> columns = selector.getColumnsFromRow("applications", "resources", false, ConsistencyLevel.ONE);
+		List<Column> columns = selector.getColumnsFromRow("applications", "resources", false, ConsistencyLevel.QUORUM);
 		List<String> jids = new ArrayList<String>();
 		for(Column column: columns) {
 			jids.add(new String(column.getName()));
@@ -652,6 +656,11 @@ public class CassandraDatastore implements GatewayDatastore {
 		System.out.println(cassandraService.getNode("userb@localhost"));	
 		System.out.println(cassandraService.getCall("1234"));
 		System.out.println(cassandraService.getClientApplication("mpermar@jabber.org/voxeo"));
+	}
+	
+	private long createTimestamp() {
+		
+		return System.currentTimeMillis() * 1000;
 	}
 
 	public String getHostname() {

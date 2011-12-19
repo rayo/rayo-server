@@ -20,4 +20,12 @@ public class JIDUtils {
 		}
 		return jid;
 	}
+	
+	public static String getResource(String jid) {
+		
+		if (jid.contains("/")) {
+			jid = jid.substring(jid.indexOf("/")+1);
+		}
+		return null;
+	}
 }
