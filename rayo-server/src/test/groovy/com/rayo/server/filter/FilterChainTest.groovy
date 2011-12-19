@@ -11,6 +11,8 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 
 import com.rayo.server.filter.FilterChain;
 import com.rayo.server.filter.MessageFilter;
+import com.rayo.core.CallCommand;
+import com.rayo.core.CallEvent;
 import com.rayo.core.validation.ValidationException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
@@ -70,14 +72,15 @@ public class FilterChainTest {
 	public void testCommandRequestExecutedInSequence() throws InterruptedException {
 		
 		def queue = new LinkedList()
-		def filter1 = [handleCommandRequest:{command, chain -> queue.offer("filter1")}] as MessageFilter
-		def filter2 = [handleCommandRequest:{command, chain -> queue.offer("filter2")}] as MessageFilter
-		def filter3 = [handleCommandRequest:{command, chain -> queue.offer("filter3")}] as MessageFilter
+		def filter1 = [handleCommandRequest:{command, chain -> queue.offer("filter1"); return command}] as MessageFilter
+		def filter2 = [handleCommandRequest:{command, chain -> queue.offer("filter2"); return command}] as MessageFilter
+		def filter3 = [handleCommandRequest:{command, chain -> queue.offer("filter3"); return command}] as MessageFilter
 		filtersChain.addFilter(filter1)
 		filtersChain.addFilter(filter2)
 		filtersChain.addFilter(filter3)
 		
-		filtersChain.handleCommandRequest(null)
+		def callCommand = [:] as CallCommand
+		filtersChain.handleCommandRequest(callCommand)
 		assertEquals queue.poll(),"filter1"
 		assertEquals queue.poll(),"filter2"
 		assertEquals queue.poll(),"filter3"
@@ -87,14 +90,15 @@ public class FilterChainTest {
 	public void testCommandResponseExecutedInSequence() throws InterruptedException {
 		
 		def queue = new LinkedList()
-		def filter1 = [handleCommandResponse:{response, chain -> queue.offer("filter1")}] as MessageFilter
-		def filter2 = [handleCommandResponse:{response, chain -> queue.offer("filter2")}] as MessageFilter
-		def filter3 = [handleCommandResponse:{response, chain -> queue.offer("filter3")}] as MessageFilter
+		def filter1 = [handleCommandResponse:{response, chain -> queue.offer("filter1"); return response}] as MessageFilter
+		def filter2 = [handleCommandResponse:{response, chain -> queue.offer("filter2"); return response}] as MessageFilter
+		def filter3 = [handleCommandResponse:{response, chain -> queue.offer("filter3"); return response}] as MessageFilter
 		filtersChain.addFilter(filter1)
 		filtersChain.addFilter(filter2)
 		filtersChain.addFilter(filter3)
 		
-		filtersChain.handleCommandResponse(null)
+		def commandResponse = new Object()
+		filtersChain.handleCommandResponse(commandResponse)
 		assertEquals queue.poll(),"filter1"
 		assertEquals queue.poll(),"filter2"
 		assertEquals queue.poll(),"filter3"
@@ -104,14 +108,15 @@ public class FilterChainTest {
 	public void testEventExecutedInSequence() throws InterruptedException {
 		
 		def queue = new LinkedList()
-		def filter1 = [handleEvent:{event, chain -> queue.offer("filter1")}] as MessageFilter
-		def filter2 = [handleEvent:{event, chain -> queue.offer("filter2")}] as MessageFilter
-		def filter3 = [handleEvent:{event, chain -> queue.offer("filter3")}] as MessageFilter
+		def filter1 = [handleEvent:{event, chain -> queue.offer("filter1");return event}] as MessageFilter
+		def filter2 = [handleEvent:{event, chain -> queue.offer("filter2");return event}] as MessageFilter
+		def filter3 = [handleEvent:{event, chain -> queue.offer("filter3");return event}] as MessageFilter
 		filtersChain.addFilter(filter1)
 		filtersChain.addFilter(filter2)
 		filtersChain.addFilter(filter3)
 		
-		filtersChain.handleEvent(null)
+		def CallEvent event = [:] as CallEvent
+		filtersChain.handleEvent(event)
 		assertEquals queue.poll(),"filter1"
 		assertEquals queue.poll(),"filter2"
 		assertEquals queue.poll(),"filter3"
@@ -123,14 +128,16 @@ public class FilterChainTest {
 		def queue = new LinkedList()
 		def filter1 = [handleCommandRequest:{command, context ->
 			context.setAttribute("test","value")
-			queue.offer("filter1")}] as MessageFilter
+			queue.offer("filter1")
+			return command}] as MessageFilter
 		def filter2 = [handleCommandRequest:{command, context ->
-			queue.offer(context.getAttribute("test"))}] as MessageFilter
+			queue.offer(context.getAttribute("test")); return command}] as MessageFilter
 
 		filtersChain.addFilter(filter1)
 		filtersChain.addFilter(filter2)
 
-		filtersChain.handleCommandRequest(null)
+		def callCommand = [:] as CallCommand
+		filtersChain.handleCommandRequest(callCommand)
 		assertEquals queue.poll(),"filter1"
 		assertEquals queue.poll(),"value"
 	}
@@ -140,16 +147,18 @@ public class FilterChainTest {
 
 		def queue = new LinkedList()
 		def filter1 = [handleCommandRequest:{command, context ->
-			context.setAttribute("test","value")}] as MessageFilter
+			context.setAttribute("test","value");return command}] as MessageFilter
 
 		filtersChain.addFilter(filter1)
 		filtersChain.handleCommandRequest(null)
 		
 		def filter2 = [handleCommandRequest:{command, context ->
-			queue.offer(context.getAttribute("test")?context.getAttribute("test"):"empty")}] as MessageFilter
+			queue.offer(context.getAttribute("test")?context.getAttribute("test"):"empty"); return command}] as MessageFilter
 		filtersChain.clear()
 		filtersChain.addFilter(filter2)
-		filtersChain.handleCommandRequest(null)
+		
+		def callCommand = [:] as CallCommand
+		filtersChain.handleCommandRequest(callCommand)
 
 		assertEquals queue.poll(),"empty"
 	}
