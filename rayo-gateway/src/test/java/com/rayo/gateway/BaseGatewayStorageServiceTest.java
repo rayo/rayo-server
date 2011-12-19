@@ -79,6 +79,25 @@ public abstract class BaseGatewayStorageServiceTest {
 		
 		storageService.unregisterRayoNode(node1.getJid());
 	}
+	
+	@Test
+	public void testMultipleRegisterAndUnregister() throws Exception {
+		
+		String[] platforms = new String[]{"staging"};
+		RayoNode node1 = buildRayoNode("usera@localhost", platforms);
+		
+		storageService.registerRayoNode(node1.getJid(), Arrays.asList(platforms));
+		assertEquals(1, storageService.getRayoNodes("staging").size());
+		
+		storageService.unregisterRayoNode(node1.getJid());
+		assertEquals(0, storageService.getRayoNodes("staging").size());
+		
+		storageService.registerRayoNode(node1.getJid(), Arrays.asList(platforms));
+		
+		List<String> nodes = storageService.getRayoNodes("staging");
+		assertEquals(nodes.size(),1);
+		assertEquals(nodes.get(0), "usera@localhost");
+	}
 		
 	@Test
 	public void testDomainLookupNotFound() throws Exception {
@@ -315,6 +334,8 @@ public abstract class BaseGatewayStorageServiceTest {
 
 		assertEquals(storageService.getRegisteredPlatforms().size(), 0);
 	}
+	
+	
 	
 	private RayoNode buildRayoNode(String jid, String[] platforms) {
 
