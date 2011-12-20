@@ -422,14 +422,18 @@ public class RayoServlet extends AbstractRayoServlet {
             actor.command(callCommand, new ResponseHandler() {
                 public void handle(Response commandResponse) throws Exception {
 
-                    Object value = commandResponse.getValue();
-
+                    Object original = commandResponse.getValue();
+                    Object value = null;
                 	// Invoke filters
-                    value = filtersChain.handleCommandResponse(value);
-            		if (value == null) {
-            			log.warn("Response dispatching stopped by message filter. Response: [%s]", value);
-            			return;
-            		}
+                    try {
+                    	value = filtersChain.handleCommandResponse(original);
+                		if (original != null && value == null) {
+                			log.warn("Response dispatching stopped by message filter. Response: [%s]", value);
+                			return;
+                		}
+                    } catch (RayoProtocolException rpe) {
+                    	value = rpe;
+                    }
                     
                     if (value instanceof Exception) {
                         sendIqError(request, (Exception)value);
