@@ -60,6 +60,7 @@ public class CassandraDatastore implements GatewayDatastore {
 	private String hostname = "localhost";
 	private String port = "9160";
 	private boolean overrideExistingSchema = true;
+	private boolean createSampleApplication = true;
 	
 	public void init() throws Exception {
 		
@@ -171,15 +172,17 @@ public class CassandraDatastore implements GatewayDatastore {
 		
 		Pelops.addPool("rayo", cluster, "rayo");
 		
-		// Create a default application to be used by functional testing
-		Application application = new Application("voxeo");
-		application.setAccountId("undefined");
-		application.setJid("rayo@gw1-ext.testing.voxeolabs.net");
-		application.setName("voxeo");
-		application.setPermissions("undefined");
-		application.setPlatform("staging");
-		
-		storeApplication(application);
+		if (createSampleApplication) {
+			// Create a default application to be used by functional testing
+			Application application = new Application("voxeo");
+			application.setAccountId("undefined");
+			application.setJid("rayo@gw1-ext.testing.voxeolabs.net");
+			application.setName("voxeo");
+			application.setPermissions("undefined");
+			application.setPlatform("staging");
+			
+			storeApplication(application);
+		}
 	}
 
 	private CfDef getCfDef(KsDef def, String table) {
@@ -861,5 +864,13 @@ public class CassandraDatastore implements GatewayDatastore {
 	 */
 	public void setOverrideExistingSchema(boolean overrideExistingSchema) {
 		this.overrideExistingSchema = overrideExistingSchema;
+	}
+
+	public boolean isCreateSampleApplication() {
+		return createSampleApplication;
+	}
+
+	public void setCreateSampleApplication(boolean createSampleApplication) {
+		this.createSampleApplication = createSampleApplication;
 	}
 }

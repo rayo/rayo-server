@@ -19,6 +19,7 @@ public class CassandraGatewayStorageServiceTest extends BaseGatewayStorageServic
 	public void setup() throws Exception {
 		
 		CassandraDatastore cassandraDatastore = new CassandraDatastore();
+		cassandraDatastore.setCreateSampleApplication(false);
 		cassandraDatastore.init();
 		storageService = new DefaultGatewayStorageService();
 		storageService.setDefaultPlatform("staging");

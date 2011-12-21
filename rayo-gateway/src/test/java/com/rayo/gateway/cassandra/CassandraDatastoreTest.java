@@ -17,6 +17,7 @@ public class CassandraDatastoreTest extends BaseDatastoreTest {
 	public void setup() throws Exception {
 		
 		store = new CassandraDatastore();
+		((CassandraDatastore)store).setCreateSampleApplication(false);
 		((CassandraDatastore)store).init();
 	}
 }
