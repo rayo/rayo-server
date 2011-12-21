@@ -23,6 +23,7 @@ import com.rayo.gateway.lb.GatewayLoadBalancingStrategy;
 import com.rayo.gateway.util.JIDUtils;
 import com.rayo.server.lookup.RayoJIDLookupService;
 import com.rayo.server.servlet.AbstractRayoServlet;
+import com.voxeo.exceptions.NotFoundException;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.util.ParticipantIDParser;
 import com.voxeo.servlet.xmpp.IQRequest;
@@ -274,8 +275,14 @@ public class GatewayServlet extends AbstractRayoServlet {
 	
 	private JID createInternalCallJid(String callId) {
 		
-		String nodeIp = ParticipantIDParser.getIpAddress(callId);
+		String nodeIp = null;
+		try {
+			nodeIp = ParticipantIDParser.getIpAddress(callId);
+		} catch (Exception e) {
+			throw new NotFoundException(String.format("Could not find rayo node for callId [%s]", callId));
+		}
 		return getXmppFactory().createJID(callId + "@" + nodeIp);
+			
 	}
 
 	
