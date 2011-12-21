@@ -170,6 +170,16 @@ public class CassandraDatastore implements GatewayDatastore {
 		}
 		
 		Pelops.addPool("rayo", cluster, "rayo");
+		
+		// Create a default application to be used by functional testing
+		Application application = new Application("voxeo");
+		application.setAccountId("undefined");
+		application.setJid("rayo@gw1-ext.testing.voxeolabs.net");
+		application.setName("voxeo");
+		application.setPermissions("undefined");
+		application.setPlatform("staging");
+		
+		storeApplication(application);
 	}
 
 	private CfDef getCfDef(KsDef def, String table) {
@@ -194,7 +204,6 @@ public class CassandraDatastore implements GatewayDatastore {
 		}
 						
 		for (String platform: node.getPlatforms()) {
-			log.debug("Storing Rayo Node [%s] on the Cassandra Datastore.", node);
 			mutator.writeSubColumns("nodes", platform, node.getHostname(), 
 				mutator.newColumnList(
 					mutator.newColumn("priority", "100"),

@@ -56,7 +56,7 @@ public class DefaultGatewayStorageService implements GatewayStorageService {
 			
 	@Override
 	public String getPlatformForClient(JID clientJid) {
-
+		
 		GatewayClient client = store.getClient(clientJid.toString());
 		String platformId = null;
 		if (client != null) {
@@ -74,15 +74,12 @@ public class DefaultGatewayStorageService implements GatewayStorageService {
 		
 		GatewayClient client = new GatewayClient(appId, clientJid.toString(), application.getPlatform());
 		store.storeClient(client);
-	
-		log.debug("Client %s added for platform %s", clientJid, application.getPlatform());
 	}
 
 	@Override
 	public void unregisterClient(JID clientJid) throws GatewayException {
 	
 		store.removeClient(clientJid.toString());
-		log.debug("Client %s removed", clientJid);
 	}
 
 	@Override
@@ -100,7 +97,6 @@ public class DefaultGatewayStorageService implements GatewayStorageService {
 	@Override
 	public RayoNode registerRayoNode(RayoNode rayoNode) throws GatewayException {
 		
-		log.debug("Trying to register Rayo Node [%s]", rayoNode);
 		RayoNode node = store.getNode(rayoNode.getHostname());
 		if (node != null) {
 			log.warn("Rayo Node [%s] already exists. Ignoring status update.", rayoNode);
@@ -138,7 +134,6 @@ public class DefaultGatewayStorageService implements GatewayStorageService {
 		if (calls == null) {
 			calls = Collections.EMPTY_SET;
 		}
-		log.debug("Found calls for %s: %s", clientJid, calls);
 		return calls;
 	}
 	
@@ -150,7 +145,6 @@ public class DefaultGatewayStorageService implements GatewayStorageService {
 		if (calls == null) {
 			calls = Collections.EMPTY_SET;
 		}
-		log.debug("Found calls for %s: %s", nodeJid, calls);
 		return calls;
 	}
 
@@ -194,15 +188,12 @@ public class DefaultGatewayStorageService implements GatewayStorageService {
 		//TODO: This bind must be launched from an external administrative tool
 		GatewayClient client = new GatewayClient(appId, clientJid.toString(), defaultPlatform);
 		store.storeClient(client);
-		
-		log.debug("Client resource %s added for client JID %s", clientJid.getResource(), clientJid.getBareJID());
 	}
 
 	@Override
 	public void unregisterClientResource(JID clientJid) throws GatewayException {
 
 		store.removeClient(clientJid.toString());
-		log.debug("Client resource %s removed from client JID %s", clientJid.getResource(), clientJid.getBareJID());
 	}
 	
 	@SuppressWarnings("unchecked")
