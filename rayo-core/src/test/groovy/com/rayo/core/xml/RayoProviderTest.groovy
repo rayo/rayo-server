@@ -977,6 +977,16 @@ public class RayoProviderTest {
         assertEquals transfer.to.size(),1
         assertEquals transfer.to[0].toString(),"sip:martin@127.0.0.1:6089"
     }
+
+	@Test	
+	public void transferOneToElement() {
+		
+		def transfer = fromXml("""<transfer xmlns="urn:xmpp:tropo:transfer:1" from="sip:name@connfu.com"><to>sip:8517c60c-39a6-4bce-8d21-9df2b6b1ad8c@gw113.phono.com</to></transfer>""")
+		assertNotNull transfer
+		assertEquals transfer.to.size(),1
+		assertEquals transfer.to[0].toString(),"sip:8517c60c-39a6-4bce-8d21-9df2b6b1ad8c@gw113.phono.com"
+		assertNotNull transfer.from
+	}
     
     @Test
     public void transferMixedToItemsFromXml() {

@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.List;
 
 import com.rayo.gateway.exception.GatewayException;
+import com.rayo.gateway.model.RayoNode;
 import com.voxeo.servlet.xmpp.JID;
 
 /**
@@ -29,12 +30,26 @@ public interface GatewayStorageService {
 	 * <p>Once the Rayo Node is linked to a platform, subsequent client messages targeted to 
 	 * that platform will avail from that Rayo Node to be processed.</p>
 	 * 
-	 * @param rayoNode JID for the Rayo Node to be registered
+	 * @param rayoNode Domain for the Rayo Node to be registered
 	 * @param platformIds A collection with platform ids that this rayo node will be linked to
-	 * 
+	 * @return {@link RayoNode} Rayo node
 	 * @throws GatewayException If the rayo node cannot be registered
 	 */
-	void registerRayoNode(String rayoNode, Collection<String> platformIds) throws GatewayException;
+	RayoNode registerRayoNode(String rayoNode, Collection<String> platformIds) throws GatewayException;
+
+	/**
+	 * <p>Registers a new Rayo Node. Commonly, a Rayo Node will broadcast its presence
+	 * to a Rayo Gateway and will provide a set of platform ids to which the rayo node wish 
+	 * to be linked.</p>
+	 * 
+	 * <p>Once the Rayo Node is linked to a platform, subsequent client messages targeted to 
+	 * that platform will avail from that Rayo Node to be processed.</p>
+	 * 
+	 * @param node Rayo Node to register
+	 * @return {@link RayoNode} Rayo node that has been registered
+	 * @throws GatewayException If the rayo node cannot be registered
+	 */
+	RayoNode registerRayoNode(RayoNode node) throws GatewayException;
 
 	/**
 	 * <p>Unregisters a Rayo Node.</p>
@@ -73,19 +88,6 @@ public interface GatewayStorageService {
 	Collection<String> getRegisteredPlatforms();
 	
 	/**
-	 * <p>Returns the domain name for a given IP Address or <code>null</code> if the domain
-	 * cannot be found.</p>
-	 * 
-	 *  <p>This method is commonly used to find host names which will be able to process a 
-	 *  call id on Rayo, as Rayo encodes the IP Address information within the call id itself.</p>
-	 * 
-	 * @param ipAddress IP Address IP Address for which we want to find a domain name
-	 *  
-	 * @return String Domain name
-	 */
-	String getDomainName(String ipAddress);
-	
-	/**
 	 * <p>Registers a client JID on a given platform, so future messages received from that 
 	 * client JID on the Gateway Interface will be dispatched to the nodes that are linked 
 	 * to that actual platform.</p>
@@ -95,13 +97,13 @@ public interface GatewayStorageService {
 	 * provides a way to administrative interfaces to link those applications to actual 
 	 * Rayo Servers.</p> 
 	 *  
+	 * @param appId Application's id 
 	 * @param clientJid Client JId
-	 * @param platformID Id of the platform to which this client JID will be linked to
 	 * 
 	 * @throws GatewayException If the client JID could not be registered, like for example when 
 	 * a Rayo application linked to that client JID cannot be found
 	 */
-	void bindClientToPlatform(JID clientJid, String platformId) throws GatewayException;
+	void registerClient(String appId, JID clientJid) throws GatewayException;
 
 	/**
 	 * <p>Removes this client. Subsequent clients from this JID will not find 
@@ -113,7 +115,7 @@ public interface GatewayStorageService {
 	 * @param clientJid Client JID to be unregistered
 	 * @throws GatewayException If there is any issues when unregistering the client JID
 	 */
-	void unbindClientFromPlatform(JID clientJid) throws GatewayException;
+	void unregisterClient(JID clientJid) throws GatewayException;
 
 	
 	/**
@@ -144,8 +146,8 @@ public interface GatewayStorageService {
 	 * @param clientJid Client JID for which we want to get all the calls
 	 * @return Collection<String> Calls collection
 	 */
-	Collection<String> getCalls(String clientJid);
-
+	Collection<String> getCallsForClient(String clientJid);
+	
 	/**
 	 * <p>Registers a call.</p>
 	 * 
@@ -182,20 +184,20 @@ public interface GatewayStorageService {
 	 * send an end message to each an every call.</p>
 	 * 
 	 * <p>It will return an empty collection if no calls can be found for the given 
-	 * Rayo Node JID.</p> 
+	 * Rayo Node domain.</p> 
 	 * 
-	 * @param nodeJid Rayo Node JID
+	 * @param rayoNode Domain of the rayo node
 	 * @return Collection<String> Collection of calls linked to the given Rayo Node
 	 */
-	Collection<String> getCallsForRayoNode(String nodeJid);
+	Collection<String> getCallsForNode(String rayoNode);
 	
 	/**
-	 * <p>Returns the JID of the Rayo Node that is currently handling a given call or 
+	 * <p>Returns the domain of the Rayo Node that is currently handling a given call or 
 	 * <code>null</code> if no Rayo Node can be found for the specified call id.</p>
 	 *  
 	 * @param callId Call Id
 	 * 
-	 * @return {@link JID} of the Rayo Node that is currently handling the call or 
+	 * @return String Domain of the Rayo Node that is currently handling the call or 
 	 * <code>null</code> if no Rayo Node could be found. 
 	 */
 	String getRayoNode(String callId);
@@ -225,10 +227,11 @@ public interface GatewayStorageService {
 	 * it will find the list of available resources for that client JID and will redirect 
 	 * the message to one of those available resources.</p> 
 	 * 
+	 * @param appId Application's id
 	 * @param clientJid Client JID
 	 * @throws GatewayException If there is any problems while registering the resource
 	 */
-	public void registerClientResource(JID clientJid) throws GatewayException;
+	public void registerClientResource(String appId, JID clientJid) throws GatewayException;
 
 	/**
 	 * <p>Unregisters a client resource.</p>
@@ -257,9 +260,11 @@ public interface GatewayStorageService {
 	public List<String> getResourcesForClient(String clientJid);
 	
 	/**
-	 * <p>Returns a collection with all the registered client applications.</p>
+	 * <p>Returns a collection with all the registered client applications. Note that 
+	 * this method will return a list of all the clients. This does not include the multiple 
+	 * resources that a client may have.</p>
 	 * 
 	 * @return {@link Collection} Collection of registered client applications
 	 */
-	public List<String> getClientResources();
+	public List<String> getClients();
 }

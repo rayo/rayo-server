@@ -1,17 +1,21 @@
 package com.rayo.gateway.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
 /**
- * Represents an application registered in the gateway
+ * Represents a Rayo application. 
  * 
  * @author martin
  *
  */
-public class GatewayClient implements Serializable {
+public class Application implements Serializable {
 
 	private static final long serialVersionUID = -6377732285884068488L;
 
@@ -22,11 +26,11 @@ public class GatewayClient implements Serializable {
 	/**
 	 * Application registered in the gateway
 	 * 
-	 * @param appId Application id
+	 * @param appId Application's id
 	 * @param jid Application's JID
 	 * @param platform Application's platform
 	 */
-	public GatewayClient(String appId, String jid, String platform) {
+	public Application(String appId, String jid, String platform) {
 		
 		this.appId = appId;
 		this.jid = jid;
@@ -34,10 +38,13 @@ public class GatewayClient implements Serializable {
 	}
 	
 	/**
-	 * Empty constructor
+	 * Application registered in the gateway
+	 * 
+	 * @param appId Application's id
 	 */
-	public GatewayClient() {
+	public Application(String appId) {
 		
+		this.appId = appId;
 	}
 	
 	/**
@@ -71,14 +78,14 @@ public class GatewayClient implements Serializable {
 	@Override
 	public boolean equals(Object obj) {
 
-		if (!(obj instanceof GatewayClient)) return false;
-		return jid.equals(((GatewayClient)obj).getJid());
+		if (!(obj instanceof Application)) return false;
+		return jid.equals(((Application)obj).getJid());
 	}
 	
 	@Override
 	public String toString() {
 
-    	return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)  
+    	return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
     		.append("appId", getAppId())
 			.append("jid", getJid())
 			.append("platform", getPlatform())

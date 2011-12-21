@@ -17,18 +17,19 @@ public class GatewayCall implements Serializable {
 	private static final long serialVersionUID = 8103375784518687864L;
 	
 	private String callId;
-	private RayoNode rayoNode;
+	private String nodeJid;
 	private String clientJid;
 
 	/**
 	 * Builds a new call object linked to both a rayo node and a client application. 
 	 * 
-	 * @param node Rayo Node that hosts the call
+	 * @param callId Id of the call
+	 * @param nodeJid Rayo Node that hosts the call
 	 * @param clientJid Client application that initiated the call
 	 */ 
-	public GatewayCall(String callId, RayoNode node, String clientJid) {
+	public GatewayCall(String callId, String nodeJid, String clientJid) {
 		
-		this.rayoNode = node;
+		this.nodeJid = nodeJid;
 		this.clientJid = clientJid;
 		this.callId = callId;
 	}
@@ -43,10 +44,10 @@ public class GatewayCall implements Serializable {
 	/**
 	 * <p>Returns the rayo node that hosts the call.</p>
 	 * 
-	 * @return {@link RayoNode} Rayo node
+	 * @return String Rayo node
 	 */
-	public RayoNode getRayoNode() {
-		return rayoNode;
+	public String getNodeJid() {
+		return nodeJid;
 	}
 	
 	/**
@@ -80,8 +81,8 @@ public class GatewayCall implements Serializable {
 		this.callId = callId;
 	}
 
-	public void setRayoNode(RayoNode rayoNode) {
-		this.rayoNode = rayoNode;
+	public void setNodeJid(String nodeJid) {
+		this.nodeJid = nodeJid;
 	}
 
 	public void setClientJid(String clientJid) {
@@ -94,7 +95,7 @@ public class GatewayCall implements Serializable {
     	return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)    		
     		.append("callId", getCallId())
     		.append("clientJid", getClientJid())
-    		.append("rayoNode", getRayoNode())
+    		.append("rayoNode", getNodeJid())
     		.toString();
     }
 }

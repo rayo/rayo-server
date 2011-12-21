@@ -45,7 +45,7 @@ public class Node implements RayoNodeMXBean {
 	public List<Call> getCalls() {
 
 		List<Call> calls = new ArrayList<Call>();
-		for(String callId : gatewayStorageService.getCallsForRayoNode(jid)) {
+		for(String callId : gatewayStorageService.getCallsForNode(jid)) {
 			Call call = new Call(callId, jid, gatewayStorageService.getclientJID(callId));
 			calls.add(call);
 		}

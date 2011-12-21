@@ -7,12 +7,13 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
+import com.rayo.gateway.exception.DatastoreException;
 import com.rayo.gateway.exception.GatewayException;
 import com.rayo.gateway.exception.RayoNodeNotFoundException;
+import com.rayo.gateway.model.Application;
 import com.rayo.gateway.model.GatewayCall;
 import com.rayo.gateway.model.GatewayClient;
 import com.rayo.gateway.model.RayoNode;
-import com.rayo.gateway.util.JIDUtils;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.util.ParticipantIDParser;
 import com.voxeo.servlet.xmpp.JID;
@@ -56,7 +57,7 @@ public class DefaultGatewayStorageService implements GatewayStorageService {
 	@Override
 	public String getPlatformForClient(JID clientJid) {
 
-		GatewayClient client = store.getClientApplication(clientJid.toString());
+		GatewayClient client = store.getClient(clientJid.toString());
 		String platformId = null;
 		if (client != null) {
 			return client.getPlatform();
@@ -65,34 +66,22 @@ public class DefaultGatewayStorageService implements GatewayStorageService {
 		log.debug("Platform lookup for %s found %s", clientJid, platformId);
 		return platformId;
 	}
-
-	@Override
-	public String getDomainName(String ipAddress) {
-		
-		String domain = null;
-		RayoNode node = store.getNodeForIpAddress(ipAddress);
-		if (node == null) {
-			return null;
-		} else {
-			domain = node.getHostname();
-		}
-		log.debug("%s mapped to domain %s", ipAddress, domain);
-		return domain;
-	}
 	
 	@Override
-	public void bindClientToPlatform(JID clientJid, String platformId) throws GatewayException {
+	public void registerClient(String appId, JID clientJid) throws GatewayException {
 		
-		GatewayClient client = new GatewayClient(clientJid.toString(), platformId);
-		store.storeClientApplication(client);
+		Application application = store.getApplication(appId);
+		
+		GatewayClient client = new GatewayClient(appId, clientJid.toString(), application.getPlatform());
+		store.storeClient(client);
 	
-		log.debug("Client %s added for platform %s", clientJid, platformId);
+		log.debug("Client %s added for platform %s", clientJid, application.getPlatform());
 	}
 
 	@Override
-	public void unbindClientFromPlatform(JID clientJid) throws GatewayException {
+	public void unregisterClient(JID clientJid) throws GatewayException {
 	
-		store.removeClientApplication(clientJid.toString());
+		store.removeClient(clientJid.toString());
 		log.debug("Client %s removed", clientJid);
 	}
 
@@ -103,25 +92,30 @@ public class DefaultGatewayStorageService implements GatewayStorageService {
 	}
 
 	@Override
-	public void registerRayoNode(String rayoNode, Collection<String> platformIds) throws GatewayException {
+	public RayoNode registerRayoNode(String rayoNode, Collection<String> platformIds) throws GatewayException {
+
+		return registerRayoNode(new RayoNode(rayoNode, null, new HashSet<String>(platformIds)));
+	}
+	
+	@Override
+	public RayoNode registerRayoNode(RayoNode rayoNode) throws GatewayException {
 		
-		try {
-			log.debug("Adding %s to platforms %s", rayoNode, platformIds);
-			RayoNode node = store.getNode(rayoNode);
-			if (node != null) {
-				log.warn("Rayo Node [%s] already exists. Ignoring status update.", rayoNode);
-				return;
+		log.debug("Trying to register Rayo Node [%s]", rayoNode);
+		RayoNode node = store.getNode(rayoNode.getHostname());
+		if (node != null) {
+			log.warn("Rayo Node [%s] already exists. Ignoring status update.", rayoNode);
+			return node;
+		}
+		
+		try {			
+			if (rayoNode.getIpAddress() == null) {
+				rayoNode.setIpAddress(InetAddress.getByName(rayoNode.getHostname()).getHostAddress());
 			}
-			
-			String hostname = JIDUtils.getDomain(rayoNode);
-			String ipAddress = InetAddress.getByName(hostname)
-					.getHostAddress();
-			node = new RayoNode(hostname, ipAddress, rayoNode.toString() ,new HashSet<String>(platformIds));
-			//storeRayoNode(node);
-			store.storeNode(node);
+			store.storeNode(rayoNode);
 		} catch (UnknownHostException uhe) {
 			throw new GatewayException("Unknown host", uhe);
 		}
+		return node;
 	}
 	
 	@Override
@@ -138,13 +132,25 @@ public class DefaultGatewayStorageService implements GatewayStorageService {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public Collection<String> getCalls(String jid) {
+	public Collection<String> getCallsForClient(String clientJid) {
 		
-		Collection<String> calls = store.getCalls(jid);
+		Collection<String> calls = store.getCallsForClient(clientJid);
 		if (calls == null) {
 			calls = Collections.EMPTY_SET;
 		}
-		log.debug("Found calls for %s: %s", jid, calls);
+		log.debug("Found calls for %s: %s", clientJid, calls);
+		return calls;
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public Collection<String> getCallsForNode(String nodeJid) {
+		
+		Collection<String> calls = store.getCallsForNode(nodeJid);
+		if (calls == null) {
+			calls = Collections.EMPTY_SET;
+		}
+		log.debug("Found calls for %s: %s", nodeJid, calls);
 		return calls;
 	}
 
@@ -153,17 +159,17 @@ public class DefaultGatewayStorageService implements GatewayStorageService {
 		
 		String ipAddress = ParticipantIDParser.getIpAddress(callId);
 		
-		RayoNode node = store.getNodeForIpAddress(ipAddress);
-		if (node == null) {
+		String nodeJid = store.getNodeForIpAddress(ipAddress);
+		if (nodeJid == null) {
 			throw new RayoNodeNotFoundException(String.format("Node not found for callId %s", callId));
 		}
 		
 		if (log.isDebugEnabled()) {
 			log.debug("Call %s mapped to client %s", callId, clientJid);
-			log.debug("Call %s mapped to Rayo node %s", callId, node.getJid());
+			log.debug("Call %s mapped to Rayo node %s", callId, nodeJid);
 		}
 		
-		store.storeCall(new GatewayCall(callId, node, clientJid));
+		store.storeCall(new GatewayCall(callId, nodeJid, clientJid));
 	}
 	
 	@Override
@@ -181,19 +187,13 @@ public class DefaultGatewayStorageService implements GatewayStorageService {
 		}
 		return null;
 	}
-		
-	@Override
-	public Collection<String> getCallsForRayoNode(String nodeJid) {
-		
-		return getCalls(nodeJid);
-	}
 	
 	@Override
-	public void registerClientResource(JID clientJid) throws GatewayException {
+	public void registerClientResource(String appId, JID clientJid) throws GatewayException {
 		
 		//TODO: This bind must be launched from an external administrative tool
-		GatewayClient client = new GatewayClient(clientJid.toString(), defaultPlatform);
-		store.storeClientApplication(client);
+		GatewayClient client = new GatewayClient(appId, clientJid.toString(), defaultPlatform);
+		store.storeClient(client);
 		
 		log.debug("Client resource %s added for client JID %s", clientJid.getResource(), clientJid.getBareJID());
 	}
@@ -201,7 +201,7 @@ public class DefaultGatewayStorageService implements GatewayStorageService {
 	@Override
 	public void unregisterClientResource(JID clientJid) throws GatewayException {
 
-		store.removeClientApplication(clientJid.toString());
+		store.removeClient(clientJid.toString());
 		log.debug("Client resource %s removed from client JID %s", clientJid.getResource(), clientJid.getBareJID());
 	}
 	
@@ -217,9 +217,9 @@ public class DefaultGatewayStorageService implements GatewayStorageService {
 	}	
 	
 	@Override
-	public List<String> getClientResources() {
+	public List<String> getClients() {
 
-		return store.getClientApplications();
+		return store.getClients();
 	}
 	
 	@Override
@@ -227,9 +227,14 @@ public class DefaultGatewayStorageService implements GatewayStorageService {
 
 		GatewayCall call = store.getCall(callId);
 		if (call != null) {
-			return call.getRayoNode().getJid();
+			return call.getNodeJid();
 		}
 		return null;
+	}
+	
+	public Application storeApplication(Application application) throws DatastoreException {
+		
+		return store.storeApplication(application);
 	}
 
 	public void setStore(GatewayDatastore store) {

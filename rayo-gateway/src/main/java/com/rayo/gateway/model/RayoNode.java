@@ -18,7 +18,6 @@ public class RayoNode implements Serializable {
 
 	private static final long serialVersionUID = -3327026666287357013L;
 	
-	private String jid;
 	private String ipAddress;
 	private String hostname;
 	private Set<String> platforms = new HashSet<String>();
@@ -28,16 +27,13 @@ public class RayoNode implements Serializable {
 	 * 
 	 * @param hostname Host name of this rayo server
 	 * @param ipAddress Ip address of the rayo server
-	 * @param rayoNode JID of the rayo instance. It represents how it will be addressed from 
-	 * external systems
 	 * @param platforms Set of platforms that this rayo server will belong to. This Rayo node 
 	 * will only process messages targeted to these platforms. 
 	 */
-	public RayoNode(String hostname, String ipAddress, String rayoNode, Set<String> platforms) {
+	public RayoNode(String hostname, String ipAddress, Set<String> platforms) {
 		
 		this.hostname = hostname;
 		this.ipAddress = ipAddress;
-		this.jid = rayoNode;
 		this.platforms = platforms;
 	}
 	
@@ -116,42 +112,24 @@ public class RayoNode implements Serializable {
 	public void setPlatforms(Set<String> platforms) {
 		this.platforms = platforms;
 	}
-	/**
-	 * Returns the JID that external systems will use to refer to this 
-	 * rayo node
-	 * 
-	 * @return String JID of this rayo node
-	 */
-	public String getJid() {
-		return jid;
-	}
-	/**
-	 * Sets the JID associated with this rayo node
-	 * 
-	 * @param jid JID associated with this node
-	 */
-	public void setJid(String jid) {
-		this.jid = jid;
-	}
 	
 	@Override
 	public boolean equals(Object obj) {
 
 		if (!(obj instanceof RayoNode)) return false;
-		return jid.equals(((RayoNode)obj).getJid());
+		return hostname.equals(((RayoNode)obj).getHostname());
 	}
 	
 	@Override
 	public int hashCode() {
 
-		return jid.hashCode();
+		return hostname.hashCode();
 	}
 
 	@Override
     public String toString() {
 
     	return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)    		
-    		.append("jid", getJid())
     		.append("hostname", getHostname())
     		.append("ipAddress", getIpAddress())
     		.append("platforms", getPlatforms())

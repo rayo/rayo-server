@@ -24,7 +24,7 @@ public class JIDUtils {
 	public static String getResource(String jid) {
 		
 		if (jid.contains("/")) {
-			jid = jid.substring(jid.indexOf("/")+1);
+			return jid.substring(jid.indexOf("/")+1);
 		}
 		return null;
 	}

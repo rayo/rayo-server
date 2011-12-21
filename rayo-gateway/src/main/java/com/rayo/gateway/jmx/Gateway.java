@@ -63,7 +63,7 @@ public class Gateway implements GatewayMXBean {
 		
 		List<ClientApplication> clients = new ArrayList<ClientApplication>();
 
-		for(String jid: gatewayStorageService.getClientResources()) {
+		for(String jid: gatewayStorageService.getClients()) {
 			String bareJid = JIDUtils.getBareJid(jid);			
 			ClientApplication client = new ClientApplication(bareJid);
 			if (!clients.contains(client)) {

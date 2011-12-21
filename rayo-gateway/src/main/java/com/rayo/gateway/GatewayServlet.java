@@ -20,9 +20,9 @@ import com.rayo.core.OfferEvent;
 import com.rayo.gateway.exception.GatewayException;
 import com.rayo.gateway.jmx.GatewayStatistics;
 import com.rayo.gateway.lb.GatewayLoadBalancingStrategy;
+import com.rayo.gateway.util.JIDUtils;
 import com.rayo.server.lookup.RayoJIDLookupService;
 import com.rayo.server.servlet.AbstractRayoServlet;
-import com.voxeo.exceptions.NotFoundException;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.util.ParticipantIDParser;
 import com.voxeo.servlet.xmpp.IQRequest;
@@ -132,7 +132,8 @@ public class GatewayServlet extends AbstractRayoServlet {
 				case AWAY:
 				case DND:
 				case XA:
-					gatewayStorageService.unregisterRayoNode(message.getFrom().toString());
+					gatewayStorageService.unregisterRayoNode(
+							JIDUtils.getDomain(message.getFrom().toString()));
 					break;
 			}
 		} else if (message.getType().equals("unavailable")) {			
@@ -149,7 +150,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 	 */
 	private void broadcastEndEvent(PresenceMessage message) {
 		
-		Collection<String> calls = gatewayStorageService.getCalls(message.getFrom().toString());
+		Collection<String> calls = gatewayStorageService.getCallsForNode(message.getFrom().toString());
 		for (String callId : calls) {
 			JID fromJid = createInternalCallJid(callId);
 			String target = gatewayStorageService.getclientJID(callId);
@@ -189,7 +190,8 @@ public class GatewayServlet extends AbstractRayoServlet {
 			}
 		}
 		
-		gatewayStorageService.registerRayoNode(message.getFrom().toString(), platforms);		
+		gatewayStorageService.registerRayoNode(
+			JIDUtils.getDomain(message.getFrom().toString()), platforms);		
 	}
 
 	/*
@@ -272,11 +274,8 @@ public class GatewayServlet extends AbstractRayoServlet {
 	
 	private JID createInternalCallJid(String callId) {
 		
-		String rayoNode = gatewayStorageService.getRayoNode(callId);
-		if (rayoNode != null) {
-			return getXmppFactory().createJID(callId + "@" + rayoNode);
-		}
-		throw new NotFoundException(String.format("Could not find Rayo Node for call id [%s]", callId));
+		String nodeIp = ParticipantIDParser.getIpAddress(callId);
+		return getXmppFactory().createJID(callId + "@" + nodeIp);
 	}
 
 	
@@ -307,7 +306,8 @@ public class GatewayServlet extends AbstractRayoServlet {
 			if (validApplicationJid(message.getFrom())) {
 				switch (message.getShow()) {
 					case CHAT: 
-						gatewayStorageService.registerClientResource(message.getFrom());
+						//TODO: Valid application method needs to return an application id to use here
+						gatewayStorageService.registerClientResource("voxeo",message.getFrom());
 						gatewayStatistics.clientRegistered(message.getFrom().getBareJID());
 						break;
 					case AWAY:
@@ -325,13 +325,11 @@ public class GatewayServlet extends AbstractRayoServlet {
 			
 			// Note that the following method does include the resource as we only want to 
 			// stop calls for the resource that goes offline
-			Collection<String> callIds = gatewayStorageService.getCalls(fromJid.toString()); 
+			Collection<String> callIds = gatewayStorageService.getCallsForClient(fromJid.toString()); 
 			for (String callId: callIds) {
 				try {
-					String domainName = getDomainName(callId);
-
-					JID toJidInternal = getXmppFactory().createJID(
-							callId + "@" + domainName);
+					String nodeIp = ParticipantIDParser.getIpAddress(callId);
+					JID toJidInternal = getXmppFactory().createJID(callId + "@" + nodeIp);
 					JID fromJidInternal = getXmppFactory().createJID(getInternalDomain());								
                 	sendPresenceError(fromJidInternal, toJidInternal);
 				} catch (Exception e) {
@@ -585,17 +583,6 @@ public class GatewayServlet extends AbstractRayoServlet {
 
 	private boolean isMyExternalDomain(JID jid) {
 		return externalDomains.contains(jid.getDomain());
-	}
-	
-	private String getDomainName(String callId) {
-
-		String ipAddress = ParticipantIDParser.getIpAddress(callId);
-		if (ipAddress != null) {
-			return gatewayStorageService.getDomainName(ipAddress);
-		} else {
-			log.error("Could not decode IP Address from call id [%s]", callId);
-			return null;
-		}
 	}
 
 	private String getInternalDomain() {
