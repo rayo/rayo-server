@@ -103,7 +103,7 @@ public abstract class BaseGatewayStorageServiceTest {
 	@Test
 	public void testBindClient() throws Exception {
 		
-		Application application = new Application("voxeo", "client@jabber.org","staging");
+		Application application = buildApplication("voxeo");
 		storageService.storeApplication(application);
 
 		JID clientJid = new JIDImpl("test@jabber.org/a");
@@ -207,7 +207,7 @@ public abstract class BaseGatewayStorageServiceTest {
 	@Test
 	public void testClientResources() throws Exception {
 		
-		Application application = new Application("voxeo", "client@jabber.org","staging");
+		Application application = buildApplication("voxeo");
 		storageService.storeApplication(application);
 
 		JID clientJid1 = new JIDImpl("test@jabber.org/a");
@@ -233,7 +233,7 @@ public abstract class BaseGatewayStorageServiceTest {
 	@Test
 	public void testGetClientResources() throws Exception {
 
-		Application application = new Application("voxeo", "client@jabber.org","staging");
+		Application application = buildApplication("voxeo");
 		storageService.storeApplication(application);
 
 		assertEquals(storageService.getClients().size(),0);
@@ -285,7 +285,7 @@ public abstract class BaseGatewayStorageServiceTest {
 	@Test
 	public void testClientResourcesLoadBalancing() throws Exception{
 		
-		Application application = new Application("voxeo", "client@jabber.org","staging");
+		Application application = buildApplication("voxeo");
 		storageService.storeApplication(application);
 
 		JID clientJid = new JIDImpl("test@jabber.org/a");
@@ -328,12 +328,20 @@ public abstract class BaseGatewayStorageServiceTest {
 		// Platforms are not removed once added
 		assertEquals(storageService.getRegisteredPlatforms().size(), 2);
 	}
-	
-	
-	
+		
 	private RayoNode buildRayoNode(String hostname,String[] platforms) {
 
 		List<String> list = Arrays.asList(platforms);
 		return new RayoNode(hostname, "127.0.0.1", new HashSet<String>(list));
 	}
+	
+	private Application buildApplication(String appId) {
+		
+		Application application = new Application(appId, "client@jabber.org","staging");
+		application.setName("test");
+		application.setAccountId("zytr");
+		application.setPermissions("read,write");
+		return application;
+	}
+
 }
