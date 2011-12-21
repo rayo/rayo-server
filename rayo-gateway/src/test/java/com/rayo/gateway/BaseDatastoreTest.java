@@ -231,8 +231,7 @@ public abstract class BaseDatastoreTest {
 	@Test
 	public void testStoreApplication() throws Exception {
 
-		Application application = new Application("1234", "client@jabber.org",
-				"staging");
+		Application application = buildApplication();
 		Application stored = store.storeApplication(application);
 		assertNotNull(stored);
 		assertEquals(stored, application);
@@ -241,13 +240,28 @@ public abstract class BaseDatastoreTest {
 	@Test
 	public void testFindApplication() throws Exception {
 
-		Application application = new Application("1234", "client@jabber.org",
-				"staging");
+		Application application = buildApplication();
 		store.storeApplication(application);
 		Application stored = store.getApplication("1234");
 
 		assertNotNull(stored);
 		assertEquals(stored, application);
+	}
+	
+	@Test
+	public void testContentInFindApplication() throws Exception {
+
+		Application application = buildApplication();
+		store.storeApplication(application);
+		Application stored = store.getApplication("1234");
+
+		assertNotNull(stored);
+		assertEquals(stored, application); // will validate jid only
+		assertEquals(stored.getAppId(), application.getAppId());
+		assertEquals(stored.getName(), application.getName());
+		assertEquals(stored.getAccountId(), application.getAccountId());
+		assertEquals(stored.getPermissions(), application.getPermissions());
+		assertEquals(stored.getPlatform(), application.getPlatform());
 	}
 
 	@Test
@@ -259,7 +273,7 @@ public abstract class BaseDatastoreTest {
 	@Test
 	public void testRemoveApplication() throws Exception {
 
-		Application application = new Application("1234", "client@jabber.org","staging");
+		Application application = buildApplication();
 		store.storeApplication(application);
 		Application stored = store.getApplication("1234");
 
@@ -273,7 +287,7 @@ public abstract class BaseDatastoreTest {
 	@Test
 	public void testAddAddressToApplication() throws Exception {
 
-		Application application = new Application("1234", "client@jabber.org","staging");
+		Application application = buildApplication();
 		store.storeApplication(application);
 		store.storeAddress("+348005551212", application.getAppId());
 	}
@@ -281,7 +295,7 @@ public abstract class BaseDatastoreTest {
 	@Test
 	public void testFindApplicationForAddress() throws Exception {
 
-		Application application = new Application("1234", "client@jabber.org","staging");
+		Application application = buildApplication();
 		store.storeApplication(application);
 		store.storeAddress("+348005551212", application.getAppId());
 		
@@ -293,7 +307,7 @@ public abstract class BaseDatastoreTest {
 	@Test
 	public void testAddAddressesToApplication() throws Exception {
 
-		Application application = new Application("1234", "client@jabber.org","staging");
+		Application application = buildApplication();
 		store.storeApplication(application);
 		List<String> addresses = new ArrayList<String>();
 		addresses.add("+348005551212");
@@ -311,7 +325,7 @@ public abstract class BaseDatastoreTest {
 	@Test
 	public void testFindAddressesForApplication() throws Exception {
 
-		Application application = new Application("1234", "client@jabber.org","staging");
+		Application application = buildApplication();
 		store.storeApplication(application);
 		List<String> addresses = new ArrayList<String>();
 		addresses.add("+348005551212");
@@ -333,7 +347,7 @@ public abstract class BaseDatastoreTest {
 	@Test
 	public void testRemoveAddressFromApplication() throws Exception {
 
-		Application application = new Application("1234", "client@jabber.org","staging");
+		Application application = buildApplication();
 		store.storeApplication(application);
 		store.storeAddress("+348005551212", application.getAppId());
 		
@@ -357,7 +371,7 @@ public abstract class BaseDatastoreTest {
 	@Test
 	public void testRemoveApplicationRemovesAddresses() throws Exception {
 
-		Application application = new Application("1234", "client@jabber.org","staging");
+		Application application = buildApplication();
 		store.storeApplication(application);
 		
 		List<String> addresses = new ArrayList<String>();
@@ -381,7 +395,7 @@ public abstract class BaseDatastoreTest {
 	@Test(expected=ApplicationAlreadyExistsException.class)
 	public void testExceptionWhenStoringAlreadyExistingApplication() throws Exception {
 
-		Application application = new Application("1234", "client@jabber.org","staging");
+		Application application = buildApplication();
 		store.storeApplication(application);
 		store.storeApplication(application);
 	}
@@ -389,8 +403,7 @@ public abstract class BaseDatastoreTest {
 	@Test
 	public void testStoreClientApplication() throws Exception {
 
-		Application application = new Application("1234", "client@jabber.org",
-				"staging");
+		Application application = buildApplication();
 		store.storeApplication(application);
 
 		GatewayClient client = new GatewayClient(application.getAppId(),
@@ -403,8 +416,7 @@ public abstract class BaseDatastoreTest {
 	@Test
 	public void testRemoveClientApplication() throws Exception {
 
-		Application application = new Application("voxeo", "client@jabber.org",
-				"staging");
+		Application application = buildApplication("voxeo");
 		store.storeApplication(application);
 
 		GatewayClient client = new GatewayClient("voxeo",
@@ -418,8 +430,7 @@ public abstract class BaseDatastoreTest {
 	@Test
 	public void testGetClientApplication() throws Exception {
 
-		Application application = new Application("voxeo", "client@jabber.org",
-				"staging");
+		Application application = buildApplication("voxeo");
 		store.storeApplication(application);
 
 		GatewayClient client = new GatewayClient("voxeo",
@@ -440,8 +451,7 @@ public abstract class BaseDatastoreTest {
 	@Test
 	public void testGetClientResources() throws Exception {
 
-		Application application = new Application("voxeo", "client@jabber.org",
-				"staging");
+		Application application = buildApplication("voxeo");
 		store.storeApplication(application);
 
 		GatewayClient client1 = new GatewayClient("voxeo",
@@ -463,8 +473,7 @@ public abstract class BaseDatastoreTest {
 	@Test
 	public void testGetAndRemoveClientResources() throws Exception {
 
-		Application application = new Application("voxeo", "client@jabber.org",
-				"staging");
+		Application application = buildApplication("voxeo");
 		store.storeApplication(application);
 
 		GatewayClient client1 = new GatewayClient("voxeo",
@@ -491,8 +500,7 @@ public abstract class BaseDatastoreTest {
 	@Test
 	public void testGetClientApplications() throws Exception {
 
-		Application application = new Application("voxeo", "client@jabber.org",
-				"staging");
+		Application application = buildApplication("voxeo");
 		store.storeApplication(application);
 
 		assertEquals(0, store.getClients().size());
@@ -527,5 +535,19 @@ public abstract class BaseDatastoreTest {
 
 		List<String> list = Arrays.asList(platforms);
 		return new RayoNode(hostname, ipAddress, new HashSet<String>(list));
+	}
+
+	private Application buildApplication() {
+	
+		return buildApplication("1234");
+	}
+	
+	private Application buildApplication(String appId) {
+		
+		Application application = new Application(appId, "client@jabber.org","staging");
+		application.setName("test");
+		application.setAccountId("zytr");
+		application.setPermissions("read,write");
+		return application;
 	}
 }

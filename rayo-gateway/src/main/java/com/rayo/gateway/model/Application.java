@@ -1,10 +1,6 @@
 package com.rayo.gateway.model;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
@@ -22,6 +18,9 @@ public class Application implements Serializable {
 	private String appId;
 	private String jid;
 	private String platform;
+	private String name;
+	private String accountId;
+	private String permissions;
 	
 	/**
 	 * Application registered in the gateway
@@ -87,8 +86,11 @@ public class Application implements Serializable {
 
     	return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
     		.append("appId", getAppId())
+			.append("name", getJid())
 			.append("jid", getJid())
 			.append("platform", getPlatform())
+			.append("accountId", getJid())
+			.append("permissions", getJid())
 		.toString();
 	}
 	
@@ -113,5 +115,29 @@ public class Application implements Serializable {
 
 	public void setAppId(String appId) {
 		this.appId = appId;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getAccountId() {
+		return accountId;
+	}
+
+	public void setAccountId(String accountId) {
+		this.accountId = accountId;
+	}
+
+	public String getPermissions() {
+		return permissions;
+	}
+
+	public void setPermissions(String permissions) {
+		this.permissions = permissions;
 	}
 }

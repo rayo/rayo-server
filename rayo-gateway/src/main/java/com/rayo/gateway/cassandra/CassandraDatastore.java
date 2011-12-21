@@ -10,7 +10,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.Column;
@@ -54,29 +53,35 @@ import com.voxeo.logging.Loggerf;
  * @author martin
  *
  */
-public class CassandraDatastore2 implements GatewayDatastore {
+public class CassandraDatastore implements GatewayDatastore {
 
-	private final static Loggerf log = Loggerf.getLogger(CassandraDatastore2.class);
+	private final static Loggerf log = Loggerf.getLogger(CassandraDatastore.class);
 	
 	private String hostname = "localhost";
 	private String port = "9160";
+	private boolean overrideExistingSchema = true;
 	
 	public void init() throws Exception {
 		
+		log.debug("Initializing Cassandra Datastore on [%s:%s]", hostname, port);
 		Cluster cluster = new Cluster(hostname, Integer.parseInt(port));
 		
 		KeyspaceManager keyspaceManager = Pelops.createKeyspaceManager(cluster);
 		
-		try {
-			keyspaceManager.dropKeyspace("rayo");
-		} catch (Exception e) {
-
+		if (overrideExistingSchema) {
+			try {
+				log.debug("Dropping existing Cassandra schema: rayo");
+				keyspaceManager.dropKeyspace("rayo");
+			} catch (Exception e) {
+	
+			}
 		}
 		
 		KsDef ksDef = null;
 		try {
 			ksDef = keyspaceManager.getKeyspaceSchema("rayo");
 		} catch (Exception e) {
+			log.debug("Creating new Cassandra schema: rayo");
 			List<CfDef> cfDefs = new ArrayList<CfDef>();
 			Map<String, String> ksOptions = new HashMap<String, String>();
 			ksOptions.put("replication_factor", "1");
@@ -88,6 +93,7 @@ public class CassandraDatastore2 implements GatewayDatastore {
 		ColumnFamilyManager cfManager = Pelops.createColumnFamilyManager(cluster, "rayo");		
 		CfDef cfNode = getCfDef(ksDef, "nodes");
 		if (cfNode == null) {
+			log.debug("Creating new Column Family: nodes");
 			cfNode = new CfDef("rayo", "nodes")
 				.setColumn_type(ColumnFamilyManager.CFDEF_TYPE_SUPER)
 				.setComparator_type(ColumnFamilyManager.CFDEF_COMPARATOR_BYTES)
@@ -105,6 +111,7 @@ public class CassandraDatastore2 implements GatewayDatastore {
 		
 		CfDef cfApplications = getCfDef(ksDef, "applications");
 		if (cfApplications == null) {
+			log.debug("Creating new Column Family: applications");
 			cfApplications = new CfDef("rayo", "applications")
 				.setComparator_type(ColumnFamilyManager.CFDEF_COMPARATOR_BYTES)
 				.setDefault_validation_class("UTF8Type");
@@ -113,6 +120,7 @@ public class CassandraDatastore2 implements GatewayDatastore {
 		}
 		CfDef cfAddresses = getCfDef(ksDef, "addresses");
 		if (cfAddresses == null) {
+			log.debug("Creating new Column Family: addresses");
 			cfAddresses = new CfDef("rayo", "addresses")
 				.setComparator_type(ColumnFamilyManager.CFDEF_COMPARATOR_BYTES)
 				.setDefault_validation_class("UTF8Type");
@@ -120,26 +128,29 @@ public class CassandraDatastore2 implements GatewayDatastore {
 			cfManager.addColumnFamily(cfAddresses);
 		}
 		
-		CfDef cfResource = getCfDef(ksDef, "clients");
-		if (cfResource == null) {
-			cfResource = new CfDef("rayo", "clients")
+		CfDef cfClients = getCfDef(ksDef, "clients");
+		if (cfClients == null) {
+			log.debug("Creating new Column Family: clients");
+			cfClients = new CfDef("rayo", "clients")
 				.setComparator_type(ColumnFamilyManager.CFDEF_COMPARATOR_BYTES)
 				.setDefault_validation_class("UTF8Type")
 				.setGc_grace_seconds(0);
-			ksDef.addToCf_defs(cfResource);			
-			cfManager.addColumnFamily(cfResource);
+			ksDef.addToCf_defs(cfClients);			
+			cfManager.addColumnFamily(cfClients);
 		}
 		
-		CfDef cfNodeIp = getCfDef(ksDef, "ips");
-		if (cfNodeIp == null) {
-			cfNodeIp = new CfDef("rayo", "ips");
-			cfNodeIp.default_validation_class = "UTF8Type";
-			ksDef.addToCf_defs(cfNodeIp);			
-			cfManager.addColumnFamily(cfNodeIp);
+		CfDef cfIps = getCfDef(ksDef, "ips");
+		if (cfIps == null) {
+			log.debug("Creating new Column Family: ips");
+			cfIps = new CfDef("rayo", "ips");
+			cfIps.default_validation_class = "UTF8Type";
+			ksDef.addToCf_defs(cfIps);			
+			cfManager.addColumnFamily(cfIps);
 		}
 		
 		CfDef calls = getCfDef(ksDef, "calls");
 		if (calls == null) {
+			log.debug("Creating new Column Family: calls");
 			calls = new CfDef("rayo", "calls");
 			calls.default_validation_class = "UTF8Type";
 			ksDef.addToCf_defs(calls);			
@@ -148,11 +159,12 @@ public class CassandraDatastore2 implements GatewayDatastore {
 		
 		CfDef cfJids = getCfDef(ksDef, "jids");
 		if (cfJids == null) {
+			log.debug("Creating new Column Family: jids");
 			cfJids = new CfDef("rayo", "jids")
 				.setColumn_type("Super")
 				.setComparator_type(ColumnFamilyManager.CFDEF_COMPARATOR_BYTES)
 				.setSubcomparator_type(ColumnFamilyManager.CFDEF_COMPARATOR_BYTES);
-			cfResource.default_validation_class = "UTF8Type";
+			cfClients.default_validation_class = "UTF8Type";
 			ksDef.addToCf_defs(cfJids);			
 			cfManager.addColumnFamily(cfJids);
 		}
@@ -173,9 +185,11 @@ public class CassandraDatastore2 implements GatewayDatastore {
 	@Override
 	public RayoNode storeNode(RayoNode node) throws DatastoreException {
 		
+		log.debug("Storing node: [%s]", node);
 		Mutator mutator = Pelops.createMutator("rayo");
 		RayoNode stored = getNode(node.getHostname());
 		if (stored != null) {
+			log.error("Node [%s] already exists", node);
 			throw new RayoNodeAlreadyExistsException();
 		}
 						
@@ -195,6 +209,7 @@ public class CassandraDatastore2 implements GatewayDatastore {
 		
 		try {
 			mutator.execute(ConsistencyLevel.ONE);
+			log.debug("Node [%s] stored successfully", node);
 		} catch (Exception e) {
 			log.error(e.getMessage(),e);
 			throw new DatastoreException(String.format("Could not create node [%s]", node));
@@ -203,10 +218,12 @@ public class CassandraDatastore2 implements GatewayDatastore {
 	}
 
 	@Override
-	public RayoNode removeNode(String jid) throws DatastoreException {
+	public RayoNode removeNode(String rayoNode) throws DatastoreException {
 	
-		RayoNode node = getNode(jid);
+		log.debug("Removing node: [%s]", rayoNode);
+		RayoNode node = getNode(rayoNode);
 		if (node == null) {
+			log.error("Node not found: [%s]", rayoNode);
 			throw new RayoNodeNotFoundException();
 		}
 		RowDeletor deletor = Pelops.createRowDeletor("rayo");
@@ -214,11 +231,12 @@ public class CassandraDatastore2 implements GatewayDatastore {
 
 		Mutator mutator = Pelops.createMutator("rayo");
 		for (String platform: node.getPlatforms()) {
-			mutator.deleteColumn("nodes", platform, jid);
+			mutator.deleteColumn("nodes", platform, rayoNode);
 		}
 		
 		try {
 			mutator.execute(ConsistencyLevel.ONE);
+			log.debug("Node [%s] deleted successfully", rayoNode);
 		} catch (Exception e) {
 			log.error(e.getMessage(),e);
 			throw new DatastoreException("Could not remove node");
@@ -230,8 +248,10 @@ public class CassandraDatastore2 implements GatewayDatastore {
 	@Override
 	public GatewayCall storeCall(GatewayCall call) throws DatastoreException {
 		
+		log.debug("Storing call: [%s]", call);
 		RayoNode node = getNode(call.getNodeJid());
 		if (node == null) {
+			log.debug("Node [%s] not found for call [%s]", call.getNodeJid(), call);
 			throw new RayoNodeNotFoundException();
 		}		
 		
@@ -248,6 +268,7 @@ public class CassandraDatastore2 implements GatewayDatastore {
 		
 		try {
 			mutator.execute(ConsistencyLevel.ONE);
+			log.debug("Call [%s] stored successfully", call);
 		} catch (Exception e) {
 			log.error(e.getMessage(),e);
 			throw new DatastoreException("Could not store call");
@@ -259,6 +280,7 @@ public class CassandraDatastore2 implements GatewayDatastore {
 	@Override
 	public GatewayCall getCall(String id) {
 		
+		log.debug("Getting call with id [%s]", id);
 		Selector selector = Pelops.createSelector("rayo");
 		try {
 			List<Column> columns = selector.getColumnsFromRow("calls", id, false, ConsistencyLevel.ONE);
@@ -276,12 +298,12 @@ public class CassandraDatastore2 implements GatewayDatastore {
 			GatewayCall call = new GatewayCall();
 			call.setCallId(id);
 			for(Column column: columns) {
-				String name = new String(column.getName());
+				String name = Bytes.toUTF8(column.getName());
 				if (name.equals("node")) {
-					call.setNodeJid(new String(column.getValue()));
+					call.setNodeJid(Bytes.toUTF8(column.getValue()));
 				}
 				if (name.equals("jid")) {
-					call.setClientJid(new String(column.getValue()));
+					call.setClientJid(Bytes.toUTF8(column.getValue()));
 				}
 			}
 			return call;
@@ -292,6 +314,7 @@ public class CassandraDatastore2 implements GatewayDatastore {
 	@Override
 	public GatewayCall removeCall(String id) throws DatastoreException {
 		
+		log.debug("Removing call with id: [%s]", id);
 		GatewayCall call = getCall(id);
 
 		Mutator mutator = Pelops.createMutator("rayo");
@@ -303,6 +326,7 @@ public class CassandraDatastore2 implements GatewayDatastore {
 			deletor.deleteRow("calls", Bytes.fromUTF8(id), ConsistencyLevel.ONE);
 			
 			mutator.execute(ConsistencyLevel.ONE);
+			log.debug("Call [%s] removed successfully", id);
 		} catch (Exception e) {
 			log.error(e.getMessage(),e);
 			throw new DatastoreException("Could not remove call");
@@ -319,7 +343,7 @@ public class CassandraDatastore2 implements GatewayDatastore {
 			List<Column> columns = selector.getSubColumnsFromRow("jids", type, jid, false, ConsistencyLevel.ONE);
 			List<String> calls = new ArrayList<String>();
 			for(Column column: columns) {
-				calls.add(new String(column.getValue()));
+				calls.add(Bytes.toUTF8(column.getValue()));
 			}
 			return calls;
 		} catch (PelopsException pe) {
@@ -329,26 +353,30 @@ public class CassandraDatastore2 implements GatewayDatastore {
 	}
 	
 	@Override
-	public Collection<String> getCallsForNode(String jid) {
+	public Collection<String> getCallsForNode(String rayoNode) {
 		
-		return getCalls(jid, "nodes");
+		log.debug("Finding calls for node: [%s]", rayoNode);
+		return getCalls(rayoNode, "nodes");
 	}
 
 	@Override
 	public Collection<String> getCallsForClient(String jid) {
 		
+		log.debug("Finding calls for client: [%s]", jid);
 		return getCalls(jid, "clients");
 	}
 
-	public RayoNode getNode(String hostname) {
+	@Override
+	public RayoNode getNode(String rayoNode) {
 		
+		log.debug("Getting node with id: [%s]", rayoNode);
 		RayoNode node = null;
 		try {
 			Selector selector = Pelops.createSelector("rayo");
 			Map<String, List<SuperColumn>> rows = selector.getSuperColumnsFromRowsUtf8Keys(
 					"nodes", 
 					Selector.newKeyRange("", "", 100), // 100 platforms limit should be enough :)
-					Selector.newColumnsPredicate(hostname),
+					Selector.newColumnsPredicate(rayoNode),
 					ConsistencyLevel.ONE);
 					
 			Iterator<Entry<String, List<SuperColumn>>> it = rows.entrySet().iterator();
@@ -360,7 +388,7 @@ public class CassandraDatastore2 implements GatewayDatastore {
 					if (node == null) {
 						node = new RayoNode();
 						node = buildNode(column.getColumns());
-						node.setHostname(hostname);
+						node.setHostname(rayoNode);
 					}
 					node.addPlatform(currPlatform);
 				}
@@ -375,6 +403,7 @@ public class CassandraDatastore2 implements GatewayDatastore {
 	@Override
 	public String getNodeForCall(String callId) {
 		
+		log.debug("Finding node for call: [%s]", callId);
 		GatewayCall call = getCall(callId);
 		if (call != null) {
 			return call.getNodeJid();
@@ -386,12 +415,14 @@ public class CassandraDatastore2 implements GatewayDatastore {
 	public String getNodeForIpAddress(String ip) {
 		
 		try {
+			log.debug("Finding node for IP address: [%s]", ip);
 			Selector selector = Pelops.createSelector("rayo");
 			Column column = selector.getColumnFromRow("ips", ip, "node", ConsistencyLevel.ONE);
 			if (column != null) {
-				return new String(column.getValue());
+				return Bytes.toUTF8(column.getValue());
 			}
 		} catch (NotFoundException nfe) {
+			log.debug("No node found for ip address: [%s]", ip);
 			return null;
 		} catch (PelopsException pe) {
 			log.error(pe.getMessage(),pe);
@@ -402,6 +433,7 @@ public class CassandraDatastore2 implements GatewayDatastore {
 	@Override
 	public List<String> getPlatforms() {
 		
+		log.debug("Returning list with all available platforms");
 		return getAllRowNames("nodes",0,false);
 	}
 
@@ -409,11 +441,12 @@ public class CassandraDatastore2 implements GatewayDatastore {
 	public List<String> getRayoNodesForPlatform(String platformId) {
 
 		try {
+			log.debug("Finding rayo nodes for platform: [%s]", platformId);
 			List<String> nodes = new ArrayList<String>();
 			Selector selector = Pelops.createSelector("rayo");
 			List<SuperColumn> columns = selector.getSuperColumnsFromRow("nodes", platformId, false, ConsistencyLevel.ONE);
 			for(SuperColumn column: columns) {
-				String id = new String(column.getName());
+				String id = Bytes.toUTF8(column.getName());
 				nodes.add(id);
 			}
 
@@ -423,16 +456,13 @@ public class CassandraDatastore2 implements GatewayDatastore {
 			return Collections.EMPTY_LIST;
 		}
 	}
-
-	public GatewayClient storeGatewayClient(GatewayClient client) throws DatastoreException {
-		
-		return client;
-	}
 		
 	@Override
 	public Application storeApplication(Application application) throws DatastoreException {
 		
+		log.debug("Storing application: [%s]", application);
 		if (getApplication(application.getAppId()) != null) {
+			log.error("Application [%s] already exists", application);
 			throw new ApplicationAlreadyExistsException();
 		}
 		
@@ -440,11 +470,15 @@ public class CassandraDatastore2 implements GatewayDatastore {
 
 		mutator.writeColumns("applications", application.getAppId(), 
 			mutator.newColumnList(
-					mutator.newColumn(Bytes.fromUTF8("appJid"), application.getBareJid()),
-					mutator.newColumn(Bytes.fromUTF8("platformId"), application.getPlatform())));
+					mutator.newColumn(Bytes.fromUTF8("appJid"), Bytes.fromUTF8(application.getBareJid())),
+					mutator.newColumn(Bytes.fromUTF8("platformId"), Bytes.fromUTF8(application.getPlatform())),
+					mutator.newColumn(Bytes.fromUTF8("name"), Bytes.fromUTF8(application.getName())),
+					mutator.newColumn(Bytes.fromUTF8("accountId"), Bytes.fromUTF8(application.getAccountId())),
+					mutator.newColumn(Bytes.fromUTF8("permissions"), Bytes.fromUTF8(application.getPermissions()))));
 
 		try {
 			mutator.execute(ConsistencyLevel.ONE);
+			log.debug("Application [%s] stored successfully", application);
 		} catch (Exception e) {
 			log.error(e.getMessage(),e);
 			throw new DatastoreException(String.format("Could not create application [%s]", application));
@@ -456,6 +490,7 @@ public class CassandraDatastore2 implements GatewayDatastore {
 	@Override
 	public Application getApplication(String id) {
 		
+		log.debug("Finding application with id: [%s]", id);
 		Application application = null;
 		
 		Selector selector = Pelops.createSelector("rayo");
@@ -463,12 +498,21 @@ public class CassandraDatastore2 implements GatewayDatastore {
 		if (columns.size() > 0) {
 			application = new Application(id);
 			for (Column column: columns) {
-				String name = new String(column.getName());
+				String name = Bytes.toUTF8(column.getName());
 				if (name.equals("appJid")) {
-					application.setJid(new String(column.getValue()));
+					application.setJid(Bytes.toUTF8((column.getValue())));
 				}
 				if (name.equals("platformId")) {
-					application.setPlatform(new String(column.getValue()));
+					application.setPlatform(Bytes.toUTF8((column.getValue())));
+				}
+				if (name.equals("name")) {
+					application.setName(Bytes.toUTF8((column.getValue())));
+				}
+				if (name.equals("accountId")) {
+					application.setAccountId(Bytes.toUTF8((column.getValue())));
+				}
+				if (name.equals("permissions")) {
+					application.setPermissions(Bytes.toUTF8((column.getValue())));
 				}
 			}
 		}
@@ -478,6 +522,7 @@ public class CassandraDatastore2 implements GatewayDatastore {
 	@Override
 	public Application removeApplication(String id) throws DatastoreException {
 		
+		log.debug("Removing application with id: [%s]", id);
 		Application application = getApplication(id);
 		if (application != null) {
 			RowDeletor deletor = Pelops.createRowDeletor("rayo");
@@ -487,6 +532,7 @@ public class CassandraDatastore2 implements GatewayDatastore {
 			removeAddresses(addresses);
 			
 		} else {
+			log.debug("No application found with id: [%s]", id);
 			throw new ApplicationNotFoundException();
 		}
 		return application;
@@ -495,18 +541,21 @@ public class CassandraDatastore2 implements GatewayDatastore {
 	@Override
 	public List<String> getAddressesForApplication(String appId) {
 				
+		log.debug("Finding addresses for application id: [%s]", appId);
 		return getAllRowNames("addresses", 1, true, appId);
 	}
 
 	@Override
 	public Application getApplicationForAddress(String address) {
 
+		log.debug("Finding application for address: [%s]", address);
 		Selector selector = Pelops.createSelector("rayo");
 		List<Column> columns = selector.getColumnsFromRow("addresses", address, false, ConsistencyLevel.ONE);
 		if (columns != null && columns.size() > 0) {
 			Column column = columns.get(0);
-			return getApplication(new String(column.getValue()));
+			return getApplication(Bytes.toUTF8(column.getValue()));
 		}
+		log.debug("No application found for address: [%s]", address);
 		return null;
 	}
 
@@ -521,6 +570,7 @@ public class CassandraDatastore2 implements GatewayDatastore {
 	@Override
 	public void storeAddresses(Collection<String> addresses, String appId) throws DatastoreException {
 		
+		log.debug("Storing addresses [%s] on application [%s]", addresses, appId);
 		if (getApplication(appId) == null) {
 			throw new ApplicationNotFoundException();
 		}
@@ -533,6 +583,7 @@ public class CassandraDatastore2 implements GatewayDatastore {
 		
 		try {
 			mutator.execute(ConsistencyLevel.ONE);
+			log.debug("Addresses [%s] stored successfully on application [%s]", addresses, appId);
 		} catch (Exception e) {
 			log.error(e.getMessage(),e);
 			throw new DatastoreException(String.format("Could not add addresses [%s] to application [%s]", addresses, appId));
@@ -552,6 +603,7 @@ public class CassandraDatastore2 implements GatewayDatastore {
 
 	private void removeAddresses(List<String> addresses) throws DatastoreException {
 		
+		log.debug("Removing addresses [%s]", addresses);
 		RowDeletor deletor = Pelops.createRowDeletor("rayo");
 		for (String address: addresses) {
 			deletor.deleteRow("addresses", address, ConsistencyLevel.ONE);
@@ -561,8 +613,10 @@ public class CassandraDatastore2 implements GatewayDatastore {
 	@Override
 	public GatewayClient storeClient(GatewayClient client) throws DatastoreException {
 		
+		log.debug("Storing client: [%s]", client);
 		Application application = getApplication(client.getAppId());
 		if (application == null) {
+			log.debug("Client [%s] already exists", client);
 			throw new ApplicationNotFoundException();
 		}
 		
@@ -573,6 +627,7 @@ public class CassandraDatastore2 implements GatewayDatastore {
 				mutator.newColumn("appId", client.getAppId())));
 		try {
 			mutator.execute(ConsistencyLevel.ONE);
+			log.debug("Client [%s] stored successfully", client);
 		} catch (Exception e) {
 			log.error(e.getMessage(),e);
 			throw new DatastoreException(String.format("Could not create client application [%s]", client));
@@ -584,6 +639,7 @@ public class CassandraDatastore2 implements GatewayDatastore {
 	@Override
 	public GatewayClient removeClient(String jid) throws DatastoreException {
 		
+		log.debug("Removing client with jid: [%s]", jid);
 		GatewayClient client = getClient(jid);
 		if (client != null) {
 			Mutator mutator = Pelops.createMutator("rayo");
@@ -597,7 +653,8 @@ public class CassandraDatastore2 implements GatewayDatastore {
 				RowDeletor deletor = Pelops.createRowDeletor("rayo");
 				deletor.deleteRow("clients", bareJid, ConsistencyLevel.ONE);				
 			}			
-		}		
+			log.debug("Client with jid: [%s] removed successfully", jid);
+		}
 		
 		return client;
 	}
@@ -605,6 +662,7 @@ public class CassandraDatastore2 implements GatewayDatastore {
 	@Override
 	public GatewayClient getClient(String jid) {
 				
+		log.debug("Finding client with jid: [%s]", jid);
 		GatewayClient client = null;
 		try {
 			String bareJid = JIDUtils.getBareJid(jid);
@@ -616,9 +674,9 @@ public class CassandraDatastore2 implements GatewayDatastore {
 			List<Column> columns = selector.getColumnsFromRow("clients", bareJid, false, ConsistencyLevel.ONE);
 			if (columns != null && columns.size() > 0) {
 				for(Column column: columns) {
-					String name = new String(column.getName());
+					String name = Bytes.toUTF8(column.getName());
 					if (name.equals("appId")) {
-						appId = new String(column.getValue());
+						appId = Bytes.toUTF8(column.getValue());
 					} else if (name.equals(resource)) {
 						resourceFound = true;
 					}
@@ -647,13 +705,14 @@ public class CassandraDatastore2 implements GatewayDatastore {
 	public List<String> getClientResources(String bareJid) {
 						
 		try {
+			log.debug("Finding resources for clients with jid: [%s]", bareJid);
 			Selector selector = Pelops.createSelector("rayo");
 			List<Column> resourceColumn = selector.getColumnsFromRow("clients", bareJid, false, ConsistencyLevel.ONE);			
 			List<String> resources = new ArrayList<String>();
 			for(Column column: resourceColumn) {
-				String name = new String(column.getName());
+				String name = Bytes.toUTF8(column.getName());
 				if (!name.equals("appId")) {
-					resources.add(new String(column.getName()));
+					resources.add(Bytes.toUTF8(column.getName()));
 				}
 			}
 			return resources;
@@ -668,12 +727,12 @@ public class CassandraDatastore2 implements GatewayDatastore {
 		if (columns != null && columns.size() > 0) {
 			RayoNode node = new RayoNode();
 			for(Column column: columns) {
-				String name = new String(column.getName());
+				String name = Bytes.toUTF8(column.getName());
 				if (name.equals("ip")) {
-					node.setIpAddress(new String(column.getValue()));
+					node.setIpAddress(Bytes.toUTF8(column.getValue()));
 				}
 				if (name.equals("platforms")) {
-					node.setPlatforms(new HashSet<String>(Arrays.asList(StringUtils.split(new String(column.getValue()),","))));
+					node.setPlatforms(new HashSet<String>(Arrays.asList(StringUtils.split(Bytes.toUTF8(column.getValue()),","))));
 				}
 			}
 			return node;
@@ -684,6 +743,7 @@ public class CassandraDatastore2 implements GatewayDatastore {
 	@Override
 	public List<String> getClients() {
 	
+		log.debug("Returning all clients");
 		return getAllRowNames("clients", 1, true);
 	}	
 
@@ -737,97 +797,60 @@ public class CassandraDatastore2 implements GatewayDatastore {
 		return result;
 	}
 	
-	public static void main(String[] args) throws Exception {
-		
-		CassandraDatastore2 cassandraService = new CassandraDatastore2();
-		cassandraService.init();
-		
-		Set<String> platforms = new HashSet<String>();
-		platforms.add("staging");
-		RayoNode node1 = new RayoNode("localhost","127.0.0.1", platforms);
-		Set<String> platforms2 = new HashSet<String>();
-		platforms2.add("staging");
-		platforms2.add("production");
-		RayoNode node2 = new RayoNode("connfu","10.23.45.121", platforms2);
-		
-		List<String> addresses = new ArrayList<String>();
-		addresses.add("+18005551212");
-		List<String> addresses2 = new ArrayList<String>();
-		addresses2.add("+348005551212");
-		addresses2.add("+348005551213");
-		
-		GatewayCall call1 = new GatewayCall("1234", node1.getHostname(), "mpermar@jabber.org");
-		GatewayCall call2 = new GatewayCall("zyxw", node1.getHostname(), "mpermar@jabber.org");
-				
-		Application application1 = new Application("appId1","mpermar@jabber.org", "staging");
-		Application application2 = new Application("appId2","mpermar@connfu", "staging");
-
-		GatewayClient client1 = new GatewayClient("appId1","mpermar@jabber.org/resource1", "staging");
-		GatewayClient client2 = new GatewayClient("appId1","mpermar@jabber.org/resource2", "staging");
-		GatewayClient client3 = new GatewayClient("appId2","mpermar@connfu/resourceA", "staging");
-		
-		cassandraService.storeNode(node1);
-		cassandraService.storeNode(node2);
-		System.out.println(cassandraService.getNode("localhost"));
-		System.out.println(cassandraService.getNode("connfu"));
-		System.out.println(cassandraService.getNodeForIpAddress("10.23.45.121"));
-		System.out.println(cassandraService.getRayoNodesForPlatform("staging"));
-		System.out.println(cassandraService.getPlatforms());
-		
-		cassandraService.storeApplication(application1);
-		cassandraService.storeAddresses(addresses, application1.getAppId());
-		cassandraService.storeApplication(application2);
-		cassandraService.storeAddresses(addresses, application2.getAppId());
-
-		cassandraService.storeClient(client1);
-		cassandraService.storeClient(client2);
-		cassandraService.storeClient(client3);
-		System.out.println(cassandraService.getAddressesForApplication("appId1"));
-		System.out.println(cassandraService.getAddressesForApplication("appId2"));
-		System.out.println(cassandraService.getApplicationForAddress("+18005551212"));
-		System.out.println(cassandraService.getApplicationForAddress("+348005551212"));
-		System.out.println(cassandraService.getClientResources("mpermar@connfu"));
-		System.out.println(cassandraService.getClients());
-
-		cassandraService.storeCall(call1);
-		cassandraService.storeCall(call2);
-		System.out.println(cassandraService.getCall("1234"));
-		System.out.println(cassandraService.getCallsForClient("mpermar@jabber.org"));
-		System.out.println(cassandraService.getCallsForClient("mpermar@connfu"));
-		System.out.println(cassandraService.getCallsForNode("userb@localhost"));
-
-		cassandraService.removeCall("1234");
-		System.out.println(cassandraService.getCall("1234"));
-		System.out.println(cassandraService.getCallsForClient("mpermar@jabber.org"));
-		System.out.println(cassandraService.getCallsForNode("userb@localhost"));
-
-		System.out.println(cassandraService.getClient("mpermar@jabber.org/resource1"));
-		cassandraService.removeClient("mpermar@jabber.org/resource1");
-		System.out.println(cassandraService.getClient("mpermar@jabber.org/resource1"));		
-		System.out.println(cassandraService.getClients());
-
-		System.out.println(cassandraService.getApplication("appId1"));
-		cassandraService.removeApplication("appId1");
-		System.out.println(cassandraService.getApplication("appId1"));
-
-		cassandraService.removeNode("localhost");
-		System.out.println(cassandraService.getNode("localhost"));	
-		System.out.println(cassandraService.getNodeForIpAddress("127.0.0.1"));
-	}
-	
+	/**
+	 * Gets the domain that Cassandra is running on
+	 * 
+	 * @return String Cassandra domain
+	 */
 	public String getHostname() {
 		return hostname;
 	}
 
+	/**
+	 * Sets the domain that Cassandra is running on
+	 * 
+	 * @param hostname Cassandra domain
+	 */
 	public void setHostname(String hostname) {
 		this.hostname = hostname;
 	}
 
+	/**
+	 * Gets the port that Cassandra is running on
+	 * 
+	 * @return int Cassandra port
+	 */
 	public String getPort() {
 		return port;
 	}
 
+	/**
+	 * Sets the port Cassandra is running on
+	 * 
+	 * @param port Cassandra port
+	 */
 	public void setPort(String port) {
 		this.port = port;
+	}
+
+	/**
+	 * Tells is schema is going to be overriding on startup or not
+	 * 
+	 * @return boolean Override schema
+	 */
+	public boolean isOverrideExistingSchema() {
+		return overrideExistingSchema;
+	}
+
+	/**
+	 * <p>Sets whether the current Cassandra schema should be overriden after startup 
+	 * or not. If <code>true</code> this Cassandra Datastore will drop the existing 
+	 * schema and will create a new one on initialization. If <code>false</code> then 
+	 * the Datastore will try to use the existing schema.</p> 
+	 * 
+	 * @param overrideExistingSchema
+	 */
+	public void setOverrideExistingSchema(boolean overrideExistingSchema) {
+		this.overrideExistingSchema = overrideExistingSchema;
 	}
 }
