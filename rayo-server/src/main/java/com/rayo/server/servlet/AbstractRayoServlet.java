@@ -128,7 +128,12 @@ public abstract class AbstractRayoServlet extends XmppServlet implements AdminLi
             }
     		
     		if (DomUtils.isSupportedNamespace(payload)) {
-    			processIQRequest(request, payload);
+    			// Validate jid
+    			if (!validJid(request.getTo())) {
+    				sendIqError(request, StanzaError.Type.CANCEL, StanzaError.Condition.JID_MALFORMED, String.format("Malformed JID", request.getTo()));
+    			} else {
+    				processIQRequest(request, payload);
+    			}
     		} else {
            	 	// We don't handle this type of request...
     			sendIqError(request, StanzaError.Type.CANCEL, StanzaError.Condition.FEATURE_NOT_IMPLEMENTED, "Feature not supported");
@@ -271,6 +276,14 @@ public abstract class AbstractRayoServlet extends XmppServlet implements AdminLi
 			domElement = (DOMElement)requestDocument.getDocumentElement();
 		}
 		return domElement;
+	}
+	
+	private boolean validJid(JID jid) {
+		
+		if (jid.getDomain() == null || jid.getDomain().isEmpty()) {
+			return false;
+		}
+		return true;
 	}
 	
     protected String getBareJID(String address) {
