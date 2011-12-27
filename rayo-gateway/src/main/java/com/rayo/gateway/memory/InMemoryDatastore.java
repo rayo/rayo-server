@@ -133,7 +133,11 @@ public class InMemoryDatastore implements GatewayDatastore {
 		Lock nodeLock = nodesLock.readLock();
 		nodeLock.lock();
 		try {
-			return platformsMap.get(platformId);			
+			List<RayoNode> nodes = platformsMap.get(platformId);
+			if (nodes == null) {
+				nodes = Collections.EMPTY_LIST;
+			}
+			return nodes;
 		} finally {
 			nodeLock.unlock();
 		}

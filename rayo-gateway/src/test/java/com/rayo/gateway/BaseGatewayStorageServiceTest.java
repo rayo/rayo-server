@@ -268,18 +268,18 @@ public abstract class BaseGatewayStorageServiceTest {
 		RayoNode node3 = buildRayoNode("node3",platforms);
 		storageService.registerRayoNode(node3);
 		
-		assertEquals(loadBalancer.pickRayoNode("staging"), node1.getHostname());
-		assertEquals(loadBalancer.pickRayoNode("staging"), node2.getHostname());
-		assertEquals(loadBalancer.pickRayoNode("staging"), node3.getHostname());
-		assertEquals(loadBalancer.pickRayoNode("staging"), node1.getHostname());
-		assertEquals(loadBalancer.pickRayoNode("staging"), node2.getHostname());
-		assertEquals(loadBalancer.pickRayoNode("staging"), node3.getHostname());
+		assertEquals(loadBalancer.pickRayoNode("staging"), node1);
+		assertEquals(loadBalancer.pickRayoNode("staging"), node2);
+		assertEquals(loadBalancer.pickRayoNode("staging"), node3);
+		assertEquals(loadBalancer.pickRayoNode("staging"), node1);
+		assertEquals(loadBalancer.pickRayoNode("staging"), node2);
+		assertEquals(loadBalancer.pickRayoNode("staging"), node3);
 		
 		storageService.unregisterRayoNode(node2.getHostname());
-		assertEquals(loadBalancer.pickRayoNode("staging"), node1.getHostname());
-		assertEquals(loadBalancer.pickRayoNode("staging"), node3.getHostname());
-		assertEquals(loadBalancer.pickRayoNode("staging"), node1.getHostname());
-		assertEquals(loadBalancer.pickRayoNode("staging"), node3.getHostname());
+		assertEquals(loadBalancer.pickRayoNode("staging"), node1);
+		assertEquals(loadBalancer.pickRayoNode("staging"), node3);
+		assertEquals(loadBalancer.pickRayoNode("staging"), node1);
+		assertEquals(loadBalancer.pickRayoNode("staging"), node3);
 	}
 	
 	@Test
