@@ -67,7 +67,7 @@
   	</bean>
 	
 	<!-- Load balancing strategy -->
-  	<bean id="gatewayLoadBalancer" class="com.rayo.gateway.lb.RoundRobinLoadBalancer">
+  	<bean id="gatewayLoadBalancer" class="com.rayo.gateway.lb.PriorityBasedLoadBalancer">
   		<property name="storageService" ref="gatewayStorageService" />  		
   	</bean>
 	
