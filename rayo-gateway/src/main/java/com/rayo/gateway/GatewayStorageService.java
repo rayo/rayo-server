@@ -55,6 +55,17 @@ public interface GatewayStorageService {
 	RayoNode registerRayoNode(RayoNode node) throws GatewayException;
 
 	/**
+	 * <p>Updates a rayo node. Normally rayo nodes can be updated to store their 
+	 * statistics. For example a routing engine may want to track the number of 
+	 * errors that a rayo node is having to black list it.</p>
+	 * 
+	 * @param node Rayo Node to update
+	 * @return {@link RayoNode} Rayo node that has been updated
+	 * @throws GatewayException If the rayo node cannot be updated
+	 */
+	RayoNode updateRayoNode(RayoNode node) throws GatewayException;
+	
+	/**
 	 * <p>Unregisters a Rayo Node.</p>
 	 * 
 	 * <p>Commonly a Rayo Node will be unregistered when it is not available for processing 

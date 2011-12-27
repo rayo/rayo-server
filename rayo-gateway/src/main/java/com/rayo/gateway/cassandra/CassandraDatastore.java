@@ -10,6 +10,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.Column;
@@ -103,8 +104,10 @@ public class CassandraDatastore implements GatewayDatastore {
 				.setGc_grace_seconds(0)
 				.setColumn_metadata(Arrays.asList(
 					new ColumnDef(Bytes.fromUTF8("hostname").getBytes(), ColumnFamilyManager.CFDEF_COMPARATOR_UTF8),
-					new ColumnDef(Bytes.fromUTF8("priority").getBytes(), ColumnFamilyManager.CFDEF_COMPARATOR_UTF8),
-					new ColumnDef(Bytes.fromUTF8("weight").getBytes(), ColumnFamilyManager.CFDEF_COMPARATOR_UTF8)
+					new ColumnDef(Bytes.fromUTF8("priority").getBytes(), ColumnFamilyManager.CFDEF_COMPARATOR_INTEGER),
+					new ColumnDef(Bytes.fromUTF8("weight").getBytes(), ColumnFamilyManager.CFDEF_COMPARATOR_INTEGER),
+					new ColumnDef(Bytes.fromUTF8("consecutive-errors").getBytes(), ColumnFamilyManager.CFDEF_COMPARATOR_INTEGER),
+					new ColumnDef(Bytes.fromUTF8("blacklisted").getBytes(), ColumnFamilyManager.CFDEF_COMPARATOR_UTF8)
 				));			
 			ksDef.addToCf_defs(cfNode);			
 			cfManager.addColumnFamily(cfNode);
@@ -199,19 +202,39 @@ public class CassandraDatastore implements GatewayDatastore {
 	public RayoNode storeNode(RayoNode node) throws DatastoreException {
 		
 		log.debug("Storing node: [%s]", node);
-		Mutator mutator = Pelops.createMutator("rayo");
+
 		RayoNode stored = getNode(node.getHostname());
 		if (stored != null) {
 			log.error("Node [%s] already exists", node);
 			throw new RayoNodeAlreadyExistsException();
 		}
-						
+		return store(node);
+	}
+	
+	public RayoNode updateNode(RayoNode node) throws DatastoreException {
+		
+		log.debug("Updating node: [%s]", node);
+		
+		RayoNode stored = getNode(node.getHostname());
+		if (stored == null) {
+			log.error("Node [%s] does not exist", node);
+			throw new RayoNodeNotFoundException();
+		}
+			
+		return store(node);
+	}
+	
+	private RayoNode store(RayoNode node) throws DatastoreException {
+		
+		Mutator mutator = Pelops.createMutator("rayo");
 		for (String platform: node.getPlatforms()) {
 			mutator.writeSubColumns("nodes", platform, node.getHostname(), 
 				mutator.newColumnList(
 					mutator.newColumn("priority", String.valueOf(node.getPriority())),
 					mutator.newColumn("weight", String.valueOf(node.getWeight())),
-					mutator.newColumn("ip", node.getIpAddress())
+					mutator.newColumn("ip", node.getIpAddress()),
+					mutator.newColumn("consecutive-errors", String.valueOf(node.getConsecutiveErrors())),
+					mutator.newColumn("blacklisted", String.valueOf(node.isBlackListed()))
 				)
 			);
 		}
@@ -454,6 +477,9 @@ public class CassandraDatastore implements GatewayDatastore {
 
 		try {
 			log.debug("Finding rayo nodes for platform: [%s]", platformId);
+			Set<String> platforms = new HashSet<String>();
+			platforms.add(platformId);
+			
 			List<RayoNode> nodes = new ArrayList<RayoNode>();
 			Selector selector = Pelops.createSelector("rayo");
 			List<SuperColumn> columns = selector.getSuperColumnsFromRow("nodes", platformId, false, ConsistencyLevel.ONE);
@@ -461,6 +487,7 @@ public class CassandraDatastore implements GatewayDatastore {
 				String id = Bytes.toUTF8(column.getName());
 				RayoNode rayoNode = buildNode(column.getColumns());
 				rayoNode.setHostname(id);
+				rayoNode.setPlatforms(platforms);
 				nodes.add(rayoNode);
 			}
 
@@ -750,6 +777,12 @@ public class CassandraDatastore implements GatewayDatastore {
 				}
 				if (name.equals("priority")) {
 					node.setPriority(Integer.parseInt(Bytes.toUTF8(column.getValue())));
+				}
+				if (name.equals("consecutive-errors")) {
+					node.setConsecutiveErrors(Integer.parseInt(Bytes.toUTF8(column.getValue())));
+				}
+				if (name.equals("blacklisted")) {
+					node.setBlackListed(Boolean.valueOf(Bytes.toUTF8(column.getValue())));
 				}
 				if (name.equals("platforms")) {
 					node.setPlatforms(new HashSet<String>(Arrays.asList(StringUtils.split(Bytes.toUTF8(column.getValue()),","))));

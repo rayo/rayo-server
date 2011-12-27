@@ -29,9 +29,21 @@ public interface GatewayDatastore {
 	 * 
 	 * @param node RayoNode object to store
 	 * @return {@link RayoNode} Node that has been stored
-	 * @throws DatastoreException If the rayo node could not be removed
+	 * @throws DatastoreException If the rayo node could not be stored
 	 */	
 	RayoNode storeNode(RayoNode node) throws DatastoreException;
+	
+
+	/**
+	 * <p>Updates a new Rayo Node on the DHT.</p>
+	 * 
+	 * <p>See also {@link GatewayStorageService#registerRayoNode(String, Collection)}</p>
+	 * 
+	 * @param node RayoNode object to update
+	 * @return {@link RayoNode} Node that has been updated
+	 * @throws DatastoreException If the rayo node could not be updated
+	 */	
+	RayoNode updateNode(RayoNode node) throws DatastoreException;
 
 	/**
 	 * <p>Removes a Rayo Node from the DHT.</p>

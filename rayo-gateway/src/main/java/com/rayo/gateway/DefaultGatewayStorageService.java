@@ -107,11 +107,17 @@ public class DefaultGatewayStorageService implements GatewayStorageService {
 			if (rayoNode.getIpAddress() == null) {
 				rayoNode.setIpAddress(InetAddress.getByName(rayoNode.getHostname()).getHostAddress());
 			}
-			store.storeNode(rayoNode);
+			return store.storeNode(rayoNode);
 		} catch (UnknownHostException uhe) {
 			throw new GatewayException("Unknown host", uhe);
 		}
-		return node;
+	}
+	
+	
+	@Override
+	public RayoNode updateRayoNode(RayoNode rayoNode) throws GatewayException {
+		
+		return store.updateNode(rayoNode);
 	}
 	
 	@Override

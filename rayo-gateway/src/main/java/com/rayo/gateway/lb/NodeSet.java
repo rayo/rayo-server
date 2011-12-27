@@ -103,6 +103,8 @@ public class NodeSet {
 		copy.setWeight(node.getWeight());
 		copy.setPlatforms(new HashSet<String>(node.getPlatforms()));
 		copy.setPriority(node.getPriority());
+		copy.setConsecutiveErrors(node.getConsecutiveErrors());
+		copy.setBlackListed(node.isBlackListed());
 		return copy;
 	}
 

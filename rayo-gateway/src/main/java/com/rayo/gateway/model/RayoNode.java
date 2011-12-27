@@ -40,6 +40,10 @@ public class RayoNode implements Serializable {
 	private int weight = DEFAULT_WEIGHT;
 	private int priority = DEFAULT_PRIORITY;
 	
+	// This information can be used by routers to implement blacklisting
+	//TODO: Refactor it into some stats object?
+	private int consecutiveErrors = 0;
+	private boolean blackListed = false;	
 	/**
 	 * <p>Creates an instance of a rayo server.</p>
 	 * 
@@ -152,6 +156,8 @@ public class RayoNode implements Serializable {
     		.append("ipAddress", getIpAddress())
     		.append("weight", getWeight())
     		.append("priority", getPriority())
+    		.append("consecutive-errors", getConsecutiveErrors())
+    		.append("blackListed", isBlackListed())
     		.append("platforms", getPlatforms())
     		.toString();
     }
@@ -170,5 +176,21 @@ public class RayoNode implements Serializable {
 
 	public void setPriority(int priority) {
 		this.priority = priority;
+	}
+
+	public int getConsecutiveErrors() {
+		return consecutiveErrors;
+	}
+
+	public void setConsecutiveErrors(int consecutiveErrors) {
+		this.consecutiveErrors = consecutiveErrors;
+	}
+
+	public boolean isBlackListed() {
+		return blackListed;
+	}
+
+	public void setBlackListed(boolean blackListed) {
+		this.blackListed = blackListed;
 	}
 }

@@ -6,6 +6,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.rayo.gateway.GatewayStorageService;
 import com.rayo.gateway.model.RayoNode;
+import com.voxeo.logging.Loggerf;
 
 /**
  * <p>This is a hybrid load balancer. It will use a complex algorithm based on 
@@ -30,14 +31,19 @@ import com.rayo.gateway.model.RayoNode;
  * @author martin
  *
  */
-public class PriorityBasedLoadBalancer implements GatewayLoadBalancingStrategy, GatewayStorageServiceSupport {
+public class PriorityBasedLoadBalancer extends BlacklistingLoadBalancer {
 
-	private GatewayStorageService storageService;
+	private Loggerf log = Loggerf.getLogger(PriorityBasedLoadBalancer.class);
 	
 	private Map<String, NodeSet> nodeSets = new ConcurrentHashMap<String, NodeSet>();
 
 	private RoundRobinLoadBalancer delegate = new RoundRobinLoadBalancer();
 	
+	/*
+	 * This load balancer delegates all the client resource load balancing stuff
+	 * to a regular round robin load balancer. It is important therefore to override
+	 * and delegate all the sensible method.
+	 */
 	@Override
 	public String pickClientResource(String jid) {
 
@@ -45,10 +51,24 @@ public class PriorityBasedLoadBalancer implements GatewayLoadBalancingStrategy, 
 	}
 	
 	@Override
+	public void clientOperationFailed(String fullJid) {
+
+		delegate.clientOperationFailed(fullJid);
+	}
+	
+	@Override
+	public void clientOperationSuceeded(String fullJid) {
+
+		delegate.clientOperationSuceeded(fullJid);
+	}
+		
+	@Override
 	public RayoNode pickRayoNode(String platformId) {
 
+		log.debug("Picking rayo node for platform [%s]", platformId);
 		List<RayoNode> nodes = storageService.getRayoNodes(platformId);
 		if (nodes.isEmpty()) {
+			log.debug("Could not find any available node for platform [%s]", platformId);
 			return null;
 		}
 
@@ -58,12 +78,27 @@ public class PriorityBasedLoadBalancer implements GatewayLoadBalancingStrategy, 
 			nodeSets.put(platformId, nodeSet);
 		}
 		
-		return nodeSet.next(nodes);
+		RayoNode node = nodes.get(nodes.indexOf(nodeSet.next(nodes)));
+		RayoNode last = node;
+		do {
+			if (!valid(node)) {
+				if (last == null) {
+					last = node;
+				}
+				node = nodes.get(nodes.indexOf(nodeSet.next(nodes)));
+			}  else {
+				return node;
+			}
+			
+		} while (!last.equals(node));
+		
+		log.debug("All vailable nodes for platform [%s] are blacklisted", platformId);
+		return null;
 	}
-
+	
 	public void setStorageService(GatewayStorageService storageService) {
 		
-		this.storageService = storageService;
+		super.setStorageService(storageService);
 		delegate.setStorageService(storageService);
 	}
 }

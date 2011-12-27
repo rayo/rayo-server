@@ -13,7 +13,7 @@ import com.rayo.gateway.model.RayoNode;
  * @author martin
  *
  */
-public interface GatewayLoadBalancingStrategy {
+public interface GatewayLoadBalancingStrategy extends GatewayOperationListener {
 
 	/**
 	 * Picks the next rayo node for  given platform id
@@ -23,7 +23,7 @@ public interface GatewayLoadBalancingStrategy {
 	 * @return {@link RayoNode} Next rayo node according to the load balancing strategy
 	 */
 	RayoNode pickRayoNode(String platformId);
-
+	
 	/**
 	 * Picks the next client resource for a given JID
 	 * 

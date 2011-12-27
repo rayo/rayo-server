@@ -59,6 +59,20 @@ public class InMemoryDatastore implements GatewayDatastore {
 		if (getNode(node.getHostname()) != null) {
 			throw new RayoNodeAlreadyExistsException();
 		}
+		return store(node);
+	}
+	
+	@Override
+	public RayoNode updateNode(RayoNode node) throws DatastoreException {
+
+		if (getNode(node.getHostname()) == null) {
+			throw new RayoNodeNotFoundException();
+		}
+		return store(node);
+	}
+	
+	private RayoNode store(RayoNode node) throws DatastoreException {
+		
 		Lock nodeLock = nodesLock.writeLock();
 		nodeLock.lock();
 		try {
@@ -128,6 +142,7 @@ public class InMemoryDatastore implements GatewayDatastore {
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
 	public List<RayoNode> getRayoNodesForPlatform(String platformId) {
 		
 		Lock nodeLock = nodesLock.readLock();

@@ -13,31 +13,54 @@ import com.rayo.gateway.model.RayoNode;
  * @author martin
  *
  */
-public class RoundRobinLoadBalancer implements GatewayLoadBalancingStrategy, GatewayStorageServiceSupport {
-
+public class RoundRobinLoadBalancer extends BlacklistingLoadBalancer {
+	
 	private Map<String,String> lastClients = new ConcurrentHashMap<String,String>();
 	private Map<String,RayoNode> lastNodes = new ConcurrentHashMap<String,RayoNode>();
-
-	private GatewayStorageService storageService;
+	
+	public RoundRobinLoadBalancer() {
+		
+		//TODO: Cleaning thread
+	}
 	
 	@Override
-	public String pickClientResource(String jid) {
+	public String pickClientResource(String bareJid) {
 
-		List<String> resources = storageService.getResourcesForClient(jid);
+		List<String> resources = storageService.getResourcesForClient(bareJid);
 		if (resources.isEmpty()) {
 			return null;
 		}
-		String lastClient = lastClients.get(jid);
-		
-		int i = resources.indexOf(lastClient);	
-		if (i == resources.size() -1) {
-			i = -1;
+		String client = pickNextResource(resources, bareJid);
+		if (client != null) {
+			lastClients.put(bareJid,client);
 		}
-		lastClient = resources.get(i+1);// when not found, 0 will be returned
-		lastClients.put(jid,lastClient); 
-		return lastClient;
+		return client;
 	}
 	
+	private String pickNextResource(List<String> resources, String bareJid) {
+		
+		String lastClient = lastClients.get(bareJid);
+		String client = lastClient;
+		boolean found = false;
+		
+		do {
+			int i = resources.indexOf(client);	
+			if (i == resources.size() -1) {
+				i = -1;
+			}
+			client = resources.get(i+1);// when not found, 0 will be returned
+			if (lastClient == null) {
+				lastClient = client;
+			}
+			if (validClient(bareJid+"/"+client)) {
+				found = true;
+				break;
+			}
+		} while (!client.equals(lastClient));
+		if (!found) return null;
+		return client;
+	}
+		
 	@Override
 	public RayoNode pickRayoNode(String platformId) {
 
@@ -45,14 +68,35 @@ public class RoundRobinLoadBalancer implements GatewayLoadBalancingStrategy, Gat
 		if (nodes.isEmpty()) {
 			return null;
 		}
+		RayoNode node = pickNextNode(nodes, platformId);
+		if (node != null) {
+			lastNodes.put(platformId,node);
+		}
+		return node;
+	}
+	
+	private RayoNode pickNextNode(List<RayoNode> nodes, String platformId) {
+		
 		RayoNode lastNode = lastNodes.get(platformId);
-		int i = nodes.indexOf(lastNode);	
-		if (i == nodes.size() -1) {
-			i = -1;
-		}		
-		lastNode = nodes.get(i+1); // when not found, 0 will be returned
-		lastNodes.put(platformId,lastNode);
-		return lastNode;
+		RayoNode node = lastNode;
+		boolean found = false;
+		
+		do {
+			int i = nodes.indexOf(node);	
+			if (i == nodes.size() -1) {
+				i = -1;
+			}		
+			node = nodes.get(i+1); // when not found, 0 will be returned
+			if (lastNode == null) {
+				lastNode = node;
+			}
+			if (valid(node)) {
+				found = true;
+				break;
+			}
+		} while (!node.equals(lastNode));
+		if (!found) return null;
+		return node;
 	}
 
 	public void setStorageService(GatewayStorageService storageService) {

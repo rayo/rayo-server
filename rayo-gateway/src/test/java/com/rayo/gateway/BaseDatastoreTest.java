@@ -1,6 +1,7 @@
 package com.rayo.gateway;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -33,6 +34,43 @@ public abstract class BaseDatastoreTest {
 		RayoNode stored = store.storeNode(node);
 		assertNotNull(stored);
 		assertEquals(stored, node);
+	}
+	
+	@Test
+	public void testAllPropertiesStored() throws Exception {
+
+		RayoNode node = buildRayoNode("localhost","127.0.0.1", new String[] { "staging" });
+		RayoNode stored = store.storeNode(node);
+		assertNotNull(stored);
+		// rayo node toString representations will dump all properties
+		assertEquals(node.toString(), stored.toString());
+	}
+	
+	@Test
+	public void testUpdateNode() throws Exception {
+
+		RayoNode node = buildRayoNode("localhost","127.0.0.1", new String[] { "staging" }, 10, 1);
+		RayoNode stored = store.storeNode(node);
+		assertNotNull(stored);
+		assertEquals(node.toString(), stored.toString());
+		
+		RayoNode newnode = buildRayoNode("localhost","128.90.78.98", new String[] { "staging" }, 25, 3);
+		newnode.setBlackListed(true);
+		newnode.setConsecutiveErrors(10);
+		stored = store.updateNode(newnode);
+		assertEquals(newnode.toString(), stored.toString());
+		assertFalse(stored.toString().equals(node.toString()));
+		
+		RayoNode found = store.getNode(newnode.getHostname());
+		assertEquals(newnode.toString(), found.toString());
+		assertFalse(found.toString().equals(node.toString()));
+	}
+	
+	@Test(expected=RayoNodeNotFoundException.class)
+	public void testUpdateNodeNotFound() throws Exception {
+		
+		RayoNode node = buildRayoNode("localhost","127.0.0.1", new String[] { "staging" }, 10, 1);
+		store.updateNode(node);
 	}
 
 	@Test

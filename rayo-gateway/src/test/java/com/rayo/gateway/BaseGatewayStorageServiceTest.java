@@ -3,6 +3,7 @@ package com.rayo.gateway;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -45,6 +46,28 @@ public abstract class BaseGatewayStorageServiceTest {
 		
 		storageService.unregisterRayoNode(node1.getHostname());
 		assertEquals(0, storageService.getRayoNodes("staging").size());		
+	}
+	
+	@Test
+	public void testUpdateRayoNode() throws Exception {
+		
+		String[] platforms = new String[]{"staging"};
+		RayoNode node = buildRayoNode("node1", platforms);
+		node.setIpAddress("127.0.0.1");
+		node.setWeight(30);
+		node.setPriority(1);
+		
+		RayoNode stored = storageService.registerRayoNode(node);
+		assertEquals(stored.toString(), node.toString());
+
+		RayoNode newnode = buildRayoNode("node1", platforms);
+		node.setIpAddress("127.0.0.1");
+		node.setWeight(30);
+		node.setPriority(1);
+
+		stored = storageService.updateRayoNode(newnode);
+		assertEquals(stored.toString(), newnode.toString());
+		assertFalse(stored.toString().equals(node.toString()));
 	}
 	
 	@Test
