@@ -64,11 +64,6 @@ import com.voxeo.servlet.xmpp.StanzaError;
 public class RayoServlet extends AbstractRayoServlet {
 
     private static final Loggerf log = Loggerf.getLogger(RayoServlet.class);
-
-    public static final String GATEWAY_DOMAIN = "gateway-domain";
-    public static final String DEFAULT_PLATFORM_ID = "default-platform-id";
-    public static final String WEIGHT = "weight";
-    public static final String PRIORITY = "priority";
     
     private JIDRegistry jidRegistry;
     
@@ -85,12 +80,6 @@ public class RayoServlet extends AbstractRayoServlet {
     private RayoJIDLookupService<OfferEvent> rayoLookupService;
     
     private XmppMessageListenerGroup xmppMessageListenersGroup;
-    
-    private String gatewayDomain;
-    private String defaultPlatform;
-    
-    private String weight = "10";
-    private String priority = "1";
 	
     // Setup
     // ================================================================================
@@ -98,13 +87,9 @@ public class RayoServlet extends AbstractRayoServlet {
     @Override
     public void init(ServletConfig config) throws ServletException {
         super.init(config);
-                
-        gatewayDomain = config.getInitParameter(GATEWAY_DOMAIN);
-        defaultPlatform = config.getInitParameter(DEFAULT_PLATFORM_ID);        
-        weight = config.getInitParameter(WEIGHT);
-        priority = config.getInitParameter(PRIORITY);
         
-        if (gatewayDomain != null) {
+        RayoAdminService adminService = (RayoAdminService)getAdminService();
+        if (adminService.getGatewayDomain() != null) {
         	        	
 	        Timer timer = new Timer();
 	        timer.schedule(new TimerTask() {
@@ -145,8 +130,11 @@ public class RayoServlet extends AbstractRayoServlet {
      */
     private void broadcastPresence(String status) {
     	
+        RayoAdminService adminService = (RayoAdminService)getAdminService();
+        String gatewayDomain = adminService.getGatewayDomain();
+        
     	//TODO: Make private
-        if (gatewayDomain != null) {
+        if (adminService.getGatewayDomain() != null) {
         	//TODO: Extract this logic elsewhere. Advertises presence and platform id preference.
         	PresenceMessage presence = null;        	
         	try {
@@ -160,9 +148,9 @@ public class RayoServlet extends AbstractRayoServlet {
 		        	showElement.setTextContent(status.toLowerCase());
 		        	org.w3c.dom.Element nodeInfoElement = 
 		        			document.createElementNS("urn:xmpp:rayo:cluster:1", "node-info");
-		        	appendNodeInfoElement(document, nodeInfoElement, "platform", defaultPlatform);
-		        	appendNodeInfoElement(document, nodeInfoElement, "weight", weight);
-		        	appendNodeInfoElement(document, nodeInfoElement, "priority", priority);
+		        	appendNodeInfoElement(document, nodeInfoElement, "platform", adminService.getDefaultPlatform());
+		        	appendNodeInfoElement(document, nodeInfoElement, "weight", adminService.getWeight());
+		        	appendNodeInfoElement(document, nodeInfoElement, "priority", adminService.getPriority());
 					presence = getXmppFactory().createPresence(
 							getLocalDomain(), gatewayDomain, null, showElement, nodeInfoElement);
 	        	}        	
@@ -222,6 +210,8 @@ public class RayoServlet extends AbstractRayoServlet {
     	JID jid = null; 
     	JID from = null;
     	RayoProtocolException jidLookupError = null;
+        RayoAdminService adminService = (RayoAdminService)getAdminService();
+        String gatewayDomain = adminService.getGatewayDomain();
     	if (gatewayDomain == null) {
     		// Single server. This code needs a bit of refactoring specially as 
     		// the gateway servlet shares some of this stuff. 
@@ -329,6 +319,8 @@ public class RayoServlet extends AbstractRayoServlet {
     	
 		JID toJid = presence.getTo();
 		JID fromJid = presence.getFrom();
+        RayoAdminService adminService = (RayoAdminService)getAdminService();
+        String gatewayDomain = adminService.getGatewayDomain();
 		if (fromJid.getNode() == null) {
 			if (gatewayDomain != null && fromJid.getDomain().equals(gatewayDomain)) {
 				if (presence.getType().equals("error")) {
@@ -370,6 +362,7 @@ public class RayoServlet extends AbstractRayoServlet {
             
             // Handle outbound 'dial' command
             if (command instanceof DialCommand) {
+            	rayoStatistics.commandReceived(command);
             	if (((RayoAdminService)getAdminService()).isQuiesceMode()) {
                     log.debug("Quiesce Mode ON. Dropping incoming call: %s :: %s", request.toString(), request.getSession().getId());
                     sendIqError(request, StanzaError.Type.WAIT, StanzaError.Condition.SERVICE_UNAVAILABLE, "Quiesce Mode ON.");

@@ -22,4 +22,12 @@ public interface AdminListener {
 	 * This method is invoked when Rayo Server is being shut down
 	 */
 	public void onShutdown();
+	
+	/**
+	 * Notifies about a property change
+	 * 
+	 * @param property Property that has changed
+	 * @param newValue New value for the property
+	 */
+	public void onPropertyChanged(String property, String newValue);
 }

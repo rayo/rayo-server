@@ -11,6 +11,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 
 import com.rayo.server.listener.AdminListener;
@@ -31,7 +32,12 @@ import com.voxeo.logging.Loggerf;
 public abstract class AdminService {
 
 	private static final Loggerf log = Loggerf.getLogger(AdminService.class);
-	
+
+    public static final String GATEWAY_DOMAIN = "gateway-domain";
+    public static final String DEFAULT_PLATFORM_ID = "default-platform-id";
+    public static final String WEIGHT = "weight";
+    public static final String PRIORITY = "priority";
+    
 	private long buildNumber;
 	private String buildId;
 	private String versionNumber;
@@ -40,6 +46,8 @@ public abstract class AdminService {
 	private AtomicBoolean quiesceMode = new AtomicBoolean(false);
 	private ReentrantReadWriteLock adminLock = new ReentrantReadWriteLock();
 		
+
+	
 	/**
 	 * <p>Returns the Quiesce status for this particular Rayo Server or Gateway.</p>
 	 * 
@@ -106,7 +114,7 @@ public abstract class AdminService {
 		
 		return isQuiesceMode();
 	}
-	
+		
 	/**
 	 * <p>Shuts down a Rayo Server or Gateway.</p>
 	 */
@@ -132,10 +140,11 @@ public abstract class AdminService {
 	 * <p>Reads the context configuration from the Servlet Context. Typical 
 	 * context configuration are the build number, build id or version number.
 	 * 
-	 * @param application Servlet context
+	 * @param config Servlet config
 	 */
-	public void readConfigurationFromContext(ServletContext application) {
+	public void readConfigurationFromContext(ServletConfig config) {
 		
+		ServletContext application = config.getServletContext();
         InputStream inputStream = application.getResourceAsStream("/META-INF/MANIFEST.MF");
         try {
 			Manifest manifest = new Manifest(inputStream);
@@ -151,7 +160,7 @@ public abstract class AdminService {
 			log.info("Build Version Number: %s", versionNumber);
 		} catch (IOException e) {
 			log.warn("Could not red MANIFEST.MF file. Application information won't be available in Admin Service.");
-		} 
+		}
 	}
 
 	/**

@@ -1,5 +1,7 @@
 package com.rayo.server.admin;
 
+import javax.servlet.ServletConfig;
+
 import com.rayo.server.CallActor;
 import com.rayo.server.CallRegistry;
 import com.voxeo.logging.Loggerf;
@@ -18,7 +20,17 @@ public class RayoAdminService extends AdminService {
 
 	private static final Loggerf log = Loggerf.getLogger(RayoAdminService.class);
 		
+    public static final String GATEWAY_DOMAIN = "gateway-domain";
+    public static final String DEFAULT_PLATFORM_ID = "default-platform-id";
+    public static final String WEIGHT = "weight";
+    public static final String PRIORITY = "priority";
+	
 	private CallRegistry callRegistry;
+	
+    private String gatewayDomain;
+    private String defaultPlatform;
+    private String weight = "10";
+    private String priority = "1";
 		
 	/**
 	 * Sends a DTMF tone to a call
@@ -42,6 +54,36 @@ public class RayoAdminService extends AdminService {
 	}
 	
 	/**
+	 * Sets the new weight for a rayo server
+	 * 
+	 * @param weight New weight
+	 */
+	public void setWeight(int weight) {
+		
+		this.weight = String.valueOf(weight);
+	}
+	
+	/**
+	 * Sets the new priority for a rayo server
+	 * 
+	 * @param priority New priority
+	 */
+	public void setPriority(int priority) {
+		
+		this.priority = String.valueOf(priority);
+	}
+	
+	/**
+	 * Sets the new platform for a rayo server
+	 * 
+	 * @param platform New platform
+	 */
+	public void setPlatform(String platform) {
+		
+		this.defaultPlatform = platform;
+	}
+	
+	/**
 	 * Sets the call registry
 	 * 
 	 * @param callRegistry Call registry
@@ -51,8 +93,51 @@ public class RayoAdminService extends AdminService {
 	}
 	
 	@Override
+	public void readConfigurationFromContext(ServletConfig config) {
+		
+		super.readConfigurationFromContext(config);
+		
+        gatewayDomain = config.getInitParameter(GATEWAY_DOMAIN);
+        defaultPlatform = config.getInitParameter(DEFAULT_PLATFORM_ID);        
+        weight = config.getInitParameter(WEIGHT);
+        priority = config.getInitParameter(PRIORITY);
+	}
+	
+	@Override
 	public String getServerName() {
 		
 		return "Rayo Server";
+	}
+
+	public String getGatewayDomain() {
+		return gatewayDomain;
+	}
+
+	public void setGatewayDomain(String gatewayDomain) {
+		this.gatewayDomain = gatewayDomain;
+	}
+
+	public String getDefaultPlatform() {
+		return defaultPlatform;
+	}
+
+	public void setDefaultPlatform(String defaultPlatform) {
+		this.defaultPlatform = defaultPlatform;
+	}
+
+	public String getWeight() {
+		return weight;
+	}
+
+	public void setWeight(String weight) {
+		this.weight = weight;
+	}
+
+	public String getPriority() {
+		return priority;
+	}
+
+	public void setPriority(String priority) {
+		this.priority = priority;
 	}
 }

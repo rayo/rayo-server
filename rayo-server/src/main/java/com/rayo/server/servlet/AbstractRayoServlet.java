@@ -70,9 +70,12 @@ public abstract class AbstractRayoServlet extends XmppServlet implements AdminLi
 			}
 		}
 		
-        adminService.readConfigurationFromContext(getServletConfig().getServletContext());     
+        adminService.readConfigurationFromContext(getServletConfig());     
         adminService.addAdminListener(this);
 	}
+	
+	@Override
+	public void onPropertyChanged(String property, String newValue) {}
 	
     /**
      * Called by Spring on component initialization
