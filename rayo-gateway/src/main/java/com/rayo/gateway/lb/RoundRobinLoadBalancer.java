@@ -1,8 +1,11 @@
 package com.rayo.gateway.lb;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.rayo.gateway.GatewayStorageService;
+import com.rayo.gateway.model.RayoNode;
 
 /**
  * <p>A default round robin based load balancer.</p>
@@ -10,10 +13,10 @@ import com.rayo.gateway.GatewayStorageService;
  * @author martin
  *
  */
-public class RoundRobinLoadBalancer implements GatewayLoadBalancingStrategy {
+public class RoundRobinLoadBalancer implements GatewayLoadBalancingStrategy, GatewayStorageServiceSupport {
 
-	private String lastClient;
-	private String lastNode;
+	private Map<String,String> lastClients = new ConcurrentHashMap<String,String>();
+	private Map<String,RayoNode> lastNodes = new ConcurrentHashMap<String,RayoNode>();
 
 	private GatewayStorageService storageService;
 	
@@ -24,26 +27,31 @@ public class RoundRobinLoadBalancer implements GatewayLoadBalancingStrategy {
 		if (resources.isEmpty()) {
 			return null;
 		}
+		String lastClient = lastClients.get(jid);
+		
 		int i = resources.indexOf(lastClient);	
 		if (i == resources.size() -1) {
 			i = -1;
 		}
-		lastClient = resources.get(i+1); // when not found, 0 will be returned
+		lastClient = resources.get(i+1);// when not found, 0 will be returned
+		lastClients.put(jid,lastClient); 
 		return lastClient;
 	}
 	
 	@Override
-	public String pickRayoNode(String platformId) {
+	public RayoNode pickRayoNode(String platformId) {
 
-		List<String> nodes = storageService.getRayoNodes(platformId);
+		List<RayoNode> nodes = storageService.getRayoNodes(platformId);
 		if (nodes.isEmpty()) {
 			return null;
 		}
+		RayoNode lastNode = lastNodes.get(platformId);
 		int i = nodes.indexOf(lastNode);	
 		if (i == nodes.size() -1) {
 			i = -1;
 		}		
 		lastNode = nodes.get(i+1); // when not found, 0 will be returned
+		lastNodes.put(platformId,lastNode);
 		return lastNode;
 	}
 

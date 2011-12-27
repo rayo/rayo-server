@@ -1,5 +1,7 @@
 package com.rayo.gateway.lb;
 
+import com.rayo.gateway.model.RayoNode;
+
 
 
 /**
@@ -18,9 +20,9 @@ public interface GatewayLoadBalancingStrategy {
 	 * 
 	 * @param platformId Id of the platform
 	 * 
-	 * @return String Next rayo node according to the load balancing strategy
+	 * @return {@link RayoNode} Next rayo node according to the load balancing strategy
 	 */
-	String pickRayoNode(String platformId);
+	RayoNode pickRayoNode(String platformId);
 
 	/**
 	 * Picks the next client resource for a given JID

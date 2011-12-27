@@ -128,19 +128,12 @@ public class InMemoryDatastore implements GatewayDatastore {
 		}
 	}
 	
-	public List<String> getRayoNodesForPlatform(String platformId) {
+	public List<RayoNode> getRayoNodesForPlatform(String platformId) {
 		
 		Lock nodeLock = nodesLock.readLock();
 		nodeLock.lock();
 		try {
-			List<String> ids = new ArrayList<String>();
-			List<RayoNode> nodes = platformsMap.get(platformId);
-			if (nodes != null) {
-				for(RayoNode node: nodes) {
-					ids.add(node.getHostname());
-				}
-			}
-			return ids;
+			return platformsMap.get(platformId);			
 		} finally {
 			nodeLock.unlock();
 		}

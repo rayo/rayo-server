@@ -83,9 +83,9 @@ public interface GatewayDatastore {
 	 * <p>See also {@link GatewayStorageService#getRayoNode(String)}  
 	 *
 	 * @param platformId Id of the platform for which we want to query the nodes
-	 * @return List<String> Collection or Rayo Nodes linked to the platform
+	 * @return List<RayoNode> Collection or Rayo Nodes linked to the platform
 	 */
-	List<String> getRayoNodesForPlatform(String platformId);
+	List<RayoNode> getRayoNodesForPlatform(String platformId);
 
 	/**
 	 * <p>Returns the list of registered platforms on this DHT.</p>

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
 
@@ -20,6 +21,7 @@ import com.rayo.core.OfferEvent;
 import com.rayo.gateway.exception.GatewayException;
 import com.rayo.gateway.jmx.GatewayStatistics;
 import com.rayo.gateway.lb.GatewayLoadBalancingStrategy;
+import com.rayo.gateway.model.RayoNode;
 import com.rayo.gateway.util.JIDUtils;
 import com.rayo.server.lookup.RayoJIDLookupService;
 import com.rayo.server.servlet.AbstractRayoServlet;
@@ -183,16 +185,37 @@ public class GatewayServlet extends AbstractRayoServlet {
 				"node-info", "urn:xmpp:rayo:cluster:1");
 				
 		List<String> platforms = new ArrayList<String>();
+		int weight = RayoNode.DEFAULT_WEIGHT;
+		int priority = RayoNode.DEFAULT_PRIORITY;
 		if (nodeInfoElement != null) {
 			NodeList platformElements = nodeInfoElement
 					.getElementsByTagName("platform");
 			for (int i=0;i<platformElements.getLength();i++) {
-				platforms.add(platformElements.item(0).getTextContent());
+				platforms.add(platformElements.item(i).getTextContent());
+			}
+			NodeList weightList = nodeInfoElement.getElementsByTagName("weight");
+			if (weightList.getLength() > 0) {
+				try {
+					weight = Integer.parseInt(weightList.item(0).getTextContent());
+				} catch (Exception e) {
+					log.error("Unable to parse weight on message [%s]", message);
+				}
+			}
+			NodeList priorityList = nodeInfoElement.getElementsByTagName("priority");
+			if (priorityList.getLength() > 0) {
+				try {
+					priority = Integer.parseInt(priorityList.item(0).getTextContent());
+				} catch (Exception e) {
+					log.error("Unable to parse priority on message [%s]", message);
+				}
 			}
 		}
 		
-		gatewayStorageService.registerRayoNode(
-			JIDUtils.getDomain(message.getFrom().toString()), platforms);		
+		RayoNode node = new RayoNode(message.getFrom().toString(), null, new HashSet<String>(platforms));
+		node.setPriority(priority);
+		node.setWeight(weight);
+		
+		gatewayStorageService.registerRayoNode(node);		
 	}
 
 	/*
@@ -201,12 +224,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 	 * @param message Presence Message
 	 */
 	private void processCallPresence(PresenceMessage message) throws Exception {
-				
-		if (getAdminService().isQuiesceMode()) {
-			sendPresenceError(message.getTo(), message.getFrom(), Condition.SERVICE_UNAVAILABLE);
-			return;
-		}
-		
+						
 		JID toJid = message.getTo();
 		JID fromJid = message.getFrom();		
 		String callId = fromJid.getNode();
@@ -215,7 +233,12 @@ public class GatewayServlet extends AbstractRayoServlet {
 		String resource = null;
 		
 		//TODO: All this routing code is also in Rayo Servlet. We need to refactor
-		if (offerElement != null) {
+		if (offerElement != null) {			
+			if (getAdminService().isQuiesceMode()) {
+				log.warn("Gateway is on Quiesce mode. Discarding incoming job offer for call id: [%s]", callId);
+				sendPresenceError(message.getTo(), message.getFrom(), Condition.SERVICE_UNAVAILABLE);
+				return;
+			}			
 			String offerTo = offerElement.getAttribute("to");
 			JID callTo = getXmppFactory().createJID(getBareJID(offerTo));
 			//TODO: This needs to be refactored
@@ -284,7 +307,6 @@ public class GatewayServlet extends AbstractRayoServlet {
 		return getXmppFactory().createJID(callId + "@" + nodeIp);
 			
 	}
-
 	
 	private JID createExternalCallJid(String callId, String resource) {
 		
@@ -409,6 +431,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 	private void processDialRequest(IQRequest request) throws Exception {
 		
 		if (getAdminService().isQuiesceMode()) {
+			log.warn("Gateway is on Quiesce mode. Discarding incoming dial request: [%s]", request);
 			sendIqError(request, Type.CANCEL, Condition.SERVICE_UNAVAILABLE, "Gateway Server is on Quiesce Mode");
 			return;
 		}
@@ -422,9 +445,9 @@ public class GatewayServlet extends AbstractRayoServlet {
 		
 		String platformId = gatewayStorageService.getPlatformForClient(request.getFrom());
 		if (platformId != null) {	
-			String rayoNode = loadBalancer.pickRayoNode(platformId); // picks and load balances
+			RayoNode rayoNode = loadBalancer.pickRayoNode(platformId); // picks and load balances
 			if (rayoNode != null) {
-				JID to = getXmppFactory().createJID(rayoNode);
+				JID to = getXmppFactory().createJID(rayoNode.getHostname());
 				forwardIQRequest(fromJidInternal, to, request, payload);								
 			} else {
 				sendIqError(request, Type.CANCEL, Condition.SERVICE_UNAVAILABLE, 

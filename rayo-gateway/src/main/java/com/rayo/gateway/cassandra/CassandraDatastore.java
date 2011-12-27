@@ -209,8 +209,8 @@ public class CassandraDatastore implements GatewayDatastore {
 		for (String platform: node.getPlatforms()) {
 			mutator.writeSubColumns("nodes", platform, node.getHostname(), 
 				mutator.newColumnList(
-					mutator.newColumn("priority", "100"),
-					mutator.newColumn("weight","1"),
+					mutator.newColumn("priority", String.valueOf(node.getPriority())),
+					mutator.newColumn("weight", String.valueOf(node.getWeight())),
 					mutator.newColumn("ip", node.getIpAddress())
 				)
 			);
@@ -450,16 +450,18 @@ public class CassandraDatastore implements GatewayDatastore {
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<String> getRayoNodesForPlatform(String platformId) {
+	public List<RayoNode> getRayoNodesForPlatform(String platformId) {
 
 		try {
 			log.debug("Finding rayo nodes for platform: [%s]", platformId);
-			List<String> nodes = new ArrayList<String>();
+			List<RayoNode> nodes = new ArrayList<RayoNode>();
 			Selector selector = Pelops.createSelector("rayo");
 			List<SuperColumn> columns = selector.getSuperColumnsFromRow("nodes", platformId, false, ConsistencyLevel.ONE);
 			for(SuperColumn column: columns) {
 				String id = Bytes.toUTF8(column.getName());
-				nodes.add(id);
+				RayoNode rayoNode = buildNode(column.getColumns());
+				rayoNode.setHostname(id);
+				nodes.add(rayoNode);
 			}
 
 			return nodes;
@@ -742,6 +744,12 @@ public class CassandraDatastore implements GatewayDatastore {
 				String name = Bytes.toUTF8(column.getName());
 				if (name.equals("ip")) {
 					node.setIpAddress(Bytes.toUTF8(column.getValue()));
+				}
+				if (name.equals("weight")) {
+					node.setWeight(Integer.parseInt(Bytes.toUTF8(column.getValue())));
+				}
+				if (name.equals("priority")) {
+					node.setPriority(Integer.parseInt(Bytes.toUTF8(column.getValue())));
 				}
 				if (name.equals("platforms")) {
 					node.setPlatforms(new HashSet<String>(Arrays.asList(StringUtils.split(Bytes.toUTF8(column.getValue()),","))));

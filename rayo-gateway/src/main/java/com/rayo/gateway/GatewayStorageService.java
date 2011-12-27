@@ -3,7 +3,10 @@ package com.rayo.gateway;
 import java.util.Collection;
 import java.util.List;
 
+import com.rayo.gateway.exception.DatastoreException;
 import com.rayo.gateway.exception.GatewayException;
+import com.rayo.gateway.model.Application;
+import com.rayo.gateway.model.GatewayClient;
 import com.rayo.gateway.model.RayoNode;
 import com.voxeo.servlet.xmpp.JID;
 
@@ -75,10 +78,10 @@ public interface GatewayStorageService {
 	 *  
 	 * @param platformId Id of the platform for which we want to query the nodes
 	 * 
-	 * @return List<String> Collection or Rayo Nodes linked to the platform
+	 * @return List<RayoNode> Collection or Rayo Nodes linked to the platform
 	 *
 	 */
-	List<String> getRayoNodes(String platformId);
+	List<RayoNode> getRayoNodes(String platformId);
 	
 	/**
 	 * <p>Returns the list of registered platforms.</p>
@@ -99,11 +102,12 @@ public interface GatewayStorageService {
 	 *  
 	 * @param appId Application's id 
 	 * @param clientJid Client JId
+	 * @return GatewayClient client that has been created
 	 * 
 	 * @throws GatewayException If the client JID could not be registered, like for example when 
 	 * a Rayo application linked to that client JID cannot be found
 	 */
-	void registerClient(String appId, JID clientJid) throws GatewayException;
+	GatewayClient registerClient(String appId, JID clientJid) throws GatewayException;
 
 	/**
 	 * <p>Removes this client. Subsequent clients from this JID will not find 
@@ -113,9 +117,10 @@ public interface GatewayStorageService {
 	 * a Rayo application from a Rayo Cluster.</p>
 	 * 
 	 * @param clientJid Client JID to be unregistered
+	 * @return GatewayClient client that has been removed
 	 * @throws GatewayException If there is any issues when unregistering the client JID
 	 */
-	void unregisterClient(JID clientJid) throws GatewayException;
+	GatewayClient unregisterClient(JID clientJid) throws GatewayException;
 
 	
 	/**
@@ -267,4 +272,24 @@ public interface GatewayStorageService {
 	 * @return {@link Collection} Collection of registered client applications
 	 */
 	public List<String> getClients();
+	
+	/**
+	 * Registers an application in the storage service
+	 * 
+	 * @param appId Id of the application to be registered
+	 * @return Application registered application
+	 * 
+	 * @throws DatastoreException If there is any problem while registering the application
+	 */
+	public Application registerApplication(Application application) throws DatastoreException;
+	
+	/**
+	 * Unregisters an application from the storage service
+	 * 
+	 * @param appId Id of the application to be unregistered
+	 * @return Application unregistered application
+	 * 
+	 * @throws DatastoreException If there is any problem while unregistering the application
+	 */
+	public Application unregisterApplication(String appId) throws DatastoreException;
 }

@@ -54,9 +54,9 @@ public abstract class BaseGatewayStorageServiceTest {
 		RayoNode node1 = buildRayoNode("node1",platforms);
 		storageService.registerRayoNode(node1);
 		
-		List<String> nodes = storageService.getRayoNodes("staging");
+		List<RayoNode> nodes = storageService.getRayoNodes("staging");
 		assertEquals(nodes.size(),1);
-		assertEquals(nodes.get(0), "node1");
+		assertEquals(nodes.get(0).getHostname(), "node1");
 	}
 	
 	@Test
@@ -95,16 +95,16 @@ public abstract class BaseGatewayStorageServiceTest {
 		
 		storageService.registerRayoNode(node1);
 		
-		List<String> nodes = storageService.getRayoNodes("staging");
+		List<RayoNode> nodes = storageService.getRayoNodes("staging");
 		assertEquals(nodes.size(),1);
-		assertEquals(nodes.get(0), "node1");
+		assertEquals(nodes.get(0).getHostname(), "node1");
 	}
 	
 	@Test
 	public void testBindClient() throws Exception {
 		
 		Application application = buildApplication("voxeo");
-		storageService.storeApplication(application);
+		storageService.registerApplication(application);
 
 		JID clientJid = new JIDImpl("test@jabber.org/a");
 		assertNull(storageService.getPlatformForClient(clientJid));
@@ -208,7 +208,7 @@ public abstract class BaseGatewayStorageServiceTest {
 	public void testClientResources() throws Exception {
 		
 		Application application = buildApplication("voxeo");
-		storageService.storeApplication(application);
+		storageService.registerApplication(application);
 
 		JID clientJid1 = new JIDImpl("test@jabber.org/a");
 		assertEquals(0, storageService.getResourcesForClient(clientJid1.getBareJID().toString()).size());
@@ -234,7 +234,7 @@ public abstract class BaseGatewayStorageServiceTest {
 	public void testGetClientResources() throws Exception {
 
 		Application application = buildApplication("voxeo");
-		storageService.storeApplication(application);
+		storageService.registerApplication(application);
 
 		assertEquals(storageService.getClients().size(),0);
 		JID clientJid1 = new JIDImpl("test@jabber.org/a");		
@@ -286,7 +286,7 @@ public abstract class BaseGatewayStorageServiceTest {
 	public void testClientResourcesLoadBalancing() throws Exception{
 		
 		Application application = buildApplication("voxeo");
-		storageService.storeApplication(application);
+		storageService.registerApplication(application);
 
 		JID clientJid = new JIDImpl("test@jabber.org/a");
 		assertNull(loadBalancer.pickClientResource(clientJid.getBareJID().toString()));		

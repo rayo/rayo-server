@@ -67,6 +67,8 @@ public class RayoServlet extends AbstractRayoServlet {
 
     public static final String GATEWAY_DOMAIN = "gateway-domain";
     public static final String DEFAULT_PLATFORM_ID = "default-platform-id";
+    public static final String WEIGHT = "weight";
+    public static final String PRIORITY = "priority";
     
     private JIDRegistry jidRegistry;
     
@@ -86,6 +88,9 @@ public class RayoServlet extends AbstractRayoServlet {
     
     private String gatewayDomain;
     private String defaultPlatform;
+    
+    private String weight = "10";
+    private String priority = "1";
 	
     // Setup
     // ================================================================================
@@ -96,6 +101,8 @@ public class RayoServlet extends AbstractRayoServlet {
                 
         gatewayDomain = config.getInitParameter(GATEWAY_DOMAIN);
         defaultPlatform = config.getInitParameter(DEFAULT_PLATFORM_ID);        
+        weight = config.getInitParameter(WEIGHT);
+        priority = config.getInitParameter(PRIORITY);
         
         if (gatewayDomain != null) {
         	        	
@@ -153,9 +160,9 @@ public class RayoServlet extends AbstractRayoServlet {
 		        	showElement.setTextContent(status.toLowerCase());
 		        	org.w3c.dom.Element nodeInfoElement = 
 		        			document.createElementNS("urn:xmpp:rayo:cluster:1", "node-info");
-		        	org.w3c.dom.Element platform = document.createElement("platform");
-		        	platform.setTextContent(defaultPlatform);
-		        	nodeInfoElement.appendChild(platform);
+		        	appendNodeInfoElement(document, nodeInfoElement, "platform", defaultPlatform);
+		        	appendNodeInfoElement(document, nodeInfoElement, "weight", weight);
+		        	appendNodeInfoElement(document, nodeInfoElement, "priority", priority);
 					presence = getXmppFactory().createPresence(
 							getLocalDomain(), gatewayDomain, null, showElement, nodeInfoElement);
 	        	}        	
@@ -166,6 +173,14 @@ public class RayoServlet extends AbstractRayoServlet {
         	}
         }    	
     }
+
+	private void appendNodeInfoElement(CoreDocumentImpl document, org.w3c.dom.Element nodeInfoElement, 
+									   String name, String value) {
+		
+		org.w3c.dom.Element platform = document.createElement(name);
+		platform.setTextContent(value);		        	
+		nodeInfoElement.appendChild(platform);
+	}
 
     @Override
     public void start() {

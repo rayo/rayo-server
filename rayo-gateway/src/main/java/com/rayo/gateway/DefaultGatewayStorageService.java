@@ -68,22 +68,22 @@ public class DefaultGatewayStorageService implements GatewayStorageService {
 	}
 	
 	@Override
-	public void registerClient(String appId, JID clientJid) throws GatewayException {
+	public GatewayClient registerClient(String appId, JID clientJid) throws GatewayException {
 		
 		Application application = store.getApplication(appId);
 		
 		GatewayClient client = new GatewayClient(appId, clientJid.toString(), application.getPlatform());
-		store.storeClient(client);
+		return store.storeClient(client);
 	}
 
 	@Override
-	public void unregisterClient(JID clientJid) throws GatewayException {
+	public GatewayClient unregisterClient(JID clientJid) throws GatewayException {
 	
-		store.removeClient(clientJid.toString());
+		return store.removeClient(clientJid.toString());
 	}
 
 	@Override
-	public List<String> getRayoNodes(String platformId) {
+	public List<RayoNode> getRayoNodes(String platformId) {
 			
 		return store.getRayoNodesForPlatform(platformId);
 	}
@@ -223,9 +223,16 @@ public class DefaultGatewayStorageService implements GatewayStorageService {
 		return null;
 	}
 	
-	public Application storeApplication(Application application) throws DatastoreException {
+	@Override
+	public Application registerApplication(Application application) throws DatastoreException {
 		
 		return store.storeApplication(application);
+	}
+	
+	@Override
+	public Application unregisterApplication(String appId) throws DatastoreException {
+		
+		return store.removeApplication(appId);
 	}
 
 	public void setStore(GatewayDatastore store) {

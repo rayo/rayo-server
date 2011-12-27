@@ -531,20 +531,38 @@ public abstract class BaseDatastoreTest {
 		assertTrue(clients.contains("clientb@jabber.org"));
 	}
 
-	private RayoNode buildRayoNode(String hostname,String ipAddress, String[] platforms) {
+	public static RayoNode buildRayoNode(String hostname,String ipAddress, String[] platforms) {
+	
+		return buildRayoNode(hostname, ipAddress, platforms, RayoNode.DEFAULT_WEIGHT);
+	}
+
+	public static RayoNode buildRayoNode(String hostname,String ipAddress, String[] platforms, int weight) {
+	
+		return buildRayoNode(hostname, ipAddress, platforms, weight, RayoNode.DEFAULT_PRIORITY);
+	}
+	
+	public static RayoNode buildRayoNode(String hostname,String ipAddress, String[] platforms, int weight, int priority) {
 
 		List<String> list = Arrays.asList(platforms);
-		return new RayoNode(hostname, ipAddress, new HashSet<String>(list));
+		RayoNode node = new RayoNode(hostname, ipAddress, new HashSet<String>(list));
+		node.setWeight(weight);
+		node.setPriority(priority);
+		return node;
 	}
 
 	private Application buildApplication() {
 	
 		return buildApplication("1234");
 	}
+
+	public static Application buildApplication(String appId) {
 	
-	private Application buildApplication(String appId) {
+		return buildApplication(appId, "client@jabber.org","staging");
+	}
+	
+	public static Application buildApplication(String appId, String jid, String platform) {
 		
-		Application application = new Application(appId, "client@jabber.org","staging");
+		Application application = new Application(appId, jid, platform);
 		application.setName("test");
 		application.setAccountId("zytr");
 		application.setPermissions("read,write");

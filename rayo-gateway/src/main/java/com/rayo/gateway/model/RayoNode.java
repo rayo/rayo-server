@@ -7,6 +7,8 @@ import java.util.Set;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
+import com.rayo.gateway.lb.PriorityBasedLoadBalancer;
+
 /**
  * <p>This model object represent an instance of a Rayo Server.</p>
  * 
@@ -18,9 +20,25 @@ public class RayoNode implements Serializable {
 
 	private static final long serialVersionUID = -3327026666287357013L;
 	
+	/**
+	 * Default weight for Rayo Nodes is 10
+	 * 
+	 * <p>See {@link PriorityBasedLoadBalancer} for more information.</p>
+	 */
+	public static final int DEFAULT_WEIGHT = 10;
+	
+	/**
+	 * <p>Default priority for Rayo Nodes is 1</p> 
+	 * 
+	 * <p>See {@link PriorityBasedLoadBalancer} for more information.</p>
+	 */
+	public static final int DEFAULT_PRIORITY = 1;
+	
 	private String ipAddress;
 	private String hostname;
 	private Set<String> platforms = new HashSet<String>();
+	private int weight = DEFAULT_WEIGHT;
+	private int priority = DEFAULT_PRIORITY;
 	
 	/**
 	 * <p>Creates an instance of a rayo server.</p>
@@ -132,7 +150,25 @@ public class RayoNode implements Serializable {
     	return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)    		
     		.append("hostname", getHostname())
     		.append("ipAddress", getIpAddress())
+    		.append("weight", getWeight())
+    		.append("priority", getPriority())
     		.append("platforms", getPlatforms())
     		.toString();
     }
+
+	public int getWeight() {
+		return weight;
+	}
+
+	public void setWeight(int weight) {
+		this.weight = weight;
+	}
+
+	public int getPriority() {
+		return priority;
+	}
+
+	public void setPriority(int priority) {
+		this.priority = priority;
+	}
 }

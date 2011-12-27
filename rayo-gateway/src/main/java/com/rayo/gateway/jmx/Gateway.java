@@ -9,6 +9,7 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 
 import com.rayo.gateway.GatewayServlet;
 import com.rayo.gateway.GatewayStorageService;
+import com.rayo.gateway.model.RayoNode;
 import com.rayo.gateway.util.JIDUtils;
 
 /**
@@ -42,8 +43,8 @@ public class Gateway implements GatewayMXBean {
 		
 		List<Node> nodes = new ArrayList<Node>();
 		for(String platform: gatewayStorageService.getRegisteredPlatforms()) {
-			for (String jid: gatewayStorageService.getRayoNodes(platform)) {
-				Node node = new Node(jid);
+			for (RayoNode rayoNode: gatewayStorageService.getRayoNodes(platform)) {
+				Node node = new Node(rayoNode.getHostname());
 				node.setGatewayStorageService(gatewayStorageService);
 				if (!nodes.contains(node)) {
 					nodes.add(node);
