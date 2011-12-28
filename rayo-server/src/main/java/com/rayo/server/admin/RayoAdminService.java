@@ -4,6 +4,7 @@ import javax.servlet.ServletConfig;
 
 import com.rayo.server.CallActor;
 import com.rayo.server.CallRegistry;
+import com.rayo.server.listener.AdminListener;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.Call;
 import com.voxeo.moho.common.event.MohoInputDetectedEvent;
@@ -58,9 +59,12 @@ public class RayoAdminService extends AdminService {
 	 * 
 	 * @param weight New weight
 	 */
-	public void setWeight(int weight) {
+	public void setWeight(String weight) {
 		
 		this.weight = String.valueOf(weight);
+		for(AdminListener listener: getAdminListeners()) {
+			listener.onPropertyChanged(AdminService.WEIGHT, this.weight);
+		}
 	}
 	
 	/**
@@ -68,9 +72,12 @@ public class RayoAdminService extends AdminService {
 	 * 
 	 * @param priority New priority
 	 */
-	public void setPriority(int priority) {
+	public void setPriority(String priority) {
 		
 		this.priority = String.valueOf(priority);
+		for(AdminListener listener: getAdminListeners()) {
+			listener.onPropertyChanged(AdminService.PRIORITY, this.priority);
+		}
 	}
 	
 	/**
@@ -81,6 +88,9 @@ public class RayoAdminService extends AdminService {
 	public void setPlatform(String platform) {
 		
 		this.defaultPlatform = platform;
+		for(AdminListener listener: getAdminListeners()) {
+			listener.onPropertyChanged(AdminService.DEFAULT_PLATFORM_ID, this.defaultPlatform);
+		}
 	}
 	
 	/**
@@ -117,27 +127,15 @@ public class RayoAdminService extends AdminService {
 		this.gatewayDomain = gatewayDomain;
 	}
 
-	public String getDefaultPlatform() {
+	public String getPlatform() {
 		return defaultPlatform;
-	}
-
-	public void setDefaultPlatform(String defaultPlatform) {
-		this.defaultPlatform = defaultPlatform;
 	}
 
 	public String getWeight() {
 		return weight;
 	}
 
-	public void setWeight(String weight) {
-		this.weight = weight;
-	}
-
 	public String getPriority() {
 		return priority;
-	}
-
-	public void setPriority(String priority) {
-		this.priority = priority;
 	}
 }

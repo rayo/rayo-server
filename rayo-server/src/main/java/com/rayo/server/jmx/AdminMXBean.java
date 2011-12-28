@@ -8,7 +8,7 @@ public interface AdminMXBean {
 	boolean getQuiesceMode();
 	void setLogLevel(String loggerName, String logLevel);
 	String getServerName();
-	void setWeight(int weight);
-	void setPriority(int priority);
-	void setPlatform(String platform);
+	void weight(String weight);
+	void priority(String priority);
+	void platform(String platform);
 }

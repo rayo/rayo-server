@@ -106,6 +106,17 @@ public class RayoServlet extends AbstractRayoServlet {
     }
     
     @Override
+    public void onPropertyChanged(String property, String newValue) {
+    	
+    	if (property.equals(RayoAdminService.WEIGHT) ||
+    		property.equals(RayoAdminService.PRIORITY) ||
+    		property.equals(RayoAdminService.DEFAULT_PLATFORM_ID)) {
+    		
+    		broadcastPresence("chat");
+    	}
+    }
+    
+    @Override
     public void onQuiesceModeEntered() {
     
     	broadcastPresence("away");
@@ -148,7 +159,7 @@ public class RayoServlet extends AbstractRayoServlet {
 		        	showElement.setTextContent(status.toLowerCase());
 		        	org.w3c.dom.Element nodeInfoElement = 
 		        			document.createElementNS("urn:xmpp:rayo:cluster:1", "node-info");
-		        	appendNodeInfoElement(document, nodeInfoElement, "platform", adminService.getDefaultPlatform());
+		        	appendNodeInfoElement(document, nodeInfoElement, "platform", adminService.getPlatform());
 		        	appendNodeInfoElement(document, nodeInfoElement, "weight", adminService.getWeight());
 		        	appendNodeInfoElement(document, nodeInfoElement, "priority", adminService.getPriority());
 					presence = getXmppFactory().createPresence(

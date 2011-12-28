@@ -48,22 +48,22 @@ public class Admin implements AdminMXBean {
 	}
 	
 	@Override
-	@ManagedOperation(description = "Sets Rayo Node's Weight")
-	public void setWeight(int weight) {
+	@ManagedOperation(description = "Sets Rayo Node Weight")
+	public void weight(String weight) {
 		
 		adminService.setWeight(weight);
 	}
 	
 	@Override
-	@ManagedOperation(description = "Sets Rayo Node's Priority")
-	public void setPriority(int priority) {
+	@ManagedOperation(description = "Sets Rayo Node Priority")
+	public void priority(String priority) {
 		
 		adminService.setPriority(priority);
 	}
 	
 	@Override
-	@ManagedOperation(description = "Sets Rayo Node's Platform")
-	public void setPlatform(String platform) {
+	@ManagedOperation(description = "Sets Rayo Node Platform")
+	public void platform(String platform) {
 		
 		adminService.setPlatform(platform);
 	}
