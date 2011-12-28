@@ -98,17 +98,20 @@ public class DefaultGatewayStorageService implements GatewayStorageService {
 	public RayoNode registerRayoNode(RayoNode rayoNode) throws GatewayException {
 		
 		RayoNode node = store.getNode(rayoNode.getHostname());
-		if (node != null) {
-			if (node.toString().equals(rayoNode.toString())) {
-				log.debug("Rayo Node [%s] already exists. Ignoring status update.", rayoNode);
-				return node;
-			} else {
-				log.debug("Rayo Node [%s] has been updated. Updating storage service.", rayoNode);
-				return store.updateNode(rayoNode);
+		try {	
+			if (node != null) {
+				if (node.toString().equals(rayoNode.toString())) {
+					log.debug("Rayo Node [%s] already exists. Ignoring status update.", rayoNode);
+					return node;
+				} else {
+					log.debug("Rayo Node [%s] has been updated. Updating storage service.", rayoNode);
+					if (rayoNode.getIpAddress() == null) {
+						rayoNode.setIpAddress(InetAddress.getByName(rayoNode.getHostname()).getHostAddress());
+					}
+					return store.updateNode(rayoNode);
+				}
 			}
-		}
-		
-		try {			
+				
 			if (rayoNode.getIpAddress() == null) {
 				rayoNode.setIpAddress(InetAddress.getByName(rayoNode.getHostname()).getHostAddress());
 			}
