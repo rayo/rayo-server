@@ -104,7 +104,7 @@ public class DefaultGatewayStorageService implements GatewayStorageService {
 				return node;
 			} else {
 				log.debug("Rayo Node [%s] has been updated. Updating storage service.", rayoNode);
-				return store.updateNode(node);
+				return store.updateNode(rayoNode);
 			}
 		}
 		
