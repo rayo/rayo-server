@@ -70,8 +70,10 @@ public class NodeSet {
 					nodeKeys.put(node.getHostname(), entry);
 					recalculate = true;
 				} else {
-					if (stored.node.getWeight() != node.getWeight()) {
+					if (stored.node.getWeight() != node.getWeight() ||
+						stored.node.getPriority() != node.getPriority()) {
 						stored.node.setWeight(node.getWeight());
+						stored.node.setPriority(node.getPriority());
 						stored.expected = stored.node.getWeight();
 						
 						recalculate = true;

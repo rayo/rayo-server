@@ -110,7 +110,23 @@ public abstract class PriorityBasedLoadBalancerTest extends LoadBalancingTest {
 		assertEquals(totals.get(nodes[1]),(Integer)60);
 		assertNull(totals.get(nodes[2]));
 	}
-
+	
+	@Test
+	public void testNodesWithLowPriorityDoNotGetCalls2() throws Exception {
+				
+		RayoNode node1 = BaseDatastoreTest.buildRayoNode("node1","127.0.0.1", new String[] { "staging" }, 10, 1);
+		RayoNode node2 = BaseDatastoreTest.buildRayoNode("node2","10.20.120.98", new String[] { "staging" }, 10, 2);
+		storageService.registerRayoNode(node1);
+		storageService.registerRayoNode(node2);
+		
+		RayoNode[] nodes = new RayoNode[] { node1, node2 };
+		for (int i=0;i<120;i++) {
+			RayoNode next = loadBalancer.pickRayoNode("staging");
+			inc(next);
+		}
+		assertEquals(totals.get(nodes[0]),(Integer)120);
+		assertNull(totals.get(nodes[1]));
+	}
 	
 	@Test
 	public void testRemoveNodesWithPriority() throws Exception {
@@ -169,6 +185,58 @@ public abstract class PriorityBasedLoadBalancerTest extends LoadBalancingTest {
 		assertEquals(totals.get(nodes[0]),(Integer)250);
 		assertEquals(totals.get(nodes[1]),(Integer)250);
 		assertEquals(totals.get(nodes[2]),(Integer)500);
+	}
+	
+	@Test
+	public void testCallsAreEvenLoadBalancedAfterPriorityChanges() throws Exception {
+				
+		RayoNode node1 = BaseDatastoreTest.buildRayoNode("node1","127.0.0.1", new String[] { "staging" }, 10, 1);
+		RayoNode node2 = BaseDatastoreTest.buildRayoNode("node2","10.20.120.98", new String[] { "staging" }, 10, 2);
+		storageService.registerRayoNode(node1);
+		storageService.registerRayoNode(node2);
+		
+		RayoNode[] nodes = new RayoNode[] { node1, node2 };
+		for (int i=0;i<120;i++) {
+			RayoNode next = loadBalancer.pickRayoNode("staging");
+			inc(next);
+		}
+		assertEquals(totals.get(nodes[0]),(Integer)120);
+		assertNull(totals.get(nodes[1]));
+		
+		node1.setPriority(2);
+		storageService.updateRayoNode(node1);
+		for (int i=0;i<120;i++) {
+			RayoNode next = loadBalancer.pickRayoNode("staging");
+			inc(next);
+		}
+		assertEquals(totals.get(nodes[0]),(Integer)180);
+		assertEquals(totals.get(nodes[1]),(Integer)60);
+	}
+	
+	@Test
+	public void testCallsAreEvenLoadBalancedAfterWeightChanges() throws Exception {
+				
+		RayoNode node1 = BaseDatastoreTest.buildRayoNode("node1","127.0.0.1", new String[] { "staging" }, 10, 1);
+		RayoNode node2 = BaseDatastoreTest.buildRayoNode("node2","10.20.120.98", new String[] { "staging" }, 20, 1);
+		storageService.registerRayoNode(node1);
+		storageService.registerRayoNode(node2);
+		
+		RayoNode[] nodes = new RayoNode[] { node1, node2 };
+		for (int i=0;i<120;i++) {
+			RayoNode next = loadBalancer.pickRayoNode("staging");
+			inc(next);
+		}
+		assertEquals(totals.get(nodes[0]),(Integer)40);
+		assertEquals(totals.get(nodes[1]),(Integer)80);
+		
+		node2.setWeight(10);
+		storageService.updateRayoNode(node2);
+		for (int i=0;i<120;i++) {
+			RayoNode next = loadBalancer.pickRayoNode("staging");
+			inc(next);
+		}
+		assertEquals(totals.get(nodes[0]),(Integer)100);
+		assertEquals(totals.get(nodes[1]),(Integer)140);
 	}
 	
 	private void inc(RayoNode node) {
