@@ -33,6 +33,8 @@ public class RayoAdminService extends AdminService {
     private String weight = "10";
     private String priority = "1";
 		
+    
+    
 	/**
 	 * Sends a DTMF tone to a call
 	 * 
@@ -107,10 +109,18 @@ public class RayoAdminService extends AdminService {
 		
 		super.readConfigurationFromContext(config);
 		
-        gatewayDomain = config.getInitParameter(GATEWAY_DOMAIN);
-        defaultPlatform = config.getInitParameter(DEFAULT_PLATFORM_ID);        
-        weight = config.getInitParameter(WEIGHT);
-        priority = config.getInitParameter(PRIORITY);
+		if (config.getInitParameter(GATEWAY_DOMAIN) != null) {
+			gatewayDomain = config.getInitParameter(GATEWAY_DOMAIN);
+		}
+		if (config.getInitParameter(DEFAULT_PLATFORM_ID) != null) {
+			defaultPlatform = config.getInitParameter(DEFAULT_PLATFORM_ID);
+		}
+		if (config.getInitParameter(WEIGHT) != null) {
+			weight = config.getInitParameter(WEIGHT);
+		}
+		if (config.getInitParameter(PRIORITY) != null) {
+			priority = config.getInitParameter(PRIORITY);
+		}
 	}
 	
 	@Override
