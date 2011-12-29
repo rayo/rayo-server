@@ -7,4 +7,6 @@ public interface AdminMXBean {
 	boolean getQuiesceMode();
 	void setLogLevel(String loggerName, String logLevel);
 	String getServerName();
+	void blacklist(String platformId, String hostname, boolean blacklisted);
+	void maxDialRetries(String retries);
 }
