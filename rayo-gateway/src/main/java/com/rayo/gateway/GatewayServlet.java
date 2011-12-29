@@ -589,7 +589,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 					if (!errorNode.getNodeName().equals("text")) {
 						try {
 							// Only retry dial on certain errors that could be caused by a concrete Rayo Node malfunctioning
-							Condition condition = Condition.valueOf(errorNode.getNodeName());
+							Condition condition = toCondition(errorNode.getNodeName());
 							switch(condition) {
 								case GONE: 
 								case INTERNAL_SERVER_ERROR:
@@ -608,6 +608,13 @@ public class GatewayServlet extends AbstractRayoServlet {
 			loadBalancer.nodeOperationSuceeded(nodesDialed.get(nodesDialed.size()-1));
 		}
 		forwardResponse(response, originalRequest);
+	}
+
+	private Condition toCondition(String nodeName) {
+
+		//TODO: https://evolution.voxeo.com/ticket/1626815
+		nodeName = nodeName.replaceAll("-", "_").toUpperCase();
+		return Condition.valueOf(nodeName);
 	}
 
 	private void resendDialRequest(XmppServletResponse response,
