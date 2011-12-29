@@ -33,7 +33,7 @@ public class RayoAdminService extends AdminService {
     private String weight = "10";
     private String priority = "1";
 		
-    
+    private boolean outgoingCallsAllowed = true;
     
 	/**
 	 * Sends a DTMF tone to a call
@@ -96,6 +96,17 @@ public class RayoAdminService extends AdminService {
 	}
 	
 	/**
+	 * This special method is used to forbid a server from accepting dial requests. The 
+	 * Rayo server will return an IQ error for any incoming dial request. This method
+	 * is specially handy for doing failover functional testing.
+	 * 
+	 */
+	public void setOutgoingCallsAllowed(boolean outgoingCallsAllowed) {
+		
+		this.outgoingCallsAllowed = outgoingCallsAllowed;
+	}
+	
+	/**
 	 * Sets the call registry
 	 * 
 	 * @param callRegistry Call registry
@@ -147,5 +158,9 @@ public class RayoAdminService extends AdminService {
 
 	public String getPriority() {
 		return priority;
+	}
+
+	public boolean isOutgoingCallsAllowed() {
+		return outgoingCallsAllowed;
 	}
 }

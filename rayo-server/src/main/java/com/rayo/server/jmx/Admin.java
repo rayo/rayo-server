@@ -69,6 +69,13 @@ public class Admin implements AdminMXBean {
 	}
 	
 	@Override
+	@ManagedOperation(description = "Sets if a Rayo Node can receive dial requests or not")
+	public void allowOutgoingCalls(boolean outgoingCallsAllowed) {
+		
+		adminService.setOutgoingCallsAllowed(outgoingCallsAllowed);
+	}
+	
+	@Override
 	@ManagedOperation(description = "Change Log Level")
 	public void setLogLevel(String loggerName, String level) {
 

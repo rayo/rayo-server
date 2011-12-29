@@ -11,4 +11,5 @@ public interface AdminMXBean {
 	void weight(String weight);
 	void priority(String priority);
 	void platform(String platform);
+	public void allowOutgoingCalls(boolean outgoingCallsAllowed);
 }

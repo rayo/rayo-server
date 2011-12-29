@@ -379,6 +379,12 @@ public class RayoServlet extends AbstractRayoServlet {
                     sendIqError(request, StanzaError.Type.WAIT, StanzaError.Condition.SERVICE_UNAVAILABLE, "Quiesce Mode ON.");
             		return;
             	} 
+            	if (!((RayoAdminService)getAdminService()).isOutgoingCallsAllowed()) {
+                    log.debug("Ougoing calls have been disabled on this node. Rejecting dial request [%s]", request.toString());
+                    sendIqError(request, StanzaError.Type.WAIT, StanzaError.Condition.SERVICE_UNAVAILABLE, "Dial requests disabled.");
+            		return;            		
+            	}
+        
             	if (log.isDebugEnabled()) {
             		log.debug("Received dial command");
             	}
@@ -426,7 +432,6 @@ public class RayoServlet extends AbstractRayoServlet {
 	            cdrManager.append(callCommand.getCallId(), payload.asXML());
             }
             
-
             if (callCommand instanceof VerbCommand) {
                 VerbCommand verbCommand = (VerbCommand) callCommand;
                 verbCommand.setCallId(callId(request.getTo()));
