@@ -11,13 +11,16 @@ import java.util.Scanner;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.xerces.dom.CoreDocumentImpl;
 import org.dom4j.dom.DOMElement;
 import org.springframework.core.io.Resource;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import com.rayo.core.OfferEvent;
+import com.rayo.gateway.admin.GatewayAdminService;
 import com.rayo.gateway.exception.GatewayException;
 import com.rayo.gateway.jmx.GatewayStatistics;
 import com.rayo.gateway.lb.GatewayLoadBalancingStrategy;
@@ -58,6 +61,14 @@ import com.voxeo.servlet.xmpp.XmppServletResponse;
  */
 public class GatewayServlet extends AbstractRayoServlet {
 	
+	private static final String PLATFORM_DIALED = "com.rayo.gateway.platform";
+
+	private static final String NODES_DIALED = "com.rayo.gateway.nodesdialed";
+
+	private static final String DIAL_RETRIES = "com.rayo.gateway.dialretries";
+
+	private static final String ORIGINAL_REQUEST = "com.rayo.gateway.originaRequest";
+
 	private static final long serialVersionUID = 1L;
 
 	private static final Loggerf log = Loggerf
@@ -435,37 +446,93 @@ public class GatewayServlet extends AbstractRayoServlet {
 			sendIqError(request, Type.CANCEL, Condition.SERVICE_UNAVAILABLE, "Gateway Server is on Quiesce Mode");
 			return;
 		}
-		
-		Element payload = request.getElement();
-		
-		//TODO: Build full jid as in the doc. Currently blocked on Prism issue.
-		//fromJidInternal = getXmppFactory().createJID(
-		//		toJidExternal.getDomain()+"/"+fromJidExternal.getBareJID());
-		JID fromJidInternal = getXmppFactory().createJID(getInternalDomain());
-		
+						
 		String platformId = gatewayStorageService.getPlatformForClient(request.getFrom());
 		if (platformId != null) {	
-			RayoNode rayoNode = loadBalancer.pickRayoNode(platformId); // picks and load balances
-			if (rayoNode != null) {
-				JID to = getXmppFactory().createJID(rayoNode.getHostname());
-				forwardIQRequest(fromJidInternal, to, request, payload);								
-			} else {
-				sendIqError(request, Type.CANCEL, Condition.SERVICE_UNAVAILABLE, 
-						String.format("Could not find an available Rayo Node in platform %s", platformId));				
-			}
+			sendDialRequest(request, platformId, new ArrayList<RayoNode>(), 0);
 		} else {
 			sendIqError(request, Type.CANCEL, Condition.SERVICE_UNAVAILABLE, 
 					String.format("Could not find associated platform for client JID",request.getFrom()));
 		}
 	}
+	
+	@SuppressWarnings("unchecked")
+	private void sendDialRequest(IQRequest request, String platformId, List<RayoNode> nodesDialed, int dialRetries) throws Exception {
+		
+		//TODO: Build full jid as in the doc. Currently blocked on Prism issue.
+		//fromJidInternal = getXmppFactory().createJID(
+		//		toJidExternal.getDomain()+"/"+fromJidExternal.getBareJID());
+		JID fromJidInternal = getXmppFactory().createJID(getInternalDomain());
+		Element payload = request.getElement();
+
+		int maxDialRetries = ((GatewayAdminService)getAdminService()).getMaxDialRetries();
+		RayoNode firstChoice = null;
+		if (nodesDialed.size() > 0) {
+			firstChoice = nodesDialed.get(0);
+		}
+		do {
+			RayoNode rayoNode = loadBalancer.pickRayoNode(platformId);
+			if (rayoNode == null) {
+				sendIqError(request, Type.CANCEL, Condition.SERVICE_UNAVAILABLE, 
+						String.format("Could not find an available Rayo Node in platform %s", platformId));				
+				return;
+			}
+			if (rayoNode.equals(firstChoice)) {
+				List<RayoNode> nodes = gatewayStorageService.getRayoNodes(platformId);
+				if (nodesDialed.size() < nodes.size()) {
+					Collection<RayoNode> missing = CollectionUtils.subtract(nodes, nodesDialed);
+					rayoNode = missing.iterator().next();
+				} else {
+					// done. No more nodes to dial.
+					log.error("We could not dispatch the dial request [%s] to any of the available Rayo Nodes.", request);
+					sendIqError(request, Type.CANCEL, Condition.SERVICE_UNAVAILABLE, 
+							String.format("Could not find an available Rayo Node in platform %s", platformId));				
+					break;
+				}
+			}
+			
+			JID to = getXmppFactory().createJID(rayoNode.getHostname());
+			try {
+				nodesDialed.add(rayoNode);
+				dialRetries++;
+				log.debug("Dialing node [%s]. Dial attempts: [%s]. Maximum attempts: [%s].", rayoNode, dialRetries, maxDialRetries);
+				forwardIQRequest(fromJidInternal, to, request, payload, platformId, dialRetries, nodesDialed);
+				log.debug("Dial request [%s] dispatched successfully", request);
+				return;
+			} catch (Exception e) {
+				log.error("Error while sending dial request: " + e.getMessage(), e);
+				log.debug("Resending dial request to a different node");
+				loadBalancer.nodeOperationFailed(rayoNode);
+			}
+		} while (dialRetries < maxDialRetries);
+		
+		log.error("The maximum number of [%s] dial retries was reached for dial request [%s]. This dial request is going to be discarded");
+		sendIqError(request, Type.CANCEL, Condition.SERVICE_UNAVAILABLE, 
+				String.format("Could not find an available Rayo Node in platform %s", platformId));						
+	}
 
 	private void forwardIQRequest(JID fromJidInternal, JID toJidInternal, 
-				IQRequest originalRequest, Element payload) throws Exception {
+			IQRequest originalRequest, Element payload) throws Exception {
+		
+		forwardIQRequest(fromJidInternal, toJidInternal, originalRequest, payload, null, null, null);
+	}
+	
+	private void forwardIQRequest(JID fromJidInternal, JID toJidInternal, 
+				IQRequest originalRequest, Element payload, String platformId, 
+				Integer dialRetries, List<RayoNode> nodesDialed) throws Exception {
 		
 		IQRequest nattedRequest = getXmppFactory().createIQ(
 				fromJidInternal, toJidInternal, originalRequest.getType(),payload);
-		nattedRequest.setAttribute(
-				"com.tropo.ozone.gateway.originaRequest", originalRequest);
+		nattedRequest.setAttribute(ORIGINAL_REQUEST, originalRequest);
+		if (dialRetries != null) {
+			nattedRequest.setAttribute(DIAL_RETRIES, dialRetries);
+		}
+		if (nodesDialed != null) {
+			nattedRequest.setAttribute(NODES_DIALED, nodesDialed);			
+		}
+		if (platformId != null) {
+			nattedRequest.setAttribute(PLATFORM_DIALED, platformId);
+		}
 		nattedRequest.setID(originalRequest.getId());
 		nattedRequest.send();
 		if (getWireLogger().isDebugEnabled()) {
@@ -488,6 +555,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 		return false;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	protected void doResponse(XmppServletResponse response) throws ServletException, IOException {
 
@@ -498,8 +566,9 @@ public class GatewayServlet extends AbstractRayoServlet {
 		
 		//TODO: Depends on this bug https://evolution.voxeo.com/ticket/1553126 so needs a build post 0928
 		XmppServletRequest nattedRequest = response.getRequest();
-		IQRequest originalRequest = (IQRequest)nattedRequest.getAttribute("com.tropo.ozone.gateway.originaRequest");
+		IQRequest originalRequest = (IQRequest)nattedRequest.getAttribute(ORIGINAL_REQUEST);
 		if (isDial(originalRequest)) {
+			List<RayoNode> nodesDialed = (List<RayoNode>)nattedRequest.getAttribute(NODES_DIALED);
 			if (response.getElement("error") == null) {
 				// fetch call id and add it to the registry
 				String callId = response.getElement("ref").getAttribute("id");
@@ -512,10 +581,55 @@ public class GatewayServlet extends AbstractRayoServlet {
 					log.error("Could not register call for dial");
 					log.error(e.getMessage(),e);
 				}
+			} else {
+				Element errorElement = response.getElement("error");
+				NodeList list = errorElement.getChildNodes();
+				for (int i=0;i<list.getLength();i++) {
+					Node errorNode = list.item(i);
+					if (!errorNode.getNodeName().equals("text")) {
+						try {
+							// Only retry dial on certain errors that could be caused by a concrete Rayo Node malfunctioning
+							Condition condition = Condition.valueOf(errorNode.getNodeName());
+							switch(condition) {
+								case GONE: 
+								case INTERNAL_SERVER_ERROR:
+								case REMOTE_SERVER_TIMEOUT:
+								case REMOTE_SERVER_NOT_FOUND:
+									loadBalancer.nodeOperationFailed(nodesDialed.get(nodesDialed.size()-1));
+									resendDialRequest(response, nattedRequest, originalRequest, nodesDialed);
+									return;
+							}
+						} catch (Exception e) {
+							log.error("Could not parse condition [%s]", errorNode.getNodeName());
+						}
+					}
+				}				
+			}
+			loadBalancer.nodeOperationSuceeded(nodesDialed.get(nodesDialed.size()-1));
+		}
+		forwardResponse(response, originalRequest);
+	}
+
+	private void resendDialRequest(XmppServletResponse response,
+			XmppServletRequest nattedRequest, IQRequest originalRequest,
+			List<RayoNode> nodesDialed) {
+		Integer retries = (Integer)nattedRequest.getAttribute("com.rayo.gateway.maxdialretries");
+		if (retries > ((GatewayAdminService)getAdminService()).getMaxDialRetries()) {
+			log.error("Max number of dial retries reached for request [%s]. Dial request failed.", originalRequest);
+			forwardResponse(response, originalRequest);
+			return;
+		} else {
+			String platformId = (String)nattedRequest.getAttribute(PLATFORM_DIALED);
+			Integer dialsRetried = (Integer)nattedRequest.getAttribute(DIAL_RETRIES);
+			try {
+				sendDialRequest(originalRequest, platformId, nodesDialed, dialsRetried);
+				return;
+			} catch (Exception e) {
+				log.error(e.getMessage(),e);
+				forwardResponse(response, originalRequest);
+				return;
 			}
 		}
-
-		forwardResponse(response, originalRequest);
 	}
 
 	/*

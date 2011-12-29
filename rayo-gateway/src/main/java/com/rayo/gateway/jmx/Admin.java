@@ -71,6 +71,20 @@ public class Admin implements AdminMXBean {
 
 		return adminService.getServerName();
 	}
+	
+	@Override
+	@ManagedOperation(description = "Blacklists or Unblacklists a Rayo Node")
+	public void blacklist(String platformId, String hostname, boolean blacklisted) {
+		
+		adminService.blacklist(platformId, hostname, blacklisted);
+	}
+	
+	@Override
+	@ManagedOperation(description = "Sets the maximum number of dial retries before giving up on a dial request")
+	public void maxDialRetries(String retries) {
+		
+		adminService.setMaxDialRetries(Integer.parseInt(retries));
+	}
 
 	public void setAdminService(GatewayAdminService adminService) {
 		this.adminService = adminService;
