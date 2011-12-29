@@ -30,7 +30,9 @@
 	</bean>
 	
 	<!-- Admin Service -->
-	<bean id="adminService" class="com.rayo.gateway.admin.GatewayAdminService"/>
+	<bean id="adminService" class="com.rayo.gateway.admin.GatewayAdminService">
+		<property name="storageService" ref="gatewayStorageService"/>
+	</bean>
 	
 	<!-- JMX Configuration -->
   	<bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
