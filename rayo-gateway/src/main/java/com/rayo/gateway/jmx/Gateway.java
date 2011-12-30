@@ -44,7 +44,7 @@ public class Gateway implements GatewayMXBean {
 		List<Node> nodes = new ArrayList<Node>();
 		for(String platform: gatewayStorageService.getRegisteredPlatforms()) {
 			for (RayoNode rayoNode: gatewayStorageService.getRayoNodes(platform)) {
-				Node node = new Node(rayoNode.getHostname());
+				Node node = new Node(rayoNode);
 				node.setGatewayStorageService(gatewayStorageService);
 				if (!nodes.contains(node)) {
 					nodes.add(node);

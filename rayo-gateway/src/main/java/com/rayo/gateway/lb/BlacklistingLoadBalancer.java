@@ -71,7 +71,7 @@ public abstract class BlacklistingLoadBalancer implements GatewayLoadBalancingSt
 		if (node.isBlackListed()) {
 			return false;
 		}
-		if (node.getConsecutiveErrors() > 0 && node.getConsecutiveErrors() > consecutiveFailuresAllowed) {
+		if (node.getConsecutiveErrors() >= consecutiveFailuresAllowed) {
 			node.setBlackListed(true);
 			return false;
 		}

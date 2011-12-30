@@ -590,15 +590,29 @@ public class GatewayServlet extends AbstractRayoServlet {
 						try {
 							// Only retry dial on certain errors that could be caused by a concrete Rayo Node malfunctioning
 							Condition condition = toCondition(errorNode.getNodeName());
+							if (condition.equals(Condition.SERVICE_UNAVAILABLE) ||
+								condition.equals(Condition.GONE) ||
+								condition.equals(Condition.INTERNAL_SERVER_ERROR) ||
+								condition.equals(Condition.REMOTE_SERVER_NOT_FOUND) ||
+								condition.equals(Condition.REMOTE_SERVER_TIMEOUT)) {
+								
+								loadBalancer.nodeOperationFailed(nodesDialed.get(nodesDialed.size()-1));
+								resendDialRequest(response, nattedRequest, originalRequest, nodesDialed);
+								return;								
+							}
+									
+							/*
 							switch(condition) {
 								case GONE: 
 								case INTERNAL_SERVER_ERROR:
 								case REMOTE_SERVER_TIMEOUT:
 								case REMOTE_SERVER_NOT_FOUND:
+								case SERVICE_UNAVAILABLE:
 									loadBalancer.nodeOperationFailed(nodesDialed.get(nodesDialed.size()-1));
 									resendDialRequest(response, nattedRequest, originalRequest, nodesDialed);
 									return;
 							}
+							*/
 						} catch (Exception e) {
 							log.error("Could not parse condition [%s]", errorNode.getNodeName());
 						}
@@ -620,14 +634,14 @@ public class GatewayServlet extends AbstractRayoServlet {
 	private void resendDialRequest(XmppServletResponse response,
 			XmppServletRequest nattedRequest, IQRequest originalRequest,
 			List<RayoNode> nodesDialed) {
-		Integer retries = (Integer)nattedRequest.getAttribute("com.rayo.gateway.maxdialretries");
-		if (retries > ((GatewayAdminService)getAdminService()).getMaxDialRetries()) {
+
+		Integer dialsRetried = (Integer)nattedRequest.getAttribute(DIAL_RETRIES);
+		if (dialsRetried > ((GatewayAdminService)getAdminService()).getMaxDialRetries()) {
 			log.error("Max number of dial retries reached for request [%s]. Dial request failed.", originalRequest);
 			forwardResponse(response, originalRequest);
 			return;
 		} else {
 			String platformId = (String)nattedRequest.getAttribute(PLATFORM_DIALED);
-			Integer dialsRetried = (Integer)nattedRequest.getAttribute(DIAL_RETRIES);
 			try {
 				sendDialRequest(originalRequest, platformId, nodesDialed, dialsRetried);
 				return;
