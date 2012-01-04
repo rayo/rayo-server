@@ -377,7 +377,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 		if (((GatewayAdminService)getAdminService()).isBanned(fromJid.getBareJID().toString())) {
 			return false;
 		}
-		
+/*		
 		GatewayClient client = gatewayStorageService.getClient(fromJid);
 		if (client == null) {
 			return false;
@@ -385,7 +385,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 		Application application = gatewayStorageService.getApplication(client.getAppId());
 		
 		//TODO: Check permissions
-		
+*/		
 		return true;
 	}
 
