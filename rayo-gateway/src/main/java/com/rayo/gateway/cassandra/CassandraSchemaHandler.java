@@ -46,7 +46,7 @@ public class CassandraSchemaHandler {
 		try {
 			KsDef ksDef = keyspaceManager.getKeyspaceSchema(schemaName);
 			if (ksDef != null) {
-				log.debug("Found schema %s :: %s", schemaName);
+				log.debug("Found schema %s :: %s", schemaName, ksDef);
 				return true;
 			}
 		} catch (Exception e) {
