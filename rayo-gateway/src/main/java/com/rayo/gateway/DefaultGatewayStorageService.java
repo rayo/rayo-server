@@ -115,6 +115,9 @@ public class DefaultGatewayStorageService implements GatewayStorageService {
 					// do not consider them when comparing
 					rayoNode.setConsecutiveErrors(node.getConsecutiveErrors());
 					rayoNode.setBlackListed(node.isBlackListed());
+					if (rayoNode.getIpAddress() == null) {
+						node.setIpAddress(null);
+					}
 					if (node.toString().equals(rayoNode.toString())) {
 						log.debug("Rayo Node [%s] already exists. Ignoring status update.", rayoNode);
 						return node;
