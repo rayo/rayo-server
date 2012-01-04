@@ -41,9 +41,12 @@ public class CassandraSchemaHandler {
 	 */
 	public boolean schemaExists(Cluster cluster, String schemaName) {
 		
+		log.debug("Searching schema %s on cluster %s", schemaName, cluster);
 		KeyspaceManager keyspaceManager = Pelops.createKeyspaceManager(cluster);
 		try {
-			if (keyspaceManager.getKeyspaceSchema(schemaName) != null) {
+			KsDef ksDef = keyspaceManager.getKeyspaceSchema(schemaName);
+			if (ksDef != null) {
+				log.debug("Found schema %s :: %s", schemaName);
 				return true;
 			}
 		} catch (Exception e) {
