@@ -29,7 +29,7 @@ class JidRegistryTest {
 	public void testAdd() {
 		
 		assertEquals jidRegistry.size(), 0
-		jidRegistry.put("abcd", createJID("sip:a@localhost"),"localhost")
+		jidRegistry.put("abcd", createJID("sip:a@localhost"))
 		assertEquals jidRegistry.size(), 1
 	}
 	
@@ -38,20 +38,10 @@ class JidRegistryTest {
 		
 		assertEquals jidRegistry.size(), 0
 		def jid = createJID("sip:a@localhost")
-		jidRegistry.put("abcd", jid,"localhost")
+		jidRegistry.put("abcd", jid)
 		assertEquals jidRegistry.getJID("abcd"), jid
 		assertEquals jidRegistry.getJID("abcd").toString(), "sip:a@localhost"
 		assertNull jidRegistry.getJID("1234")
-		assertEquals jidRegistry.size(), 1
-	}
-	
-	@Test
-	public void testGetOriginDomain() {
-		
-		assertEquals jidRegistry.size(), 0
-		def jid = createJID("sip:a@localhost")
-		jidRegistry.put("abcd", jid, "conference.jabber.org")
-		assertEquals jidRegistry.getOriginDomain("abcd"), "conference.jabber.org"
 		assertEquals jidRegistry.size(), 1
 	}
 	
@@ -62,7 +52,7 @@ class JidRegistryTest {
 		// until it is purged 
 		assertEquals jidRegistry.size(), 0
 		def jid = createJID("sip:a@localhost")
-		jidRegistry.put("abcd", jid,"localhost")
+		jidRegistry.put("abcd", jid)
 		assertNotNull jidRegistry.getJID("abcd")
 
 		jidRegistry.remove("abcd")
@@ -78,7 +68,7 @@ class JidRegistryTest {
 		// until it is purged
 		assertEquals jidRegistry.size(), 0
 		def jid = createJID("sip:a@localhost")
-		jidRegistry.put("abcd", jid,"localhost")
+		jidRegistry.put("abcd", jid)
 		assertNotNull jidRegistry.getJID("abcd")
 
 		jidRegistry.remove("abcd")
@@ -95,9 +85,9 @@ class JidRegistryTest {
 		def jidb = createJID("sip:b@localhost")
 		
 		assertEquals jidRegistry.size(), 0
-		jidRegistry.put("call1", jida,"localhost")
-		jidRegistry.put("call2", jidb,"localhost")
-		jidRegistry.put("call3", jida,"localhost")
+		jidRegistry.put("call1", jida)
+		jidRegistry.put("call2", jidb)
+		jidRegistry.put("call3", jida)
 		assertEquals jidRegistry.size(), 3
 		
 		assertEquals jidRegistry.getCallsByJID(jida).size(),2
@@ -112,11 +102,11 @@ class JidRegistryTest {
 		def jidb = createJID("sip:b@localhost")
 		
 		assertEquals jidRegistry.size(), 0
-		jidRegistry.put("call1", jida,"localhost")
-		jidRegistry.put("call2", jidb,"localhost")
-		jidRegistry.put("call3", jida,"localhost")
-		jidRegistry.put("call4", jida,"localhost")
-		jidRegistry.put("call5", jidb,"localhost")
+		jidRegistry.put("call1", jida)
+		jidRegistry.put("call2", jidb)
+		jidRegistry.put("call3", jida)
+		jidRegistry.put("call4", jida)
+		jidRegistry.put("call5", jidb)
 		assertEquals jidRegistry.size(), 5
 		
 		assertEquals jidRegistry.getCallsByJID(jida).size(),3
