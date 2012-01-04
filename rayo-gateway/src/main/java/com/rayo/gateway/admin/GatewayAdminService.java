@@ -23,6 +23,7 @@ public class GatewayAdminService extends AdminService {
 		for(RayoNode node: nodes) {
 			if(node.getHostname().equals(hostname)) {
 				node.setBlackListed(blacklisted);
+				node.setConsecutiveErrors(0);
 				try {
 					storageService.updateRayoNode(node);
 				} catch (GatewayException e) {}

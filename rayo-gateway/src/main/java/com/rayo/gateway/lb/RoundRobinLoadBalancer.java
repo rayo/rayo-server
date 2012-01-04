@@ -1,11 +1,16 @@
 package com.rayo.gateway.lb;
 
+import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.rayo.gateway.GatewayStorageService;
 import com.rayo.gateway.model.RayoNode;
+import com.voxeo.logging.Loggerf;
 
 /**
  * <p>A default round robin based load balancer.</p>
@@ -15,12 +20,49 @@ import com.rayo.gateway.model.RayoNode;
  */
 public class RoundRobinLoadBalancer extends BlacklistingLoadBalancer {
 	
+	private Loggerf log = Loggerf.getLogger(RoundRobinLoadBalancer.class);
+	
 	private Map<String,String> lastClients = new ConcurrentHashMap<String,String>();
 	private Map<String,RayoNode> lastNodes = new ConcurrentHashMap<String,RayoNode>();
 	
+	private static final long DEFAULT_CLEANING_INTERVAL = 1000 * 60 * 30; // default cleaning interval of 30 minutes
+
 	public RoundRobinLoadBalancer() {
 		
-		//TODO: Cleaning thread
+		this(DEFAULT_CLEANING_INTERVAL);
+	}
+	
+	public RoundRobinLoadBalancer(long cleaningInterval) {
+		
+		// A cleaning thread checks each 10 minutes if clients and nodes are still active. And if 
+		// they are not then the hashmaps are cleaned up
+		
+		TimerTask cleaningTask = new TimerTask() {
+			
+			@Override
+			public void run() {
+
+				log.debug("Starting cleaning task");
+				List<String> activeClients = storageService.getClients();
+				Iterator<Map.Entry<String, String>> it = lastClients.entrySet().iterator();
+				while (it.hasNext()) {
+					Map.Entry<String, String> entry = it.next();
+					if (!activeClients.contains(entry.getKey())) {
+						log.debug("Removing client [%s] from load balancer's clients cache", entry.getKey());
+						it.remove();
+					}
+				}
+			}
+		};
+		log.debug("Creating round robin load balancer's cleaning task");
+		Date nextExecution = new Date(System.currentTimeMillis() + cleaningInterval); 
+		Timer cleaningTimer = new Timer();
+		cleaningTimer.schedule(cleaningTask, nextExecution, cleaningInterval);
+	}
+	
+	protected String getLastClient(String bareJid) {
+
+		return lastClients.get(bareJid);
 	}
 	
 	@Override

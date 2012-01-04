@@ -82,11 +82,18 @@
 	<!-- In-memory Map based Datastore -->
 	<bean id="inMemoryDatastore" class="com.rayo.gateway.memory.InMemoryDatastore"/>
 	
+	<bean id="propertyPlaceholderConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">  
+  		<property name="locations">  
+    		<list>  
+      			<value>/WEB-INF/cassandra.properties</value>  
+    		</list>  
+  		</property>  
+	</bean>  
+	
 	<!-- Cassandra based Datastore -->  
 	<bean id="cassandraDatastore" class="com.rayo.gateway.cassandra.CassandraDatastore" init-method="init">
-		<property name="hostname" value="localhost"/>
-		<property name="port" value="9160"/>
-		<property name="overrideExistingSchema" value="true"/>
+		<property name="hostname" value="${cassandra.server}"/>
+		<property name="port" value="${cassandra.port}"/>
+		<property name="overrideExistingSchema" value="${cassandra.create.new.schema}"/>
 	</bean>
-	
 </beans>

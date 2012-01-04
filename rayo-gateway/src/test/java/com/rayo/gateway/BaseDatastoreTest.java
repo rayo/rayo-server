@@ -51,19 +51,29 @@ public abstract class BaseDatastoreTest {
 
 		RayoNode node = buildRayoNode("localhost","127.0.0.1", new String[] { "staging" }, 10, 1);
 		RayoNode stored = store.storeNode(node);
+		RayoNode node2 = buildRayoNode("localhost2","127.0.0.1", new String[] { "staging" }, 10, 1);
+		RayoNode stored2 = store.storeNode(node2);
+		RayoNode node3 = buildRayoNode("localhost3","127.0.0.1", new String[] { "staging" }, 10, 1);
+		RayoNode stored3 = store.storeNode(node3);
+		
 		assertNotNull(stored);
 		assertEquals(node.toString(), stored.toString());
 		
-		RayoNode newnode = buildRayoNode("localhost","128.90.78.98", new String[] { "staging" }, 25, 3);
-		newnode.setBlackListed(true);
-		newnode.setConsecutiveErrors(10);
-		stored = store.updateNode(newnode);
-		assertEquals(newnode.toString(), stored.toString());
-		assertFalse(stored.toString().equals(node.toString()));
-		
-		RayoNode found = store.getNode(newnode.getHostname());
-		assertEquals(newnode.toString(), found.toString());
-		assertFalse(found.toString().equals(node.toString()));
+		for (int i=1;i<5;i++) {
+			RayoNode newnode = buildRayoNode("localhost","128.90.78.98", new String[] { "staging" }, i*5, i);
+			newnode.setBlackListed(true);
+			newnode.setConsecutiveErrors(i);
+			stored = store.updateNode(newnode);
+			assertEquals(newnode.toString(), stored.toString());
+			assertFalse(stored.toString().equals(node.toString()));
+
+			List<RayoNode> nodes = store.getRayoNodesForPlatform("staging");
+			assertEquals(newnode.toString(), nodes.get(0).toString());
+			
+			RayoNode found = store.getNode(newnode.getHostname());
+			assertEquals(newnode.toString(), found.toString());
+			assertFalse(found.toString().equals(node.toString()));
+		}
 	}
 	
 	@Test(expected=RayoNodeNotFoundException.class)

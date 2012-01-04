@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
 import com.rayo.gateway.exception.DatastoreException;
 import com.rayo.gateway.exception.GatewayException;
@@ -53,6 +54,8 @@ public class DefaultGatewayStorageService implements GatewayStorageService {
 	private String defaultPlatform;
 	
 	private GatewayDatastore store;
+	
+	private ReentrantLock nodeLock = new ReentrantLock();
 			
 	@Override
 	public String getPlatformForClient(JID clientJid) {
@@ -99,16 +102,25 @@ public class DefaultGatewayStorageService implements GatewayStorageService {
 		
 		RayoNode node = store.getNode(rayoNode.getHostname());
 		try {	
-			if (node != null) {
-				if (node.toString().equals(rayoNode.toString())) {
-					log.debug("Rayo Node [%s] already exists. Ignoring status update.", rayoNode);
-					return node;
-				} else {
-					log.debug("Rayo Node [%s] has been updated. Updating storage service.", rayoNode);
-					if (rayoNode.getIpAddress() == null) {
-						rayoNode.setIpAddress(InetAddress.getByName(rayoNode.getHostname()).getHostAddress());
+			if (node != null) {			
+				nodeLock.lock();
+				try {
+					// trick, consecutive errors and blacklisted are managed are gateway-only variables
+					// do not consider them when comparing
+					rayoNode.setConsecutiveErrors(node.getConsecutiveErrors());
+					rayoNode.setBlackListed(node.isBlackListed());
+					if (node.toString().equals(rayoNode.toString())) {
+						log.debug("Rayo Node [%s] already exists. Ignoring status update.", rayoNode);
+						return node;
+					} else {
+						log.debug("Rayo Node [%s] has been updated. Updating storage service.", rayoNode);
+						if (rayoNode.getIpAddress() == null) {
+							rayoNode.setIpAddress(InetAddress.getByName(rayoNode.getHostname()).getHostAddress());
+						}
+						return store.updateNode(rayoNode);
 					}
-					return store.updateNode(rayoNode);
+				} finally {
+					nodeLock.unlock();
 				}
 			}
 				
@@ -125,7 +137,12 @@ public class DefaultGatewayStorageService implements GatewayStorageService {
 	@Override
 	public RayoNode updateRayoNode(RayoNode rayoNode) throws GatewayException {
 		
-		return store.updateNode(rayoNode);
+		nodeLock.lock();
+		try {
+			return store.updateNode(rayoNode);
+		} finally {
+			nodeLock.unlock();
+		}
 	}
 	
 	@Override
@@ -137,7 +154,12 @@ public class DefaultGatewayStorageService implements GatewayStorageService {
 	@Override
 	public void unregisterRayoNode(String rayoNode) throws GatewayException {
 
-		store.removeNode(rayoNode);
+		nodeLock.lock();
+		try {
+			store.removeNode(rayoNode);
+		} finally {
+			nodeLock.unlock();
+		}
 	}
 	
 	@SuppressWarnings("unchecked")
