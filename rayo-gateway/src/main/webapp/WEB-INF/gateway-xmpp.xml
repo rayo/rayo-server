@@ -61,7 +61,6 @@
   	
   	<bean id="gatewayBean" class="com.rayo.gateway.jmx.Gateway">
   		<property name="gatewayStorageService" ref="gatewayStorageService" />
-  		<property name="gatewayServlet" ref="gateway" />
   	</bean>
   	
   	<bean id="gatewayStatistics" class="com.rayo.gateway.jmx.GatewayStatistics">
@@ -95,5 +94,6 @@
 		<property name="hostname" value="${cassandra.server}"/>
 		<property name="port" value="${cassandra.port}"/>
 		<property name="overrideExistingSchema" value="${cassandra.create.new.schema}"/>
+		<property name="schemaName" value="${cassandra.schema.name}"/>
 	</bean>
 </beans>

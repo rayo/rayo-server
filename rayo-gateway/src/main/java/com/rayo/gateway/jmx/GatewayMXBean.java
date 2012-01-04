@@ -11,8 +11,4 @@ public interface GatewayMXBean {
 	List<ClientApplication> getClientApplications();
 	
 	Call callInfo(String callId);
-	
-	void ban(String jid);
-	
-	void unban(String jid);
 }

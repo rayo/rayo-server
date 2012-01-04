@@ -34,8 +34,6 @@ public class MixerManager {
 		parameters.put(MediaMixer.ENABLED_EVENTS, new EventType[]{MixerEvent.ACTIVE_INPUTS_CHANGED});    			
 		Mixer mixer = endpoint.create(mixerName, parameters);
 		
-        //TODO: This is the only place I found to create the actual conference actor. I didn't find events for 
-        // conference/mixer creation
         MixerActor actor = mixerActorFactory.create(mixer, mixerName);
         actor.setupMohoListeners(mixer);
         // Wire up default call handlers

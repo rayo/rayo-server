@@ -51,7 +51,6 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 
 	private static final Loggerf log = Loggerf.getLogger(CallActor.class);
 	
-    //TODO: Move this to Spring configuration
     private int JOIN_TIMEOUT = 30000;
     private Set<Participant> joinees = new HashSet<Participant>();
     
@@ -184,7 +183,6 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     	OutputCommand command = new OutputCommand(resource);
     	participant.output(command);
     	
-    	//TODO: Check with Jose if we should send this event to the target participant or not
     	if (message.getTones().length() == 1) {
     		fire(new DtmfEvent(participant.getId(), message.getTones()));    		
     	} else {

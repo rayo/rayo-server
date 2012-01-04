@@ -129,8 +129,6 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference, Call
             }
         }
 
-        //TODO: This is the only place I found to create the actual conference actor. I didn't find events for 
-        // conference/mixer creation
         MixerActor actor = mixerActoryFactory.create(mohoConference, mohoConference.getId());
         actor.setupMohoListeners(mohoConference, this);
         // Wire up default call handlers

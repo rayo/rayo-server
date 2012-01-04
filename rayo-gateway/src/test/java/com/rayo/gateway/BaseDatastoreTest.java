@@ -68,7 +68,7 @@ public abstract class BaseDatastoreTest {
 			assertFalse(stored.toString().equals(node.toString()));
 
 			List<RayoNode> nodes = store.getRayoNodesForPlatform("staging");
-			assertEquals(newnode.toString(), nodes.get(0).toString());
+			assertEquals(newnode.toString(), nodes.get(nodes.indexOf(stored)).toString());
 			
 			RayoNode found = store.getNode(newnode.getHostname());
 			assertEquals(newnode.toString(), found.toString());

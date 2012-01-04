@@ -96,23 +96,9 @@ public class JIDRegistry {
 		return entry.jid;
 	}
 	
-	
-	public String getOriginDomain(String callId) {
+	public void put(String callId, JID jid) {
 		
-		if (callId == null) {
-			return null;
-		}
-		JIDEntry entry = jids.get(callId);
-		if (entry == null) {
-			return null;
-		}
-		
-		return entry.originDomain;
-	}
-	
-	public void put(String callId, JID jid, String originDomain) {
-		
-		jids.put(callId, new JIDEntry(jid, -1L, callId, originDomain));
+		jids.put(callId, new JIDEntry(jid, -1L, callId));
 		
 		callsByJidLock.writeLock().lock();
 		List<String> calls = callsByJid.get(jid.getBareJID().toString());
@@ -186,13 +172,11 @@ class JIDEntry {
 	String key;
 	JID jid;
 	long time;
-	String originDomain;
 	
-	JIDEntry(JID jid, long time, String key, String originDomain) {
+	JIDEntry(JID jid, long time, String key) {
 		
 		this.key = key;
 		this.jid = jid;
 		this.time = time;
-		this.originDomain = originDomain;
 	}
 }

@@ -132,6 +132,16 @@ public interface GatewayStorageService {
 	 * @throws GatewayException If there is any issues when unregistering the client JID
 	 */
 	GatewayClient unregisterClient(JID clientJid) throws GatewayException;
+	
+	/**
+	 * Returns the gateway client instance associated with a given bare JID or 
+	 * <code>null</code> if the JID does not exist
+	 * 
+	 * @param bareJid Bare JID
+	 * 
+	 * @return {@link GatewayClient} instance for the given bare JID or <code>null</code>
+	 */
+	GatewayClient getClient(JID bareJid);
 
 	
 	/**
@@ -303,4 +313,13 @@ public interface GatewayStorageService {
 	 * @throws DatastoreException If there is any problem while unregistering the application
 	 */
 	public Application unregisterApplication(String appId) throws DatastoreException;
+	
+	/**
+	 * Returns the application with the given app id or <code>null</code> if 
+	 * no application can be found
+	 * 
+	 * @param appId Id of the application
+	 * @return {@link Application} instance or <code>null</code>
+	 */
+	public Application getApplication(String appId);
 }

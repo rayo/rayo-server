@@ -7,7 +7,6 @@ import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
-import com.rayo.gateway.GatewayServlet;
 import com.rayo.gateway.GatewayStorageService;
 import com.rayo.gateway.model.RayoNode;
 import com.rayo.gateway.util.JIDUtils;
@@ -24,7 +23,6 @@ import com.rayo.gateway.util.JIDUtils;
 public class Gateway implements GatewayMXBean {
 	
 	private GatewayStorageService gatewayStorageService;
-	private GatewayServlet gatewayServlet;
 
 	@Override
 	@ManagedAttribute(description="Platforms")
@@ -84,24 +82,8 @@ public class Gateway implements GatewayMXBean {
 		
 		return new Call(callId, rayoNode, clientJID);
 	}
-
-	@ManagedOperation(description = "Bans an aplication from the gateway")
-	public void ban(String jid) {
-		
-		gatewayServlet.ban(jid);
-	}
-
-	@ManagedOperation(description = "Unbans an aplication from the gateway")
-	public void unban(String jid) {
-		
-		gatewayServlet.unban(jid);
-	}
 	
 	public void setGatewayStorageService(GatewayStorageService gatewayStorageService) {
 		this.gatewayStorageService = gatewayStorageService;
 	}
-
-	public void setGatewayServlet(GatewayServlet gatewayServlet) {
-		this.gatewayServlet = gatewayServlet;
-	}	
 }

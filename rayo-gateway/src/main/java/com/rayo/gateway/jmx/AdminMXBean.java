@@ -9,4 +9,6 @@ public interface AdminMXBean {
 	String getServerName();
 	void blacklist(String platformId, String hostname, boolean blacklisted);
 	void maxDialRetries(String retries);
+	void ban(String jid);
+	void unban(String jid);
 }

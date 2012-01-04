@@ -76,6 +76,7 @@ public class InMemoryDatastore implements GatewayDatastore {
 		Lock nodeLock = nodesLock.writeLock();
 		nodeLock.lock();
 		try {
+			RayoNode original = nodesMap.get(node.getHostname());
 			nodesMap.put(node.getHostname(), node);
 			ipsMap.put(node.getIpAddress(), node);
 			for(String platform: node.getPlatforms()) {
@@ -83,10 +84,12 @@ public class InMemoryDatastore implements GatewayDatastore {
 				if (nodes == null) {
 					nodes = new ArrayList<RayoNode>();
 					platformsMap.put(platform, nodes);
+				} else {
+					if (nodes.contains(original)) {
+						nodes.remove(original);
+					}
 				}
-				if(!nodes.contains(node)) {
-					nodes.add(node);
-				}
+				nodes.add(node);
 			}
 		} finally {
 			nodeLock.unlock();

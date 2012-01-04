@@ -1,7 +1,6 @@
 package com.rayo.gateway;
 
 import java.io.IOException;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
@@ -19,14 +18,15 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import com.rayo.core.OfferEvent;
 import com.rayo.gateway.admin.GatewayAdminService;
 import com.rayo.gateway.exception.GatewayException;
 import com.rayo.gateway.jmx.GatewayStatistics;
 import com.rayo.gateway.lb.GatewayLoadBalancingStrategy;
+import com.rayo.gateway.model.Application;
+import com.rayo.gateway.model.GatewayClient;
 import com.rayo.gateway.model.RayoNode;
 import com.rayo.gateway.util.JIDUtils;
-import com.rayo.server.lookup.RayoJIDLookupService;
+import com.rayo.server.exception.ErrorMapping;
 import com.rayo.server.servlet.AbstractRayoServlet;
 import com.voxeo.exceptions.NotFoundException;
 import com.voxeo.logging.Loggerf;
@@ -79,10 +79,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 
 	private List<String> internalDomains;
 	private List<String> externalDomains;
-		
-	private List<String> bannedJids = new ArrayList<String>();
-	
-	protected RayoJIDLookupService<OfferEvent> rayoLookupService;
+			
 	private GatewayStatistics gatewayStatistics;
 
 	@Override
@@ -110,12 +107,12 @@ public class GatewayServlet extends AbstractRayoServlet {
 			} else if (isMyInternalDomain(message.getTo())) {
 				processServerPresence(message);
 			} else {
-				sendPresenceError(message.getTo(), message.getFrom(), Condition.BAD_REQUEST);
+				sendPresenceError(message.getTo(), message.getFrom(), Condition.BAD_REQUEST, Type.CANCEL, "Could not map request.");
 			}
 		} catch (Exception e) {
 		    log.error(e.getMessage(),e);
-			// TODO: Use some exception mapper like in a Rayo Node (probably can share some code)
-			sendPresenceError(message.getTo(), message.getFrom());
+		    ErrorMapping error = getExceptionMapper().toXmppError(e);
+			sendPresenceError(message.getTo(), message.getFrom(), error.getCondition(), error.getType(), error.getText());
 		}
 	}
 
@@ -153,7 +150,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 		} else if (message.getType().equals("unavailable")) {			
 			broadcastEndEvent(message);			
 		} else {
-			sendPresenceError(message.getTo(), message.getFrom(), Condition.BAD_REQUEST);
+			sendPresenceError(message.getTo(), message.getFrom(), Condition.BAD_REQUEST, Type.CANCEL, "Could not map request.");
 		}	
 	}
 
@@ -243,27 +240,18 @@ public class GatewayServlet extends AbstractRayoServlet {
 		Element offerElement = message.getElement("offer", "urn:xmpp:rayo:1");
 		String resource = null;
 		
-		//TODO: All this routing code is also in Rayo Servlet. We need to refactor
 		if (offerElement != null) {			
 			if (getAdminService().isQuiesceMode()) {
 				log.warn("Gateway is on Quiesce mode. Discarding incoming job offer for call id: [%s]", callId);
-				sendPresenceError(message.getTo(), message.getFrom(), Condition.SERVICE_UNAVAILABLE);
+				sendPresenceError(message.getTo(), message.getFrom(), Condition.SERVICE_UNAVAILABLE, Type.CANCEL, "Gateway is on Quiesce mode.");
 				return;
 			}			
-			String offerTo = offerElement.getAttribute("to");
-			JID callTo = getXmppFactory().createJID(getBareJID(offerTo));
-			//TODO: This needs to be refactored
-			String forwardDestination = rayoLookupService.lookup(new URI(offerTo));
-    		if (forwardDestination != null) {
-    			callTo = getXmppFactory().createJID(forwardDestination);
-    		}
-    		if (log.isDebugEnabled()) {
-    			log.debug("Received Offer. Offer will be delivered to [%s]", callTo);
-    		}
+			JID callTo = getCallDestination(offerElement.getAttribute("to"));
     		
     		resource = loadBalancer.pickClientResource(callTo.getBareJID().toString()); // picks and load balances
     		if (resource == null) {
-				sendPresenceError(toJid, fromJid, Condition.RECIPIENT_UNAVAILABLE);
+				sendPresenceError(toJid, fromJid, Condition.RECIPIENT_UNAVAILABLE, Type.CANCEL, "Could not find an available resource");
+				return;
 			}
 
     		callTo.setResource(resource);
@@ -276,7 +264,7 @@ public class GatewayServlet extends AbstractRayoServlet {
     	String jid = gatewayStorageService.getclientJID(callId);  
     	if (jid == null) {
     		log.error("Could not find registered client JID for call id [%s]", callId);
-    		sendPresenceError(toJid, fromJid, Condition.RECIPIENT_UNAVAILABLE);
+    		sendPresenceError(toJid, fromJid, Condition.RECIPIENT_UNAVAILABLE, Type.CANCEL, "Could not find registered client JID for call");
     		return;
     	}
     	JID to = getXmppFactory().createJID(jid);
@@ -293,7 +281,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 			
 	    	if (presence == null) {
 	    		log.error("Could not find registered client session for call id [%s]", callId);
-	    		sendPresenceError(toJid, fromJid, Condition.RECIPIENT_UNAVAILABLE);
+	    		sendPresenceError(toJid, fromJid, Condition.RECIPIENT_UNAVAILABLE, Type.CANCEL, "Could not find registered client session for call");
 	    		return;
 	    	}
 			presence.send();
@@ -358,7 +346,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 				}
 			} else {
 				log.warn("Application [%s] is not registered as a valid Rayo application", message.getFrom());
-				sendPresenceError(message.getTo(), message.getFrom(), Condition.RECIPIENT_UNAVAILABLE);
+				sendPresenceError(message.getTo(), message.getFrom(), Condition.RECIPIENT_UNAVAILABLE, Type.CANCEL, "The application does not exist");
 			}
 		} else if (message.getType().equals("unavailable")) {
 			gatewayStorageService.unregisterClientResource(message.getFrom());
@@ -386,10 +374,18 @@ public class GatewayServlet extends AbstractRayoServlet {
 
 	private boolean validApplicationJid(JID fromJid) {
 
-		//TODO: Lookup bare JID in DNS to confirm it belongs to a valid app
-		if (bannedJids.contains(fromJid.getBareJID().toString())) {
+		if (((GatewayAdminService)getAdminService()).isBanned(fromJid.getBareJID().toString())) {
 			return false;
 		}
+		
+		GatewayClient client = gatewayStorageService.getClient(fromJid);
+		if (client == null) {
+			return false;
+		}
+		Application application = gatewayStorageService.getApplication(client.getAppId());
+		
+		//TODO: Check permissions
+		
 		return true;
 	}
 
@@ -725,17 +721,6 @@ public class GatewayServlet extends AbstractRayoServlet {
 		gatewayStatistics.errorProcessed();
 	}
 	
-	//TODO: Move ban/unban stuff to an admin service
-	public void ban(String jid) {
-		
-		bannedJids.add(jid);
-	}
-	
-	public void unban(String jid) {
-		
-		bannedJids.remove(jid);
-	}
-	
     @Override
     protected Loggerf getLog() {
 
@@ -798,11 +783,6 @@ public class GatewayServlet extends AbstractRayoServlet {
         } catch (Exception e) {
         	log.error(e.getMessage(),e);
         }
-	}
-
-	public void setRayoLookupService(
-			RayoJIDLookupService<OfferEvent> rayoLookupService) {
-		this.rayoLookupService = rayoLookupService;
 	}
 
 	public void setGatewayStatistics(GatewayStatistics gatewayStatistics) {

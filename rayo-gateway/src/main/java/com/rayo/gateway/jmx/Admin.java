@@ -89,4 +89,18 @@ public class Admin implements AdminMXBean {
 	public void setAdminService(GatewayAdminService adminService) {
 		this.adminService = adminService;
 	}
+	
+	@Override
+	@ManagedOperation(description = "Bans an aplication from the gateway")	
+	public void ban(String jid) {
+		
+		adminService.ban(jid);
+	}
+
+	@Override
+	@ManagedOperation(description = "Unbans an aplication from the gateway")
+	public void unban(String jid) {
+		
+		adminService.unban(jid);
+	}
 }

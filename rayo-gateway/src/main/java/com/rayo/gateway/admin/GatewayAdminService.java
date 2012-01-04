@@ -1,6 +1,8 @@
 package com.rayo.gateway.admin;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.rayo.gateway.GatewayStorageService;
 import com.rayo.gateway.exception.GatewayException;
@@ -11,7 +13,8 @@ import com.voxeo.logging.Loggerf;
 public class GatewayAdminService extends AdminService {
 
 	private GatewayStorageService storageService;
-	
+	private Set<String> bannedJids = new HashSet<String>();
+
 	private static final Loggerf log = Loggerf.getLogger(GatewayAdminService.class);
 	
 	private int maxDialRetries = 3;
@@ -30,6 +33,21 @@ public class GatewayAdminService extends AdminService {
 				break;
 			}
 		}
+	}
+	
+	public void ban(String jid) {
+		
+		bannedJids.add(jid);
+	}
+	
+	public void unban(String jid) {
+		
+		bannedJids.remove(jid);
+	}
+	
+	public boolean isBanned(String jid) {
+		
+		return bannedJids.contains(jid);
 	}
 	
 	@Override

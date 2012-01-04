@@ -49,10 +49,6 @@ public class InputHandler extends AbstractLocalVerbHandler<Input, Participant> {
         if (model.getInitialTimeout() != null) {
         	inputCommand.setInitialTimeout(model.getInitialTimeout().getMillis());
         }
-        // TODO: put this back in when we get clarification from wei
-        //if (model.getMaxDigits() != null) {
-        //	inputCommand.setNumberOfDigits(model.getMaxDigits());
-        //}
         if (model.getInterDigitTimeout() != null) {
         	inputCommand.setInterDigitsTimeout(model.getInterDigitTimeout().getMillis());
         }

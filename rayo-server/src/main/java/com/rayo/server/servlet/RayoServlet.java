@@ -23,7 +23,6 @@ import com.rayo.core.EndCommand;
 import com.rayo.core.EndEvent;
 import com.rayo.core.HangupCommand;
 import com.rayo.core.OfferEvent;
-import com.rayo.core.sip.SipURI;
 import com.rayo.core.validation.ValidationException;
 import com.rayo.core.verb.Verb;
 import com.rayo.core.verb.VerbCommand;
@@ -47,7 +46,6 @@ import com.rayo.server.admin.RayoAdminService;
 import com.rayo.server.exception.RayoProtocolException;
 import com.rayo.server.filter.FilterChain;
 import com.rayo.server.listener.XmppMessageListenerGroup;
-import com.rayo.server.lookup.RayoJIDLookupService;
 import com.rayo.server.util.DomUtils;
 import com.voxeo.exceptions.NotFoundException;
 import com.voxeo.logging.Loggerf;
@@ -76,8 +74,6 @@ public class RayoServlet extends AbstractRayoServlet {
     private CdrManager cdrManager;
     
     private FilterChain filtersChain;
-    
-    private RayoJIDLookupService<OfferEvent> rayoLookupService;
     
     private XmppMessageListenerGroup xmppMessageListenersGroup;
 	
@@ -144,9 +140,7 @@ public class RayoServlet extends AbstractRayoServlet {
         RayoAdminService adminService = (RayoAdminService)getAdminService();
         String gatewayDomain = adminService.getGatewayDomain();
         
-    	//TODO: Make private
         if (adminService.getGatewayDomain() != null) {
-        	//TODO: Extract this logic elsewhere. Advertises presence and platform id preference.
         	PresenceMessage presence = null;        	
         	try {
 	        	if (status.equalsIgnoreCase("unavailable")) {
@@ -217,56 +211,31 @@ public class RayoServlet extends AbstractRayoServlet {
     	if (event instanceof EndEvent) {
     		cdrManager.store(event.getCallId());
     	}
-    	    	
+
     	JID jid = null; 
     	JID from = null;
-    	RayoProtocolException jidLookupError = null;
-        RayoAdminService adminService = (RayoAdminService)getAdminService();
-        String gatewayDomain = adminService.getGatewayDomain();
-    	if (gatewayDomain == null) {
-    		// Single server. This code needs a bit of refactoring specially as 
-    		// the gateway servlet shares some of this stuff. 
-	    	if (event instanceof OfferEvent) {
-	    		SipURI sipUriTo = new SipURI(((OfferEvent)event).getTo().toString());
-	    		JID callTo = getXmppFactory().createJID(getBareJID(((OfferEvent)event).getTo().toString()));
-	    		String forwardDestination = null;
-				try {
-					forwardDestination = rayoLookupService.lookup((OfferEvent)event);
-				} catch (RayoProtocolException e) {
-					jidLookupError = e;
-				}
-	    		if (forwardDestination != null) {
-	    			callTo = getXmppFactory().createJID(forwardDestination);
-	    		}
-	    		jidRegistry.put(event.getCallId(), callTo, sipUriTo.getHost());
+    	try {
+	        RayoAdminService adminService = (RayoAdminService)getAdminService();
+	        String gatewayDomain = adminService.getGatewayDomain();
+	    	if (gatewayDomain == null) {
+	    		// Single server. This code needs a bit of refactoring specially as 
+	    		// the gateway servlet shares some of this stuff. 
+		    	if (event instanceof OfferEvent) {
+		    		JID callTo = getCallDestination(((OfferEvent)event).getTo().toString());
+		    		jidRegistry.put(event.getCallId(), callTo);
+		    	}
+	    	
+		    	String callDomain = getLocalDomain();
+		    	jid = jidRegistry.getJID(event.getCallId());    	
+		    	from = getXmppFactory().createJID(event.getCallId() + "@" + callDomain);
+	    	} else {
+	    		// Clustered setup. Everything is forwarded to the gateway
+		    	from = getXmppFactory().createJID(event.getCallId() + "@" + getLocalDomain());
+	    		jid = getXmppFactory().createJID(gatewayDomain);
 	    	}
-    	
-	    	String callDomain = getLocalDomain();
-	    	if (callDomain == null) {
-	    		jidRegistry.getOriginDomain(event.getCallId());
-	    	}
-	    	jid = jidRegistry.getJID(event.getCallId());    	
-	    	from = getXmppFactory().createJID(event.getCallId() + "@" + callDomain);
-    	} else {
-    		// Clustered setup. Everything is forwarded to the gateway
-	    	from = getXmppFactory().createJID(event.getCallId() + "@" + getLocalDomain());
-    		jid = getXmppFactory().createJID(gatewayDomain);
-    	}
-    	
-	    if (event instanceof VerbEvent) {
-	    	from.setResource(((VerbEvent) event).getVerbId());
-		}
-	    
-		try {
-			if (jidLookupError != null) {
-				log.error("JID lookup service threw an error: [%s]", jidLookupError.getText());
-				try {
-					JID to = getXmppFactory().createJID(jidLookupError.getTo());
-					sendPresenceError(from, to, jidLookupError.getCondition(), jidLookupError.getType(), jidLookupError.getText());
-				} catch (Exception e) {
-					log.error("Exception while trying to send error event: [%s]", e.getMessage());
-					log.error(e);
-				}
+	    	
+		    if (event instanceof VerbEvent) {
+		    	from.setResource(((VerbEvent) event).getVerbId());
 			}
 			
 	    	// Invoke filters
@@ -284,8 +253,11 @@ public class RayoServlet extends AbstractRayoServlet {
 			xmppMessageListenersGroup.onPresenceSent(presence);
 	    } catch (RayoProtocolException e) {
 	    	try {
-	    		log.error("Filters threw some exception: [%s]", e.getMessage());
-				sendPresenceError(from, jid, e.getCondition(), e.getType(), e.getText());
+	    		log.error("Rayo Exception: [%s] - [%s]", e.getMessage(), e.getText());
+	    		if (e.getTo() != null) {
+	    			jid = getXmppFactory().createJID(e.getTo());
+	    		}				
+	    		sendPresenceError(from, jid, e.getCondition(), e.getType(), e.getText());
 			} catch (ServletException se) {
 				log.error(se.getMessage(), se);
 			}
@@ -393,7 +365,7 @@ public class RayoServlet extends AbstractRayoServlet {
                     public void handle(Response response) throws Exception {
                         if (response.isSuccess()) {
                             CallRef callRef = (CallRef) response.getValue();
-                            jidRegistry.put(callRef.getCallId(), request.getFrom().getBareJID(), request.getTo().getDomain());
+                            jidRegistry.put(callRef.getCallId(), request.getFrom().getBareJID());
 
                         	CoreDocumentImpl document = new CoreDocumentImpl(false);
                         	org.w3c.dom.Element refElement = document.createElementNS("urn:xmpp:rayo:1", "ref");
@@ -515,7 +487,7 @@ public class RayoServlet extends AbstractRayoServlet {
     		org.w3c.dom.Element resultPayload = (org.w3c.dom.Element) result.getChildNodes().item(0);
     		cdrManager.append(callId, asXML(resultPayload));
     	} else {	
-    		cdrManager.append(callId,"<todo>TODO: Empty IQ Result</todo>");
+    		//cdrManager.append(callId,"<todo>TODO: Empty IQ Result</todo>");
     	}
     }
 
@@ -607,10 +579,6 @@ public class RayoServlet extends AbstractRayoServlet {
 
 	public void setFiltersChain(FilterChain filtersChain) {
 		this.filtersChain = filtersChain;
-	}
-
-	public void setRayoLookupService(RayoJIDLookupService<OfferEvent> rayoLookupService) {
-		this.rayoLookupService = rayoLookupService;
 	}
 
 	public void setXmppMessageListenersGroup(XmppMessageListenerGroup xmppMessageListenersGroup) {
