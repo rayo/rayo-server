@@ -18,6 +18,7 @@ public class CassandraDatastoreTest extends BaseDatastoreTest {
 		
 		store = new CassandraDatastore();
 		((CassandraDatastore)store).setCreateSampleApplication(false);
+		((CassandraDatastore)store).getSchemaHandler().setWaitForSyncing(false);
 		((CassandraDatastore)store).init();
 	}
 }

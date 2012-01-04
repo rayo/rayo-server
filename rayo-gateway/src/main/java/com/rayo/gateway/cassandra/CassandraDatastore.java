@@ -814,4 +814,12 @@ public class CassandraDatastore implements GatewayDatastore {
 	public void setSchemaName(String schemaName) {
 		this.schemaName = schemaName;
 	}
+
+	public CassandraSchemaHandler getSchemaHandler() {
+		return schemaHandler;
+	}
+
+	public void setSchemaHandler(CassandraSchemaHandler schemaHandler) {
+		this.schemaHandler = schemaHandler;
+	}
 }

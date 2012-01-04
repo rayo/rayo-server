@@ -27,6 +27,9 @@ public class CassandraSchemaHandler {
 
 	private final static Loggerf log = Loggerf.getLogger(CassandraSchemaHandler.class);
 	
+	private int schemaWaitPeriod = 200;
+	private boolean waitForSyncing = true;
+	
 	/**
 	 * Tells if a Cassandra schema does exist or not
 	 * 
@@ -183,7 +186,9 @@ public class CassandraSchemaHandler {
 		
 		// This is simple wait to get all the schema changes propagated to the nodes in 
 		// the cluster. Otherwise it is very easy to get a SchemaAgreementException
-		Thread.sleep(200);
+		if (waitForSyncing) {
+			Thread.sleep(schemaWaitPeriod);
+		}
 	}
 	
 	private CfDef getCfDef(KsDef def, String table) {
@@ -194,5 +199,13 @@ public class CassandraSchemaHandler {
 			}
 		}
 		return null;
+	}
+
+	public void setSchemaWaitPeriod(int schemaWaitPeriod) {
+		this.schemaWaitPeriod = schemaWaitPeriod;
+	}
+
+	public void setWaitForSyncing(boolean waitForSyncing) {
+		this.waitForSyncing = waitForSyncing;
 	}
 }
