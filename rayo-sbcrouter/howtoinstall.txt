@@ -1,0 +1,21 @@
+1 install prism with sipoint.
+
+2 start prism.
+
+3 modify proxy.xml in this project, add domains in the <domains> element. modify <session-timeout>120</session-timeout> if necessary, the unit is minute.
+modify those two properties in element <router>, CassandraHost="localhost" CassandraPort="9160".
+
+4 copy proxy.xml {prism}/conf/apps/sipoint/proxy, replace the old one.
+
+5 copy sbc-router-2.0-SNAPSHOT.jar and the following dependency jars to {prism}/lib/apps/sipoint
+cassandra-all-1.0.5.jar
+cassandra-thrift-1.0.3.jar
+commons-pool-1.5.5.jar
+libthrift-0.6.1.jar
+rayo-gateway.jar
+sbc-router-2.0-SNAPSHOT.jar
+scale7-core-1.3.jar
+scale7-pelops-1.3-1.0.x-SNAPSHOT.jar
+
+6 the sip port is configured in {prism}/conf/apps/sipoint/proxy/sipmethod-application.xml, the default port is 6060, 
+you can modify that if necessary, or remove that two NetworkAccessPoint, then prism will use the port configured in sipmethod.xml.
