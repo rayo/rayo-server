@@ -9,6 +9,7 @@ import java.util.Map;
 import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.ColumnDef;
 import org.apache.cassandra.thrift.KsDef;
+import org.apache.thrift.transport.TTransportException;
 import org.scale7.cassandra.pelops.Bytes;
 import org.scale7.cassandra.pelops.Cluster;
 import org.scale7.cassandra.pelops.ColumnFamilyManager;
@@ -39,7 +40,7 @@ public class CassandraSchemaHandler {
 	 * @return boolean <code>true</code> if the Cassandra schema does exist and <code>false</code> 
 	 * if it does not
 	 */
-	public boolean schemaExists(Cluster cluster, String schemaName) {
+	public boolean schemaExists(Cluster cluster, String schemaName) throws Exception {
 		
 		log.debug("Searching schema %s on cluster %s", schemaName, cluster);
 		KeyspaceManager keyspaceManager = Pelops.createKeyspaceManager(cluster);
@@ -49,7 +50,12 @@ public class CassandraSchemaHandler {
 				log.debug("Found schema %s :: %s", schemaName, ksDef);
 				return true;
 			}
+		} catch (TTransportException te) {
+			log.error("It looks like the Cassandra Server is down");
+			log.error(te.getMessage(), te);
+			throw te;
 		} catch (Exception e) {
+			log.warn(e.getMessage());
 		}
 		return false;
 	}
@@ -72,6 +78,10 @@ public class CassandraSchemaHandler {
 			keyspaceManager.dropKeyspace(schemaName);
 			log.debug("Schema dropped");
 			waitToPropagate();
+		} catch (TTransportException te) {
+			log.error("It looks like the Cassandra Server is down");
+			log.error(te.getMessage(), te);
+			throw te;
 		} catch (Exception e) {
 			log.debug("The schema did not exist. No schema has been dropped");
 		}
