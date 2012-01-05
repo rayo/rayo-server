@@ -87,6 +87,9 @@ public class RayoRouter implements Router {
 		}
 		
 		Destination destination = _helper.createDestination("sip:" + node.getIpAddress());
+		dests.add(destination);
+		
+		//TODO: Failover and blacklisting
 	}
 
 	public void destroy() {
