@@ -334,6 +334,8 @@
     <module>rayo-server</module>
     <module>rayo-core</module>
     <module>rayo-war</module>
+    <module>rayo-sbcrouter</module>
+    <module>rayo-storage</module>
     <module>rayo-gateway</module>
   </modules>
   <profiles>

@@ -7,9 +7,9 @@ import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
-import com.rayo.gateway.GatewayStorageService;
-import com.rayo.gateway.model.RayoNode;
-import com.rayo.gateway.util.JIDUtils;
+import com.rayo.storage.GatewayStorageService;
+import com.rayo.storage.model.RayoNode;
+import com.rayo.storage.util.JIDUtils;
 
 /**
  * <p>This Mbean exposes relevant information on the Distributed hash table. It 
