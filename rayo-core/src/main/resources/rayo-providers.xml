@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context" 
+    xmlns:lang="http://www.springframework.org/schema/lang"
+    xmlns:p="http://www.springframework.org/schema/p" 
+    xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+		http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-3.0.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd"
+    default-autowire="byName">
+
+	<context:annotation-config />
+	
+	<bean id="validator" class="com.rayo.core.validation.Validator"/>
+
+	<!-- Rayo providers -->
+	<bean id="rayoProvider" class="com.rayo.core.xml.providers.RayoProvider">
+		<property name="validator" ref="validator" />
+		<property name="namespaces">
+			<list>
+				<value>urn:xmpp:rayo:1</value>
+                <value>urn:xmpp:rayo:ext:1</value>
+                <value>urn:xmpp:rayo:ext:complete:1</value>
+			</list>
+		</property>
+		<property name="classes">
+	    	<list>
+	    		<value>com.rayo.core.OfferEvent</value>
+	    		<value>com.rayo.core.EndEvent</value>
+	    		<value>com.rayo.core.RingingEvent</value>
+	    		<value>com.rayo.core.SpeakingEvent</value>
+	    		<value>com.rayo.core.FinishedSpeakingEvent</value>
+	    		<value>com.rayo.core.AnsweredEvent</value>
+	    		<value>com.rayo.core.AcceptCommand</value>
+	    		<value>com.rayo.core.AnswerCommand</value>
+	    		<value>com.rayo.core.HangupCommand</value>
+	    		<value>com.rayo.core.RejectCommand</value>
+	    		<value>com.rayo.core.RedirectCommand</value>
+	    		<value>com.rayo.core.verb.StopCommand</value>
+	    		<value>com.rayo.core.DialCommand</value>
+	    		<value>com.rayo.core.DtmfEvent</value>
+	    		<value>com.rayo.core.verb.HoldCommand</value>
+	    		<value>com.rayo.core.verb.UnholdCommand</value>
+	    		<value>com.rayo.core.verb.MuteCommand</value>
+	    		<value>com.rayo.core.verb.UnmuteCommand</value>
+	    		<value>com.rayo.core.JoinCommand</value>
+	    		<value>com.rayo.core.UnjoinCommand</value>
+	    		<value>com.rayo.core.JoinedEvent</value>
+	    		<value>com.rayo.core.UnjoinedEvent</value>
+	    		<value>com.rayo.core.DtmfCommand</value>
+	      	</list>
+	   	</property>		
+	</bean>
+	<bean id="outputProvider" class="com.rayo.core.xml.providers.OutputProvider">
+		<property name="validator" ref="validator" />
+		<property name="namespaces">
+			<list>
+				<value>urn:xmpp:rayo:output:1</value>
+                <value>urn:xmpp:rayo:output:complete:1</value>
+			</list>
+		</property>
+		<property name="classes">
+	    	<list>
+	    		<value>com.rayo.core.verb.Output</value>
+	    		<value>com.rayo.core.verb.PauseCommand</value>
+	    		<value>com.rayo.core.verb.ResumeCommand</value>
+	    		<value>com.rayo.core.verb.VolumeUpCommand</value>
+	    		<value>com.rayo.core.verb.VolumeDownCommand</value>
+	    		<value>com.rayo.core.verb.SeekCommand</value>
+	    		<value>com.rayo.core.verb.SpeedUpCommand</value>
+	    		<value>com.rayo.core.verb.SpeedDownCommand</value>
+	    		<value>com.rayo.core.verb.OutputCompleteEvent</value>
+	    	</list>
+	    </property>			
+	</bean>
+	<bean id="inputProvider" class="com.rayo.core.xml.providers.InputProvider">
+		<property name="validator" ref="validator" />
+		<property name="namespaces">
+			<list>
+				<value>urn:xmpp:rayo:input:1</value>
+                <value>urn:xmpp:rayo:input:complete:1</value>
+			</list>
+		</property>
+		<property name="classes">
+	    	<list>
+	    		<value>com.rayo.core.verb.Input</value>
+	    		<value>com.rayo.core.verb.InputCompleteEvent</value>
+	    	</list>
+	    </property>					
+	</bean>
+	<bean id="recordProvider" class="com.rayo.core.xml.providers.RecordProvider">
+		<property name="validator" ref="validator" />
+		<property name="namespaces">
+			<list>
+				<value>urn:xmpp:rayo:record:1</value>
+				<value>urn:xmpp:rayo:record:complete:1</value>
+			</list>
+		</property>	
+		<property name="classes">
+	    	<list>
+	    		<value>com.rayo.core.verb.Record</value>
+	    		<value>com.rayo.core.verb.RecordResumeCommand</value>
+	    		<value>com.rayo.core.verb.RecordPauseCommand</value>
+	    		<value>com.rayo.core.verb.RecordCompleteEvent</value>
+	    	</list>
+	    </property>			
+	</bean>			
+	<bean id="sayProvider" class="com.rayo.core.xml.providers.SayProvider">
+		<property name="validator" ref="validator" />
+		<property name="namespaces">
+			<list>
+				<value>urn:xmpp:tropo:say:1</value>
+                <value>urn:xmpp:tropo:say:complete:1</value>
+			</list>
+		</property>	
+		<property name="classes">
+	    	<list>
+	    		<value>com.rayo.core.verb.Say</value>
+	    		<value>com.rayo.core.verb.PauseCommand</value>
+	    		<value>com.rayo.core.verb.ResumeCommand</value>
+	    		<value>com.rayo.core.verb.SayCompleteEvent</value>
+	    	</list>
+	    </property>			
+	</bean>	
+	<bean id="askProvider" class="com.rayo.core.xml.providers.AskProvider">
+		<property name="validator" ref="validator" />
+		<property name="namespaces">
+			<list>
+				<value>urn:xmpp:tropo:ask:1</value>
+                <value>urn:xmpp:tropo:ask:complete:1</value>
+			</list>
+		</property>		
+		<property name="classes">
+	    	<list>
+	    		<value>com.rayo.core.verb.Ask</value>
+	    		<value>com.rayo.core.verb.AskCompleteEvent</value>
+	    	</list>
+	    </property>			
+	</bean>	
+	<bean id="transferProvider" class="com.rayo.core.xml.providers.TransferProvider">
+		<property name="validator" ref="validator" />
+		<property name="namespaces">
+			<list>
+				<value>urn:xmpp:tropo:transfer:1</value>
+                <value>urn:xmpp:tropo:transfer:complete:1</value>
+			</list>
+		</property>		
+		<property name="classes">
+	    	<list>
+	    		<value>com.rayo.core.verb.Transfer</value>
+	    		<value>com.rayo.core.verb.TransferCompleteEvent</value>
+	    	</list>
+	    </property>			
+	</bean>
+	<bean id="conferenceProvider" class="com.rayo.core.xml.providers.ConferenceProvider">
+		<property name="validator" ref="validator" />
+		<property name="namespaces">
+			<list>
+				<value>urn:xmpp:tropo:conference:1</value>
+                <value>urn:xmpp:tropo:conference:complete:1</value>
+			</list>
+		</property>
+		<property name="classes">
+	    	<list>
+	    		<value>com.rayo.core.verb.Conference</value>
+	    		<value>com.rayo.core.verb.KickCommand</value>
+	    		<value>com.rayo.core.verb.OnHoldEvent</value>
+	    		<value>com.rayo.core.verb.OffHoldEvent</value>
+	    		<value>com.rayo.core.SpeakingEvent</value>
+	    		<value>com.rayo.core.FinishedSpeakingEvent</value>
+	    		<value>com.rayo.core.verb.ConferenceCompleteEvent</value>
+	    	</list>
+	    </property>				
+	</bean>	
+	
+	<!-- Create a global XML Provider -->
+	<bean id="xmlProviderManager" class="com.rayo.core.xml.DefaultXmlProviderManagerFactoryBean">
+		<property name="providers">
+			<list>
+				<ref bean="rayoProvider"/>
+				<ref bean="sayProvider"/>
+				<ref bean="askProvider"/>
+				<ref bean="transferProvider"/>
+				<ref bean="conferenceProvider"/>
+				<ref bean="outputProvider"/>
+				<ref bean="inputProvider"/>
+				<ref bean="recordProvider"/>
+			</list>
+		</property>		
+	</bean>		
+</beans>

@@ -13,9 +13,9 @@ import org.dom4j.QName;
 
 import com.rayo.core.verb.Ask;
 import com.rayo.core.verb.AskCompleteEvent;
+import com.rayo.core.verb.AskCompleteEvent.Reason;
 import com.rayo.core.verb.Choices;
 import com.rayo.core.verb.InputMode;
-import com.rayo.core.verb.AskCompleteEvent.Reason;
 
 public class AskProvider extends BaseProvider {
 
@@ -182,12 +182,4 @@ public class AskProvider extends BaseProvider {
             }
         }
     }
-
-	@Override
-	public boolean handles(Class<?> clazz) {
-		//TODO: Refactor out to spring configuration and put everything in the base provider class
-		return clazz == Ask.class ||
-			   clazz == AskCompleteEvent.class;
-	}
-	
 }

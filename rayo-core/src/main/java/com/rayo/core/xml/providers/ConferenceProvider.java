@@ -210,16 +210,4 @@ public class ConferenceProvider extends BaseProvider {
 		Element element = document.addElement(new QName("stopped-speaking", NAMESPACE));
 		element.addAttribute("call-id", event.getSpeakerId());
 	}
-
-	@Override
-	public boolean handles(Class<?> clazz) {
-
-		// TODO: Refactor out to spring configuration and put everything in the
-		// base provider class
-		return clazz == Conference.class || clazz == KickCommand.class
-				|| clazz == ConferenceCompleteEvent.class
-				|| clazz == OnHoldEvent.class || clazz == OffHoldEvent.class
-				|| clazz == SpeakingEvent.class
-				|| clazz == FinishedSpeakingEvent.class;
-	}
 }

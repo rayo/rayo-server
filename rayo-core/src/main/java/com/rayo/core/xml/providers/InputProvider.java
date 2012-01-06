@@ -211,12 +211,4 @@ public class InputProvider extends BaseProvider {
             }
         }
     }
-
-    @Override
-    public boolean handles(Class<?> clazz) {
-
-        //TODO: Refactor out to spring configuration and put everything in the base provider class
-        return clazz == Input.class || 
-               clazz == InputCompleteEvent.class;
-    }
 }

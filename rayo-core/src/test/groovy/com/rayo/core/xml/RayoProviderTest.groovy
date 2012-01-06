@@ -18,16 +18,20 @@ import org.dom4j.io.SAXReader
 import org.joda.time.Duration
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.test.context.ContextConfiguration
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 
 import com.rayo.core.AcceptCommand
 import com.rayo.core.AnswerCommand
-import com.rayo.core.AnsweredEvent;
+import com.rayo.core.AnsweredEvent
 import com.rayo.core.CallRejectReason
 import com.rayo.core.DialCommand
-import com.rayo.core.DtmfCommand;
+import com.rayo.core.DtmfCommand
 import com.rayo.core.DtmfEvent
-import com.rayo.core.EndEvent;
-import com.rayo.core.FinishedSpeakingEvent;
+import com.rayo.core.EndEvent
+import com.rayo.core.FinishedSpeakingEvent
 import com.rayo.core.HangupCommand
 import com.rayo.core.JoinCommand
 import com.rayo.core.JoinDestinationType
@@ -35,83 +39,70 @@ import com.rayo.core.JoinedEvent
 import com.rayo.core.OfferEvent
 import com.rayo.core.RedirectCommand
 import com.rayo.core.RejectCommand
-import com.rayo.core.RingingEvent;
-import com.rayo.core.SpeakingEvent;
+import com.rayo.core.RingingEvent
+import com.rayo.core.SpeakingEvent
 import com.rayo.core.UnjoinCommand
 import com.rayo.core.UnjoinedEvent
+import com.rayo.core.validation.Validator
+import com.rayo.core.verb.Ask
+import com.rayo.core.verb.AskCompleteEvent
+import com.rayo.core.verb.Choices
+import com.rayo.core.verb.Conference
+import com.rayo.core.verb.ConferenceCompleteEvent
+import com.rayo.core.verb.HoldCommand
+import com.rayo.core.verb.Input
+import com.rayo.core.verb.InputCompleteEvent
+import com.rayo.core.verb.InputMode
+import com.rayo.core.verb.KickCommand
+import com.rayo.core.verb.MediaType
+import com.rayo.core.verb.MuteCommand
+import com.rayo.core.verb.Output
+import com.rayo.core.verb.OutputCompleteEvent
+import com.rayo.core.verb.PauseCommand
+import com.rayo.core.verb.Record
+import com.rayo.core.verb.RecordCompleteEvent
+import com.rayo.core.verb.RecordPauseCommand
+import com.rayo.core.verb.RecordResumeCommand
+import com.rayo.core.verb.ResumeCommand
+import com.rayo.core.verb.Say
+import com.rayo.core.verb.SayCompleteEvent
+import com.rayo.core.verb.SeekCommand
+import com.rayo.core.verb.SpeedDownCommand
+import com.rayo.core.verb.SpeedUpCommand
+import com.rayo.core.verb.Ssml
+import com.rayo.core.verb.StopCommand
+import com.rayo.core.verb.Transfer
+import com.rayo.core.verb.TransferCompleteEvent
+import com.rayo.core.verb.UnholdCommand
+import com.rayo.core.verb.UnmuteCommand
+import com.rayo.core.verb.VerbCompleteEvent
+import com.rayo.core.verb.VolumeDownCommand
+import com.rayo.core.verb.VolumeUpCommand
 import com.rayo.core.verb.AskCompleteEvent.Reason
 import com.rayo.core.xml.providers.AskProvider
 import com.rayo.core.xml.providers.ConferenceProvider
-import com.rayo.core.xml.providers.InputProvider;
+import com.rayo.core.xml.providers.InputProvider
 import com.rayo.core.xml.providers.OutputProvider
 import com.rayo.core.xml.providers.RayoProvider
 import com.rayo.core.xml.providers.RecordProvider
 import com.rayo.core.xml.providers.SayProvider
 import com.rayo.core.xml.providers.TransferProvider
-import com.rayo.core.validation.Validator;
-import com.rayo.core.verb.Ask;
-import com.rayo.core.verb.AskCompleteEvent;
-import com.rayo.core.verb.Choices;
-import com.rayo.core.verb.Conference;
-import com.rayo.core.verb.ConferenceCompleteEvent;
-import com.rayo.core.verb.HoldCommand;
-import com.rayo.core.verb.Input;
-import com.rayo.core.verb.InputCompleteEvent;
-import com.rayo.core.verb.InputMode;
-import com.rayo.core.verb.KickCommand;
-import com.rayo.core.verb.MediaType;
-import com.rayo.core.verb.MuteCommand;
-import com.rayo.core.verb.Output;
-import com.rayo.core.verb.OutputCompleteEvent;
-import com.rayo.core.verb.PauseCommand;
-import com.rayo.core.verb.Record;
-import com.rayo.core.verb.RecordCompleteEvent;
-import com.rayo.core.verb.RecordPauseCommand;
-import com.rayo.core.verb.RecordResumeCommand;
-import com.rayo.core.verb.ResumeCommand;
-import com.rayo.core.verb.Say;
-import com.rayo.core.verb.SayCompleteEvent;
-import com.rayo.core.verb.SeekCommand;
-import com.rayo.core.verb.SpeedDownCommand;
-import com.rayo.core.verb.SpeedUpCommand;
-import com.rayo.core.verb.Ssml;
-import com.rayo.core.verb.StopCommand;
-import com.rayo.core.verb.Transfer;
-import com.rayo.core.verb.TransferCompleteEvent;
-import com.rayo.core.verb.UnholdCommand;
-import com.rayo.core.verb.UnmuteCommand;
-import com.rayo.core.verb.VerbCompleteEvent;
-import com.rayo.core.verb.VolumeDownCommand;
-import com.rayo.core.verb.VolumeUpCommand;
-import com.rayo.core.xml.DefaultXmlProviderManager;
-import com.rayo.core.xml.XmlProviderManager;
 import com.voxeo.moho.Participant.JoinType
 import com.voxeo.moho.media.output.OutputCommand.BargeinType
 
+
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration(locations=["/rayo-providers.xml"])
 public class RayoProviderTest {
 
+	@Autowired
     XmlProviderManager provider
 
     SAXReader reader = new SAXReader()
-    
+    	
     @Before
     public void setup() {
         
-        def validator = new Validator()
-        
-        provider = new DefaultXmlProviderManager()
-        
-        [new RayoProvider(validator:validator,namespaces:['urn:xmpp:rayo:1', 'urn:xmpp:rayo:ext:1', 'urn:xmpp:rayo:ext:complete:1']),
-         new SayProvider(validator:validator,namespaces:['urn:xmpp:tropo:say:1', 'urn:xmpp:tropo:say:complete:1']),
-         new AskProvider(validator:validator,namespaces:['urn:xmpp:tropo:ask:1', 'urn:xmpp:tropo:ask:complete:1']),
-         new TransferProvider(validator:validator,namespaces:['urn:xmpp:tropo:transfer:1', 'urn:xmpp:tropo:transfer:complete:1']),
-         new ConferenceProvider(validator:validator,namespaces:['urn:xmpp:tropo:conference:1', 'urn:xmpp:tropo:conference:complete:1']),
-         new RecordProvider(validator:validator,namespaces:['urn:xmpp:rayo:record:1', 'urn:xmpp:rayo:record:complete:1']),
-         new OutputProvider(validator:validator,namespaces:['urn:xmpp:rayo:output:1', 'urn:xmpp:rayo:output:complete:1']),
-		 new InputProvider(validator:validator,namespaces:['urn:xmpp:rayo:input:1', 'urn:xmpp:rayo:input:complete:1'])
-		].each {
-             provider.register it
-         }
     }
 
     // OfferEvent
@@ -316,7 +307,6 @@ public class RayoProviderTest {
 	}
 
 	@Test
-	//TODO Is this valid?
 	public void dialWithNestedJoinToXml() {
 		
 		DialCommand command = new DialCommand();

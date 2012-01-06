@@ -19,7 +19,6 @@ import com.rayo.core.DialCommand;
 import com.rayo.core.DtmfCommand;
 import com.rayo.core.DtmfEvent;
 import com.rayo.core.EndEvent;
-import com.rayo.core.FinishedSpeakingEvent;
 import com.rayo.core.HangupCommand;
 import com.rayo.core.JoinCommand;
 import com.rayo.core.JoinDestinationType;
@@ -28,7 +27,6 @@ import com.rayo.core.OfferEvent;
 import com.rayo.core.RedirectCommand;
 import com.rayo.core.RejectCommand;
 import com.rayo.core.RingingEvent;
-import com.rayo.core.SpeakingEvent;
 import com.rayo.core.UnjoinCommand;
 import com.rayo.core.UnjoinedEvent;
 import com.rayo.core.validation.Messages;
@@ -590,33 +588,4 @@ public class RayoProvider extends BaseProvider {
 
         return document;
     }
-
-	@Override
-	public boolean handles(Class<?> clazz) {
-
-		//TODO: Refactor out to spring configuration and put everything in the base provider class
-		return clazz == OfferEvent.class ||
-			   clazz == EndEvent.class ||
-			   clazz == RingingEvent.class ||
-			   clazz == SpeakingEvent.class ||
-			   clazz == FinishedSpeakingEvent.class ||
-			   clazz == AnsweredEvent.class ||
-			   clazz == AcceptCommand.class ||
-			   clazz == AnswerCommand.class ||
-			   clazz == HangupCommand.class ||
-			   clazz == RejectCommand.class ||
-			   clazz == RedirectCommand.class ||
-	           clazz == StopCommand.class  ||
-			   clazz == DialCommand.class ||
-		       clazz == DtmfEvent.class ||
-		       clazz == HoldCommand.class ||
-		       clazz == UnholdCommand.class ||
-		       clazz == MuteCommand.class ||
-		       clazz == UnmuteCommand.class ||
-		       clazz == JoinCommand.class ||
-		       clazz == UnjoinCommand.class ||
-		       clazz == JoinedEvent.class ||
-		       clazz == UnjoinedEvent.class ||
-		       clazz == DtmfCommand.class;
-	}
 }

@@ -160,11 +160,4 @@ public class TransferProvider extends BaseProvider {
 	private void createTransferCompleteEvent(TransferCompleteEvent event, Document document) throws Exception {
 	    addCompleteElement(document, event, COMPLETE_NAMESPACE);
 	}
-
-	@Override
-	public boolean handles(Class<?> clazz) {
-		//TODO: Refactor out to spring configuration and put everything in the base provider class
-		return clazz == Transfer.class ||
-			   clazz == TransferCompleteEvent.class;
-	}
 }

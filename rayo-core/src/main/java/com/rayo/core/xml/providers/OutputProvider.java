@@ -243,19 +243,4 @@ public class OutputProvider extends BaseProvider {
             throw new ValidationException(Messages.INVALID_BARGEIN_TYPE);
         }
     }
-
-    @Override
-    public boolean handles(Class<?> clazz) {
-
-        //TODO: Refactor out to spring configuration and put everything in the base provider class
-        return clazz == Output.class || 
-               clazz == PauseCommand.class || 
-               clazz == ResumeCommand.class || 
-               clazz == VolumeUpCommand.class || 
-               clazz == VolumeDownCommand.class || 
-               clazz == SeekCommand.class || 
-               clazz == SpeedUpCommand.class || 
-               clazz == SpeedDownCommand.class || 
-               clazz == OutputCompleteEvent.class;
-    }
 }

@@ -22,8 +22,8 @@ import com.rayo.core.validation.Validator;
 import com.rayo.core.verb.InputMode;
 import com.rayo.core.verb.Ssml;
 import com.rayo.core.verb.VerbCompleteEvent;
-import com.rayo.core.verb.VerbCompleteReason;
 import com.rayo.core.verb.VerbCompleteEvent.Reason;
+import com.rayo.core.verb.VerbCompleteReason;
 import com.rayo.core.xml.XmlProvider;
 import com.rayo.core.xml.XmlProviderManager;
 import com.voxeo.utils.Enums;
@@ -38,6 +38,8 @@ public abstract class BaseProvider implements XmlProvider {
     private XmlProviderManager manager;
 
     private List<String> namespaces;
+    
+    private List<Class<?>> classes;
 
     @Override
     @SuppressWarnings("unchecked")
@@ -353,4 +355,19 @@ public abstract class BaseProvider implements XmlProvider {
     public void setNamespaces(List<String> namespaces) {
         this.namespaces = namespaces;
     }
+    
+    @Override
+    public boolean handles(Class<?> clazz) {
+
+    	return classes.contains(clazz);
+    }
+
+	public void setClasses(List<Class<?>> classes) {
+		
+		this.classes = classes;
+	}
+
+	public List<Class<?>> getClasses() {
+		return classes;
+	}
 }

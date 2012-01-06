@@ -172,16 +172,6 @@ public class RecordProvider extends BaseProvider {
         	root.addAttribute("max-duration", String.valueOf(record.getMaxDuration().getMillis()));
         }
     }
-
-    @Override
-    public boolean handles(Class<?> clazz) {
-
-        //TODO: Refactor out to spring configuration and put everything in the base provider class
-        return clazz == Record.class ||
-        	   clazz == RecordCompleteEvent.class ||
-        	   clazz == RecordPauseCommand.class ||
-        	   clazz == RecordResumeCommand.class;
-    }
     
     private VerbCompleteReason findReason(String reasonValue) {
     	

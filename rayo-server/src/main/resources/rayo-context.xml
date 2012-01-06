@@ -12,6 +12,9 @@
     default-autowire="byName">
 
 	<context:annotation-config />
+	
+	<!-- Rayo providers are defined in the rayo-core project -->
+	<import resource="classpath:rayo-providers.xml"/>
 
 	<!-- Actor Thread Pool -->
 	<bean id="executor" class="java.util.concurrent.Executors" factory-method="newCachedThreadPool" />
@@ -80,99 +83,8 @@
 	</bean>
 
 	<!-- Model / Request Validation -->
-	<bean id="validator" class="com.rayo.core.validation.Validator"/>
 	<bean id="ssmlValidator" class="com.rayo.server.validation.SsmlValidator">
 		<property name="resource" value="classpath:synthesis-core.xsd"/>
-	</bean>
-
-	<!-- Rayo providers -->
-	<bean id="rayoProvider" class="com.rayo.core.xml.providers.RayoProvider">
-		<property name="validator" ref="validator" />
-		<property name="namespaces">
-			<list>
-				<value>urn:xmpp:rayo:1</value>
-                <value>urn:xmpp:rayo:ext:1</value>
-                <value>urn:xmpp:rayo:ext:complete:1</value>
-			</list>
-		</property>		
-	</bean>
-	<bean id="sayProvider" class="com.rayo.core.xml.providers.SayProvider">
-		<property name="validator" ref="validator" />
-		<property name="namespaces">
-			<list>
-				<value>urn:xmpp:tropo:say:1</value>
-                <value>urn:xmpp:tropo:say:complete:1</value>
-			</list>
-		</property>		
-	</bean>
-	<bean id="askProvider" class="com.rayo.core.xml.providers.AskProvider">
-		<property name="validator" ref="validator" />
-		<property name="namespaces">
-			<list>
-				<value>urn:xmpp:tropo:ask:1</value>
-                <value>urn:xmpp:tropo:ask:complete:1</value>
-			</list>
-		</property>		
-	</bean>
-	<bean id="transferProvider" class="com.rayo.core.xml.providers.TransferProvider">
-		<property name="validator" ref="validator" />
-		<property name="namespaces">
-			<list>
-				<value>urn:xmpp:tropo:transfer:1</value>
-                <value>urn:xmpp:tropo:transfer:complete:1</value>
-			</list>
-		</property>		
-	</bean>
-	<bean id="conferenceProvider" class="com.rayo.core.xml.providers.ConferenceProvider">
-		<property name="validator" ref="validator" />
-		<property name="namespaces">
-			<list>
-				<value>urn:xmpp:tropo:conference:1</value>
-                <value>urn:xmpp:tropo:conference:complete:1</value>
-			</list>
-		</property>		
-	</bean>				
-	<bean id="outputProvider" class="com.rayo.core.xml.providers.OutputProvider">
-		<property name="validator" ref="validator" />
-		<property name="namespaces">
-			<list>
-				<value>urn:xmpp:rayo:output:1</value>
-                <value>urn:xmpp:rayo:output:complete:1</value>
-			</list>
-		</property>		
-	</bean>
-	<bean id="inputProvider" class="com.rayo.core.xml.providers.InputProvider">
-		<property name="validator" ref="validator" />
-		<property name="namespaces">
-			<list>
-				<value>urn:xmpp:rayo:input:1</value>
-                <value>urn:xmpp:rayo:input:complete:1</value>
-			</list>
-		</property>		
-	</bean>
-	<bean id="recordProvider" class="com.rayo.core.xml.providers.RecordProvider">
-		<property name="validator" ref="validator" />
-		<property name="namespaces">
-			<list>
-				<value>urn:xmpp:rayo:record:1</value>
-			</list>
-		</property>		
-	</bean>
-	
-	<!-- Create a global XML Provider -->
-	<bean id="xmlProviderManager" class="com.rayo.core.xml.DefaultXmlProviderManagerFactoryBean">
-		<property name="providers">
-			<list>
-				<ref bean="rayoProvider"/>
-				<ref bean="sayProvider"/>
-				<ref bean="askProvider"/>
-				<ref bean="transferProvider"/>
-				<ref bean="conferenceProvider"/>
-				<ref bean="outputProvider"/>
-				<ref bean="inputProvider"/>
-				<ref bean="recordProvider"/>
-			</list>
-		</property>		
 	</bean>
 
 	<!-- Verb Manager: Used to create VerbHandler instances and read/write XML -->
