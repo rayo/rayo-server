@@ -126,7 +126,9 @@ public class CassandraSchemaHandler {
 			ksDef.addToCf_defs(cfNode);			
 			cfManager.addColumnFamily(cfNode);
 			waitToPropagate();
-		}		
+		} else {
+			log.debug("Found Column Family: nodes");
+		}
 		
 		CfDef cfApplications = getCfDef(ksDef, "applications");
 		if (cfApplications == null) {
@@ -137,7 +139,10 @@ public class CassandraSchemaHandler {
 			ksDef.addToCf_defs(cfApplications);			
 			cfManager.addColumnFamily(cfApplications);
 			waitToPropagate();
+		} else {
+			log.debug("Found Column Family: applications");
 		}
+		
 		CfDef cfAddresses = getCfDef(ksDef, "addresses");
 		if (cfAddresses == null) {
 			log.debug("Creating new Column Family: addresses");
@@ -147,6 +152,8 @@ public class CassandraSchemaHandler {
 			ksDef.addToCf_defs(cfAddresses);			
 			cfManager.addColumnFamily(cfAddresses);
 			waitToPropagate();
+		} else {
+			log.debug("Found Column Family: addresses");
 		}
 		
 		CfDef cfClients = getCfDef(ksDef, "clients");
@@ -159,6 +166,8 @@ public class CassandraSchemaHandler {
 			ksDef.addToCf_defs(cfClients);			
 			cfManager.addColumnFamily(cfClients);
 			waitToPropagate();
+		} else {
+			log.debug("Found Column Family: clients");
 		}
 		
 		CfDef cfIps = getCfDef(ksDef, "ips");
@@ -169,6 +178,8 @@ public class CassandraSchemaHandler {
 			ksDef.addToCf_defs(cfIps);			
 			cfManager.addColumnFamily(cfIps);
 			waitToPropagate();
+		} else {
+			log.debug("Found Column Family: ips");
 		}
 		
 		CfDef calls = getCfDef(ksDef, "calls");
@@ -179,6 +190,8 @@ public class CassandraSchemaHandler {
 			ksDef.addToCf_defs(calls);			
 			cfManager.addColumnFamily(calls);
 			waitToPropagate();
+		} else {
+			log.debug("Found Column Family: calls");
 		}
 		
 		CfDef cfJids = getCfDef(ksDef, "jids");
@@ -192,6 +205,8 @@ public class CassandraSchemaHandler {
 			ksDef.addToCf_defs(cfJids);			
 			cfManager.addColumnFamily(cfJids);
 			waitToPropagate();
+		} else {
+			log.debug("Found Column Family: jids");
 		}
 	}
 	
