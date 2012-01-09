@@ -15,6 +15,7 @@ import org.scale7.cassandra.pelops.Cluster;
 import org.scale7.cassandra.pelops.ColumnFamilyManager;
 import org.scale7.cassandra.pelops.KeyspaceManager;
 import org.scale7.cassandra.pelops.Pelops;
+import org.scale7.cassandra.pelops.exceptions.NotFoundException;
 
 import com.voxeo.logging.Loggerf;
 
@@ -54,6 +55,8 @@ public class CassandraSchemaHandler {
 			log.error("It looks like the Cassandra Server is down");
 			log.error(te.getMessage(), te);
 			throw te;
+		} catch (NotFoundException nfe) {
+			log.debug("Schema %s does not exist", schemaName);
 		} catch (Exception e) {
 			log.warn(e.getMessage(),e);
 		}
