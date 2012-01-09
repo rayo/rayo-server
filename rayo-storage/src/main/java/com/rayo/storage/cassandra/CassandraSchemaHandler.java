@@ -55,9 +55,70 @@ public class CassandraSchemaHandler {
 			log.error(te.getMessage(), te);
 			throw te;
 		} catch (Exception e) {
+			log.warn(e.getMessage(),e);
+		}
+		return false;
+	}
+	
+	/**
+	 * Validates the existing schema. 
+	 * 
+	 * @param cluster Cluster name
+	 * @param schemaName Name of the schema
+	 * @return boolean <code>true</code> if the schema is valid and <code>false</code> 
+	 * if it should be recreated
+	 * @throws Exception If there is any issue while validating the schema
+	 */
+	public boolean validSchema(Cluster cluster, String schemaName) throws Exception {
+		
+		log.debug("Validating schema %s on cluster %s", schemaName, cluster);
+		KeyspaceManager keyspaceManager = Pelops.createKeyspaceManager(cluster);
+		try {
+			KsDef ksDef = keyspaceManager.getKeyspaceSchema(schemaName);
+			if (ksDef == null) {
+				log.debug("Keyspace not found");
+				return false;
+			}
+			if (!validateTable(ksDef, "nodes")) return false;
+			if (!validateTable(ksDef, "applications")) return false;
+			if (!validateTable(ksDef, "addresses")) return false;
+			if (!validateTable(ksDef, "clients")) return false;
+			if (!validateTable(ksDef, "ips")) return false;
+			if (!validateTable(ksDef, "calls")) return false;
+			if (!validateTable(ksDef, "jids")) return false;
+			
+			return true;
+		} catch (TTransportException te) {
+			log.error("It looks like the Cassandra Server is down");
+			log.error(te.getMessage(), te);
+			throw te;
+		} catch (Exception e) {
 			log.warn(e.getMessage());
 		}
 		return false;
+
+	}
+	
+	private boolean validateTable(KsDef ksDef, String tableName) {
+
+		if (getCfDef(ksDef, tableName) == null) {
+			log.debug("Table %s not found. Schema will be recreated");
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Creates a new Cassandra Schema. This method will drop the schema if there 
+	 * is already an existing schema with that name
+	 * 
+	 * @param cluster Cluster configuration
+	 * @param schemaName Name of the schema to create
+	 * @throws Exception If the schema cannot be created
+	 */
+	public void buildSchema(Cluster cluster, String schemaName) throws Exception {
+	
+		buildSchema(cluster, schemaName, true);
 	}
 	
 	/**
@@ -65,25 +126,17 @@ public class CassandraSchemaHandler {
 	 * 
 	 * @param cluster Cluster configuration
 	 * @param schemaName Name of the schema to create
+	 * @param dropExisting <code>true</code> if the existing schema should be dropped if exists
 	 * @throws Exception If the schema cannot be created
 	 */
-	public void buildSchema(Cluster cluster, String schemaName) throws Exception {
+	public void buildSchema(Cluster cluster, String schemaName, boolean dropExisting) throws Exception {
 		
 		log.debug("Creating a new schema: " + schemaName);
 		
 		KeyspaceManager keyspaceManager = Pelops.createKeyspaceManager(cluster);
 		
-		try {
-			log.debug("Dropping existing Cassandra schema: " + schemaName);
-			keyspaceManager.dropKeyspace(schemaName);
-			log.debug("Schema dropped");
-			waitToPropagate();
-		} catch (TTransportException te) {
-			log.error("It looks like the Cassandra Server is down");
-			log.error(te.getMessage(), te);
-			throw te;
-		} catch (Exception e) {
-			log.debug("The schema did not exist. No schema has been dropped");
+		if (dropExisting) {
+			dropSchema(schemaName, keyspaceManager);
 		}
 		
 		KsDef ksDef = null;
@@ -102,6 +155,29 @@ public class CassandraSchemaHandler {
 		}
 		
 		createColumnFamilies(cluster, schemaName, ksDef);
+	}
+
+	/**
+	 * Drops an existing schema
+	 * 
+	 * @param schemaName Name of the schema
+	 * @param keyspaceManager Keyspace manager
+	 * @throws Exception If the schema cannot be dropped
+	 */
+	public void dropSchema(String schemaName, KeyspaceManager keyspaceManager) throws Exception {
+	
+		try {
+			log.debug("Dropping existing Cassandra schema: " + schemaName);
+			keyspaceManager.dropKeyspace(schemaName);
+			log.debug("Schema dropped");
+			waitToPropagate();
+		} catch (TTransportException te) {
+			log.error("It looks like the Cassandra Server is down");
+			log.error(te.getMessage(), te);
+			throw te;
+		} catch (Exception e) {
+			log.debug("The schema did not exist. No schema has been dropped");
+		}
 	}
 	
 	private void createColumnFamilies(Cluster cluster, String schemaName, KsDef ksDef) throws Exception, InterruptedException {
