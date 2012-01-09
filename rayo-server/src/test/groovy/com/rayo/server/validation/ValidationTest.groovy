@@ -217,6 +217,21 @@ class ValidationTest {
 		assertNotNull fromXML(ask)
 	}
 	
+	// Reject
+	// ====================================================================================
+	@Test
+	public void validateRejectMissingReason() {
+				
+		def reject = parseXml("""<reject xmlns="urn:xmpp:rayo:1"/>""")
+		
+		def errorMapping = assertValidationException(reject)
+		assertNotNull errorMapping
+		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
+		assertEquals errorMapping.condition, ExceptionMapper.toString(StanzaError.Condition.BAD_REQUEST)
+		assertEquals errorMapping.text, Messages.MISSING_REASON
+	}
+	
+	
 	// Transfer
 	// ====================================================================================
 	
