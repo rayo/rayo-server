@@ -108,7 +108,7 @@ public class CassandraSchemaHandler {
 	private boolean validateTable(KsDef ksDef, String tableName) {
 
 		if (getCfDef(ksDef, tableName) == null) {
-			log.debug("Table %s not found. Schema will be recreated");
+			log.debug("Table %s not found. Schema will be recreated", tableName);
 			return false;
 		}
 		return true;
