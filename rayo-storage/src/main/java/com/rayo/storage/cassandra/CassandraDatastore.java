@@ -73,29 +73,33 @@ public class CassandraDatastore implements GatewayDatastore {
 			//   1. The property that forces us to create a new schema is set, or
 			//   2. The schema has not been created yet
 			schemaHandler.buildSchema(cluster, schemaName);
-			checkDefaultApplication();
 		} else if (!schemaHandler.validSchema(cluster, schemaName)) {
 			// if the current schema is somehow screwed, try to fix it
 			schemaHandler.buildSchema(cluster, schemaName, false);
-			checkDefaultApplication();
-		}			
+		}					
 		// try to turn on auto-discovery
 		cluster = new Cluster(hostname, Integer.parseInt(port), true);
 		Pelops.addPool(schemaName, cluster, schemaName);
+		
+		// Create default application if needed
+		checkDefaultApplication();
 	}
 
 	private void checkDefaultApplication() throws DatastoreException {
 		
 		if (createSampleApplication) {
-			// Create a default application to be used by functional testing
-			Application application = new Application("voxeo");
-			application.setAccountId("undefined");
-			application.setJid("rayo@gw1-ext.testing.voxeolabs.net");
-			application.setName("voxeo");
-			application.setPermissions("undefined");
-			application.setPlatform("staging");
-			
-			storeApplication(application);
+			Application application = getApplication("voxeo");
+			if (application == null) {
+				// Create a default application to be used by functional testing
+				application = new Application("voxeo");
+				application.setAccountId("undefined");
+				application.setJid("rayo@gw1-ext.testing.voxeolabs.net");
+				application.setName("voxeo");
+				application.setPermissions("undefined");
+				application.setPlatform("staging");
+				
+				storeApplication(application);
+			}
 		}
 	}
 

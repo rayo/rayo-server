@@ -57,8 +57,11 @@ public class CassandraSchemaHandler {
 			throw te;
 		} catch (NotFoundException nfe) {
 			log.debug("Schema %s does not exist", schemaName);
+		} catch (org.apache.cassandra.thrift.NotFoundException nfe2) {
+			log.debug("Schema %s does not exist", schemaName);
 		} catch (Exception e) {
-			log.warn(e.getMessage(),e);
+			// Oddly, cassandra throws a null message which causes issues with vlib logger
+			log.error("There has been an error: " + e.getMessage());
 		}
 		return false;
 	}
