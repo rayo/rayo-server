@@ -299,6 +299,8 @@ public class RayoProvider extends BaseProvider {
             } catch (IllegalArgumentException iae) {
                 throw new ValidationException(Messages.INVALID_REASON);
             }
+        } else {
+        	throw new ValidationException(Messages.MISSING_REASON);
         }
         reject.setHeaders(grabHeaders(element));
 
@@ -548,7 +550,9 @@ public class RayoProvider extends BaseProvider {
 
         RejectCommand reject = (RejectCommand) object;
         Element root = document.addElement(new QName("reject", RAYO_NAMESPACE));
-        root.addElement(reject.getReason().name().toLowerCase());
+        if (reject.getReason() != null) {
+        	root.addElement(reject.getReason().name().toLowerCase());
+        }
         addHeaders(reject.getHeaders(), root);
 
         return document;
