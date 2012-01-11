@@ -1,0 +1,216 @@
+.home {
+	background: #F7F7F7 url("../images/home-top.png") repeat-x 0 0
+}
+
+#header {}
+
+#header-content {
+	height: 73px;
+	width: 950px;
+	margin: 0 auto;
+	position: relative;
+}
+
+body #main {
+	padding: 0px;
+	position: relative;
+	width: 950px;
+	margin: 0 auto;
+	clear: both;
+}
+
+body #main-debug {
+	padding: 0px;
+	position: relative;
+	width: 90%;
+	margin: 0 20px;
+	clear: both;
+}
+
+
+#banner-icon {
+	width: 187px;
+	height: 248px;
+	background: url("../images/rayo.png") no-repeat 0 0;
+	float: right;
+	margin-top: 5px;
+	margin-right:15px;
+}
+
+.heading {
+	font-family: 'Droid Sans', sans-serif;
+	font-weight: 700;
+	color: #EE9A00;
+	font-size: 30px;
+	line-height: 1.3em;
+	float:left;
+	width:550px;
+	text-align:right;
+}
+
+#dashboard {
+	position: absolute;
+	z-index: 1001;
+	height: 250px;
+	left: 8px;
+	top: 280px;
+	height: 350px;
+}
+
+.dashboard-content {
+	width: 960px;
+	height: 400px;
+	float: left;
+	background: url("../images/content-box-big.png") no-repeat 0 0;
+	margin-right: 9px;
+	display: block;
+}
+
+.dashboard-info {
+	width: 300px;
+	height: 400px;
+	float: left;
+	margin-left: 40px;
+	margin-top: 40px;
+	display: block;
+}
+
+.dashboard-congrats {
+	width: 550px;
+	height: 400px;
+	float: left;
+	margin-left: 40px;
+	margin-top: 40px;
+	display: block;
+}
+
+.dashboard-info-header {
+	font-family: 'Droid Sans', sans-serif;
+	font-weight: 700;
+	color: #2E425B;
+	font-size: 32px;
+	line-height: 1.3em;
+}
+
+
+.dashboard-info-detail {
+	font-family: 'Droid Sans', sans-serif;
+	font-weight: 500;
+	color: #2E425B;
+	font-size: 24px;
+	line-height: 170%;
+}
+
+#logo {
+	position: absolute;
+	top: 0;
+	left: 800px;
+	width: 311px;
+	height: 73px;
+	background: url("../images/voxeolabs.png") no-repeat 0 0;
+}
+
+#portlet-template {
+	display: none;
+}
+
+.title {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 10px;
+}
+
+.chart {
+	width: 290px;
+	height: 230px;
+	float: left;
+}
+
+.column {
+	width: 312px;
+	float: left;
+}
+
+.portlet {
+	width: 298px;
+	margin: 4px 2px;
+	padding: 3px;
+}
+
+.portlet-big {
+	width: 100%;
+	height: 100%;
+	margin: 4px 2px;
+	padding: 3px;
+}
+
+.portlet-header {
+	padding-left: 4px;
+}
+
+.portlet-header .ui-icon {
+	float: right;
+}
+
+.portlet-content {
+	width: 290px;
+	height: 230px;
+	margin: 4px;
+}
+
+.portlet-content-big {
+	width: 100%;
+	height: 95%;
+	margin: 4px;
+	overflow:hidden;
+}
+
+.ui-sortable-placeholder {
+	border: 1px dotted lightgray;
+	visibility: visible !important;
+	height: 10px !important;
+}
+
+.ui-sortable-placeholder * {
+	visibility: hidden;
+}
+
+td {
+	border-right: 1px solid #C1DAD7;
+	border-bottom: 1px solid #C1DAD7;
+	background: #fff;
+	padding: 6px 6px 6px 12px;
+	color: #6D929B;
+}
+
+
+td.alt {
+	background: #F5FAFA;
+	color: #B4AA9D;
+}
+
+.row-in {
+	background-image: url(../images/in.png);background-repeat: no-repeat;
+	font-size: 11px;
+	margin-right: 5px;
+	padding-left: 20px;
+	line-height: 1.2em;
+	min-height:15px;
+}
+
+.row-out {
+	background-image: url(../images/out.png);background-repeat: no-repeat;
+	font-size: 11px;
+	margin-right: 5px;
+	padding-left: 20px;
+	line-height: 1.2em;
+	min-height:15px;
+}
+
+.row-error {
+	background-image: url(../images/error.png);background-repeat: no-repeat;
+	font-size: 11px;
+	margin-right: 5px;
+	padding-left: 20px;
+	line-height: 1.2em;
+	min-height:15px;
+}
