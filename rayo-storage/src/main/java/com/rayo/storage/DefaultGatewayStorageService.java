@@ -113,8 +113,8 @@ public class DefaultGatewayStorageService implements GatewayStorageService {
 				try {
 					// trick, consecutive errors and blacklisted are managed are gateway-only variables
 					// do not consider them when comparing
-					rayoNode.setConsecutiveErrors(node.getConsecutiveErrors());
-					rayoNode.setBlackListed(node.isBlackListed());
+					//rayoNode.setConsecutiveErrors(node.getConsecutiveErrors());
+					//rayoNode.setBlackListed(node.isBlackListed());
 					if (rayoNode.getIpAddress() == null) {
 						node.setIpAddress(null);
 					}

@@ -221,6 +221,9 @@ public class GatewayServlet extends AbstractRayoServlet {
 		RayoNode node = new RayoNode(message.getFrom().toString(), null, new HashSet<String>(platforms));
 		node.setPriority(priority);
 		node.setWeight(weight);
+		// if a rayo node sends a chat presence, then lets give it a chance if blacklisted
+		node.setBlackListed(false); 
+		node.setConsecutiveErrors(0);
 		
 		gatewayStorageService.registerRayoNode(node);		
 	}
