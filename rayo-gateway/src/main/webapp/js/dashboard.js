@@ -14,13 +14,13 @@ $(document).ready(function() {
 	]);	
 	factory.create([
 		{
-			name: 'com.rayo:Type=Calls',
+			name: 'com.rayo.gateway:Type=GatewayStatistics',
 			attribute: 'ActiveCallsCount'
 		}
 	]);
 	factory.create({
-		name:     'com.rayo:Type=Mixer Statistics',
-		attribute: 'ActiveMixersCount'
+		name:     'com.rayo.gateway:Type=GatewayStatistics',
+		attribute: 'ActiveClientsCount'
 	});	
 });
 
