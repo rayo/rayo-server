@@ -206,7 +206,7 @@ public class RayoServlet extends AbstractRayoServlet {
 		        	}        	
 		
 					presence.send();
-					continue;
+					break;
 	        	} catch (Exception e) {
 	        		log.error("Could not broadcast presence to gateway [%s]", gatewayDomain, e);
 	        		try {
