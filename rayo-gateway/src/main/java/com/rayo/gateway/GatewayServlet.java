@@ -267,6 +267,7 @@ public class GatewayServlet extends AbstractRayoServlet {
     	if (jid == null) {
     		log.error("Could not find registered client JID for call id [%s]", callId);
     		sendPresenceError(toJid, fromJid, Condition.RECIPIENT_UNAVAILABLE, Type.CANCEL, "Could not find registered client JID for call");
+    		gatewayStatistics.errorProcessed();
     		return;
     	}
     	JID to = getXmppFactory().createJID(jid);
