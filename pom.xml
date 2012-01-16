@@ -3,7 +3,7 @@
   <packaging>pom</packaging>
   <modelVersion>4.0.0</modelVersion>
   
-  <name>Tropo2 Parent POM</name>
+  <name>Rayo Parent POM</name>
   
   <groupId>com.rayo</groupId>
   <artifactId>rayo-parent</artifactId>
