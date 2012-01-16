@@ -160,6 +160,19 @@ class RegexpJIDLookupServiceTest {
 		domain = regexpJIDLookupService.lookup(offer)
 		assertEquals domain, "domain2.com"
 	}
+	
+	@Test
+	public void testSipMatching() {
+		
+		buildLookupService("""
+			sip:arabbit@.*=arabbit@127.0.0.1
+		""")
+
+		def offer = new OfferEvent()
+		offer.setTo(new URI("sip:arabbit@127.0.0.1"))
+		def domain = regexpJIDLookupService.lookup(offer)
+		assertEquals domain, "arabbit@127.0.0.1"
+	}
 
 	def buildLookupService(String config) {
 		
