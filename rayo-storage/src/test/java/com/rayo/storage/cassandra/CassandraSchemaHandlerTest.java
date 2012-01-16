@@ -18,7 +18,7 @@ public class CassandraSchemaHandlerTest {
 
 		// Wipe out schema from other cassandra tests
 		CassandraSchemaHandler schemaHandler = new CassandraSchemaHandler();
-		Cluster cluster = new Cluster("localhost", 9160, false);
+		Cluster cluster = new Cluster("localhost", Integer.parseInt(CassandraDatastoreTest.CASSANDRA_TESTING_PORT), false);
 		KeyspaceManager keyspaceManager = Pelops.createKeyspaceManager(cluster);
 		schemaHandler.dropSchema("rayo", keyspaceManager);
 	}
@@ -27,7 +27,7 @@ public class CassandraSchemaHandlerTest {
 	public void testSchemaDoesNotExist() throws Exception {
 		
 		CassandraSchemaHandler schemaHandler = new CassandraSchemaHandler();
-		Cluster cluster = new Cluster("localhost", 9160, false);
+		Cluster cluster = new Cluster("localhost", Integer.parseInt(CassandraDatastoreTest.CASSANDRA_TESTING_PORT), false);
 		assertFalse(schemaHandler.schemaExists(cluster, "rayo"));
 	}
 	
@@ -36,7 +36,7 @@ public class CassandraSchemaHandlerTest {
 	public void testSchemaExists() throws Exception {
 		
 		CassandraSchemaHandler schemaHandler = new CassandraSchemaHandler();
-		Cluster cluster = new Cluster("localhost", 9160, false);
+		Cluster cluster = new Cluster("localhost", Integer.parseInt(CassandraDatastoreTest.CASSANDRA_TESTING_PORT), false);
 		schemaHandler.buildSchema(cluster, "rayo");
 		assertTrue(schemaHandler.schemaExists(cluster, "rayo"));
 	}
@@ -45,7 +45,7 @@ public class CassandraSchemaHandlerTest {
 	public void testDropSchema() throws Exception {
 		
 		CassandraSchemaHandler schemaHandler = new CassandraSchemaHandler();
-		Cluster cluster = new Cluster("localhost", 9160, false);
+		Cluster cluster = new Cluster("localhost", Integer.parseInt(CassandraDatastoreTest.CASSANDRA_TESTING_PORT), false);
 		KeyspaceManager keyspaceManager = Pelops.createKeyspaceManager(cluster);
 		
 		schemaHandler.buildSchema(cluster, "rayo");
@@ -57,7 +57,7 @@ public class CassandraSchemaHandlerTest {
 	public void testValidSchema() throws Exception {
 		
 		CassandraSchemaHandler schemaHandler = new CassandraSchemaHandler();
-		Cluster cluster = new Cluster("localhost", 9160, false);
+		Cluster cluster = new Cluster("localhost", Integer.parseInt(CassandraDatastoreTest.CASSANDRA_TESTING_PORT), false);
 		
 		schemaHandler.buildSchema(cluster, "rayo");
 		assertTrue(schemaHandler.validSchema(cluster, "rayo"));

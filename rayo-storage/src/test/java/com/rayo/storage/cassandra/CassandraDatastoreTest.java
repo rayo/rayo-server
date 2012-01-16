@@ -14,6 +14,10 @@ import com.rayo.storage.BaseDatastoreTest;
 
 public class CassandraDatastoreTest extends BaseDatastoreTest {
 
+	// tests use a different port so if there is any existing Cassandra instance
+	// nothing bad will happen
+	public static final String CASSANDRA_TESTING_PORT = "9164";
+	
     @BeforeClass
     public static void startCassandraServer() throws Exception {
 
@@ -24,6 +28,8 @@ public class CassandraDatastoreTest extends BaseDatastoreTest {
 	public void setup() throws Exception {
 		
 		store = new CassandraDatastore();
+		
+		((CassandraDatastore)store).setPort(CASSANDRA_TESTING_PORT); 	
 		((CassandraDatastore)store).setCreateSampleApplication(false);
 		((CassandraDatastore)store).getSchemaHandler().setWaitForSyncing(false);
 		((CassandraDatastore)store).init();
@@ -32,7 +38,9 @@ public class CassandraDatastoreTest extends BaseDatastoreTest {
 	@Test
 	public void testCreateDefaultApplication() throws Exception {
 		
+		// This test uses a different data store to test a different set of properties
 		CassandraDatastore datastore = new CassandraDatastore();
+		datastore.setPort(CASSANDRA_TESTING_PORT);
 		datastore.init();
 		assertNotNull(datastore.getApplication("voxeo"));
 	}
@@ -40,7 +48,9 @@ public class CassandraDatastoreTest extends BaseDatastoreTest {
 	@Test
 	public void testDoNotCreateDefaultApplication() throws Exception {
 		
+		// This test uses a different data store to test a different set of properties
 		CassandraDatastore datastore = new CassandraDatastore();
+		datastore.setPort(CASSANDRA_TESTING_PORT);
 		datastore.setCreateSampleApplication(false);
 		datastore.init();
 		assertNull(datastore.getApplication("voxeo"));
@@ -49,7 +59,9 @@ public class CassandraDatastoreTest extends BaseDatastoreTest {
 	@Test
 	public void testOverrideSchema() throws Exception {
 		
+		// This test uses a different data store to test a different set of properties
 		CassandraDatastore datastore = new CassandraDatastore();
+		datastore.setPort(CASSANDRA_TESTING_PORT);
 		datastore.init();
 
 		datastore.storeAddress("127.0.0.1", "voxeo");
@@ -62,7 +74,9 @@ public class CassandraDatastoreTest extends BaseDatastoreTest {
 	@Test
 	public void testDoNotOverrideSchema() throws Exception {
 		
+		// This test uses a different data store to test a different set of properties
 		CassandraDatastore datastore = new CassandraDatastore();
+		datastore.setPort(CASSANDRA_TESTING_PORT);
 		datastore.init();
 
 		datastore.storeAddress("127.0.0.1", "voxeo");
@@ -79,11 +93,13 @@ public class CassandraDatastoreTest extends BaseDatastoreTest {
 
 		// use schema handler to first drop any existing rayo schema
 		CassandraSchemaHandler schemaHandler = new CassandraSchemaHandler();
-		Cluster cluster = new Cluster("localhost", 9160, false);
+		Cluster cluster = new Cluster("localhost", Integer.parseInt(CASSANDRA_TESTING_PORT), false);
 		KeyspaceManager keyspaceManager = Pelops.createKeyspaceManager(cluster);
 		schemaHandler.dropSchema("rayo", keyspaceManager);
 		
+		// This test uses a different data store to test a different set of properties
 		CassandraDatastore datastore = new CassandraDatastore();
+		datastore.setPort(CASSANDRA_TESTING_PORT);
 		datastore.setOverrideExistingSchema(false);
 		datastore.init();
 
