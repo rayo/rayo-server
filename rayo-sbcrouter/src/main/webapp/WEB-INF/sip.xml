@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<sip-app xmlns="http://www.jcp.org/xml/ns/sipservlet" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:javaee="http://java.sun.com/xml/ns/javaee" xsi:schemaLocation="http://www.jcp.org/xml/ns/sipservlet http://www.jcp.org/xml/ns/sipservlet/sip-app_1_1.xsd http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" version="1.1">
+  <app-name>RayoSBCRouter</app-name>
+  <servlet>
+  <javaee:servlet-name>RayoSBCRouterServlet</javaee:servlet-name>
+  <javaee:servlet-class>
+  com.rayo.sbcrouter.SBCRouterServlet</javaee:servlet-class>
+  <javaee:load-on-startup>1</javaee:load-on-startup>
+  
+<javaee:init-param>
+<javaee:param-name>CassandraHost</javaee:param-name>
+<javaee:param-name>127.0.0.1</javaee:param-name>
+</javaee:init-param>
+
+<javaee:init-param>
+<javaee:param-name>CassandraPort</javaee:param-name>
+<javaee:param-name>9916</javaee:param-name>
+</javaee:init-param>
+  </servlet>
+  
+  <servlet-mapping>
+  <main-servlet>RayoSBCRouterServlet</main-servlet>
+  </servlet-mapping>
+</sip-app>

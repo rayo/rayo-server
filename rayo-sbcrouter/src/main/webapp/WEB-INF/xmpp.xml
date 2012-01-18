@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xmpp-app xmlns="http://www.voxeo.com/sipmethod/xmpp" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xmlns:javaee="http://java.sun.com/xml/ns/javaee" 
+    version="1.1" 
+    xsi:schemaLocation="http://www.voxeo.com/sipmethod/xmpp http://www.voxeo.com/prism/xsd/xmpp.xsd http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+</xmpp-app>
