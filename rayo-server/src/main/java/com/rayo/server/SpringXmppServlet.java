@@ -20,6 +20,7 @@ public class SpringXmppServlet extends XmppServlet {
     private Loggerf log = Loggerf.getLogger(SpringXmppServlet.class);
 
     static String INIT_PARAMETER = "xmpp-servlet";
+    public static final String APPLICATION_CONTEXT = "rayo.application.context";
 
     private XmppServlet target;
 
@@ -45,6 +46,8 @@ public class SpringXmppServlet extends XmppServlet {
         target = (XmppServlet) bean;
 
         target.init(getServletConfig());
+        
+        getServletContext().setAttribute(APPLICATION_CONTEXT, xmppContext);
     }
 
     public void service(ServletRequest request, ServletResponse response) throws ServletException, IOException {

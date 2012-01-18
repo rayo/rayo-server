@@ -221,6 +221,9 @@ public class GatewayServlet extends AbstractRayoServlet {
 		RayoNode node = new RayoNode(message.getFrom().toString(), null, new HashSet<String>(platforms));
 		node.setPriority(priority);
 		node.setWeight(weight);
+		// if a rayo node sends a chat presence, then lets give it a chance if blacklisted
+		node.setBlackListed(false); 
+		node.setConsecutiveErrors(0);
 		
 		gatewayStorageService.registerRayoNode(node);		
 	}
@@ -264,6 +267,7 @@ public class GatewayServlet extends AbstractRayoServlet {
     	if (jid == null) {
     		log.error("Could not find registered client JID for call id [%s]", callId);
     		sendPresenceError(toJid, fromJid, Condition.RECIPIENT_UNAVAILABLE, Type.CANCEL, "Could not find registered client JID for call");
+    		gatewayStatistics.errorProcessed();
     		return;
     	}
     	JID to = getXmppFactory().createJID(jid);

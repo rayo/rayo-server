@@ -63,6 +63,18 @@ public class RayoServlet extends AbstractRayoServlet {
 
     private static final Loggerf log = Loggerf.getLogger(RayoServlet.class);
     
+    /**
+     * By default a Rayo Server will retry 5 times in case of any failure 
+     * while brodcasting its status
+     */
+    public static final int BROADCAST_RETRIES = 5; // 5 retries to broadcast node state
+    
+    /**
+     * In case of a brodcast error by default there will be a 30 seconds delay 
+     * between broadcasting retries
+     */
+    public static final int BROADCAST_RETRY_DELAY = 30000; 
+    
     private JIDRegistry jidRegistry;
     
     // Spring injected
@@ -75,6 +87,9 @@ public class RayoServlet extends AbstractRayoServlet {
     
     private FilterChain filtersChain;
     
+    private int broadcastRetries = BROADCAST_RETRIES;
+    private int broadcastRetryDelay = BROADCAST_RETRY_DELAY;
+    
     private XmppMessageListenerGroup xmppMessageListenersGroup;
 	
     // Setup
@@ -82,23 +97,9 @@ public class RayoServlet extends AbstractRayoServlet {
     
     @Override
     public void init(ServletConfig config) throws ServletException {
+    	
         super.init(config);
-        
-        RayoAdminService adminService = (RayoAdminService)getAdminService();
-        if (adminService.getGatewayDomain() != null) {
-        	        	
-	        Timer timer = new Timer();
-	        timer.schedule(new TimerTask() {
-				
-				@Override
-				public void run() {
-					RayoAdminService adminService = (RayoAdminService)getAdminService();
-					if (!adminService.isQuiesceMode()) {
-						broadcastPresence("chat");
-					}
-				}
-			}, 10000, 30000);
-        }
+        broadcastPresence("chat");
     }
     
     @Override
@@ -135,36 +136,15 @@ public class RayoServlet extends AbstractRayoServlet {
      * 
      * @param status Presence status to be broadcasted
      */
-    private void broadcastPresence(String status) {
+    private void broadcastPresence(final String status) {
     	
-        RayoAdminService adminService = (RayoAdminService)getAdminService();
-        String gatewayDomain = adminService.getGatewayDomain();
-        
-        if (adminService.getGatewayDomain() != null) {
-        	PresenceMessage presence = null;        	
-        	try {
-	        	if (status.equalsIgnoreCase("unavailable")) {
-					presence = getXmppFactory().createPresence(
-							getLocalDomain(), gatewayDomain, "unavailable", (org.w3c.dom.Element)null);        		
-	        	} else {        	
-		        	CoreDocumentImpl document = new CoreDocumentImpl(false);
-		        	
-		        	org.w3c.dom.Element showElement = document.createElement("show");
-		        	showElement.setTextContent(status.toLowerCase());
-		        	org.w3c.dom.Element nodeInfoElement = 
-		        			document.createElementNS("urn:xmpp:rayo:cluster:1", "node-info");
-		        	appendNodeInfoElement(document, nodeInfoElement, "platform", adminService.getPlatform());
-		        	appendNodeInfoElement(document, nodeInfoElement, "weight", adminService.getWeight());
-		        	appendNodeInfoElement(document, nodeInfoElement, "priority", adminService.getPriority());
-					presence = getXmppFactory().createPresence(
-							getLocalDomain(), gatewayDomain, null, showElement, nodeInfoElement);
-	        	}        	
-	
-				presence.send();
-        	} catch (Exception e) {
-        		log.error("Could not broadcast presence to gateway [%s]", gatewayDomain, e);
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+        	@Override
+        	public void run() {
+		        doPresenceBroadcast(status);    	
         	}
-        }    	
+        },0);
     }
 
 	private void appendNodeInfoElement(CoreDocumentImpl document, org.w3c.dom.Element nodeInfoElement, 
@@ -198,6 +178,46 @@ public class RayoServlet extends AbstractRayoServlet {
         });
     }
 
+	private void doPresenceBroadcast(final String status) {
+		
+		RayoAdminService adminService = (RayoAdminService)getAdminService();
+        String gatewayDomain = adminService.getGatewayDomain();
+        
+        if (adminService.getGatewayDomain() != null) {
+        	int retries = 0;
+        	do {
+	        	PresenceMessage presence = null;        	
+	        	try {
+		        	if (status.equalsIgnoreCase("unavailable")) {
+						presence = getXmppFactory().createPresence(
+								getLocalDomain(), gatewayDomain, "unavailable", (org.w3c.dom.Element)null);        		
+		        	} else {        	
+			        	CoreDocumentImpl document = new CoreDocumentImpl(false);
+			        	
+			        	org.w3c.dom.Element showElement = document.createElement("show");
+			        	showElement.setTextContent(status.toLowerCase());
+			        	org.w3c.dom.Element nodeInfoElement = 
+			        			document.createElementNS("urn:xmpp:rayo:cluster:1", "node-info");
+			        	appendNodeInfoElement(document, nodeInfoElement, "platform", adminService.getPlatform());
+			        	appendNodeInfoElement(document, nodeInfoElement, "weight", adminService.getWeight());
+			        	appendNodeInfoElement(document, nodeInfoElement, "priority", adminService.getPriority());
+						presence = getXmppFactory().createPresence(
+								getLocalDomain(), gatewayDomain, null, showElement, nodeInfoElement);
+		        	}        	
+		
+					presence.send();
+					break;
+	        	} catch (Exception e) {
+	        		log.error("Could not broadcast presence to gateway [%s]", gatewayDomain, e);
+	        		try {
+						Thread.sleep(broadcastRetryDelay);
+					} catch (InterruptedException e1) {}
+	        		retries++;
+	        	}
+        	} while(retries < broadcastRetries);
+        }
+	}
+        
     // Events: Server -> Client
     // ================================================================================
 
@@ -589,5 +609,13 @@ public class RayoServlet extends AbstractRayoServlet {
 	protected Loggerf getLog() {
 		
 		return log;
+	}
+
+	public void setBroadcastRetries(int broadcastRetries) {
+		this.broadcastRetries = broadcastRetries;
+	}
+
+	public void setBroadcastRetryDelay(int broadcastRetryDelay) {
+		this.broadcastRetryDelay = broadcastRetryDelay;
 	}
 }

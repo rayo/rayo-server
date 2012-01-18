@@ -66,19 +66,32 @@ public class CassandraDatastore implements GatewayDatastore {
 		// discovery is turned on. So for the first check we disable auto discovery.
 		Cluster cluster = new Cluster(hostname, Integer.parseInt(port), false);
 
-		if (overrideExistingSchema || !schemaHandler.schemaExists(cluster, schemaName)) {
+		if (overrideExistingSchema || 
+			!schemaHandler.schemaExists(cluster, schemaName)) {
+			
 			// We will create the Cassandra schema if:
 			//   1. The property that forces us to create a new schema is set, or
 			//   2. The schema has not been created yet
 			schemaHandler.buildSchema(cluster, schemaName);
-			
-			// try to turn on auto-discovery
-			cluster = new Cluster(hostname, Integer.parseInt(port), true);
-			Pelops.addPool(schemaName, cluster, schemaName);
+		} else if (!schemaHandler.validSchema(cluster, schemaName)) {
+			// if the current schema is somehow screwed, try to fix it
+			schemaHandler.buildSchema(cluster, schemaName, false);
+		}					
+		// try to turn on auto-discovery
+		cluster = new Cluster(hostname, Integer.parseInt(port), true);
+		Pelops.addPool(schemaName, cluster, schemaName);
+		
+		// Create default application if needed
+		checkDefaultApplication();
+	}
 
-			if (createSampleApplication) {
+	private void checkDefaultApplication() throws DatastoreException {
+		
+		if (createSampleApplication) {
+			Application application = getApplication("voxeo");
+			if (application == null) {
 				// Create a default application to be used by functional testing
-				Application application = new Application("voxeo");
+				application = new Application("voxeo");
 				application.setAccountId("undefined");
 				application.setJid("rayo@gw1-ext.testing.voxeolabs.net");
 				application.setName("voxeo");
@@ -87,10 +100,6 @@ public class CassandraDatastore implements GatewayDatastore {
 				
 				storeApplication(application);
 			}
-		} else {
-			// try to turn on auto-discovery
-			cluster = new Cluster(hostname, Integer.parseInt(port), true);
-			Pelops.addPool(schemaName, cluster, schemaName);
 		}
 	}
 

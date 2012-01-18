@@ -4,6 +4,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 
 import com.rayo.storage.cassandra.CassandraDatastore;
+import com.rayo.storage.cassandra.CassandraDatastoreTest;
 import com.rayo.storage.cassandra.EmbeddedCassandraTestServer;
 
 public class CassandraPriorityBasedLoadBalancerTest extends PriorityBasedLoadBalancerTest {
@@ -20,6 +21,7 @@ public class CassandraPriorityBasedLoadBalancerTest extends PriorityBasedLoadBal
 		super.setup();
 
 		CassandraDatastore datastore = new CassandraDatastore();
+		datastore.setPort(CassandraDatastoreTest.CASSANDRA_TESTING_PORT);
 		datastore.setCreateSampleApplication(false);
 		datastore.init();
 		storageService.setStore(datastore);

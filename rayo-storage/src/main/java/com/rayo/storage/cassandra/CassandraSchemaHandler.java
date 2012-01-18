@@ -15,6 +15,7 @@ import org.scale7.cassandra.pelops.Cluster;
 import org.scale7.cassandra.pelops.ColumnFamilyManager;
 import org.scale7.cassandra.pelops.KeyspaceManager;
 import org.scale7.cassandra.pelops.Pelops;
+import org.scale7.cassandra.pelops.exceptions.NotFoundException;
 
 import com.voxeo.logging.Loggerf;
 
@@ -47,9 +48,52 @@ public class CassandraSchemaHandler {
 		try {
 			KsDef ksDef = keyspaceManager.getKeyspaceSchema(schemaName);
 			if (ksDef != null) {
-				log.debug("Found schema %s :: %s", schemaName, ksDef);
+				log.debug("Found schema %s", schemaName);
 				return true;
 			}
+		} catch (TTransportException te) {
+			log.error("It looks like the Cassandra Server is down");
+			log.error(te.getMessage(), te);
+			throw te;
+		} catch (NotFoundException nfe) {
+			log.debug("Schema %s does not exist", schemaName);
+		} catch (org.apache.cassandra.thrift.NotFoundException nfe2) {
+			log.debug("Schema %s does not exist", schemaName);
+		} catch (Exception e) {
+			// Oddly, cassandra throws a null message which causes issues with vlib logger
+			log.error("There has been an error: " + e.getMessage());
+		}
+		return false;
+	}
+	
+	/**
+	 * Validates the existing schema. 
+	 * 
+	 * @param cluster Cluster name
+	 * @param schemaName Name of the schema
+	 * @return boolean <code>true</code> if the schema is valid and <code>false</code> 
+	 * if it should be recreated
+	 * @throws Exception If there is any issue while validating the schema
+	 */
+	public boolean validSchema(Cluster cluster, String schemaName) throws Exception {
+		
+		log.debug("Validating schema %s on cluster %s", schemaName, cluster);
+		KeyspaceManager keyspaceManager = Pelops.createKeyspaceManager(cluster);
+		try {
+			KsDef ksDef = keyspaceManager.getKeyspaceSchema(schemaName);
+			if (ksDef == null) {
+				log.debug("Keyspace not found");
+				return false;
+			}
+			if (!validateTable(ksDef, "nodes")) return false;
+			if (!validateTable(ksDef, "applications")) return false;
+			if (!validateTable(ksDef, "addresses")) return false;
+			if (!validateTable(ksDef, "clients")) return false;
+			if (!validateTable(ksDef, "ips")) return false;
+			if (!validateTable(ksDef, "calls")) return false;
+			if (!validateTable(ksDef, "jids")) return false;
+			
+			return true;
 		} catch (TTransportException te) {
 			log.error("It looks like the Cassandra Server is down");
 			log.error(te.getMessage(), te);
@@ -58,6 +102,29 @@ public class CassandraSchemaHandler {
 			log.warn(e.getMessage());
 		}
 		return false;
+
+	}
+	
+	private boolean validateTable(KsDef ksDef, String tableName) {
+
+		if (getCfDef(ksDef, tableName) == null) {
+			log.debug("Table %s not found. Schema will be recreated", tableName);
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Creates a new Cassandra Schema. This method will drop the schema if there 
+	 * is already an existing schema with that name
+	 * 
+	 * @param cluster Cluster configuration
+	 * @param schemaName Name of the schema to create
+	 * @throws Exception If the schema cannot be created
+	 */
+	public void buildSchema(Cluster cluster, String schemaName) throws Exception {
+	
+		buildSchema(cluster, schemaName, true);
 	}
 	
 	/**
@@ -65,25 +132,17 @@ public class CassandraSchemaHandler {
 	 * 
 	 * @param cluster Cluster configuration
 	 * @param schemaName Name of the schema to create
+	 * @param dropExisting <code>true</code> if the existing schema should be dropped if exists
 	 * @throws Exception If the schema cannot be created
 	 */
-	public void buildSchema(Cluster cluster, String schemaName) throws Exception {
+	public void buildSchema(Cluster cluster, String schemaName, boolean dropExisting) throws Exception {
 		
 		log.debug("Creating a new schema: " + schemaName);
 		
 		KeyspaceManager keyspaceManager = Pelops.createKeyspaceManager(cluster);
 		
-		try {
-			log.debug("Dropping existing Cassandra schema: " + schemaName);
-			keyspaceManager.dropKeyspace(schemaName);
-			log.debug("Schema dropped");
-			waitToPropagate();
-		} catch (TTransportException te) {
-			log.error("It looks like the Cassandra Server is down");
-			log.error(te.getMessage(), te);
-			throw te;
-		} catch (Exception e) {
-			log.debug("The schema did not exist. No schema has been dropped");
+		if (dropExisting) {
+			dropSchema(schemaName, keyspaceManager);
 		}
 		
 		KsDef ksDef = null;
@@ -102,6 +161,29 @@ public class CassandraSchemaHandler {
 		}
 		
 		createColumnFamilies(cluster, schemaName, ksDef);
+	}
+
+	/**
+	 * Drops an existing schema
+	 * 
+	 * @param schemaName Name of the schema
+	 * @param keyspaceManager Keyspace manager
+	 * @throws Exception If the schema cannot be dropped
+	 */
+	public void dropSchema(String schemaName, KeyspaceManager keyspaceManager) throws Exception {
+	
+		try {
+			log.debug("Dropping existing Cassandra schema: " + schemaName);
+			keyspaceManager.dropKeyspace(schemaName);
+			log.debug("Schema dropped");
+			waitToPropagate();
+		} catch (TTransportException te) {
+			log.error("It looks like the Cassandra Server is down");
+			log.error(te.getMessage(), te);
+			throw te;
+		} catch (Exception e) {
+			log.debug("The schema did not exist. No schema has been dropped");
+		}
 	}
 	
 	private void createColumnFamilies(Cluster cluster, String schemaName, KsDef ksDef) throws Exception, InterruptedException {
@@ -126,7 +208,9 @@ public class CassandraSchemaHandler {
 			ksDef.addToCf_defs(cfNode);			
 			cfManager.addColumnFamily(cfNode);
 			waitToPropagate();
-		}		
+		} else {
+			log.debug("Found Column Family: nodes");
+		}
 		
 		CfDef cfApplications = getCfDef(ksDef, "applications");
 		if (cfApplications == null) {
@@ -137,7 +221,10 @@ public class CassandraSchemaHandler {
 			ksDef.addToCf_defs(cfApplications);			
 			cfManager.addColumnFamily(cfApplications);
 			waitToPropagate();
+		} else {
+			log.debug("Found Column Family: applications");
 		}
+		
 		CfDef cfAddresses = getCfDef(ksDef, "addresses");
 		if (cfAddresses == null) {
 			log.debug("Creating new Column Family: addresses");
@@ -147,6 +234,8 @@ public class CassandraSchemaHandler {
 			ksDef.addToCf_defs(cfAddresses);			
 			cfManager.addColumnFamily(cfAddresses);
 			waitToPropagate();
+		} else {
+			log.debug("Found Column Family: addresses");
 		}
 		
 		CfDef cfClients = getCfDef(ksDef, "clients");
@@ -159,6 +248,8 @@ public class CassandraSchemaHandler {
 			ksDef.addToCf_defs(cfClients);			
 			cfManager.addColumnFamily(cfClients);
 			waitToPropagate();
+		} else {
+			log.debug("Found Column Family: clients");
 		}
 		
 		CfDef cfIps = getCfDef(ksDef, "ips");
@@ -169,6 +260,8 @@ public class CassandraSchemaHandler {
 			ksDef.addToCf_defs(cfIps);			
 			cfManager.addColumnFamily(cfIps);
 			waitToPropagate();
+		} else {
+			log.debug("Found Column Family: ips");
 		}
 		
 		CfDef calls = getCfDef(ksDef, "calls");
@@ -179,6 +272,8 @@ public class CassandraSchemaHandler {
 			ksDef.addToCf_defs(calls);			
 			cfManager.addColumnFamily(calls);
 			waitToPropagate();
+		} else {
+			log.debug("Found Column Family: calls");
 		}
 		
 		CfDef cfJids = getCfDef(ksDef, "jids");
@@ -192,6 +287,8 @@ public class CassandraSchemaHandler {
 			ksDef.addToCf_defs(cfJids);			
 			cfManager.addColumnFamily(cfJids);
 			waitToPropagate();
+		} else {
+			log.debug("Found Column Family: jids");
 		}
 	}
 	

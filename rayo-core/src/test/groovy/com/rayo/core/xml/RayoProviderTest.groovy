@@ -612,12 +612,6 @@ public class RayoProviderTest {
     }
 
     @Test
-    public void rejectFromXmlDefaultReason() {
-        RejectCommand command = fromXml("""<reject xmlns="urn:xmpp:rayo:1"></reject>""")
-        assertEquals CallRejectReason.DECLINE, command.reason
-    }
-
-    @Test
     public void rejectWithHeadersFromXml() {
         assertProperties(fromXml("""<reject xmlns="urn:xmpp:rayo:1"><busy/><header name="test" value="atest"/></reject>"""), [
             headers: [test:"atest"]

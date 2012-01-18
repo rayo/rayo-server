@@ -5,10 +5,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Properties;
+import java.util.Scanner;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.locks.Lock;
@@ -20,7 +19,6 @@ import org.springframework.core.io.Resource;
 
 import com.rayo.core.OfferEvent;
 import com.rayo.server.exception.RayoProtocolException;
-import com.rayo.server.util.LinkedProperties;
 import com.voxeo.logging.Loggerf;
 
 /**
@@ -89,7 +87,7 @@ public class RegexpJIDLookupService implements RayoJIDLookupService<OfferEvent> 
 		
 		patterns.clear();
 		if (properties.isReadable()) {
-			Properties props = new LinkedProperties();
+
 			InputStream is = null;
 			try {
 				File file = properties.getFile();
@@ -99,20 +97,18 @@ public class RegexpJIDLookupService implements RayoJIDLookupService<OfferEvent> 
 			} catch (IOException e) {
 				is = properties.getInputStream();
 			}
-			try {
-				props.load(is);
-			} finally {
-				is.close();
-			}
-			@SuppressWarnings("rawtypes")
-			Enumeration en = props.keys();
-			while(en.hasMoreElements()) {
-				String key = en.nextElement().toString().trim();
-				try {					
+			Scanner scanner = new Scanner(is);
+			while(scanner.hasNextLine()) {
+				String line = scanner.nextLine();
+				if (!line.trim().startsWith("#")) {
+					String[] elements = line.trim().split("=");
+					if (!(elements.length == 2)) {
+						logger.error("Could not parse line %s", line);
+						continue;
+					}
+					String key = elements[0].trim();
 					Pattern p = Pattern.compile(key);
-					patterns.put(p,props.getProperty(key).trim());
-				} catch (Exception e) {
-					logger.error(String.format("Could not parse Regexp pattern: '%s'",key));
+					patterns.put(p,elements[1].trim());
 				}
 			}
 		} else {
