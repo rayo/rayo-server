@@ -68,6 +68,7 @@
 		</dependency>
 	</dependencies>
 	<build>
+		<finalName>rayo-sbc</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
