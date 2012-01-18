@@ -46,6 +46,8 @@ import com.voxeo.moho.event.JoinCompleteEvent.Cause;
 import com.voxeo.moho.event.UnjoinCompleteEvent;
 import com.voxeo.moho.media.output.AudibleResource;
 import com.voxeo.moho.media.output.OutputCommand;
+import com.voxeo.moho.remotejoin.RemoteParticipant;
+import com.voxeo.moho.util.ParticipantIDParser;
 
 public class CallActor <T extends Call> extends AbstractActor<T> {
 
@@ -323,12 +325,20 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
                 if (peer != null) {
                 	String destination = peer.getId();
                     JoinDestinationType type = null;
+                    
                     if (peer instanceof Mixer) {
                         type = JoinDestinationType.MIXER;
                         destination = ((Mixer)peer).getName();
                     } else if (peer instanceof Call) {
                         type = JoinDestinationType.CALL;
+                    } else if (peer instanceof RemoteParticipant) {
+                    	if (ParticipantIDParser.isCall((RemoteParticipant)peer)) {
+                            type = JoinDestinationType.CALL;                    		
+                    	} else {
+                    		type = JoinDestinationType.MIXER;
+                    	}
                     }
+                    
                     joinees.add(peer);
                 	if (log.isDebugEnabled()) {
                 		log.debug("Firing Joined event. Participant id: [%s]. Peer id: [%s]. Join type: [%s]", participant.getId(), peer.getId(), type);
