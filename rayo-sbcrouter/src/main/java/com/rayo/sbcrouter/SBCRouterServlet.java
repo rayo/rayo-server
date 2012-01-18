@@ -90,7 +90,13 @@ public class SBCRouterServlet extends SipServlet {
     Application application = dataStore.getApplicationForAddress(uri.toString());
     if (application == null) {
       LOG.error("Can't find application for request:" + req);
-      return;
+	  LOG.debug("Trying to fetch default application: 'voxeo'");
+      application = dataStore.getApplication("voxeo");
+      if (application != null) {
+          LOG.debug("Found application " + application + " for request:" + req);
+      } else {
+    	  return;
+      }
     }
     else {
       if (LOG.isDebugEnabled()) {
