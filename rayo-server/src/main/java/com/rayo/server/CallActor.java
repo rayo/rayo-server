@@ -332,6 +332,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
                     } else if (peer instanceof Call) {
                         type = JoinDestinationType.CALL;
                     } else if (peer instanceof RemoteParticipant) {
+                    	log.debug("Participant is remote. Trying to guess the type.");
                     	if (ParticipantIDParser.isCall((RemoteParticipant)peer)) {
                             type = JoinDestinationType.CALL;                    		
                     	} else {
