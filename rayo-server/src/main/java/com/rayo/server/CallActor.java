@@ -379,8 +379,8 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 	@com.voxeo.moho.State
 	public void onUnjoinEvent(com.voxeo.moho.event.UnjoinCompleteEvent event) {
 	    if(event.getSource().equals(participant)) {
+	    	log.debug("Unjoin event received. Participant: [%s], Peer: [%s], Cause: [%s]", participant, event.getParticipant(), event.getCause());
 	        Participant peer = event.getParticipant();
-	        
 	        switch(event.getCause()) {
 	        case SUCCESS_UNJOIN:
 	        case DISCONNECT:
@@ -393,7 +393,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 	        case FAIL_UNJOIN:
 	        case NOT_JOINED:
 	            log.error(String.format("Call with id %s could not be unjoined from %s [reason=%s]", 
-	                    participant.getId(), peer.getId(), event.getCause()));
+	                    participant.getId(), peer, event.getCause()));
 	        }
 	    }
 	}
