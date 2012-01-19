@@ -100,7 +100,7 @@ public class RegexpJIDLookupService implements RayoJIDLookupService<OfferEvent> 
 			Scanner scanner = new Scanner(is);
 			while(scanner.hasNextLine()) {
 				String line = scanner.nextLine();
-				if (!line.trim().startsWith("#")) {
+				if (line.trim().length() > 0 && !line.trim().startsWith("#")) {
 					String[] elements = line.trim().split("=");
 					if (!(elements.length == 2)) {
 						logger.error("Could not parse line %s", line);
