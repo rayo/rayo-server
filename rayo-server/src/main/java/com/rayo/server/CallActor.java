@@ -337,6 +337,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
                             type = JoinDestinationType.CALL;                    		
                     	} else {
                     		type = JoinDestinationType.MIXER;
+                    		destination = ((Mixer)peer).getName();
                     	}
                     }
                     
@@ -407,7 +408,15 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 				destination = ((Mixer)event.getParticipant()).getName();
 			} else if (event.getParticipant() instanceof Call) {
 				type = JoinDestinationType.CALL;
-			}
+			}  else if (event.getParticipant() instanceof RemoteParticipant) {
+            	log.debug("Event participant is remote. Trying to guess the type.");
+            	if (ParticipantIDParser.isCall((RemoteParticipant)event.getParticipant())) {
+                    type = JoinDestinationType.CALL;                    		
+            	} else {
+            		type = JoinDestinationType.MIXER;
+    				destination = ((Mixer)event.getParticipant()).getName();
+            	}
+            }
 			fire(new UnjoinedEvent(participant.getId(), destination, type));
 		}
 	}
