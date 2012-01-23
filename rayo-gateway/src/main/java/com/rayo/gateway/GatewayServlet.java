@@ -25,6 +25,7 @@ import com.rayo.server.servlet.AbstractRayoServlet;
 import com.rayo.storage.GatewayStorageService;
 import com.rayo.storage.exception.GatewayException;
 import com.rayo.storage.lb.GatewayLoadBalancingStrategy;
+import com.rayo.storage.model.Application;
 import com.rayo.storage.model.RayoNode;
 import com.rayo.storage.util.JIDUtils;
 import com.voxeo.exceptions.NotFoundException;
@@ -248,6 +249,13 @@ public class GatewayServlet extends AbstractRayoServlet {
 				sendPresenceError(message.getTo(), message.getFrom(), Condition.SERVICE_UNAVAILABLE, Type.CANCEL, "Gateway is on Quiesce mode.");
 				return;
 			}			
+			/*
+			Application application = gatewayStorageService.getApplicationForAddress(offerElement.getAttribute("to"));
+			if (application == null) {
+				
+			}
+			JID callTo = getXmppFactory().createJID(application.getJid());
+			*/
 			JID callTo = getCallDestination(offerElement.getAttribute("to"));
     		
     		resource = loadBalancer.pickClientResource(callTo.getBareJID().toString()); // picks and load balances
@@ -363,6 +371,10 @@ public class GatewayServlet extends AbstractRayoServlet {
 					JID toJidInternal = getXmppFactory().createJID(callId + "@" + nodeIp);
 					JID fromJidInternal = getXmppFactory().createJID(getInternalDomain());								
                 	sendPresenceError(fromJidInternal, toJidInternal);
+                	//TODO: Remove or flag the call from the data store. The problem is that the call may not 
+                	// exist in the rayo node any more, so we may not get the EndEvent ever. That is why we 
+                	// should clean up the call here. Probably the Rayo Server should not send an end event
+                	// as a response to the presence error
 				} catch (Exception e) {
 					log.error("Could not hang up call with id [%s]", callId);
 					log.error(e.getMessage(),e);
