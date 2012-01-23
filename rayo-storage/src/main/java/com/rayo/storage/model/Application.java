@@ -86,11 +86,11 @@ public class Application implements Serializable {
 
     	return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
     		.append("appId", getAppId())
-			.append("name", getJid())
+			.append("name", getName())
 			.append("jid", getJid())
 			.append("platform", getPlatform())
-			.append("accountId", getJid())
-			.append("permissions", getJid())
+			.append("accountId", getAccountId())
+			.append("permissions", getPermissions())
 		.toString();
 	}
 	
