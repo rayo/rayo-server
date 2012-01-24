@@ -42,7 +42,6 @@ public class RayoRouter implements Router {
 		dataStore = new CassandraDatastore();
 		dataStore.setHostname(hostName);
 		dataStore.setPort(port);
-		dataStore.setCreateSampleApplication(false);
 		dataStore.setOverrideExistingSchema(false);
 
 		try {

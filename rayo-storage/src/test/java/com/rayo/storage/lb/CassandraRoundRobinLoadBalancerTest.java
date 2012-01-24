@@ -22,7 +22,6 @@ public class CassandraRoundRobinLoadBalancerTest extends RoundRobinLoadBalancerT
 
 		CassandraDatastore datastore = new CassandraDatastore();
 		datastore.setPort(CassandraDatastoreTest.CASSANDRA_TESTING_PORT);
-		datastore.setCreateSampleApplication(false);
 		datastore.init();
 		storageService.setStore(datastore);
 		

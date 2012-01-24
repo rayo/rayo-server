@@ -30,20 +30,22 @@ public class CassandraDatastoreTest extends BaseDatastoreTest {
 		store = new CassandraDatastore();
 		
 		((CassandraDatastore)store).setPort(CASSANDRA_TESTING_PORT); 	
-		((CassandraDatastore)store).setCreateSampleApplication(false);
 		((CassandraDatastore)store).getSchemaHandler().setWaitForSyncing(false);
 		((CassandraDatastore)store).init();
 	}
 	
+	/*
 	@Test
 	public void testCreateDefaultApplication() throws Exception {
 		
 		// This test uses a different data store to test a different set of properties
 		CassandraDatastore datastore = new CassandraDatastore();
+		datastore.setPrimer(new DefaultCassandraPrimer());
 		datastore.setPort(CASSANDRA_TESTING_PORT);
 		datastore.init();
 		assertNotNull(datastore.getApplication("voxeo"));
 	}
+	*/
 	
 	@Test
 	public void testDoNotCreateDefaultApplication() throws Exception {
@@ -51,7 +53,6 @@ public class CassandraDatastoreTest extends BaseDatastoreTest {
 		// This test uses a different data store to test a different set of properties
 		CassandraDatastore datastore = new CassandraDatastore();
 		datastore.setPort(CASSANDRA_TESTING_PORT);
-		datastore.setCreateSampleApplication(false);
 		datastore.init();
 		assertNull(datastore.getApplication("voxeo"));
 	}
@@ -62,6 +63,7 @@ public class CassandraDatastoreTest extends BaseDatastoreTest {
 		// This test uses a different data store to test a different set of properties
 		CassandraDatastore datastore = new CassandraDatastore();
 		datastore.setPort(CASSANDRA_TESTING_PORT);
+		datastore.setPrimer(createCassandraPrimer());
 		datastore.init();
 
 		datastore.storeAddress("127.0.0.1", "voxeo");
@@ -77,6 +79,7 @@ public class CassandraDatastoreTest extends BaseDatastoreTest {
 		// This test uses a different data store to test a different set of properties
 		CassandraDatastore datastore = new CassandraDatastore();
 		datastore.setPort(CASSANDRA_TESTING_PORT);
+		datastore.setPrimer(createCassandraPrimer());
 		datastore.init();
 
 		datastore.storeAddress("127.0.0.1", "voxeo");
@@ -101,8 +104,23 @@ public class CassandraDatastoreTest extends BaseDatastoreTest {
 		CassandraDatastore datastore = new CassandraDatastore();
 		datastore.setPort(CASSANDRA_TESTING_PORT);
 		datastore.setOverrideExistingSchema(false);
+		datastore.setPrimer(createCassandraPrimer());
 		datastore.init();
 
 		assertNotNull(datastore.getApplication("voxeo"));
+	}
+	
+	private CassandraPrimer createCassandraPrimer() {
+		
+		DefaultCassandraPrimer primer = new DefaultCassandraPrimer();
+		primer.setDefaultAppName("voxeo");
+		primer.setDefaultPlatform("staging");
+		primer.setDefaultRayoUsername("rayo");
+		primer.setDialUris("localhost");
+		primer.setLoadTestAppPrefix("test");
+		primer.setLoadTestPrismUsername("user");
+		primer.setXmppServer("xmppserver");
+		
+		return primer;
 	}
 }

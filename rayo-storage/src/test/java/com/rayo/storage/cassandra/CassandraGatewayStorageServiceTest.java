@@ -20,7 +20,6 @@ public class CassandraGatewayStorageServiceTest extends BaseGatewayStorageServic
 		
 		CassandraDatastore cassandraDatastore = new CassandraDatastore();
 		cassandraDatastore.setPort(CassandraDatastoreTest.CASSANDRA_TESTING_PORT);
-		cassandraDatastore.setCreateSampleApplication(false);
 		cassandraDatastore.getSchemaHandler().setWaitForSyncing(false);
 		cassandraDatastore.init();
 		storageService = new DefaultGatewayStorageService();

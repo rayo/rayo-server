@@ -249,18 +249,21 @@ public class GatewayServlet extends AbstractRayoServlet {
 				sendPresenceError(message.getTo(), message.getFrom(), Condition.SERVICE_UNAVAILABLE, Type.CANCEL, "Gateway is on Quiesce mode.");
 				return;
 			}			
-			/*
+			
 			Application application = gatewayStorageService.getApplicationForAddress(offerElement.getAttribute("to"));
 			if (application == null) {
-				
+				String errorMessage = String.format("Could not find application for URI [%s]", offerElement.getAttribute("to"));
+				log.error(errorMessage);
+				sendPresenceError(message.getTo(), message.getFrom(), Condition.RECIPIENT_UNAVAILABLE, Type.CANCEL, errorMessage);
+				return;
 			}
 			JID callTo = getXmppFactory().createJID(application.getJid());
-			*/
-			JID callTo = getCallDestination(offerElement.getAttribute("to"));
     		
     		resource = loadBalancer.pickClientResource(callTo.getBareJID().toString()); // picks and load balances
     		if (resource == null) {
-				sendPresenceError(toJid, fromJid, Condition.RECIPIENT_UNAVAILABLE, Type.CANCEL, "Could not find an available resource");
+    			String errorMessage = String.format("Could not find an available resource for JID [%s]", callTo.getBareJID());
+    			log.error(errorMessage);
+				sendPresenceError(toJid, fromJid, Condition.RECIPIENT_UNAVAILABLE, Type.CANCEL, errorMessage);
 				return;
 			}
 

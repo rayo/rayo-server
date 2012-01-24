@@ -2,8 +2,6 @@ package com.rayo.server.servlet;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.UnknownHostException;
 
 import javax.servlet.ServletConfig;
@@ -22,13 +20,10 @@ import org.w3c.dom.Element;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSSerializer;
 
-import com.rayo.core.OfferEvent;
 import com.rayo.server.admin.AdminService;
 import com.rayo.server.exception.ErrorMapping;
 import com.rayo.server.exception.ExceptionMapper;
-import com.rayo.server.exception.RayoProtocolException;
 import com.rayo.server.listener.AdminListener;
-import com.rayo.server.lookup.RayoJIDLookupService;
 import com.rayo.server.util.DomUtils;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.servlet.xmpp.IQRequest;
@@ -56,7 +51,6 @@ public abstract class AbstractRayoServlet extends XmppServlet implements AdminLi
 	private XmppFactory xmppFactory;
     private AdminService adminService;
     private ExceptionMapper exceptionMapper;
-    private RayoJIDLookupService<OfferEvent> rayoLookupService;
     
     private String localDomain;
 
@@ -153,26 +147,7 @@ public abstract class AbstractRayoServlet extends XmppServlet implements AdminLi
             sendIqError(request, StanzaError.Type.CANCEL, StanzaError.Condition.INTERNAL_SERVER_ERROR, e.getMessage());
     	}
     }
-    
-    public JID getCallDestination(String offerTo) throws RayoProtocolException{
-    	
-		JID callTo = getXmppFactory().createJID(getBareJID(offerTo));
-		String forwardDestination = null;
-		try {
-			forwardDestination = rayoLookupService.lookup(new URI(offerTo));
-		} catch (URISyntaxException e) {
-			throw new RayoProtocolException(Condition.JID_MALFORMED, Type.CANCEL, "Invalid URI: " + offerTo);
-		}
-		if (forwardDestination != null) {
-			callTo = getXmppFactory().createJID(forwardDestination);
-		}
-		if (getLog().isDebugEnabled()) {
-			getLog().debug("Received Offer. Offer will be delivered to [%s]", callTo);
-		}
-		
-		return callTo;
-    }
-    
+        
 	protected abstract void processIQRequest(IQRequest request, DOMElement payload);
 
 	@Override
@@ -375,9 +350,5 @@ public abstract class AbstractRayoServlet extends XmppServlet implements AdminLi
 	public ExceptionMapper getExceptionMapper() {
 		
 		return exceptionMapper;
-	}
-	
-	public void setRayoLookupService(RayoJIDLookupService<OfferEvent> rayoLookupService) {
-		this.rayoLookupService = rayoLookupService;
 	}
 }

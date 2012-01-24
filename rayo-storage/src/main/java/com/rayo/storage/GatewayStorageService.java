@@ -323,4 +323,14 @@ public interface GatewayStorageService {
 	 * @return {@link Application} instance or <code>null</code>
 	 */
 	public Application getApplication(String appId);
+	
+	/**
+	 * Returns the {@link Application} that has associated the given address 
+	 * (e.g. phone number) or <code>null</code> if no application can be found 
+	 * for the given address
+	 *  
+	 * @param address Address
+	 * @return {@link Application} associated with the address or <code>null</code>
+	 */
+	public Application getApplicationForAddress(String address);
 }

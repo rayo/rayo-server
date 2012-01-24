@@ -3,6 +3,8 @@ package com.rayo.server.servlet;
 import static com.voxeo.utils.Objects.assertion;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
@@ -46,6 +48,7 @@ import com.rayo.server.admin.RayoAdminService;
 import com.rayo.server.exception.RayoProtocolException;
 import com.rayo.server.filter.FilterChain;
 import com.rayo.server.listener.XmppMessageListenerGroup;
+import com.rayo.server.lookup.RayoJIDLookupService;
 import com.rayo.server.util.DomUtils;
 import com.voxeo.exceptions.NotFoundException;
 import com.voxeo.logging.Loggerf;
@@ -57,6 +60,8 @@ import com.voxeo.servlet.xmpp.InstantMessage;
 import com.voxeo.servlet.xmpp.JID;
 import com.voxeo.servlet.xmpp.PresenceMessage;
 import com.voxeo.servlet.xmpp.StanzaError;
+import com.voxeo.servlet.xmpp.StanzaError.Condition;
+import com.voxeo.servlet.xmpp.StanzaError.Type;
 
 @SuppressWarnings("serial")
 public class RayoServlet extends AbstractRayoServlet {
@@ -76,7 +81,8 @@ public class RayoServlet extends AbstractRayoServlet {
     public static final int BROADCAST_RETRY_DELAY = 30000; 
     
     private JIDRegistry jidRegistry;
-    
+    private RayoJIDLookupService<OfferEvent> rayoLookupService;
+
     // Spring injected
     private XmlProvider provider;
     private CallManager callManager;
@@ -479,6 +485,25 @@ public class RayoServlet extends AbstractRayoServlet {
 			}
         }
     }
+    
+    public JID getCallDestination(String offerTo) throws RayoProtocolException{
+    	
+		JID callTo = getXmppFactory().createJID(getBareJID(offerTo));
+		String forwardDestination = null;
+		try {
+			forwardDestination = rayoLookupService.lookup(new URI(offerTo));
+		} catch (URISyntaxException e) {
+			throw new RayoProtocolException(Condition.JID_MALFORMED, Type.CANCEL, "Invalid URI: " + offerTo);
+		}
+		if (forwardDestination != null) {
+			callTo = getXmppFactory().createJID(forwardDestination);
+		}
+		if (getLog().isDebugEnabled()) {
+			getLog().debug("Received Offer. Offer will be delivered to [%s]", callTo);
+		}
+		
+		return callTo;
+    }
 
     // Util
     // ================================================================================
@@ -617,5 +642,9 @@ public class RayoServlet extends AbstractRayoServlet {
 
 	public void setBroadcastRetryDelay(int broadcastRetryDelay) {
 		this.broadcastRetryDelay = broadcastRetryDelay;
+	}
+	
+	public void setRayoLookupService(RayoJIDLookupService<OfferEvent> rayoLookupService) {
+		this.rayoLookupService = rayoLookupService;
 	}
 }

@@ -285,6 +285,12 @@ public class DefaultGatewayStorageService implements GatewayStorageService {
 
 		return store.getApplication(appId);
 	}
+	
+	@Override
+	public Application getApplicationForAddress(String address) {
+
+		return store.getApplicationForAddress(address);
+	}
 
 	public void setStore(GatewayDatastore store) {
 		

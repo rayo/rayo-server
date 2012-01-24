@@ -20,24 +20,24 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>com.rayo</groupId> 
+			<groupId>com.rayo</groupId>
 			<artifactId>rayo-core</artifactId>
-			<version>${project.version}</version>		
-		</dependency>	
-		<dependency>
-			<groupId>com.rayo</groupId> 
-			<artifactId>rayo-server</artifactId>
-			<version>${project.version}</version>			
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.rayo</groupId> 
+			<groupId>com.rayo</groupId>
+			<artifactId>rayo-server</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.rayo</groupId>
 			<artifactId>rayo-storage</artifactId>
-			<version>${project.version}</version>			
-		</dependency>		
+			<version>${project.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>com.voxeo</groupId>
 			<artifactId>vlib-core</artifactId>
-		</dependency>	
+		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>servlet-api</artifactId>
@@ -47,53 +47,84 @@
 			<artifactId>xmppservlet-api</artifactId>
 		</dependency>
 		<!-- Access to spring beans -->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
 		</dependency>
 		<dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-context-support</artifactId>
-            <version>${spring.version}</version>
-		</dependency>	
-			
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context-support</artifactId>
+			<version>${spring.version}</version>
+		</dependency>
+
 		<!-- JMX Management Console -->
-        <dependency>
-          <groupId>org.jolokia</groupId>
-          <artifactId>jolokia-core</artifactId>
-          <version>1.0.0</version>
-        </dependency>	
+		<dependency>
+			<groupId>org.jolokia</groupId>
+			<artifactId>jolokia-core</artifactId>
+			<version>1.0.0</version>
+		</dependency>
 	</dependencies>
-    <profiles>
-	  <profile> 
-	     <id>hudson</id> 
-	     <activation> 
-	        <property><name>BUILD_NUMBER</name></property> 
-	     </activation> 
-	     <build> 
-	       <finalName>rayo-gateway_b${BUILD_NUMBER}</finalName> 
-	       <!-- any plugin configuration --> 
-	        <plugins>
-	            <plugin>
-	                <artifactId>maven-war-plugin</artifactId>
-	                <configuration>
-	                    <manifest>
-	                        <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-	                    </manifest>
-	                    <archive>
-	                        <manifestEntries>
-	                            <Specification-Title>${project.name}</Specification-Title>
-	                            <Specification-Version>${project.version}</Specification-Version>
-	                            <Implementation-Version>${BUILD_TAG}</Implementation-Version>
-	                            <Build-Id>${BUILD_ID}</Build-Id>
-	                        </manifestEntries>
-	                    </archive>
-	                </configuration>
-	            </plugin>
-	        </plugins>	       
-	     </build> 
-	  </profile>     
-    </profiles>
+	<profiles>
+		<profile>
+			<id>production</id>
+			<activation>
+				<property>
+					<name>BUILD_NUMBER</name>
+				</property>
+			</activation>
+			<build>
+				<finalName>rayo-gateway_b${BUILD_NUMBER}</finalName>
+				<!-- any plugin configuration -->
+				<plugins>
+					<plugin>
+						<artifactId>maven-war-plugin</artifactId>
+						<configuration>
+							<manifest>
+								<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+							</manifest>
+							<archive>
+								<manifestEntries>
+									<Specification-Title>${project.name}</Specification-Title>
+									<Specification-Version>${project.version}</Specification-Version>
+									<Implementation-Version>${BUILD_TAG}</Implementation-Version>
+									<Build-Id>${BUILD_ID}</Build-Id>
+								</manifestEntries>
+							</archive>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>functional-tests</id>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-war-plugin</artifactId>
+						<configuration>
+							<webResources>
+								<resource>
+									<directory>src/test/resources</directory>
+									<targetPath>WEB-INF</targetPath>
+								</resource>
+							</webResources>
+							<manifest>
+								<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+							</manifest>
+							<archive>
+								<manifestEntries>
+									<Specification-Title>${project.name}</Specification-Title>
+									<Specification-Version>${project.version}</Specification-Version>
+									<Implementation-Version>${BUILD_TAG}</Implementation-Version>
+									<Build-Id>${BUILD_ID}</Build-Id>
+								</manifestEntries>
+							</archive>
+						</configuration>
+					</plugin>				
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 	<build>
 		<finalName>rayo-gateway</finalName>
 		<plugins>
@@ -114,15 +145,16 @@
 						<id>jar</id>
 						<phase>compile</phase>
 						<goals>
-							<goal>jar</goal>	
+							<goal>jar</goal>
 						</goals>
 					</execution>
 				</executions>
-			</plugin>			
+			</plugin>
 		</plugins>
 		<pluginManagement>
 			<plugins>
-				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+				<!--This plugin's configuration is used to store Eclipse m2e settings 
+					only. It has no influence on the Maven build itself. -->
 				<plugin>
 					<groupId>org.eclipse.m2e</groupId>
 					<artifactId>lifecycle-mapping</artifactId>
@@ -155,5 +187,5 @@
 				</plugin>
 			</plugins>
 		</pluginManagement>
-	</build>	    
+	</build>
 </project>

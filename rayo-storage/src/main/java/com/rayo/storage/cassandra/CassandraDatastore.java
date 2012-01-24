@@ -54,8 +54,8 @@ public class CassandraDatastore implements GatewayDatastore {
 	
 	private String hostname = "localhost";
 	private String port = "9160";
+	private CassandraPrimer primer = null;
 	private boolean overrideExistingSchema = true;
-	private boolean createSampleApplication = true;
 	private String schemaName = "rayo";
 	private CassandraSchemaHandler schemaHandler = new CassandraSchemaHandler();
 	
@@ -81,25 +81,8 @@ public class CassandraDatastore implements GatewayDatastore {
 		cluster = new Cluster(hostname, Integer.parseInt(port), true);
 		Pelops.addPool(schemaName, cluster, schemaName);
 		
-		// Create default application if needed
-		checkDefaultApplication();
-	}
-
-	private void checkDefaultApplication() throws DatastoreException {
-		
-		if (createSampleApplication) {
-			Application application = getApplication("voxeo");
-			if (application == null) {
-				// Create a default application to be used by functional testing
-				application = new Application("voxeo");
-				application.setAccountId("undefined");
-				application.setJid("rayo@gw1-ext.testing.voxeolabs.net");
-				application.setName("voxeo");
-				application.setPermissions("undefined");
-				application.setPlatform("staging");
-				
-				storeApplication(application);
-			}
+		if (primer != null) {
+			primer.prime(this);
 		}
 	}
 
@@ -812,14 +795,6 @@ public class CassandraDatastore implements GatewayDatastore {
 		this.overrideExistingSchema = overrideExistingSchema;
 	}
 
-	public boolean isCreateSampleApplication() {
-		return createSampleApplication;
-	}
-
-	public void setCreateSampleApplication(boolean createSampleApplication) {
-		this.createSampleApplication = createSampleApplication;
-	}
-
 	public void setSchemaName(String schemaName) {
 		this.schemaName = schemaName;
 	}
@@ -830,5 +805,9 @@ public class CassandraDatastore implements GatewayDatastore {
 
 	public void setSchemaHandler(CassandraSchemaHandler schemaHandler) {
 		this.schemaHandler = schemaHandler;
+	}
+
+	public void setPrimer(CassandraPrimer primer) {
+		this.primer = primer;
 	}
 }
