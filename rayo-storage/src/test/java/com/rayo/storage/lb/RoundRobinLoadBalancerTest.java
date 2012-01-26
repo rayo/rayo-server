@@ -27,11 +27,11 @@ public abstract class RoundRobinLoadBalancerTest extends LoadBalancingTest {
 
 		Application application = BaseDatastoreTest.buildApplication("voxeo", "client@jabber.org", "staging");
 		storageService.registerApplication(application);
-		storageService.registerClient(application.getAppId(), new JIDImpl("client@jabber.org/a"));
+		storageService.registerClient(new JIDImpl("client@jabber.org/a"));
 
 		Application application2 = BaseDatastoreTest.buildApplication("tropo", "mpermar@tropo.com", "staging");
 		storageService.registerApplication(application2);
-		storageService.registerClient(application2.getAppId(), new JIDImpl("mpermar@tropo.com/a"));
+		storageService.registerClient(new JIDImpl("mpermar@tropo.com/a"));
 
 		loadBalancer.pickClientResource("client@jabber.org");
 		loadBalancer.pickClientResource("mpermar@tropo.com");

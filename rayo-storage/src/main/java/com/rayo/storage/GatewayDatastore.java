@@ -189,33 +189,33 @@ public interface GatewayDatastore {
 	Application storeApplication(Application application) throws DatastoreException;
 
 	/**
-	 * <p>Returns a Rayo application on the DHT with the given id key. If the application does 
+	 * <p>Returns a Rayo application on the DHT with the given jid key. If the application does 
 	 * not exist then this method will return <code>null</code>.</p>
 	 * 
-	 * @param id Id of the application
-	 * @return {@link Application} Rayo application with the given id or <code>null</code>
-	 * if no application exists with that id
+	 * @param jid Jid of the application
+	 * @return {@link Application} Rayo application with the given jid or <code>null</code>
+	 * if no application exists with that jid
 	 */
-	Application getApplication(String id);
+	Application getApplication(String jid);
 	
 	/**
 	 * <p>Removes a Rayo application from the DHT.</p>
 	 * 
-	 * @param id Id of the Rayo application that has to be removed
+	 * @param jid Jid of the Rayo application that has to be removed
 	 * @return {@link Application} Rayo application that has been removed
 	 * @throws DatastoreException If there is any problems removing the client application
 	 */
-	Application removeApplication(String id) throws DatastoreException;
+	Application removeApplication(String jid) throws DatastoreException;
 	
 	/**
 	 * Stores an address (e.g. phone number) for a given application. 
 	 * 
 	 * @param address Address that we want to store
-	 * @param appId Application id
+	 * @param appId Application's jid
 	 * 
 	 * @throws DataStoreException If the address cannot be stored.
 	 */
-	void storeAddress(String address, String appId) throws DatastoreException;
+	void storeAddress(String address, String jid) throws DatastoreException;
 	
 	/**
 	 * Stores a collection of addresses (e.g. phone numbers) for a given application. 

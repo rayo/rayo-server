@@ -61,7 +61,6 @@ public class SBCRouterServlet extends SipServlet {
 
     storageService = new DefaultGatewayStorageService();
     storageService.setStore(dataStore);
-    storageService.setDefaultPlatform("staging");
     loadBalancer = new PriorityBasedLoadBalancer();
     loadBalancer.setStorageService(storageService);
   }

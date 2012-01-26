@@ -39,7 +39,7 @@
 		
 		<!-- And the user will be able to dial uris like user1@server . The following list defines 
 		allowable uris for each application -->
-		<property name="dialUris" value="gw1-ext.testing.voxeolabs.net,node1-ext.testing.voxeolabs.net,node2-testing.voxeolabs.net" />
+		<property name="dialUris" value="gw1-ext.testing.voxeolabs.net,node1-ext.testing.voxeolabs.net,node2-ext.testing.voxeolabs.net,node1.testing.voxeolabs.net,node2.voxeolabs.net" />
 		
 	</bean>
 

@@ -71,7 +71,6 @@
   	<!-- Gateway Storage Service -->
   	<bean id="gatewayStorageService" class="com.rayo.storage.DefaultGatewayStorageService">
   		<property name="store" ref="cassandraDatastore"/>
-  		<property name="defaultPlatform" value="staging" />
   	</bean>
   	
 	<!-- In-memory Map based Datastore -->

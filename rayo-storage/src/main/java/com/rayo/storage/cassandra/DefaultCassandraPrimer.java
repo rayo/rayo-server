@@ -30,14 +30,16 @@ public class DefaultCassandraPrimer implements CassandraPrimer {
 	public void prime(CassandraDatastore datastore) throws Exception {
 
 		System.out.println("Checking default application");
+		String jid = defaultRayoUsername + "@" + xmppServer;
 		// Create a default application to be used by functional testing
-		Application application = datastore.getApplication("voxeo");
+		Application application = datastore.getApplication(jid);
 		if (application == null) {
 
 			System.out.println("Default application does not exist.");
 			System.out.println("Creating default application.");
 
-			application = new Application(defaultAppName);
+			application = new Application(jid);
+			application.setAppId(defaultAppName);
 			application.setAccountId("undefined");
 			application.setJid(defaultRayoUsername + "@" + xmppServer);
 			application.setName(defaultAppName);
@@ -48,14 +50,16 @@ public class DefaultCassandraPrimer implements CassandraPrimer {
 			List<String> addresses = new ArrayList<String>();
 			String[] uris = dialUris.split(",");
 			for(String uri: uris) {
-				String address = "sip:" + uri;
-				addresses.add(address);					
+				for (char a='a';a<'g';a++) {
+					String address = "sip:user" + a +"@" + uri;
+					addresses.add(address);
+				}
 			}
 			if (addresses.size() > 0) {
-				datastore.storeAddresses(addresses, application.getAppId());
-				System.out.println(String.format("Added addresses %s to app id [%s]", addresses, application.getAppId()));
+				datastore.storeAddresses(addresses, application.getBareJid());
+				System.out.println(String.format("Added addresses %s to app id [%s]", addresses, application.getBareJid()));
 			}
-			datastore.storeAddresses(addresses, application.getAppId());		
+			datastore.storeAddresses(addresses, application.getBareJid());		
 			System.out.println("Default application created successfully");
 		} else {
 			System.out.println("Default application already exists");
@@ -63,15 +67,14 @@ public class DefaultCassandraPrimer implements CassandraPrimer {
 		
 		for (int i=0;i<=500;i++) {
 			String appid = loadTestAppPrefix + i;
-			application = datastore.getApplication(appid);
+			jid = loadTestRayoUsername + i + "@" + xmppServer;
+			application = datastore.getApplication(jid);
 			if (application == null) {
 				System.out.println(String.format("Creating application with id [%s]", appid));
-				
-				String jid = loadTestRayoUsername + i + "@" + xmppServer;
-				
-				application = new Application(appid);
+								
+				application = new Application(jid);
+				application.setAppId(appid);
 				application.setAccountId("undefined");
-				application.setJid(jid);
 				application.setName(appid);
 				application.setPermissions("undefined");
 				application.setPlatform(defaultPlatform);
@@ -86,7 +89,7 @@ public class DefaultCassandraPrimer implements CassandraPrimer {
 					addresses.add(address);					
 				}
 				if (addresses.size() > 0) {
-					datastore.storeAddresses(addresses, appid);
+					datastore.storeAddresses(addresses, jid);
 					System.out.println(String.format("Added addresses %s to app id [%s]", addresses, appid));
 				}				
 			}			

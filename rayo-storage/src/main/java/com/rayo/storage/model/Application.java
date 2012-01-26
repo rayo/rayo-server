@@ -39,11 +39,11 @@ public class Application implements Serializable {
 	/**
 	 * Application registered in the gateway
 	 * 
-	 * @param appId Application's id
+	 * @param appId Application's jid
 	 */
-	public Application(String appId) {
+	public Application(String jid) {
 		
-		this.appId = appId;
+		this.jid = jid;
 	}
 	
 	/**
@@ -109,14 +109,6 @@ public class Application implements Serializable {
 		return jid.substring(jid.indexOf("/") + 1, jid.length());
 	}
 
-	public String getAppId() {
-		return appId;
-	}
-
-	public void setAppId(String appId) {
-		this.appId = appId;
-	}
-
 	public String getName() {
 		return name;
 	}
@@ -139,5 +131,13 @@ public class Application implements Serializable {
 
 	public void setPermissions(String permissions) {
 		this.permissions = permissions;
+	}
+
+	public String getAppId() {
+		return appId;
+	}
+
+	public void setAppId(String appId) {
+		this.appId = appId;
 	}
 }

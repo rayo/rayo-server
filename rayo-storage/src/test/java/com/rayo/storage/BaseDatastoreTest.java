@@ -52,9 +52,9 @@ public abstract class BaseDatastoreTest {
 		RayoNode node = buildRayoNode("localhost","127.0.0.1", new String[] { "staging" }, 10, 1);
 		RayoNode stored = store.storeNode(node);
 		RayoNode node2 = buildRayoNode("localhost2","127.0.0.1", new String[] { "staging" }, 10, 1);
-		RayoNode stored2 = store.storeNode(node2);
+		store.storeNode(node2);
 		RayoNode node3 = buildRayoNode("localhost3","127.0.0.1", new String[] { "staging" }, 10, 1);
-		RayoNode stored3 = store.storeNode(node3);
+		store.storeNode(node3);
 		
 		assertNotNull(stored);
 		assertEquals(node.toString(), stored.toString());
@@ -290,7 +290,7 @@ public abstract class BaseDatastoreTest {
 
 		Application application = buildApplication();
 		store.storeApplication(application);
-		Application stored = store.getApplication("1234");
+		Application stored = store.getApplication(application.getBareJid());
 
 		assertNotNull(stored);
 		assertEquals(stored, application);
@@ -301,12 +301,13 @@ public abstract class BaseDatastoreTest {
 
 		Application application = buildApplication();
 		store.storeApplication(application);
-		Application stored = store.getApplication("1234");
+		Application stored = store.getApplication(application.getBareJid());
 
 		assertNotNull(stored);
 		assertEquals(stored, application); // will validate jid only
 		assertEquals(stored.getAppId(), application.getAppId());
 		assertEquals(stored.getName(), application.getName());
+		assertEquals(stored.getJid(), application.getJid());
 		assertEquals(stored.getAccountId(), application.getAccountId());
 		assertEquals(stored.getPermissions(), application.getPermissions());
 		assertEquals(stored.getPlatform(), application.getPlatform());
@@ -315,21 +316,27 @@ public abstract class BaseDatastoreTest {
 	@Test
 	public void testApplicationDoesNotExist() throws Exception {
 
-		assertNull(store.getApplication("1234"));
+		assertNull(store.getApplication("notexist@notexist.com"));
 	}
+	
+	@Test
+	public void testApplicationNull() throws Exception {
 
+		assertNull(store.getApplication(null));
+	}
+		
 	@Test
 	public void testRemoveApplication() throws Exception {
 
 		Application application = buildApplication();
 		store.storeApplication(application);
-		Application stored = store.getApplication("1234");
+		Application stored = store.getApplication(application.getBareJid());
 
 		assertNotNull(stored);
 		assertEquals(stored, application);
 
-		store.removeApplication("1234");
-		assertNull(store.getApplication("1234"));
+		store.removeApplication(application.getBareJid());
+		assertNull(store.getApplication(application.getBareJid()));
 	}
 	
 	@Test
@@ -337,7 +344,7 @@ public abstract class BaseDatastoreTest {
 
 		Application application = buildApplication();
 		store.storeApplication(application);
-		store.storeAddress("+348005551212", application.getAppId());
+		store.storeAddress("+348005551212", application.getBareJid());
 	}
 
 	@Test
@@ -345,7 +352,7 @@ public abstract class BaseDatastoreTest {
 
 		Application application = buildApplication();
 		store.storeApplication(application);
-		store.storeAddress("+348005551212", application.getAppId());
+		store.storeAddress("+348005551212", application.getBareJid());
 		
 		Application stored = store.getApplicationForAddress("+348005551212");
 		assertNotNull(stored);
@@ -360,7 +367,7 @@ public abstract class BaseDatastoreTest {
 		List<String> addresses = new ArrayList<String>();
 		addresses.add("+348005551212");
 		addresses.add("+348005551213");		
-		store.storeAddresses(addresses, application.getAppId());
+		store.storeAddresses(addresses, application.getBareJid());
 		
 		Application stored = store.getApplicationForAddress("+348005551212");
 		assertNotNull(stored);
@@ -378,9 +385,9 @@ public abstract class BaseDatastoreTest {
 		List<String> addresses = new ArrayList<String>();
 		addresses.add("+348005551212");
 		addresses.add("+348005551213");		
-		store.storeAddresses(addresses, application.getAppId());
+		store.storeAddresses(addresses, application.getBareJid());
 		
-		List<String> stored = store.getAddressesForApplication("1234");
+		List<String> stored = store.getAddressesForApplication(application.getJid());
 		assertEquals(stored.size(),2);
 		assertTrue(stored.contains("+348005551212"));
 		assertTrue(stored.contains("+348005551213"));		
@@ -397,7 +404,7 @@ public abstract class BaseDatastoreTest {
 
 		Application application = buildApplication();
 		store.storeApplication(application);
-		store.storeAddress("+348005551212", application.getAppId());
+		store.storeAddress("+348005551212", application.getBareJid());
 		
 		assertNotNull(store.getApplicationForAddress("+348005551212"));
 		store.removeAddress("+348005551212");
@@ -413,7 +420,7 @@ public abstract class BaseDatastoreTest {
 	@Test(expected=ApplicationNotFoundException.class)
 	public void testStoredAddressInNonExistingApplication() throws Exception {
 
-		store.storeAddress("+348005551212","1234");
+		store.storeAddress("+348005551212","notexist@notexist.com");
 	}
 
 	@Test
@@ -425,11 +432,11 @@ public abstract class BaseDatastoreTest {
 		List<String> addresses = new ArrayList<String>();
 		addresses.add("+348005551212");
 		addresses.add("+348005551213");		
-		store.storeAddresses(addresses, application.getAppId());
+		store.storeAddresses(addresses, application.getBareJid());
 		
-		assertEquals(store.getAddressesForApplication("1234").size(),2);
-		store.removeApplication("1234");
-		assertEquals(store.getAddressesForApplication("1234").size(),0);
+		assertEquals(store.getAddressesForApplication(application.getJid()).size(),2);
+		store.removeApplication(application.getBareJid());
+		assertEquals(store.getAddressesForApplication(application.getJid()).size(),0);
 		assertNull(store.getApplicationForAddress("+348005551212"));
 	}
 
@@ -437,7 +444,7 @@ public abstract class BaseDatastoreTest {
 	@Test(expected=ApplicationNotFoundException.class)
 	public void testExceptionWhenRemovingNonExistingApplication() throws Exception {
 
-		store.removeApplication("1234");
+		store.removeApplication("notexists@notexists.com");
 	}
 
 	@Test(expected=ApplicationAlreadyExistsException.class)
@@ -454,8 +461,7 @@ public abstract class BaseDatastoreTest {
 		Application application = buildApplication();
 		store.storeApplication(application);
 
-		GatewayClient client = new GatewayClient(application.getAppId(),
-				"client@jabber.org/a", "staging");
+		GatewayClient client = new GatewayClient("client@jabber.org/a", "staging");
 		GatewayClient stored = store.storeClient(client);
 		assertNotNull(stored);
 		assertEquals(stored, client);
@@ -467,8 +473,7 @@ public abstract class BaseDatastoreTest {
 		Application application = buildApplication("voxeo");
 		store.storeApplication(application);
 
-		GatewayClient client = new GatewayClient("voxeo",
-				"client@jabber.org/a", "staging");
+		GatewayClient client = new GatewayClient("client@jabber.org/a", "staging");
 		store.storeClient(client);
 		GatewayClient removed = store.removeClient(client.getJid());
 		assertNotNull(removed);
@@ -481,8 +486,7 @@ public abstract class BaseDatastoreTest {
 		Application application = buildApplication("voxeo");
 		store.storeApplication(application);
 
-		GatewayClient client = new GatewayClient("voxeo",
-				"client@jabber.org/a", "staging");
+		GatewayClient client = new GatewayClient("client@jabber.org/a", "staging");
 		store.storeClient(client);
 
 		GatewayClient stored = store.getClient(client.getJid());
@@ -502,14 +506,14 @@ public abstract class BaseDatastoreTest {
 		Application application = buildApplication("voxeo");
 		store.storeApplication(application);
 
-		GatewayClient client1 = new GatewayClient("voxeo",
-				"client@jabber.org/a", "staging");
+		Application application2 = buildApplication("voxeob", "clientb@jabber.org");
+		store.storeApplication(application2);
+
+		GatewayClient client1 = new GatewayClient("client@jabber.org/a", "staging");
 		store.storeClient(client1);
-		GatewayClient client2 = new GatewayClient("voxeo",
-				"client@jabber.org/b", "staging");
+		GatewayClient client2 = new GatewayClient("client@jabber.org/b", "staging");
 		store.storeClient(client2);
-		GatewayClient client3 = new GatewayClient("voxeo",
-				"clientb@jabber.org/a", "staging");
+		GatewayClient client3 = new GatewayClient("clientb@jabber.org/a", "staging");
 		store.storeClient(client3);
 
 		List<String> resources = store.getClientResources("client@jabber.org");
@@ -524,11 +528,9 @@ public abstract class BaseDatastoreTest {
 		Application application = buildApplication("voxeo");
 		store.storeApplication(application);
 
-		GatewayClient client1 = new GatewayClient("voxeo",
-				"client@jabber.org/a", "staging");
+		GatewayClient client1 = new GatewayClient("client@jabber.org/a", "staging");
 		store.storeClient(client1);
-		GatewayClient client2 = new GatewayClient("voxeo",
-				"client@jabber.org/b", "staging");
+		GatewayClient client2 = new GatewayClient("client@jabber.org/b", "staging");
 		store.storeClient(client2);
 
 		store.removeClient("client@jabber.org/a");
@@ -551,15 +553,15 @@ public abstract class BaseDatastoreTest {
 		Application application = buildApplication("voxeo");
 		store.storeApplication(application);
 
+		Application application2 = buildApplication("voxeob","clientb@jabber.org");
+		store.storeApplication(application2);
+
 		assertEquals(0, store.getClients().size());
-		GatewayClient client1 = new GatewayClient("voxeo",
-				"client@jabber.org/a", "staging");
+		GatewayClient client1 = new GatewayClient("client@jabber.org/a", "staging");
 		store.storeClient(client1);
-		GatewayClient client2 = new GatewayClient("voxeo",
-				"client@jabber.org/b", "staging");
+		GatewayClient client2 = new GatewayClient("client@jabber.org/b", "staging");
 		store.storeClient(client2);
-		GatewayClient client3 = new GatewayClient("voxeo",
-				"clientb@jabber.org/a", "staging");
+		GatewayClient client3 = new GatewayClient("clientb@jabber.org/a", "staging");
 		store.storeClient(client3);
 
 		List<String> clients = store.getClients();
@@ -605,7 +607,12 @@ public abstract class BaseDatastoreTest {
 
 	public static Application buildApplication(String appId) {
 	
-		return buildApplication(appId, "client@jabber.org","staging");
+		return buildApplication(appId, "client@jabber.org");
+	}
+
+	public static Application buildApplication(String appId, String jid) {
+		
+		return buildApplication(appId, jid,"staging");
 	}
 	
 	public static Application buildApplication(String appId, String jid, String platform) {

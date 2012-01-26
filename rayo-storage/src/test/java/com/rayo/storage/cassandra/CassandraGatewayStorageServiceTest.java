@@ -23,7 +23,6 @@ public class CassandraGatewayStorageServiceTest extends BaseGatewayStorageServic
 		cassandraDatastore.getSchemaHandler().setWaitForSyncing(false);
 		cassandraDatastore.init();
 		storageService = new DefaultGatewayStorageService();
-		storageService.setDefaultPlatform("staging");
 		storageService.setStore(cassandraDatastore);
 		
 		loadBalancer = new RoundRobinLoadBalancer();

@@ -15,20 +15,17 @@ public class GatewayClient implements Serializable {
 
 	private static final long serialVersionUID = -6377732285884068488L;
 
-	private String appId;
 	private String jid;
 	private String platform;
 	
 	/**
 	 * Application registered in the gateway
 	 * 
-	 * @param appId Application id
 	 * @param jid Application's JID
 	 * @param platform Application's platform
 	 */
-	public GatewayClient(String appId, String jid, String platform) {
+	public GatewayClient(String jid, String platform) {
 		
-		this.appId = appId;
 		this.jid = jid;
 		this.platform = platform;
 	}
@@ -79,7 +76,6 @@ public class GatewayClient implements Serializable {
 	public String toString() {
 
     	return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)  
-    		.append("appId", getAppId())
 			.append("jid", getJid())
 			.append("platform", getPlatform())
 		.toString();
@@ -98,13 +94,5 @@ public class GatewayClient implements Serializable {
 	public String getResource() {
 		
 		return jid.substring(jid.indexOf("/") + 1, jid.length());
-	}
-
-	public String getAppId() {
-		return appId;
-	}
-
-	public void setAppId(String appId) {
-		this.appId = appId;
 	}
 }

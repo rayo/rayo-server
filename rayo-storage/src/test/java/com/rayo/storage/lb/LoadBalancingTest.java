@@ -159,9 +159,9 @@ public abstract class LoadBalancingTest {
 
 		Application application = BaseDatastoreTest.buildApplication("voxeo", "client@jabber.org", "staging");
 		storageService.registerApplication(application);
-		storageService.registerClient(application.getAppId(), new JIDImpl("client@jabber.org/a"));
-		storageService.registerClient(application.getAppId(), new JIDImpl("client@jabber.org/b"));
-		storageService.registerClient(application.getAppId(), new JIDImpl("client@jabber.org/c"));
+		storageService.registerClient(new JIDImpl("client@jabber.org/a"));
+		storageService.registerClient(new JIDImpl("client@jabber.org/b"));
+		storageService.registerClient(new JIDImpl("client@jabber.org/c"));
 
 		String[] resources = new String[]{"a","b","c"};
 		for (int i=0;i<600;i++) {
@@ -180,11 +180,15 @@ public abstract class LoadBalancingTest {
 
 		Application application = BaseDatastoreTest.buildApplication("voxeo", "client@jabber.org", "staging");
 		storageService.registerApplication(application);
-		storageService.registerClient(application.getAppId(), new JIDImpl("client@jabber.org/a"));
-		storageService.registerClient(application.getAppId(), new JIDImpl("client@jabber.org/b"));
-		storageService.registerClient(application.getAppId(), new JIDImpl("client@jabber.org/c"));
-		storageService.registerClient(application.getAppId(), new JIDImpl("client@tropo.com/d"));
-		storageService.registerClient(application.getAppId(), new JIDImpl("client@tropo.com/e"));
+		
+		Application application2 = BaseDatastoreTest.buildApplication("tropo", "client@tropo.com", "staging");
+		storageService.registerApplication(application2);
+
+		storageService.registerClient(new JIDImpl("client@jabber.org/a"));
+		storageService.registerClient(new JIDImpl("client@jabber.org/b"));
+		storageService.registerClient(new JIDImpl("client@jabber.org/c"));
+		storageService.registerClient(new JIDImpl("client@tropo.com/d"));
+		storageService.registerClient(new JIDImpl("client@tropo.com/e"));
 
 		String[] resources = new String[]{"a","b","c","d","e"};
 		for (int i=0;i<600;i++) {
@@ -207,9 +211,9 @@ public abstract class LoadBalancingTest {
 
 		Application application = BaseDatastoreTest.buildApplication("voxeo", "client@jabber.org", "staging");
 		storageService.registerApplication(application);
-		storageService.registerClient(application.getAppId(), new JIDImpl("client@jabber.org/a"));
-		storageService.registerClient(application.getAppId(), new JIDImpl("client@jabber.org/b"));
-		storageService.registerClient(application.getAppId(), new JIDImpl("client@jabber.org/c"));
+		storageService.registerClient(new JIDImpl("client@jabber.org/a"));
+		storageService.registerClient(new JIDImpl("client@jabber.org/b"));
+		storageService.registerClient(new JIDImpl("client@jabber.org/c"));
 
 		String[] resources = new String[]{"a","b","c"};
 		for (int i=0;i<600;i++) {
@@ -222,7 +226,7 @@ public abstract class LoadBalancingTest {
 		assertEquals(resourceTotals.get("b"),(Integer)200);
 		assertEquals(resourceTotals.get("c"),(Integer)200);
 		
-		storageService.unregisterClientResource(new JIDImpl("client@jabber.org/c"));
+		storageService.unregisterClient(new JIDImpl("client@jabber.org/c"));
 		
 		for (int i=0;i<600;i++) {
 			String resource = loadBalancer.pickClientResource("client@jabber.org");
@@ -241,9 +245,9 @@ public abstract class LoadBalancingTest {
 
 		Application application = BaseDatastoreTest.buildApplication("voxeo", "client@jabber.org", "staging");
 		storageService.registerApplication(application);
-		storageService.registerClient(application.getAppId(), new JIDImpl("client@jabber.org/a"));
-		storageService.registerClient(application.getAppId(), new JIDImpl("client@jabber.org/b"));
-		storageService.registerClient(application.getAppId(), new JIDImpl("client@jabber.org/c"));
+		storageService.registerClient(new JIDImpl("client@jabber.org/a"));
+		storageService.registerClient(new JIDImpl("client@jabber.org/b"));
+		storageService.registerClient(new JIDImpl("client@jabber.org/c"));
 
 		String[] resources = new String[]{"a","b","c"};
 		for (int i=0;i<600;i++) {
@@ -256,7 +260,7 @@ public abstract class LoadBalancingTest {
 		assertEquals(resourceTotals.get("b"),(Integer)200);
 		assertEquals(resourceTotals.get("c"),(Integer)200);
 		
-		storageService.registerClient(application.getAppId(), new JIDImpl("client@jabber.org/d"));
+		storageService.registerClient(new JIDImpl("client@jabber.org/d"));
 		resources = new String[]{"a","b","c","d"};
 		assertEquals(loadBalancer.pickClientResource("client@jabber.org"),"d"); // skip the first one that will be d
 		for (int i=0;i<600;i++) {
@@ -394,7 +398,7 @@ public abstract class LoadBalancingTest {
 
 		Application application = BaseDatastoreTest.buildApplication("voxeo", "client@jabber.org", "staging");
 		storageService.registerApplication(application);
-		storageService.registerClient(application.getAppId(), new JIDImpl("client@jabber.org/a"));
+		storageService.registerClient(new JIDImpl("client@jabber.org/a"));
 		
 		assertNotNull(loadBalancer.pickClientResource("client@jabber.org"));
 		for (int i=0;i<10;i++) {
@@ -408,9 +412,9 @@ public abstract class LoadBalancingTest {
 
 		Application application = BaseDatastoreTest.buildApplication("voxeo", "client@jabber.org", "staging");
 		storageService.registerApplication(application);
-		storageService.registerClient(application.getAppId(), new JIDImpl("client@jabber.org/a"));
-		storageService.registerClient(application.getAppId(), new JIDImpl("client@jabber.org/b"));
-		storageService.registerClient(application.getAppId(), new JIDImpl("client@jabber.org/c"));
+		storageService.registerClient(new JIDImpl("client@jabber.org/a"));
+		storageService.registerClient(new JIDImpl("client@jabber.org/b"));
+		storageService.registerClient(new JIDImpl("client@jabber.org/c"));
 
 		String[] resources = new String[]{"a","b","c"};
 		for (int i=0;i<600;i++) {
@@ -444,7 +448,7 @@ public abstract class LoadBalancingTest {
 
 		Application application = BaseDatastoreTest.buildApplication("voxeo", "client@jabber.org", "staging");
 		storageService.registerApplication(application);
-		storageService.registerClient(application.getAppId(), new JIDImpl("client@jabber.org/a"));
+		storageService.registerClient(new JIDImpl("client@jabber.org/a"));
 		
 		assertNotNull(loadBalancer.pickClientResource("client@jabber.org"));
 		for (int i=0;i<10;i++) {
@@ -461,9 +465,9 @@ public abstract class LoadBalancingTest {
 
 		Application application = BaseDatastoreTest.buildApplication("voxeo", "client@jabber.org", "staging");
 		storageService.registerApplication(application);
-		storageService.registerClient(application.getAppId(), new JIDImpl("client@jabber.org/a"));
-		storageService.registerClient(application.getAppId(), new JIDImpl("client@jabber.org/b"));
-		storageService.registerClient(application.getAppId(), new JIDImpl("client@jabber.org/c"));
+		storageService.registerClient(new JIDImpl("client@jabber.org/a"));
+		storageService.registerClient(new JIDImpl("client@jabber.org/b"));
+		storageService.registerClient(new JIDImpl("client@jabber.org/c"));
 
 		for (int i=0;i<10;i++) {
 			loadBalancer.clientOperationFailed("client@jabber.org/a");			
@@ -479,9 +483,9 @@ public abstract class LoadBalancingTest {
 
 		Application application = BaseDatastoreTest.buildApplication("voxeo", "client@jabber.org", "staging");
 		storageService.registerApplication(application);
-		storageService.registerClient(application.getAppId(), new JIDImpl("client@jabber.org/a"));
-		storageService.registerClient(application.getAppId(), new JIDImpl("client@jabber.org/b"));
-		storageService.registerClient(application.getAppId(), new JIDImpl("client@jabber.org/c"));
+		storageService.registerClient(new JIDImpl("client@jabber.org/a"));
+		storageService.registerClient(new JIDImpl("client@jabber.org/b"));
+		storageService.registerClient(new JIDImpl("client@jabber.org/c"));
 
 		assertNotNull(loadBalancer.pickClientResource("client@jabber.org"));
 		assertNotNull(loadBalancer.pickClientResource("client@jabber.org"));

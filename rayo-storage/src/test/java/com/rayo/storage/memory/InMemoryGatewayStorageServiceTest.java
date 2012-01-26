@@ -12,7 +12,6 @@ public class InMemoryGatewayStorageServiceTest extends BaseGatewayStorageService
 	public void setup() {
 		
 		storageService = new DefaultGatewayStorageService();
-		storageService.setDefaultPlatform("staging");
 		storageService.setStore(new InMemoryDatastore());
 		
 		loadBalancer = new RoundRobinLoadBalancer();

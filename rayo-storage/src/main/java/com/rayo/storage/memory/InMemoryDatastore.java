@@ -377,37 +377,39 @@ public class InMemoryDatastore implements GatewayDatastore {
 	@Override
 	public Application storeApplication(Application application) throws DatastoreException {
 
-		if (getApplication(application.getAppId()) != null) {
+		if (getApplication(application.getBareJid()) != null) {
 			throw new ApplicationAlreadyExistsException();
 		}
 		
 		Lock applicationLock = applicationsLock.writeLock();
 		applicationLock.lock();
 		try {
-			applicationsMap.put(application.getAppId(), application);
+			applicationsMap.put(application.getBareJid(), application);
 		} finally {
 			applicationLock.unlock();
 		}
 		
 		return application;
 	}
-	
-	@Override
-	public Application getApplication(String id) {
 
+	@Override
+	public Application getApplication(String jid) {
+
+		if (jid == null) return null;
+		
 		Lock applicationLock = applicationsLock.readLock();
 		applicationLock.lock();
 		try {
-			return applicationsMap.get(id);
+			return applicationsMap.get(jid);
 		} finally {
 			applicationLock.unlock();
 		}
 	}
 	
 	@Override
-	public Application removeApplication(String id) throws DatastoreException {
+	public Application removeApplication(String jid) throws DatastoreException {
 
-		Application application = getApplication(id);
+		Application application = getApplication(jid);
 		if (application == null) {
 			throw new ApplicationNotFoundException();
 		}
@@ -415,14 +417,14 @@ public class InMemoryDatastore implements GatewayDatastore {
 		Lock applicationLock = applicationsLock.writeLock();
 		applicationLock.lock();
 		try {
-			applicationsMap.remove(id);
-			List<String> addresses = appToAddressesMap.get(id);
+			applicationsMap.remove(jid);
+			List<String> addresses = appToAddressesMap.get(jid);
 			if (addresses != null) {
 				for(String address: addresses) {
 					addressesMap.remove(address);					
 				}
 			}
-			appToAddressesMap.remove(id);
+			appToAddressesMap.remove(jid);
 		} finally {
 			applicationLock.unlock();
 		}
@@ -451,9 +453,9 @@ public class InMemoryDatastore implements GatewayDatastore {
 	}
 	
 	@Override
-	public void storeAddresses(Collection<String> addresses, String appId) throws DatastoreException {
+	public void storeAddresses(Collection<String> addresses, String jid) throws DatastoreException {
 
-		Application application = getApplication(appId);
+		Application application = getApplication(jid);
 		if (application == null) {
 			throw new ApplicationNotFoundException();
 		}
@@ -462,10 +464,10 @@ public class InMemoryDatastore implements GatewayDatastore {
 		try {
 			for (String address: addresses) {
 				addressesMap.put(address, application);
-				List<String> addr = appToAddressesMap.get(application.getAppId());
+				List<String> addr = appToAddressesMap.get(application.getBareJid());
 				if (addr == null) {
 					addr = new ArrayList<String>();
-					appToAddressesMap.put(application.getAppId(), addr);
+					appToAddressesMap.put(application.getBareJid(), addr);
 				}
 				if (!addr.contains(address)) {
 					addr.add(address);
@@ -485,10 +487,10 @@ public class InMemoryDatastore implements GatewayDatastore {
 			Application application = getApplicationForAddress(address);
 			if (application != null) {
 				addressesMap.remove(address);
-				List<String> addresses = appToAddressesMap.get(application.getAppId());
+				List<String> addresses = appToAddressesMap.get(application.getBareJid());
 				if (addresses != null) {
 					addresses.remove(address);
-					appToAddressesMap.put(application.getAppId(), addresses);
+					appToAddressesMap.put(application.getBareJid(), addresses);
 				}
 			}
 		} finally {

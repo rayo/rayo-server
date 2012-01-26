@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.rayo.storage.exception.ApplicationNotFoundException;
 import com.rayo.storage.exception.DatastoreException;
 import com.rayo.storage.exception.GatewayException;
 import com.rayo.storage.exception.RayoNodeNotFoundException;
@@ -50,8 +51,6 @@ import com.voxeo.servlet.xmpp.JID;
 public class DefaultGatewayStorageService implements GatewayStorageService {
 	
 	protected static final Loggerf log = Loggerf.getLogger(DefaultGatewayStorageService.class);
-		
-	private String defaultPlatform;
 	
 	private GatewayDatastore store;
 	
@@ -71,11 +70,15 @@ public class DefaultGatewayStorageService implements GatewayStorageService {
 	}
 	
 	@Override
-	public GatewayClient registerClient(String appId, JID clientJid) throws GatewayException {
+	public GatewayClient registerClient(JID clientJid) throws GatewayException {
 		
-		Application application = store.getApplication(appId);
+		Application application = store.getApplication(clientJid.getBareJID().toString());
 		
-		GatewayClient client = new GatewayClient(appId, clientJid.toString(), application.getPlatform());
+		if (application == null) {
+			throw new ApplicationNotFoundException();
+		}
+		
+		GatewayClient client = new GatewayClient(clientJid.toString(), application.getPlatform());
 		return store.storeClient(client);
 	}
 
@@ -227,20 +230,6 @@ public class DefaultGatewayStorageService implements GatewayStorageService {
 		return null;
 	}
 	
-	@Override
-	public void registerClientResource(String appId, JID clientJid) throws GatewayException {
-		
-		//TODO: This bind must be launched from an external administrative tool
-		GatewayClient client = new GatewayClient(appId, clientJid.toString(), defaultPlatform);
-		store.storeClient(client);
-	}
-
-	@Override
-	public void unregisterClientResource(JID clientJid) throws GatewayException {
-
-		store.removeClient(clientJid.toString());
-	}
-	
 	@SuppressWarnings("unchecked")
 	@Override
 	public List<String> getResourcesForClient(String jid) {
@@ -275,15 +264,15 @@ public class DefaultGatewayStorageService implements GatewayStorageService {
 	}
 	
 	@Override
-	public Application unregisterApplication(String appId) throws DatastoreException {
+	public Application unregisterApplication(String jid) throws DatastoreException {
 		
-		return store.removeApplication(appId);
+		return store.removeApplication(jid);
 	}
 	
 	@Override
-	public Application getApplication(String appId) {
+	public Application getApplication(String jid) {
 
-		return store.getApplication(appId);
+		return store.getApplication(jid);
 	}
 	
 	@Override
@@ -295,10 +284,5 @@ public class DefaultGatewayStorageService implements GatewayStorageService {
 	public void setStore(GatewayDatastore store) {
 		
 		this.store = store;
-	}
-	
-	public void setDefaultPlatform(String defaultPlatform) {
-		
-		this.defaultPlatform = defaultPlatform;
 	}	
 }

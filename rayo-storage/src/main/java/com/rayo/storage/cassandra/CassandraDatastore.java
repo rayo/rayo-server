@@ -390,16 +390,16 @@ public class CassandraDatastore implements GatewayDatastore {
 	public Application storeApplication(Application application) throws DatastoreException {
 		
 		log.debug("Storing application: [%s]", application);
-		if (getApplication(application.getAppId()) != null) {
+		if (getApplication(application.getBareJid()) != null) {
 			log.error("Application [%s] already exists", application);
 			throw new ApplicationAlreadyExistsException();
 		}
 		
 		Mutator mutator = Pelops.createMutator(schemaName);
 
-		mutator.writeColumns("applications", application.getAppId(), 
+		mutator.writeColumns("applications", application.getBareJid(), 
 			mutator.newColumnList(
-					mutator.newColumn(Bytes.fromUTF8("appJid"), Bytes.fromUTF8(application.getBareJid())),
+					mutator.newColumn(Bytes.fromUTF8("appId"), Bytes.fromUTF8(application.getAppId())),
 					mutator.newColumn(Bytes.fromUTF8("platformId"), Bytes.fromUTF8(application.getPlatform())),
 					mutator.newColumn(Bytes.fromUTF8("name"), Bytes.fromUTF8(application.getName())),
 					mutator.newColumn(Bytes.fromUTF8("accountId"), Bytes.fromUTF8(application.getAccountId())),
@@ -415,35 +415,41 @@ public class CassandraDatastore implements GatewayDatastore {
 		
 		return application;
 	}
+
+	private void populateApplicationData(Application application, List<Column> columns) {
+		
+		for (Column column: columns) {
+			String name = Bytes.toUTF8(column.getName());
+			if (name.equals("appId")) {
+				application.setAppId(Bytes.toUTF8((column.getValue())));
+			}
+			if (name.equals("platformId")) {
+				application.setPlatform(Bytes.toUTF8((column.getValue())));
+			}
+			if (name.equals("name")) {
+				application.setName(Bytes.toUTF8((column.getValue())));
+			}
+			if (name.equals("accountId")) {
+				application.setAccountId(Bytes.toUTF8((column.getValue())));
+			}
+			if (name.equals("permissions")) {
+				application.setPermissions(Bytes.toUTF8((column.getValue())));
+			}
+		}
+	}
 	
 	@Override
-	public Application getApplication(String id) {
+	public Application getApplication(String jid) {
 		
-		log.debug("Finding application with id: [%s]", id);
+		if (jid == null) return null;
+		log.debug("Finding application with jid: [%s]", jid);
 		Application application = null;
 		
 		Selector selector = Pelops.createSelector(schemaName);
-		List<Column> columns = selector.getColumnsFromRow("applications", id, false, ConsistencyLevel.ONE);
+		List<Column> columns = selector.getColumnsFromRow("applications", jid, false, ConsistencyLevel.ONE);
 		if (columns.size() > 0) {
-			application = new Application(id);
-			for (Column column: columns) {
-				String name = Bytes.toUTF8(column.getName());
-				if (name.equals("appJid")) {
-					application.setJid(Bytes.toUTF8((column.getValue())));
-				}
-				if (name.equals("platformId")) {
-					application.setPlatform(Bytes.toUTF8((column.getValue())));
-				}
-				if (name.equals("name")) {
-					application.setName(Bytes.toUTF8((column.getValue())));
-				}
-				if (name.equals("accountId")) {
-					application.setAccountId(Bytes.toUTF8((column.getValue())));
-				}
-				if (name.equals("permissions")) {
-					application.setPermissions(Bytes.toUTF8((column.getValue())));
-				}
-			}
+			application = new Application(jid);
+			populateApplicationData(application, columns);
 		}
 		return application;
 	}
@@ -543,7 +549,7 @@ public class CassandraDatastore implements GatewayDatastore {
 	public GatewayClient storeClient(GatewayClient client) throws DatastoreException {
 		
 		log.debug("Storing client: [%s]", client);
-		Application application = getApplication(client.getAppId());
+		Application application = getApplication(client.getBareJid());
 		if (application == null) {
 			log.debug("Client [%s] already exists", client);
 			throw new ApplicationNotFoundException();
@@ -552,8 +558,7 @@ public class CassandraDatastore implements GatewayDatastore {
 		Mutator mutator = Pelops.createMutator(schemaName);
 		mutator.writeColumns("clients", client.getBareJid(),
 			mutator.newColumnList(
-				mutator.newColumn(client.getResource(), client.getResource()),
-				mutator.newColumn("appId", client.getAppId())));
+				mutator.newColumn(client.getResource(), client.getResource())));
 		try {
 			mutator.execute(ConsistencyLevel.ONE);
 			log.debug("Client [%s] stored successfully", client);
@@ -597,27 +602,22 @@ public class CassandraDatastore implements GatewayDatastore {
 			String bareJid = JIDUtils.getBareJid(jid);
 			String resource = JIDUtils.getResource(jid);
 			boolean resourceFound = false;
-			String appId = null;
 			
 			Selector selector = Pelops.createSelector(schemaName);
 			List<Column> columns = selector.getColumnsFromRow("clients", bareJid, false, ConsistencyLevel.ONE);
 			if (columns != null && columns.size() > 0) {
 				for(Column column: columns) {
 					String name = Bytes.toUTF8(column.getName());
-					if (name.equals("appId")) {
-						appId = Bytes.toUTF8(column.getValue());
-					} else if (name.equals(resource)) {
+					if (name.equals(resource)) {
 						resourceFound = true;
 					}
 				}
 			}
 			
-			if (resourceFound && appId != null) {
-				Application application = getApplication(appId);
+			if (resourceFound) {
+				Application application = getApplication(JIDUtils.getBareJid(jid));
 				if (application != null) {
 					client =  new GatewayClient();
-					//TODO: Probably much better to set an object reference to application
-					client.setAppId(appId);
 					client.setJid(jid);
 					client.setPlatform(application.getPlatform());
 				}

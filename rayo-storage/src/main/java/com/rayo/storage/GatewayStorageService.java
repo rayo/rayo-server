@@ -112,14 +112,13 @@ public interface GatewayStorageService {
 	 * provides a way to administrative interfaces to link those applications to actual 
 	 * Rayo Servers.</p> 
 	 *  
-	 * @param appId Application's id 
-	 * @param clientJid Client JId
+	 * @param clientJid Client's jid 
 	 * @return GatewayClient client that has been created
 	 * 
 	 * @throws GatewayException If the client JID could not be registered, like for example when 
 	 * a Rayo application linked to that client JID cannot be found
 	 */
-	GatewayClient registerClient(String appId, JID clientJid) throws GatewayException;
+	GatewayClient registerClient(JID clientJid) throws GatewayException;
 
 	/**
 	 * <p>Removes this client. Subsequent clients from this JID will not find 
@@ -241,36 +240,6 @@ public interface GatewayStorageService {
 	 * @return {@link JID} Client full JID
 	 */
 	String getclientJID(String callId);
-
-	/**
-	 * <p>Registers a client resource.</p>
-	 * 
-	 * <p>When a Rayo client application comes online it will send a presence message to 
-	 * the Rayo Gateway showing its specific interest to serve requests for a rayo 
-	 * application. Rayo Clients can use register different resources to their application, so 
-	 * they can easily balance the load at their side.</p>
-	 * 
-	 * <p>When the Rayo Gateway receives a message that is targeted to a Rayo Client, 
-	 * it will find the list of available resources for that client JID and will redirect 
-	 * the message to one of those available resources.</p> 
-	 * 
-	 * @param appId Application's id
-	 * @param clientJid Client JID
-	 * @throws GatewayException If there is any problems while registering the resource
-	 */
-	public void registerClientResource(String appId, JID clientJid) throws GatewayException;
-
-	/**
-	 * <p>Unregisters a client resource.</p>
-	 * 
-	 * <p>When a resource is unregistered it won't receive any further messages from 
-	 * the Rayo Gateway. This normally happens when a Rayo Client goes offline for 
-	 * any reason.</p>
-	 * 
-	 * @param clientJid Client JID
-	 * @throws GatewayException If there is any problems while unregistering the resource
-	 */
-	public void unregisterClientResource(JID clientJid) throws GatewayException;
 	
 	/**
 	 * <p>Returns a list of available resources for the specified client JID.</p>
@@ -298,7 +267,7 @@ public interface GatewayStorageService {
 	/**
 	 * Registers an application in the storage service
 	 * 
-	 * @param appId Id of the application to be registered
+	 * @param application Application object to register
 	 * @return Application registered application
 	 * 
 	 * @throws DatastoreException If there is any problem while registering the application
@@ -308,21 +277,21 @@ public interface GatewayStorageService {
 	/**
 	 * Unregisters an application from the storage service
 	 * 
-	 * @param appId Id of the application to be unregistered
+	 * @param jid Jid of the application to be unregistered
 	 * @return Application unregistered application
 	 * 
 	 * @throws DatastoreException If there is any problem while unregistering the application
 	 */
-	public Application unregisterApplication(String appId) throws DatastoreException;
+	public Application unregisterApplication(String jid) throws DatastoreException;
 	
 	/**
 	 * Returns the application with the given app id or <code>null</code> if 
 	 * no application can be found
 	 * 
-	 * @param appId Id of the application
+	 * @param jid Jid of the application
 	 * @return {@link Application} instance or <code>null</code>
 	 */
-	public Application getApplication(String appId);
+	public Application getApplication(String jid);
 	
 	/**
 	 * Returns the {@link Application} that has associated the given address 

@@ -11,6 +11,7 @@ import java.util.List;
 
 import org.junit.Test;
 
+import com.rayo.storage.exception.ApplicationNotFoundException;
 import com.rayo.storage.exception.RayoNodeNotFoundException;
 import com.rayo.storage.lb.RoundRobinLoadBalancer;
 import com.rayo.storage.model.Application;
@@ -129,17 +130,26 @@ public abstract class BaseGatewayStorageServiceTest {
 		Application application = buildApplication("voxeo");
 		storageService.registerApplication(application);
 
-		JID clientJid = new JIDImpl("test@jabber.org/a");
+		JID clientJid = new JIDImpl("client@jabber.org/a");
 		assertNull(storageService.getPlatformForClient(clientJid));
 		
-		storageService.registerClient("voxeo",clientJid);
+		storageService.registerClient(clientJid);
 		assertEquals("staging", storageService.getPlatformForClient(clientJid));
 
 		storageService.unregisterClient(clientJid);
 		assertNull(storageService.getPlatformForClient(clientJid));
 
-		storageService.registerClient("voxeo",clientJid);
+		storageService.registerClient(clientJid);
 		assertEquals("staging", storageService.getPlatformForClient(clientJid));		
+	}
+	
+	@Test(expected=ApplicationNotFoundException.class)
+	public void testBindClientWithoutApplication() throws Exception {
+		
+		JID clientJid = new JIDImpl("test@jabber.org/a");
+		assertNull(storageService.getPlatformForClient(clientJid));
+		
+		storageService.registerClient(clientJid);
 	}
 	
 	@Test
@@ -233,23 +243,23 @@ public abstract class BaseGatewayStorageServiceTest {
 		Application application = buildApplication("voxeo");
 		storageService.registerApplication(application);
 
-		JID clientJid1 = new JIDImpl("test@jabber.org/a");
+		JID clientJid1 = new JIDImpl("client@jabber.org/a");
 		assertEquals(0, storageService.getResourcesForClient(clientJid1.getBareJID().toString()).size());
 		
-		storageService.registerClientResource("voxeo",clientJid1);
+		storageService.registerClient(clientJid1);
 		assertEquals(1, storageService.getResourcesForClient(clientJid1.getBareJID().toString()).size());
 		assertEquals(storageService.getResourcesForClient(clientJid1.getBareJID().toString()).iterator().next(),"a");
 		
-		JID clientJid2 = new JIDImpl("test@jabber.org/b");
-		storageService.registerClientResource("voxeo",clientJid2);
+		JID clientJid2 = new JIDImpl("client@jabber.org/b");
+		storageService.registerClient(clientJid2);
 		assertEquals(2, storageService.getResourcesForClient(clientJid1.getBareJID().toString()).size());
 		assertEquals(storageService.getResourcesForClient(clientJid1.getBareJID().toString()).toString(),"[a, b]");
 		
-		storageService.unregisterClientResource(clientJid2);
+		storageService.unregisterClient(clientJid2);
 		assertEquals(1, storageService.getResourcesForClient(clientJid1.getBareJID().toString()).size());
 		assertEquals(storageService.getResourcesForClient(clientJid1.getBareJID().toString()).iterator().next(),"a");
 		
-		storageService.unregisterClientResource(clientJid1);
+		storageService.unregisterClient(clientJid1);
 		assertEquals(0, storageService.getResourcesForClient(clientJid1.getBareJID().toString()).size());
 	}	
 	
@@ -259,22 +269,25 @@ public abstract class BaseGatewayStorageServiceTest {
 		Application application = buildApplication("voxeo");
 		storageService.registerApplication(application);
 
+		Application application2 = buildApplication("test", "test@jabber.org");
+		storageService.registerApplication(application2);
+
 		assertEquals(storageService.getClients().size(),0);
-		JID clientJid1 = new JIDImpl("test@jabber.org/a");		
-		storageService.registerClientResource("voxeo",clientJid1);
-		JID clientJid2 = new JIDImpl("test@jabber.org/b");
-		storageService.registerClientResource("voxeo",clientJid2);
-		JID clientJid3 = new JIDImpl("test2@jabber.org/a");
-		storageService.registerClientResource("voxeo",clientJid3);
+		JID clientJid1 = new JIDImpl("client@jabber.org/a");		
+		storageService.registerClient(clientJid1);
+		JID clientJid2 = new JIDImpl("client@jabber.org/b");
+		storageService.registerClient(clientJid2);
+		JID clientJid3 = new JIDImpl("test@jabber.org/a");
+		storageService.registerClient(clientJid3);
 
 		List<String> resources = storageService.getClients();
 		assertEquals(2, resources.size());
+		assertTrue(resources.contains("client@jabber.org"));
 		assertTrue(resources.contains("test@jabber.org"));
-		assertTrue(resources.contains("test2@jabber.org"));
 		
-		storageService.unregisterClientResource(clientJid1);
-		storageService.unregisterClientResource(clientJid2);
-		storageService.unregisterClientResource(clientJid3);
+		storageService.unregisterClient(clientJid1);
+		storageService.unregisterClient(clientJid2);
+		storageService.unregisterClient(clientJid3);
 		assertEquals(storageService.getClients().size(),0);
 	}
 	
@@ -311,14 +324,14 @@ public abstract class BaseGatewayStorageServiceTest {
 		Application application = buildApplication("voxeo");
 		storageService.registerApplication(application);
 
-		JID clientJid = new JIDImpl("test@jabber.org/a");
+		JID clientJid = new JIDImpl("client@jabber.org/a");
 		assertNull(loadBalancer.pickClientResource(clientJid.getBareJID().toString()));		
-		storageService.registerClientResource("voxeo",clientJid);
+		storageService.registerClient(clientJid);
 		
-		JID clientJid2 = new JIDImpl("test@jabber.org/b");
-		storageService.registerClientResource("voxeo",clientJid2);
-		JID clientJid3 = new JIDImpl("test@jabber.org/c");
-		storageService.registerClientResource("voxeo",clientJid3);
+		JID clientJid2 = new JIDImpl("client@jabber.org/b");
+		storageService.registerClient(clientJid2);
+		JID clientJid3 = new JIDImpl("client@jabber.org/c");
+		storageService.registerClient(clientJid3);
 
 		assertEquals(loadBalancer.pickClientResource(clientJid.getBareJID().toString()),"a");
 		assertEquals(loadBalancer.pickClientResource(clientJid.getBareJID().toString()),"b");
@@ -327,7 +340,7 @@ public abstract class BaseGatewayStorageServiceTest {
 		assertEquals(loadBalancer.pickClientResource(clientJid.getBareJID().toString()),"b");
 		assertEquals(loadBalancer.pickClientResource(clientJid.getBareJID().toString()),"c");
 		
-		storageService.unregisterClientResource(clientJid2);
+		storageService.unregisterClient(clientJid2);
 		assertEquals(loadBalancer.pickClientResource(clientJid.getBareJID().toString()),"a");
 		assertEquals(loadBalancer.pickClientResource(clientJid.getBareJID().toString()),"c");
 		assertEquals(loadBalancer.pickClientResource(clientJid.getBareJID().toString()),"a");
@@ -351,6 +364,12 @@ public abstract class BaseGatewayStorageServiceTest {
 		// Platforms are not removed once added
 		assertEquals(storageService.getRegisteredPlatforms().size(), 2);
 	}
+	
+	@Test
+	public void testNoPlatformsRegistered() throws Exception {
+		
+		assertEquals(storageService.getRegisteredPlatforms().size(), 0);
+	}
 		
 	private RayoNode buildRayoNode(String hostname,String[] platforms) {
 
@@ -360,11 +379,20 @@ public abstract class BaseGatewayStorageServiceTest {
 	
 	private Application buildApplication(String appId) {
 		
-		Application application = new Application(appId, "client@jabber.org","staging");
+		return buildApplication(appId, "client@jabber.org");
+	}
+	
+	private Application buildApplication(String appId, String jid) {
+		
+		return buildApplication(appId, jid, "staging");
+	}
+
+	private Application buildApplication(String appId, String jid, String platform) {
+		
+		Application application = new Application(appId, jid, platform);
 		application.setName("test");
 		application.setAccountId("zytr");
 		application.setPermissions("read,write");
 		return application;
 	}
-
 }

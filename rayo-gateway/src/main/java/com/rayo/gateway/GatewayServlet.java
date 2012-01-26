@@ -348,14 +348,13 @@ public class GatewayServlet extends AbstractRayoServlet {
 			if (validApplicationJid(message.getFrom())) {
 				switch (message.getShow()) {
 					case CHAT: 
-						//TODO: Valid application method needs to return an application id to use here
-						gatewayStorageService.registerClientResource("voxeo",message.getFrom());
+						gatewayStorageService.registerClient(message.getFrom());
 						gatewayStatistics.clientRegistered(message.getFrom().getBareJID());
 						break;
 					case AWAY:
 					case DND:
 					case XA:
-						gatewayStorageService.unregisterClientResource(message.getFrom());
+						gatewayStorageService.unregisterClient(message.getFrom());
 						break;
 				}
 			} else {
@@ -363,7 +362,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 				sendPresenceError(message.getTo(), message.getFrom(), Condition.RECIPIENT_UNAVAILABLE, Type.CANCEL, "The application does not exist");
 			}
 		} else if (message.getType().equals("unavailable")) {
-			gatewayStorageService.unregisterClientResource(message.getFrom());
+			gatewayStorageService.unregisterClient(message.getFrom());
 			
 			// Note that the following method does include the resource as we only want to 
 			// stop calls for the resource that goes offline
