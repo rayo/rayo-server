@@ -260,7 +260,7 @@ public class CassandraDatastore implements GatewayDatastore {
 	
 	@SuppressWarnings("unchecked")
 	private Collection<String> getCalls(String jid, String type) {
-		
+
 		try {
 			Selector selector = Pelops.createSelector(schemaName);
 			List<Column> columns = selector.getSubColumnsFromRow("jids", type, jid, false, ConsistencyLevel.ONE);
@@ -272,6 +272,28 @@ public class CassandraDatastore implements GatewayDatastore {
 		} catch (PelopsException pe) {
 			log.error(pe.getMessage(),pe);
 			return Collections.EMPTY_LIST;
+		}
+	}
+
+	@Override
+	public Collection<String> getCalls() {
+		
+		log.debug("Getting list with all active calls");
+
+		try {
+			Selector selector = Pelops.createSelector(schemaName);			
+			List<String> calls = new ArrayList<String>();
+			List<SuperColumn> cols = selector.getSuperColumnsFromRow("jids", "nodes", false, ConsistencyLevel.ONE);
+			for(SuperColumn col: cols) {
+				List<Column> columns = col.getColumns();
+				for(Column column: columns) {
+					calls.add(Bytes.toUTF8(column.getValue()));
+				}
+			}
+			return calls;
+		} catch (PelopsException pe) {
+			log.error(pe.getMessage(),pe);
+			return null;
 		}
 	}
 	

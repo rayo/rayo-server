@@ -152,6 +152,16 @@ public interface GatewayDatastore {
 	 * @return Collection<String> Collection of calls linked to the given Client application
 	 */
 	Collection<String> getCallsForClient(String jid);
+	
+	/**
+	 * <p>Returns a collection of all the active calls in a Rayo Cluster. This is equivalent
+	 * to invoke getCallsForNode method for every Rayo node in the cluster.</p> 
+	 * 
+	 * <p>See also {@link GatewayStorageService#getCalls()}
+	 * 
+	 * @return Collection<String> Collection of calls in the whole Rayo Cluster
+	 */
+	Collection<String> getCalls();
 
 	/**
 	 * <p>Returns the Gateway Call object associated with the given call id. The 
@@ -287,9 +297,10 @@ public interface GatewayDatastore {
 	List<String> getClientResources(String clientJid);
 
 	/**
-	 * <p>Returns a list with all the registered client applictions on this DHT. 
-	 * This method will return a list with all the <strong>Bare JIDs</strong> for 
-	 * all the clients connected to the Rayo Gateway.</p>
+	 * <p>Returns a collection with all the registered client applications. Note that 
+	 * this method will return a list of all the clients. In this case a client is 
+	 * represented by its bare JID. Therefore this method will not return any of the multiple 
+	 * resources that a client may have.</p>
 	 * 
 	 * @return {@link List} Collection of registered client applications
 	 */

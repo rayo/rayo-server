@@ -277,6 +277,31 @@ public abstract class BaseDatastoreTest {
 	}
 
 	@Test
+	public void testGetCalls() throws Exception {
+
+		RayoNode node1 = buildRayoNode("localhost","127.0.0.1", new String[] { "staging" });
+		store.storeNode(node1);
+		RayoNode node2 = buildRayoNode("localhost1","127.0.0.11", new String[] { "staging" });
+		store.storeNode(node2);
+
+		GatewayCall call1 = store.storeCall(new GatewayCall("1234", node1
+				.getHostname(), "clienta@jabber.org"));
+		GatewayCall call2 = store.storeCall(new GatewayCall("abcd", node1
+				.getHostname(), "clienta@jabber.org"));
+		GatewayCall call3 = store.storeCall(new GatewayCall("zzzz", node2
+				.getHostname(), "clienta@jabber.org"));
+
+		assertEquals(2, store.getCallsForNode(node1.getHostname()).size());
+		assertEquals(1, store.getCallsForNode(node2.getHostname()).size());
+		assertEquals(3, store.getCalls().size());
+
+		store.removeCall(call1.getCallId());
+		assertEquals(1, store.getCallsForNode(node1.getHostname()).size());
+		assertEquals(1, store.getCallsForNode(node2.getHostname()).size());
+		assertEquals(2, store.getCalls().size());
+	}
+	
+	@Test
 	public void testStoreApplication() throws Exception {
 
 		Application application = buildApplication();

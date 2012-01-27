@@ -26,11 +26,7 @@ public class GatewayStatistics implements GatewayStatisticsMXBean {
 	@ManagedAttribute(description="Active Calls")	
 	public long getActiveCallsCount() {
 
-		long total = 0;
-		for (String client : gatewayStorageService.getClients()) {
-			total+= gatewayStorageService.getCallsForClient(client).size();
-		}
-		return total;
+		return gatewayStorageService.getCalls().size();
 	}
 
 	@Override

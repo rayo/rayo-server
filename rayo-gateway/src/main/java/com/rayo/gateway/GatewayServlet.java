@@ -369,14 +369,13 @@ public class GatewayServlet extends AbstractRayoServlet {
 			Collection<String> callIds = gatewayStorageService.getCallsForClient(fromJid.toString()); 
 			for (String callId: callIds) {
 				try {
+                	//Clean call in data store 
+					gatewayStorageService.unregistercall(callId);
+					
 					String nodeIp = ParticipantIDParser.getIpAddress(callId);
 					JID toJidInternal = getXmppFactory().createJID(callId + "@" + nodeIp);
-					JID fromJidInternal = getXmppFactory().createJID(getInternalDomain());								
+					JID fromJidInternal = getXmppFactory().createJID(getInternalDomain());
                 	sendPresenceError(fromJidInternal, toJidInternal);
-                	//TODO: Remove or flag the call from the data store. The problem is that the call may not 
-                	// exist in the rayo node any more, so we may not get the EndEvent ever. That is why we 
-                	// should clean up the call here. Probably the Rayo Server should not send an end event
-                	// as a response to the presence error
 				} catch (Exception e) {
 					log.error("Could not hang up call with id [%s]", callId);
 					log.error(e.getMessage(),e);

@@ -218,6 +218,16 @@ public interface GatewayStorageService {
 	Collection<String> getCallsForNode(String rayoNode);
 	
 	/**
+	 * <p>Returns a collection of all the active calls in a Rayo Cluster. This is equivalent
+	 * to invoke getCallsForNode method for every Rayo node in the cluster.</p> 
+	 * 
+	 * <p>See also {@link GatewayStorageService#getCalls()}
+	 * 
+	 * @return Collection<String> Collection of calls in the whole Rayo Cluster
+	 */
+	Collection<String> getCalls();
+	
+	/**
 	 * <p>Returns the domain of the Rayo Node that is currently handling a given call or 
 	 * <code>null</code> if no Rayo Node can be found for the specified call id.</p>
 	 *  
@@ -257,7 +267,8 @@ public interface GatewayStorageService {
 	
 	/**
 	 * <p>Returns a collection with all the registered client applications. Note that 
-	 * this method will return a list of all the clients. This does not include the multiple 
+	 * this method will return a list of all the clients. In this case a client is 
+	 * represented by its bare JID. Therefore this method will not return any of the multiple 
 	 * resources that a client may have.</p>
 	 * 
 	 * @return {@link Collection} Collection of registered client applications

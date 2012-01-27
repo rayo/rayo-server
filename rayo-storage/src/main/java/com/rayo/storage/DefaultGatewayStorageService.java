@@ -195,6 +195,17 @@ public class DefaultGatewayStorageService implements GatewayStorageService {
 		}
 		return calls;
 	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public Collection<String> getCalls() {
+
+		Collection<String> calls = store.getCalls();
+		if (calls == null) {
+			calls = Collections.EMPTY_SET;
+		}
+		return calls;
+	}
 
 	@Override
 	public void registerCall(String callId, String clientJid) throws GatewayException {
