@@ -29,6 +29,7 @@ import com.rayo.core.verb.MuteCommand;
 import com.rayo.core.verb.Ssml;
 import com.rayo.core.verb.UnholdCommand;
 import com.rayo.core.verb.UnmuteCommand;
+import com.rayo.server.exception.RayoProtocolException;
 import com.voxeo.exceptions.NotFoundException;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.Call;
@@ -48,6 +49,8 @@ import com.voxeo.moho.media.output.AudibleResource;
 import com.voxeo.moho.media.output.OutputCommand;
 import com.voxeo.moho.remotejoin.RemoteParticipant;
 import com.voxeo.moho.util.ParticipantIDParser;
+import com.voxeo.servlet.xmpp.StanzaError.Condition;
+import com.voxeo.servlet.xmpp.StanzaError.Type;
 
 public class CallActor <T extends Call> extends AbstractActor<T> {
 
@@ -92,17 +95,9 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 	            JoinDestinationType type = (JoinDestinationType)participant.getAttribute(JoinCommand.TYPE);
 	            javax.media.mscontrol.join.Joinable.Direction direction = participant.getAttribute(JoinCommand.DIRECTION);
 	            JoinType mediaType = participant.getAttribute(JoinCommand.MEDIA_TYPE);                        
-	            Participant destination = getDestinationParticipant(dest, type);
+	            Participant destination = getDestinationParticipant(participant, dest, type);
 	            Boolean force = participant.getAttribute(JoinCommand.FORCE);
-	        	
-	            if (destination == null) {
-	            	if (log.isDebugEnabled()) {
-	            		log.debug("Detected Remote Join. Call [%s] will be joined to [%s].", participant.getId(), dest);
-	            	}
-	        		// Remote join
-	        		destination = participant.getApplicationContext().getParticipant(dest);
-	        	}
-	        	
+	        		        	
 	            joinees.add(destination);
 
             	if (log.isDebugEnabled()) {
@@ -196,18 +191,15 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     
     @Message
     public void join(JoinCommand message) throws Exception {
-    	
-    	Participant destination = getDestinationParticipant(message.getTo(), message.getType());
-    	if (destination == null) {
-    		// Remote join
-    		try {
-    			destination = participant.getApplicationContext().getParticipant(message.getTo());
-    		} catch (Exception e) {
-        		if (message.getType() == JoinDestinationType.MIXER) {
-        			log.warn("Trying to join a mixer by raw name [%s] : %s",message.getTo(),e.getMessage());
-        		}    			
-    		}
-    	}
+
+    	Participant destination = null;
+		try {
+			destination = getDestinationParticipant(participant, message.getTo(), message.getType());
+		} catch (Exception e) {
+    		if (message.getType() == JoinDestinationType.MIXER) {
+    			log.warn("Trying to join a mixer by raw name [%s] : %s",message.getTo(),e.getMessage());
+    		}    			
+		}
     	if (destination == null) {
     		if (message.getType() == JoinDestinationType.MIXER) {
     			// mixer creation
@@ -242,15 +234,20 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 
 	@Message
     public void unjoin(UnjoinCommand message) throws Exception {
-    	Participant destination = getDestinationParticipant(message.getFrom(), message.getType());
+    	
+		Participant destination = getDestinationParticipant(participant, message.getFrom(), message.getType());
     	try {
+    		if (destination == null) {
+    			throw new NotFoundException("Participant " + message.getFrom() + " not found");
+    		}
             participant.unjoin(destination).get(JOIN_TIMEOUT, TimeUnit.MILLISECONDS);
         } catch (TimeoutException e) {
             throw new TimeoutException("Timed out while trying to unjoin.");
         }
     }
     
-    private Participant getDestinationParticipant(String destination, JoinDestinationType type) {
+    private Participant getDestinationParticipant(
+    		Participant source, String destination, JoinDestinationType type) throws RayoProtocolException {
 
     	Participant participant = null;
     	if (type == JoinDestinationType.CALL) {
@@ -265,6 +262,13 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 				ConferenceManager conferenceManager = this.participant.getApplicationContext().getConferenceManager();
 	    		participant = conferenceManager.getConference(destination);
     		}
+    	} else {
+    		throw new RayoProtocolException(Condition.BAD_REQUEST, Type.CANCEL, "Unknown destination type");
+    	}
+    	if (participant == null) {
+    		// Remote join
+        	log.debug("Detected Remote Destination. Local Source: [%s]. Remote destination: [%s].", source.getId(), destination);
+    		participant = source.getApplicationContext().getParticipant(destination);
     	}
     	return participant;
 	}
