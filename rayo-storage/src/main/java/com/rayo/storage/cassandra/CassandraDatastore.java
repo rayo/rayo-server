@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -477,6 +478,32 @@ public class CassandraDatastore implements GatewayDatastore {
 	}
 	
 	@Override
+	public List<Application> getApplications() {
+
+		try {
+			log.debug("Finding all applications");
+			
+			List<Application> applications = new ArrayList<Application>();
+			Selector selector = Pelops.createSelector(schemaName);
+			LinkedHashMap<Bytes, List<Column>> rows = selector.getColumnsFromRows(
+					"applications", 
+					Selector.newKeyRange("", "", 10000), // 10000 applications limite, 
+					false, ConsistencyLevel.ONE);
+					
+			for(Map.Entry<Bytes, List<Column>> row: rows.entrySet()) {
+				Application application = new Application(row.getKey().toUTF8());
+				populateApplicationData(application, row.getValue());
+				applications.add(application);
+			}
+
+			return applications;
+		} catch (PelopsException pe) {
+			log.error(pe.getMessage(),pe);
+			return Collections.EMPTY_LIST;
+		}
+	}
+	
+	@Override
 	public Application removeApplication(String id) throws DatastoreException {
 		
 		log.debug("Removing application with id: [%s]", id);
@@ -496,10 +523,10 @@ public class CassandraDatastore implements GatewayDatastore {
 	}
 	
 	@Override
-	public List<String> getAddressesForApplication(String appId) {
+	public List<String> getAddressesForApplication(String jid) {
 				
-		log.debug("Finding addresses for application id: [%s]", appId);
-		return getAllRowNames("addresses", 1, true, appId);
+		log.debug("Finding addresses for application jid: [%s]", jid);
+		return getAllRowNames("addresses", 1, true, jid);
 	}
 
 	@Override
@@ -525,25 +552,25 @@ public class CassandraDatastore implements GatewayDatastore {
 	}
 	
 	@Override
-	public void storeAddresses(Collection<String> addresses, String appId) throws DatastoreException {
+	public void storeAddresses(Collection<String> addresses, String jid) throws DatastoreException {
 		
-		log.debug("Storing addresses [%s] on application [%s]", addresses, appId);
-		if (getApplication(appId) == null) {
+		log.debug("Storing addresses [%s] on application [%s]", addresses, jid);
+		if (getApplication(jid) == null) {
 			throw new ApplicationNotFoundException();
 		}
 		
 		Mutator mutator = Pelops.createMutator(schemaName);
 		for (String address: addresses) {
 			mutator.writeColumn("addresses", Bytes.fromUTF8(address), 
-					mutator.newColumn(appId, appId));
+					mutator.newColumn(jid, jid));
 		}
 		
 		try {
 			mutator.execute(ConsistencyLevel.ONE);
-			log.debug("Addresses [%s] stored successfully on application [%s]", addresses, appId);
+			log.debug("Addresses [%s] stored successfully on application [%s]", addresses, jid);
 		} catch (Exception e) {
 			log.error(e.getMessage(),e);
-			throw new DatastoreException(String.format("Could not add addresses [%s] to application [%s]", addresses, appId));
+			throw new DatastoreException(String.format("Could not add addresses [%s] to application [%s]", addresses, jid));
 		}
 	}
 	

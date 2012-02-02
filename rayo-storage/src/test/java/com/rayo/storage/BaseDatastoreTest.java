@@ -321,6 +321,23 @@ public abstract class BaseDatastoreTest {
 		assertEquals(stored, application);
 	}
 	
+
+	@Test
+	public void testFindAllApplications() throws Exception {
+
+		Application application1 = buildApplication("1234", "app@tropo.com");
+		store.storeApplication(application1);
+		Application application2 = buildApplication("abcd", "app@voxeolabs.net");
+		store.storeApplication(application2);
+		
+		List<Application> stored = store.getApplications();
+
+		assertNotNull(stored);
+		assertEquals(stored.size(), 2);
+		assertTrue(stored.contains(application1));
+		assertTrue(stored.contains(application2));
+	}
+	
 	@Test
 	public void testContentInFindApplication() throws Exception {
 
@@ -370,6 +387,9 @@ public abstract class BaseDatastoreTest {
 		Application application = buildApplication();
 		store.storeApplication(application);
 		store.storeAddress("+348005551212", application.getBareJid());
+		
+		application = store.getApplication(application.getBareJid());
+		assertEquals(application.getAddresses(), "+348005551212");
 	}
 
 	@Test
@@ -395,6 +415,7 @@ public abstract class BaseDatastoreTest {
 		store.storeAddresses(addresses, application.getBareJid());
 		
 		Application stored = store.getApplicationForAddress("+348005551212");
+		assertEquals(stored.getAddresses(),"+348005551212,+348005551213");
 		assertNotNull(stored);
 		assertEquals(stored, application);
 		stored = store.getApplicationForAddress("+348005551213");

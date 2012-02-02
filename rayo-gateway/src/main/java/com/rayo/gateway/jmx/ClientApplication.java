@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.springframework.jmx.export.annotation.ManagedResource;
 
+import com.rayo.storage.model.Application;
+
 /**
  * <p>This MBean represents a client application connected to the gateway.</p>
  * 
@@ -15,23 +17,30 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 @ManagedResource(objectName="com.rayo.gateway:Type=ClientApplication", description="Client Applications")
 public class ClientApplication implements ClientApplicationMXBean {
 
-	private String jid;
 	private List<String> resources = new ArrayList<String>();
+	
+	private String appId;
+	private String jid;
+	private String platform;
+	private String name;
+	private String accountId;
+	private String permissions;
+	private String addresses;
 
-	public ClientApplication(String jid) {
+	public ClientApplication(Application application) {
 
-		this.jid = jid;
+		this.appId = application.getAppId();
+		this.jid = application.getJid();
+		this.platform = application.getPlatform();
+		this.name = application.getName();
+		this.accountId = application.getAccountId();
+		this.permissions = application.getPermissions();
 	}
 
 	@Override
 	public List<String> getResources() {
 
 		return resources;
-	}
-	
-	public String getJID() {
-		
-		return jid.toString();
 	}
 	
 	@Override
@@ -50,5 +59,73 @@ public class ClientApplication implements ClientApplicationMXBean {
 	public void addResources(Collection<String> resourcesForClient) {
 
 		resources.addAll(resourcesForClient);
+	}
+	
+	
+	/**
+	 * Gets the JID of this application
+	 * 
+	 * @return JID Application's JID
+	 */
+	public String getJID() {
+		
+		return jid;
+	}	
+	
+	public String getPlatform() {
+		return platform;
+	}
+
+	public void setPlatform(String platform) {
+		this.platform = platform;
+	}
+
+	public void setJid(String jid) {
+		this.jid = jid;
+	}
+	
+	public String getResource() {
+		
+		return jid.substring(jid.indexOf("/") + 1, jid.length());
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getAccountId() {
+		return accountId;
+	}
+
+	public void setAccountId(String accountId) {
+		this.accountId = accountId;
+	}
+
+	public String getPermissions() {
+		return permissions;
+	}
+
+	public void setPermissions(String permissions) {
+		this.permissions = permissions;
+	}
+
+	public String getAppId() {
+		return appId;
+	}
+
+	public void setAppId(String appId) {
+		this.appId = appId;
+	}
+
+	public String getAddresses() {
+		return addresses;
+	}
+
+	public void setAddresses(String addresses) {
+		this.addresses = addresses;
 	}
 }

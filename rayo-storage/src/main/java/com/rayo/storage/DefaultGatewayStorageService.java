@@ -287,9 +287,39 @@ public class DefaultGatewayStorageService implements GatewayStorageService {
 	}
 	
 	@Override
+	public List<Application> getApplications() {
+
+		return store.getApplications();
+	}
+	
+	@Override
 	public Application getApplicationForAddress(String address) {
 
 		return store.getApplicationForAddress(address);
+	}
+	
+	@Override
+	public List<String> getAddressesForApplication(String jid) {
+		
+		return store.getAddressesForApplication(jid);
+	}
+	
+	@Override
+	public void removeAddress(String address) throws DatastoreException {
+
+		store.removeAddress(address);
+	}
+	
+	@Override
+	public void storeAddress(String address, String jid) throws DatastoreException {
+
+		store.storeAddress(address, jid);
+	}
+	
+	@Override
+	public void storeAddresses(Collection<String> addresses, String jid) throws DatastoreException {
+		
+		store.storeAddresses(addresses, jid);
 	}
 
 	public void setStore(GatewayDatastore store) {

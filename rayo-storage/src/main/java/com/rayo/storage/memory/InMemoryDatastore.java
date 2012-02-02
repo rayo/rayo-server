@@ -422,6 +422,19 @@ public class InMemoryDatastore implements GatewayDatastore {
 		}
 	}
 	
+
+	@Override
+	public List<Application> getApplications() {
+
+		Lock applicationLock = applicationsLock.readLock();
+		applicationLock.lock();
+		try {
+			return new ArrayList<Application>(applicationsMap.values());
+		} finally {
+			applicationLock.unlock();
+		}
+	}
+	
 	@Override
 	public Application removeApplication(String jid) throws DatastoreException {
 

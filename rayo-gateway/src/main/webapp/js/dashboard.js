@@ -1,31 +1,125 @@
-$(document).ready(function() {
-	var factory = new JmxChartsFactory();
-	factory.create([
-		{
-			name: 'java.lang:type=Memory',
-			attribute: 'HeapMemoryUsage',
-			path: 'committed'
-		},
-		{
-			name: 'java.lang:type=Memory',
-			attribute: 'HeapMemoryUsage',
-			path: 'used'
-		}
-	]);	
-	factory.create([
-		{
-			name: 'com.rayo.gateway:Type=GatewayStatistics',
-			attribute: 'ActiveCallsCount'
-		}
-	]);
-	factory.create({
-		name:     'com.rayo.gateway:Type=GatewayStatistics',
-		attribute: 'ActiveClientsCount'
-	});	
-});
+function JmxTable() {
 
-function JmxChartsFactory(keepHistorySec, pollInterval, columnsCount) {
-	var jolokia = new Jolokia("jmx");
+    this.showFromBean = function (jmx, path, name, attributes, names, element) {
+
+        var jolokia = new Jolokia(jmx);
+        var response = jolokia.request(path);
+        var html = "<h2>" + name + "</h2> \
+                    <table> \
+                    <tbody>";
+
+        $.each(names, function(index, n) {
+            html+="<tr><td>" + n + "</td>";
+            html+="<td>" + response.value[attributes[index]] + "</td></tr>";
+        });
+
+        html+="      </tbody> \
+                   </table>";
+        $(element).html($(html));
+    }
+    
+    this.showList = function (jmx, path, name, element) {
+
+        var jolokia = new Jolokia(jmx);
+        var response = jolokia.request(path);
+        var html = "<h2>" + name + "</h2> \
+                    <table> \
+                    <tbody>";
+
+        $.each(response.value, function(index, n) {
+            html+="<tr><td>" + n + "</td></tr>";
+        });
+
+        html+="      </tbody> \
+                   </table>";
+        $(element).html($(html));
+    }
+    
+    function showFromJmxList(jmx, path, key, name, attributes, names, element) {
+
+        var jolokia = new Jolokia(jmx);
+        var response = jolokia.request(path);
+        var html = "<h2>" + name + "</h2> \
+                    <table> \
+                    <tbody>";
+
+        $.each(response.value, function(index, item) {
+            var elementName = item[key];
+            if (elementName == name) {
+                $.each(names, function(index, n) {
+                    html+="<tr><td>" + n + "</td>";
+                    html+="<td>" + item[attributes[index]] + "</td></tr>";
+                });
+            }
+        });
+
+        html+="      </tbody> \
+                   </table>";
+        $(element).html($(html));
+    }
+
+    this.showFromList = function(jmx, path, key, name, attributes, names, element) {
+
+        showFromJmxList(jmx, path, key, name, attributes, names, element);
+    };
+
+
+	function invokeJmx(jmx, header,paths, names, element) {
+
+		var jolokia = new Jolokia(jmx);
+		var responses = jolokia.request(paths);
+		  var html = "<h2>" + header + "</h2> \
+					 <table> \
+					   <tbody>";
+
+		  $.each(responses, function(index, response) { 
+			html+="<tr><td>" + names[index] + "</td>";
+			html+="<td>" + response.value + "</td></tr>";
+		  });
+
+
+		  html+="      </tbody> \
+					 </table>";	
+		  $(element).html($(html));
+    }
+
+	function linkJmxList(jmx, header, path, name, link, element) {
+
+		var jolokia = new Jolokia(jmx);
+		var response = jolokia.request(path);
+		console.log(response.value);
+		var html = "<h2>" + header + "</h2> \
+					<table> \
+					  <tbody>";
+
+		  $.each(response.value, function(index, element) {
+			var elementName = element[name];
+			var target = link + "/" + elementName; 
+			html+="<tr><td><a href='"+ target+"'>"+elementName + "</a></td></tr>";
+		  });
+
+		  html+="      </tbody> \
+					 </table>";	
+		  $(element).html($(html));
+    }
+    
+	this.create = function(jmx, header, paths, names, element) {
+	  
+	  invokeJmx(jmx, header, paths, names, element);
+	  $.periodic({period: 1000}, function() {
+		invokeJmx(jmx, header, paths, names, element);
+	  });
+	};
+
+
+	this.createFromList = function(jmx, header, path, name, link, element) {
+	  
+	  linkJmxList(jmx, header, path, name, link, element);
+	};
+}
+
+function JmxChartsFactory(jmx, keepHistorySec, pollInterval, columnsCount) {
+	var jolokia = new Jolokia(jmx);
 	var series = [];
 	var monitoredMbeans = [];
 	var chartsCount = 0;

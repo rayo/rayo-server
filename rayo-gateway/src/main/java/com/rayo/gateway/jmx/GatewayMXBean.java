@@ -8,7 +8,13 @@ public interface GatewayMXBean {
 	
 	List<Node> getRayoNodes();
 	
+	List<Node> getRayoNodes(String platformId);
+
 	List<ClientApplication> getClientApplications();
+	
+	ClientApplication getClientApplication(String appId);
+	
+	List<String> getResourcesForAppId(String applicationJid);
 	
 	Call callInfo(String callId);
 }

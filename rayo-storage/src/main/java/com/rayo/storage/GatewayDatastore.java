@@ -209,6 +209,13 @@ public interface GatewayDatastore {
 	Application getApplication(String jid);
 	
 	/**
+	 * Returns a list with every application registered in this gateway
+	 * 
+	 * @return {@link List} List with all the applications registered in this gateway
+	 */
+	List<Application> getApplications();
+	
+	/**
 	 * <p>Removes a Rayo application from the DHT.</p>
 	 * 
 	 * @param jid Jid of the Rayo application that has to be removed
@@ -221,7 +228,7 @@ public interface GatewayDatastore {
 	 * Stores an address (e.g. phone number) for a given application. 
 	 * 
 	 * @param address Address that we want to store
-	 * @param appId Application's jid
+	 * @param jid Application's jid
 	 * 
 	 * @throws DataStoreException If the address cannot be stored.
 	 */
@@ -231,11 +238,11 @@ public interface GatewayDatastore {
 	 * Stores a collection of addresses (e.g. phone numbers) for a given application. 
 	 * 
 	 * @param addresses Addresses that we want to store
-	 * @param appId Application id
+	 * @param jid Application's jid
 	 * 
 	 * @throws DataStoreException If the addresses cannot be stored.
 	 */
-	void storeAddresses(Collection<String> addresses, String appId) throws DatastoreException;
+	void storeAddresses(Collection<String> addresses, String jid) throws DatastoreException;
 	
 	/**
 	 * Returns the {@link Application} that has associated the given address 
@@ -251,10 +258,10 @@ public interface GatewayDatastore {
 	 * Returns the list of addresses associated with a given application id or an 
 	 * empty list if no applications can be found.
 	 * 
-	 * @param appId Application id
+	 * @param jid Application's jid
 	 * @return List<String> List of addresses
 	 */
-	List<String> getAddressesForApplication(String appId);
+	List<String> getAddressesForApplication(String jid);
 	
 	/**
 	 * Removes an address

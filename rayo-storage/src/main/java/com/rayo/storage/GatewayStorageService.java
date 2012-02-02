@@ -313,4 +313,50 @@ public interface GatewayStorageService {
 	 * @return {@link Application} associated with the address or <code>null</code>
 	 */
 	public Application getApplicationForAddress(String address);
+	
+	
+	/**
+	 * Returns a list with every application registered in this gateway
+	 * 
+	 * @return {@link List} List with all the applications registered in this gateway
+	 */
+	public List<Application> getApplications();
+	
+	
+	/**
+	 * Stores an address (e.g. phone number) for a given application. 
+	 * 
+	 * @param address Address that we want to store
+	 * @param jid Application's jid
+	 * 
+	 * @throws DataStoreException If the address cannot be stored.
+	 */
+	void storeAddress(String address, String jid) throws DatastoreException;
+	
+	/**
+	 * Stores a collection of addresses (e.g. phone numbers) for a given application. 
+	 * 
+	 * @param addresses Addresses that we want to store
+	 * @param jid Application's jid
+	 * 
+	 * @throws DataStoreException If the addresses cannot be stored.
+	 */
+	void storeAddresses(Collection<String> addresses, String jid) throws DatastoreException;
+	
+	/**
+	 * Returns the list of addresses associated with a given application id or an 
+	 * empty list if no applications can be found.
+	 * 
+	 * @param jid Application's jid
+	 * @return List<String> List of addresses
+	 */
+	List<String> getAddressesForApplication(String jid);
+	
+	/**
+	 * Removes an address
+	 * 
+	 * @param address Address that we want to remove
+	 * @throws DatastoreException If the address cannot be removed
+	 */
+	void removeAddress(String address) throws DatastoreException;
 }
