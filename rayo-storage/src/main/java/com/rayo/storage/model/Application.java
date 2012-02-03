@@ -21,7 +21,6 @@ public class Application implements Serializable {
 	private String name;
 	private String accountId;
 	private String permissions;
-	private String addresses;
 	
 	/**
 	 * Application registered in the gateway
@@ -140,13 +139,5 @@ public class Application implements Serializable {
 
 	public void setAppId(String appId) {
 		this.appId = appId;
-	}
-
-	public String getAddresses() {
-		return addresses;
-	}
-
-	public void setAddresses(String addresses) {
-		this.addresses = addresses;
 	}
 }

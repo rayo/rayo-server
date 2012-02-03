@@ -387,9 +387,6 @@ public abstract class BaseDatastoreTest {
 		Application application = buildApplication();
 		store.storeApplication(application);
 		store.storeAddress("+348005551212", application.getBareJid());
-		
-		application = store.getApplication(application.getBareJid());
-		assertEquals(application.getAddresses(), "+348005551212");
 	}
 
 	@Test
@@ -415,7 +412,6 @@ public abstract class BaseDatastoreTest {
 		store.storeAddresses(addresses, application.getBareJid());
 		
 		Application stored = store.getApplicationForAddress("+348005551212");
-		assertEquals(stored.getAddresses(),"+348005551212,+348005551213");
 		assertNotNull(stored);
 		assertEquals(stored, application);
 		stored = store.getApplicationForAddress("+348005551213");
