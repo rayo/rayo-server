@@ -14,9 +14,13 @@ public interface GatewayMXBean {
 	
 	ClientApplication getClientApplication(String appId);
 	
-	List<String> getResourcesForAppId(String applicationJid);
+	List<String> getResourcesForAppId(String appId);
 	
 	List<String> getResourcesForJid(String jid);
+
+	List<String> getAddressesForAppId(String appId);
 	
+	List<String> getAddressesForJid(String jid);
+
 	Call callInfo(String callId);
 }

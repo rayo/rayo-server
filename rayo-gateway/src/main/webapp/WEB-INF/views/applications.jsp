@@ -58,6 +58,9 @@
 			<div class="information"></div>
 		  </div>
 		  <div class="span6">
+            <div class="addresses"></div>
+          </div>		  
+		  <div class="span6">
             <div class="resources"></div>
           </div>
 		</div>
@@ -84,10 +87,16 @@
         		'../../jmx',
           		{ type: "exec", mbean: "com.rayo.gateway:Type=Gateway", operation: "getClientApplication", arguments:["${application}"]},
           		"${application}",
-          		['appId', 'name', 'JID', 'platform', 'accountId', 'permissions', 'addresses'],
-          		['appId', 'Name', 'JID', 'Platform', 'Account Id', 'Permissions', 'Addresses'],
+          		['appId', 'name', 'JID', 'platform', 'accountId', 'permissions'],
+          		['appId', 'Name', 'JID', 'Platform', 'Account Id', 'Permissions'],
           		'.information');
-          		
+          	
+          	table.showList(
+        		'../../jmx',
+          		{ type: "exec", mbean: "com.rayo.gateway:Type=Gateway", operation: "getAddressesForAppId", arguments:["${application}"]},
+          		'Addresses',
+          		'.addresses');
+          		          		
           	table.showList(
         		'../../jmx',
           		{ type: "exec", mbean: "com.rayo.gateway:Type=Gateway", operation: "getResourcesForAppId", arguments:["${application}"]},

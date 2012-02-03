@@ -25,7 +25,6 @@ public class ClientApplication implements ClientApplicationMXBean {
 	private String name;
 	private String accountId;
 	private String permissions;
-	private String addresses;
 
 	public ClientApplication(Application application) {
 
@@ -119,13 +118,5 @@ public class ClientApplication implements ClientApplicationMXBean {
 
 	public void setAppId(String appId) {
 		this.appId = appId;
-	}
-
-	public String getAddresses() {
-		return addresses;
-	}
-
-	public void setAddresses(String addresses) {
-		this.addresses = addresses;
 	}
 }

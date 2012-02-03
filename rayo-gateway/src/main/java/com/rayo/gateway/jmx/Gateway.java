@@ -92,6 +92,22 @@ public class Gateway implements GatewayMXBean {
 		return gatewayStorageService.getResourcesForClient(jid);
 	}
 	
+	@Override
+	public List<String> getAddressesForAppId(String appId) {
+
+		ClientApplication application = getClientApplication(appId);
+		if (application != null) {		
+			return gatewayStorageService.getAddressesForApplication(application.getJID());
+		}
+		return null;
+	}
+	
+	
+	@Override
+	public List<String> getAddressesForJid(String jid) {
+
+		return gatewayStorageService.getAddressesForApplication(jid);
+	}	
 
 	@Override
 	@ManagedOperation(description = "Returns Rayo Nodes for a given platform")
