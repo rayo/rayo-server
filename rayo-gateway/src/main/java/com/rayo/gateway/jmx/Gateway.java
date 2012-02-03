@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.commons.lang.StringUtils;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
@@ -13,7 +12,6 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 import com.rayo.storage.GatewayStorageService;
 import com.rayo.storage.model.Application;
 import com.rayo.storage.model.RayoNode;
-import com.rayo.storage.util.JIDUtils;
 
 /**
  * <p>This Mbean exposes relevant information on the Distributed hash table. It 
@@ -58,16 +56,8 @@ public class Gateway implements GatewayMXBean {
 		List<ClientApplication> applications = new ArrayList<ClientApplication>();
 
 		for(Application application: gatewayStorageService.getApplications()) {
-			String bareJid = JIDUtils.getBareJid(application.getJid());			
 			ClientApplication app = new ClientApplication(application);
-			if (!applications.contains(app)) {
-				app.addResources(gatewayStorageService.getResourcesForClient(bareJid));
-				List<String> addresses = gatewayStorageService.getAddressesForApplication(application.getBareJid());
-				if (addresses !=  null) {
-					app.setAddresses(StringUtils.join(addresses,','));
-				}
-				applications.add(app);
-			}
+			applications.add(app);
 		}
 
 		return applications;
@@ -93,6 +83,13 @@ public class Gateway implements GatewayMXBean {
 			return gatewayStorageService.getResourcesForClient(application.getJID());
 		}
 		return null;
+	}
+	
+	
+	@Override
+	public List<String> getResourcesForJid(String jid) {
+
+		return gatewayStorageService.getResourcesForClient(jid);
 	}
 	
 

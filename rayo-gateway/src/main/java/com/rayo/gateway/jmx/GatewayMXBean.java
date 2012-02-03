@@ -16,5 +16,7 @@ public interface GatewayMXBean {
 	
 	List<String> getResourcesForAppId(String applicationJid);
 	
+	List<String> getResourcesForJid(String jid);
+	
 	Call callInfo(String callId);
 }
