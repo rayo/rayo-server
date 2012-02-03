@@ -109,6 +109,14 @@
             <div class="clients"></div>
           </div>
         </div>
+        
+        <hr>
+        
+        <div class="row">
+          <div class="span6">
+			<div class="applications"></div>
+          </div>
+        </div>
         <footer>
           <p>&copy; VoxeoLabs 2012</p>
         </footer>
@@ -135,33 +143,43 @@
 					 { type: "read", mbean: "com.rayo.gateway:Type=GatewayStatistics", attribute: "MessagesCount"},
 					 { type: "read", mbean: "com.rayo.gateway:Type=GatewayStatistics", attribute: "ErrorsCount"}], 
 					['Rayo Nodes', 'Total Calls', 'Active Calls', 'Total Clients', 'Active Clients', 'Total Messages', 'Total Errors'], 
-					'.information');
+					'.information',
+					5000);
 					
-		table.create('../jmx', 'Server',
+		table.create('../jmx', 'Rayo Server',
 					[{ type: "read", mbean: "com.rayo:Type=Info", attribute: "Uptime"},
 					 { type: "read", mbean: "com.rayo:Type=Info", attribute: "BuildNumber"},
+					 { type: "read", mbean: "com.rayo:Type=Info", attribute: "BuildId"},
 					 { type: "read", mbean: "com.rayo.gateway:Type=Admin,name=Admin", attribute: "QuiesceMode"},
 					 { type: "read", mbean: "java.lang:type=OperatingSystem", attribute: "SystemLoadAverage"},
 					 { type: "read", mbean: "java.lang:type=OperatingSystem", attribute: "FreePhysicalMemorySize"},
 					 { type: "read", mbean: "java.lang:type=Threading", attribute: "ThreadCount"}],
-					['Uptime', 'Build Number', 'Quiesced', 'System Load Average', 'Free Memory', 'Thread Count'], 
-					'.server');					
+					['Uptime', 'Build Number', 'Build Id', 'Quiesced', 'System Load Average', 'Free Memory', 'Thread Count'], 
+					'.server',
+					5000);					
 
 		table.createFromList('../jmx', 'Platforms',
 					{ type: "read", mbean: "com.rayo.gateway:Type=Gateway", attribute: "Platforms"}, 
 					"name",
 					"./platforms",
 					'.platforms');
+					
              table.createFromList('../jmx', 'Nodes',
                                         { type: "read", mbean: "com.rayo.gateway:Type=Gateway", attribute: "RayoNodes"},
 					"hostname",
                                         "./nodes",
                                         '.nodes');
-             table.createFromList('../jmx', 'Clients',
+
+             table.showList('../jmx', 
+             				'Active Clients',
+                            { type: "read", mbean: "com.rayo.gateway:Type=Gateway", attribute: "ActiveClients"},
+                            '.clients');
+                                                                                
+             table.createFromList('../jmx', 'Applications',
                                         { type: "read", mbean: "com.rayo.gateway:Type=Gateway", attribute: "ClientApplications"},
                                         "appId",
                                         "./applications",
-                                        '.clients');
+                                        '.applications');
                                         
 			var factory = new JmxChartsFactory('../jmx');
 			factory.create([

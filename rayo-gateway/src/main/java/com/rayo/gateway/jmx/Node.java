@@ -15,7 +15,7 @@ import com.rayo.storage.model.RayoNode;
  *
  */
 @ManagedResource(objectName="com.rayo.gateway:Type=Platform", description="Platform")
-public class Node implements RayoNodeMXBean {
+public class Node implements RayoNodeMXBean, Comparable<Node> {
 
 	private String hostname;
 	private List<String> platforms = new ArrayList<String>();
@@ -129,5 +129,11 @@ public class Node implements RayoNodeMXBean {
 	public void setGatewayStorageService(GatewayStorageService gatewayStorageService) {
 
 		this.gatewayStorageService = gatewayStorageService;
+	}
+	
+	@Override
+	public int compareTo(Node node) {
+
+		return hostname.compareTo(node.getHostname());
 	}
 }

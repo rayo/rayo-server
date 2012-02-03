@@ -1,6 +1,7 @@
 package com.rayo.gateway.jmx;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -34,6 +35,7 @@ public class Gateway implements GatewayMXBean {
 		for(String platform: gatewayStorageService.getRegisteredPlatforms()) {
 			platforms.add(new Platform(platform));
 		}
+		Collections.sort(platforms);
 		return platforms;
 	}	
 
@@ -45,7 +47,7 @@ public class Gateway implements GatewayMXBean {
 		for(String platform: gatewayStorageService.getRegisteredPlatforms()) {
 			nodes.addAll(buildNodesList(gatewayStorageService.getRayoNodes(platform)));
 		}
-
+		Collections.sort(nodes);
 		return nodes;
 	}	
 	
@@ -60,6 +62,7 @@ public class Gateway implements GatewayMXBean {
 			applications.add(app);
 		}
 
+		Collections.sort(applications);
 		return applications;
 	}	
 	
@@ -73,6 +76,16 @@ public class Gateway implements GatewayMXBean {
 			}
 		}
 		return null;
+	}
+	
+	
+	@Override
+	@ManagedAttribute(description="Returns a list with all active clients")
+	public List<String> getActiveClients() {
+		
+		List<String> clients = gatewayStorageService.getClients();
+		Collections.sort(clients);
+		return clients;
 	}
 	
 	@Override

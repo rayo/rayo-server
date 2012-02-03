@@ -15,7 +15,7 @@ import com.rayo.storage.model.Application;
  *
  */
 @ManagedResource(objectName="com.rayo.gateway:Type=ClientApplication", description="Client Applications")
-public class ClientApplication implements ClientApplicationMXBean {
+public class ClientApplication implements ClientApplicationMXBean, Comparable<ClientApplication> {
 
 	private List<String> resources = new ArrayList<String>();
 	
@@ -118,5 +118,11 @@ public class ClientApplication implements ClientApplicationMXBean {
 
 	public void setAppId(String appId) {
 		this.appId = appId;
+	}
+	
+	@Override
+	public int compareTo(ClientApplication app) {
+
+		return appId.compareTo(app.getAppId());
 	}
 }

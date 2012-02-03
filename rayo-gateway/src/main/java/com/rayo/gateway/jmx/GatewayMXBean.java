@@ -11,6 +11,8 @@ public interface GatewayMXBean {
 	List<Node> getRayoNodes(String platformId);
 
 	List<ClientApplication> getClientApplications();
+
+	List<String> getActiveClients();
 	
 	ClientApplication getClientApplication(String appId);
 	

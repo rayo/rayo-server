@@ -22,7 +22,7 @@ public class AdminController {
 		return mav;
 	}
 
-	@RequestMapping("/nodes/{node}")
+	@RequestMapping("/nodes/{node:.+}")
 	public ModelAndView nodeHandler(@PathVariable("node") String node) {
 		ModelAndView mav = new ModelAndView("nodes");
 		mav.addObject("node", node);

@@ -93,8 +93,8 @@
           	
           	table.showList(
         		'../../jmx',
-          		{ type: "exec", mbean: "com.rayo.gateway:Type=Gateway", operation: "getAddressesForAppId", arguments:["${application}"]},
           		'Addresses',
+          		{ type: "exec", mbean: "com.rayo.gateway:Type=Gateway", operation: "getAddressesForAppId", arguments:["${application}"]},
           		'.addresses');
           		          		
           	table.showList(
