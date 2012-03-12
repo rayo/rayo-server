@@ -265,7 +265,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     	} else {
     		throw new RayoProtocolException(Condition.BAD_REQUEST, Type.CANCEL, "Unknown destination type");
     	}
-    	if (participant == null) {
+    	if (participant == null && type == JoinDestinationType.CALL) {
     		// Remote join
         	log.debug("Detected Remote Destination. Local Source: [%s]. Remote destination: [%s].", source.getId(), destination);
     		participant = source.getApplicationContext().getParticipant(destination);
