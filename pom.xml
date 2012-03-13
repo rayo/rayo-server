@@ -19,11 +19,19 @@
       <name>Uncle Voxeo's Public Maven Repo</name>
       <url>http://maven.voxeo.net/nexus/content/groups/public</url>
     </repository>
+<!--
     <repository>
       <id>glassfish-maven-repository'</id>
       <name>Glassfish Maven Repository</name>
       <url>http://maven.glassfish.org/content/repositories/maven.hudson-labs.org</url>
     </repository>
+-->
+    <repository>
+      <id>Jenkins</id>
+      <name>Jenkins Server</name>
+      <url>http://maven.jenkins-ci.org/content/groups/artifacts/</url>
+    </repository>
+
   </repositories>  
   
   <dependencyManagement>
