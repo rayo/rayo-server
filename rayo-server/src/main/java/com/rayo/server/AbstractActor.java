@@ -93,7 +93,10 @@ public abstract class AbstractActor<T extends Participant> extends ReflectiveAct
      * @return <code>true</code> is the command was published successfuly; <code>false</code> otherwise.
      */
     public synchronized boolean command(CallCommand command, ResponseHandler callback) {
-        command.setCallId(getParticipantId());
+    	
+    	if (command.getCallId() == null) {
+    		command.setCallId(getParticipantId());
+    	}
         Request request = new Request(command, callback);
         return publish(request);
     }

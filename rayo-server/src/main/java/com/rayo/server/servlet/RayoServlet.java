@@ -24,6 +24,8 @@ import com.rayo.core.DialCommand;
 import com.rayo.core.EndCommand;
 import com.rayo.core.EndEvent;
 import com.rayo.core.HangupCommand;
+import com.rayo.core.JoinCommand;
+import com.rayo.core.JoinDestinationType;
 import com.rayo.core.OfferEvent;
 import com.rayo.core.validation.ValidationException;
 import com.rayo.core.verb.Verb;
@@ -405,6 +407,12 @@ public class RayoServlet extends AbstractRayoServlet {
                     }
                 }));
                 return;
+            } else if (command instanceof JoinCommand) {
+            	//TODO: Refactor this. Right now it is necessary to get mixers output working.
+            	JoinCommand join = (JoinCommand)command;
+            	if (join.getType() == JoinDestinationType.MIXER) {
+            		jidRegistry.put(join.getTo(), request.getFrom().getBareJID());
+            	}
             }
 
             // If it's not dial then it must be a CallCommand
