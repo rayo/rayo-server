@@ -15,6 +15,7 @@ import com.rayo.core.verb.VerbEvent;
 import com.voxeo.moho.Call;
 import com.voxeo.moho.Call.State;
 import com.voxeo.moho.MediaService;
+import com.voxeo.moho.Mixer;
 import com.voxeo.moho.Participant;
 import com.voxeo.moho.Participant.JoinType;
 import com.voxeo.moho.media.output.AudibleResource;
@@ -157,6 +158,8 @@ public abstract class AbstractLocalVerbHandler<T extends Verb, S extends Partici
     		if (call.getCallState() == State.ACCEPTED || call.getCallState() == State.CONNECTED) {
     			return true;
     		}
+    	} else if (participant instanceof Mixer) {
+    		return true;
     	}
     	return false;
     }
