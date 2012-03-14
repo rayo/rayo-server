@@ -9,12 +9,12 @@ import com.rayo.core.validation.Messages;
 import com.rayo.core.verb.AbstractVerbEvent;
 import com.rayo.core.verb.Conference;
 
-public class SpeakingEvent extends AbstractVerbEvent {
+public class ConferenceSpeakingEvent extends AbstractVerbEvent {
 
 	@NotNull(message=Messages.MISSING_SPEAKER_ID)
 	private String speakerId;
 	
-    public SpeakingEvent(Conference conference, String speakerId) {
+    public ConferenceSpeakingEvent(Conference conference, String speakerId) {
 
     	super(conference);
     	this.speakerId = speakerId;

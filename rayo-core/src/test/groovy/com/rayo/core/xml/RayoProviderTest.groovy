@@ -31,7 +31,7 @@ import com.rayo.core.DialCommand
 import com.rayo.core.DtmfCommand
 import com.rayo.core.DtmfEvent
 import com.rayo.core.EndEvent
-import com.rayo.core.FinishedSpeakingEvent
+import com.rayo.core.StoppedSpeakingEvent
 import com.rayo.core.HangupCommand
 import com.rayo.core.JoinCommand
 import com.rayo.core.JoinDestinationType
@@ -40,7 +40,7 @@ import com.rayo.core.OfferEvent
 import com.rayo.core.RedirectCommand
 import com.rayo.core.RejectCommand
 import com.rayo.core.RingingEvent
-import com.rayo.core.SpeakingEvent
+import com.rayo.core.StartedSpeakingEvent
 import com.rayo.core.UnjoinCommand
 import com.rayo.core.UnjoinedEvent
 import com.rayo.core.validation.Validator
@@ -87,6 +87,8 @@ import com.rayo.core.xml.providers.RayoProvider
 import com.rayo.core.xml.providers.RecordProvider
 import com.rayo.core.xml.providers.SayProvider
 import com.rayo.core.xml.providers.TransferProvider
+import com.voxeo.moho.Mixer;
+import com.voxeo.moho.Participant;
 import com.voxeo.moho.Participant.JoinType
 import com.voxeo.moho.media.output.OutputCommand.BargeinType
 
@@ -1803,29 +1805,36 @@ public class RayoProviderTest {
 
 	@Test
 	public void speakingToXml() {
-		SpeakingEvent speaking = new SpeakingEvent(new Conference(callId:'12', verbId:'13'),"1234");
-		assertEquals("""<started-speaking xmlns="urn:xmpp:tropo:conference:1" call-id="1234"/>""", toXml(speaking));
+		
+		def mixer = [getName:{ "1234" }, getParticipants:{[] as Participant[]}] as Mixer
+		StartedSpeakingEvent speaking = new StartedSpeakingEvent(mixer, "12");
+
+		assertEquals("""<started-speaking xmlns="urn:xmpp:rayo:1" call-id="12"/>""", toXml(speaking));
 	}
 	
 	@Test
 	public void speakingFromXml() {
-		def speaking = fromXml("""<started-speaking xmlns="urn:xmpp:tropo:conference:1" call-id="1234"></started-speaking>""")
+
+		def speaking = fromXml("""<started-speaking xmlns="urn:xmpp:rayo:1" call-id="1234"></started-speaking>""")
 		assertNotNull speaking
-		assertTrue speaking instanceof SpeakingEvent
+		assertTrue speaking instanceof StartedSpeakingEvent
 		assertEquals speaking.speakerId,"1234"
 	}
 	
 	@Test
-	public void finishedSpeakingToXml() {
-		FinishedSpeakingEvent speaking = new FinishedSpeakingEvent(new Conference(callId:'12', verbId:'13'),"1234");
-		assertEquals("""<stopped-speaking xmlns="urn:xmpp:tropo:conference:1" call-id="1234"/>""", toXml(speaking));
+	public void stoppedSpeakingToXml() {
+		
+		def mixer = [getName:{ "1234" }, getParticipants:{[] as Participant[]}] as Mixer
+		StoppedSpeakingEvent speaking = new StoppedSpeakingEvent(mixer, "12");
+		assertEquals("""<stopped-speaking xmlns="urn:xmpp:rayo:1" call-id="12"/>""", toXml(speaking));
 	}
 	
 	@Test
-	public void finishedSpeakingFromXml() {
-		def speaking = fromXml("""<stopped-speaking xmlns="urn:xmpp:tropo:conference:1" call-id="1234"></stopped-speaking>""")
+	public void stoppedSpeakingFromXml() {
+		
+		def speaking = fromXml("""<stopped-speaking xmlns="urn:xmpp:rayo:1" call-id="1234"></stopped-speaking>""")
 		assertNotNull speaking			
-		assertTrue speaking instanceof FinishedSpeakingEvent
+		assertTrue speaking instanceof StoppedSpeakingEvent
 		assertEquals speaking.speakerId,"1234"
 	}
 

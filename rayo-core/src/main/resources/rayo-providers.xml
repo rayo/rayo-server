@@ -30,8 +30,8 @@
 	    		<value>com.rayo.core.OfferEvent</value>
 	    		<value>com.rayo.core.EndEvent</value>
 	    		<value>com.rayo.core.RingingEvent</value>
-	    		<value>com.rayo.core.SpeakingEvent</value>
-	    		<value>com.rayo.core.FinishedSpeakingEvent</value>
+	    		<value>com.rayo.core.StartedSpeakingEvent</value>
+	    		<value>com.rayo.core.StoppedSpeakingEvent</value>
 	    		<value>com.rayo.core.AnsweredEvent</value>
 	    		<value>com.rayo.core.AcceptCommand</value>
 	    		<value>com.rayo.core.AnswerCommand</value>
@@ -168,8 +168,8 @@
 	    		<value>com.rayo.core.verb.KickCommand</value>
 	    		<value>com.rayo.core.verb.OnHoldEvent</value>
 	    		<value>com.rayo.core.verb.OffHoldEvent</value>
-	    		<value>com.rayo.core.SpeakingEvent</value>
-	    		<value>com.rayo.core.FinishedSpeakingEvent</value>
+	    		<value>com.rayo.core.ConferenceSpeakingEvent</value>
+	    		<value>com.rayo.core.ConferenceFinishedSpeakingEvent</value>
 	    		<value>com.rayo.core.verb.ConferenceCompleteEvent</value>
 	    	</list>
 	    </property>				

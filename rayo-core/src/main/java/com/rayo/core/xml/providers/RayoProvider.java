@@ -19,6 +19,7 @@ import com.rayo.core.DialCommand;
 import com.rayo.core.DtmfCommand;
 import com.rayo.core.DtmfEvent;
 import com.rayo.core.EndEvent;
+import com.rayo.core.StoppedSpeakingEvent;
 import com.rayo.core.HangupCommand;
 import com.rayo.core.JoinCommand;
 import com.rayo.core.JoinDestinationType;
@@ -27,6 +28,7 @@ import com.rayo.core.OfferEvent;
 import com.rayo.core.RedirectCommand;
 import com.rayo.core.RejectCommand;
 import com.rayo.core.RingingEvent;
+import com.rayo.core.StartedSpeakingEvent;
 import com.rayo.core.UnjoinCommand;
 import com.rayo.core.UnjoinedEvent;
 import com.rayo.core.validation.Messages;
@@ -86,6 +88,10 @@ public class RayoProvider extends BaseProvider {
             return buildStopCommand(element);
         } else if (element.getName().equals("complete")) {
             return buildCompleteEvent(element);
+        } else if (element.getName().equals("started-speaking")) {
+            return buildStartedSpeakingEvent(element);
+        } else if (element.getName().equals("stopped-speaking")) {
+            return buildStoppedSpeakingEvent(element);
         } else if (element.getName().equals("dtmf")) {
         	if (element.attribute("signal") != null) {
         		return buildDtmfEvent(element);
@@ -174,7 +180,23 @@ public class RayoProvider extends BaseProvider {
 
         return offer;
     }
+    
+    private Object buildStartedSpeakingEvent(Element element) throws URISyntaxException {
 
+        StartedSpeakingEvent speaking = new StartedSpeakingEvent();
+        speaking.setSpeakerId(element.attributeValue("call-id"));
+
+        return speaking;
+    }
+    
+    private Object buildStoppedSpeakingEvent(Element element) throws URISyntaxException {
+
+    	StoppedSpeakingEvent speaking = new StoppedSpeakingEvent();
+        speaking.setSpeakerId(element.attributeValue("call-id"));
+
+        return speaking;
+    }
+    
     private Object buildDtmfCommand(Element element) {
         return new DtmfCommand(element.attributeValue("tones"));
     }
@@ -365,6 +387,10 @@ public class RayoProvider extends BaseProvider {
             createDtmfEvent((DtmfEvent)object, document);
         } else if (object instanceof DtmfCommand) {
             createDtmfCommand((DtmfCommand)object, document);
+        } else if (object instanceof StartedSpeakingEvent) {
+            createStartedSpeakingEvent((StartedSpeakingEvent)object, document);
+        } else if (object instanceof StoppedSpeakingEvent) {
+            createStoppedSpeakingEvent((StoppedSpeakingEvent)object, document);
         }
     }
 
@@ -589,6 +615,26 @@ public class RayoProvider extends BaseProvider {
         root.addAttribute("from", offer.getFrom().toString());
 
         addHeaders(offer.getHeaders(), root);
+
+        return document;
+    }
+    
+    private Document createStartedSpeakingEvent(Object object, Document document) {
+
+        StartedSpeakingEvent event = (StartedSpeakingEvent) object;
+
+        Element root = document.addElement(new QName("started-speaking", RAYO_NAMESPACE));
+        root.addAttribute("call-id", event.getSpeakerId());
+
+        return document;
+    }
+    
+    private Document createStoppedSpeakingEvent(Object object, Document document) {
+
+    	StoppedSpeakingEvent event = (StoppedSpeakingEvent) object;
+
+        Element root = document.addElement(new QName("stopped-speaking", RAYO_NAMESPACE));
+        root.addAttribute("call-id", event.getSpeakerId());
 
         return document;
     }

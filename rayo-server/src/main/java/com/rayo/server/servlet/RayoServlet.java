@@ -5,6 +5,8 @@ import static com.voxeo.utils.Objects.assertion;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
@@ -26,6 +28,7 @@ import com.rayo.core.EndEvent;
 import com.rayo.core.HangupCommand;
 import com.rayo.core.JoinCommand;
 import com.rayo.core.JoinDestinationType;
+import com.rayo.core.MixerEvent;
 import com.rayo.core.OfferEvent;
 import com.rayo.core.validation.ValidationException;
 import com.rayo.core.verb.Verb;
@@ -172,7 +175,9 @@ public class RayoServlet extends AbstractRayoServlet {
 
             public void handle(Object event) throws Exception {
                 if (event instanceof CallEvent) {
-                	rayoStatistics.callReceived();
+                	if (event instanceof OfferEvent) {
+                		rayoStatistics.callReceived();
+                	}
                     CallEvent callEvent = (CallEvent) event;
                     try {
                         event(callEvent);
@@ -181,6 +186,8 @@ public class RayoServlet extends AbstractRayoServlet {
                         log.error("Failed to dispatch call event. Ending Call.", e);
                         fail(callEvent.getCallId());
                     }
+                } else if (event instanceof MixerEvent) {
+                	event((MixerEvent)event);
                 }
             }
         });
@@ -229,6 +236,55 @@ public class RayoServlet extends AbstractRayoServlet {
     // Events: Server -> Client
     // ================================================================================
 
+
+    public void event(MixerEvent event) throws IOException {
+    	
+        // Serialize the event to XML
+        Element eventElement = provider.toXML(event);
+        assertion(eventElement != null, "Could not serialize event [event=%s]", event);
+        
+        for (String callId: event.getParticipantIds()) {
+        	cdrManager.append(callId,eventElement.asXML());        	
+        }
+        
+    	JID from = getXmppFactory().createJID(event.getMixerId() + "@" + getLocalDomain());
+
+        RayoAdminService adminService = (RayoAdminService)getAdminService();
+        String gatewayDomain = adminService.getGatewayDomain();
+
+		List<JID> destinations = new ArrayList<JID>();
+    	if (gatewayDomain == null) {
+    		// Single server. Deliver individual messages to all apps listening.
+    		// Note that mutiple callIds might belong to the same app so we need 
+    		// to multiplex the mixer event destinations
+            for (String callId: event.getParticipantIds()) {
+		    	JID jid = jidRegistry.getJID(callId);
+		    	if (!destinations.contains(jid)) {
+		    		destinations.add(jid);
+		    	}
+            }	            
+            
+    	} else {
+    		// Clustered setup. Everything is forwarded to the gateway. The Gateway
+    		// will take care of multiplexing
+    		destinations.add(getXmppFactory().createJID(gatewayDomain));
+    	}
+    	for (JID jid: destinations) {
+    		try {
+				PresenceMessage presence = getXmppFactory().createPresence(from, jid, null,
+						new DOMWriter().write(eventElement.getDocument()).getDocumentElement() // TODO: ouch
+					);
+				presence.send();
+				xmppMessageListenersGroup.onPresenceSent(presence);
+			} catch (ServletException se) {
+				log.error(se.getMessage(),se);
+			} catch (Exception e) {
+				// In the event of an error, continue dispatching to all remaining JIDs
+				log.error("Failed to dispatch event [jid=%s, event=%s]", jid, event, e);    				
+			}
+    	}
+    }
+    
     public void event(CallEvent event) throws IOException {
     	
         // Serialize the event to XML
@@ -280,30 +336,9 @@ public class RayoServlet extends AbstractRayoServlet {
 			presence.send();
 			xmppMessageListenersGroup.onPresenceSent(presence);
 	    } catch (RayoProtocolException e) {
-	    	try {
-	    		log.error("Rayo Exception: [%s] - [%s]", e.getMessage(), e.getText());
-	    		if (e.getTo() != null) {
-	    			jid = getXmppFactory().createJID(e.getTo());
-	    		}				
-	    		sendPresenceError(from, jid, e.getCondition(), e.getType(), e.getText());
-			} catch (ServletException se) {
-				log.error(se.getMessage(), se);
-			}
+	    	handleEventException(jid, from, e);
 		} catch (ServletException se) {
-			//TODO: Pending of internal ticket: https://evolution.voxeo.com/ticket/1536300
-			if (se.getMessage().startsWith("can't find corresponding client session")) {
-				
-				try {
-					CallActor<Call> actor = findCallActor(event.getCallId());
-					cdrManager.store(event.getCallId());
-					if (actor.getCall().getCallState() != State.DISCONNECTED || actor.getCall().getCallState() != State.FAILED) {
-						actor.getCall().disconnect();
-					}
-				} catch (NotFoundException nfe) {
-					log.error("An event has been received but there is no active call control session for handling JID %s. " + 
-							  "We will disconnect call with id %s", jid, event.getCallId());
-				}
-			}
+			handleEventException(event, jid, se);
 		} catch (Exception e) {
 			// In the event of an error, continue dispatching to all remaining JIDs
 			log.error("Failed to dispatch event [jid=%s, event=%s]", jid, event, e);
@@ -311,6 +346,36 @@ public class RayoServlet extends AbstractRayoServlet {
 
         rayoStatistics.callEventProcessed();
     }
+
+	private void handleEventException(CallEvent event, JID jid, ServletException se) {
+		
+		//TODO: Pending of internal ticket: https://evolution.voxeo.com/ticket/1536300
+		if (se.getMessage().startsWith("can't find corresponding client session")) {
+			
+			try {
+				CallActor<Call> actor = findCallActor(event.getCallId());
+				cdrManager.store(event.getCallId());
+				if (actor.getCall().getCallState() != State.DISCONNECTED || actor.getCall().getCallState() != State.FAILED) {
+					actor.getCall().disconnect();
+				}
+			} catch (NotFoundException nfe) {
+				log.error("An event has been received but there is no active call control session for handling JID %s. " + 
+						  "We will disconnect call with id %s", jid, event.getCallId());
+			}
+		}
+	}
+
+	private void handleEventException(JID jid, JID from, RayoProtocolException e) throws IOException {
+		try {
+			log.error("Rayo Exception: [%s] - [%s]", e.getMessage(), e.getText());
+			if (e.getTo() != null) {
+				jid = getXmppFactory().createJID(e.getTo());
+			}				
+			sendPresenceError(from, jid, e.getCondition(), e.getType(), e.getText());
+		} catch (ServletException se) {
+			log.error(se.getMessage(), se);
+		}
+	}
 
 	@Override
     protected void doMessage(InstantMessage message) throws ServletException, IOException {

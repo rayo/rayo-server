@@ -1,7 +1,6 @@
 package com.rayo.server.verb;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
@@ -14,8 +13,8 @@ import javax.media.mscontrol.mixer.MediaMixer;
 import javax.media.mscontrol.mixer.MixerEvent;
 import javax.validation.ConstraintValidatorContext;
 
-import com.rayo.core.FinishedSpeakingEvent;
-import com.rayo.core.SpeakingEvent;
+import com.rayo.core.ConferenceFinishedSpeakingEvent;
+import com.rayo.core.ConferenceSpeakingEvent;
 import com.rayo.core.verb.Conference;
 import com.rayo.core.verb.ConferenceCompleteEvent;
 import com.rayo.core.verb.ConferenceCompleteEvent.Reason;
@@ -444,7 +443,7 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference, Call
     		
     		if (!activeSpeakers.contains(participant.getId())) {
     			activeSpeakers.add(participant.getId());
-        		fire(new SpeakingEvent(model, participant.getId()));
+        		fire(new ConferenceSpeakingEvent(model, participant.getId()));
     		}
     	}
 
@@ -460,7 +459,7 @@ public class ConferenceHandler extends AbstractLocalVerbHandler<Conference, Call
     		}
     		if (!found) {
     			it.remove();
-        		fire(new FinishedSpeakingEvent(model, participantId));
+        		fire(new ConferenceFinishedSpeakingEvent(model, participantId));
     		}
     	}
 

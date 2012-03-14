@@ -7,8 +7,10 @@ import org.dom4j.Element;
 import org.dom4j.Namespace;
 import org.dom4j.QName;
 
-import com.rayo.core.FinishedSpeakingEvent;
-import com.rayo.core.SpeakingEvent;
+import com.rayo.core.ConferenceFinishedSpeakingEvent;
+import com.rayo.core.ConferenceSpeakingEvent;
+import com.rayo.core.StoppedSpeakingEvent;
+import com.rayo.core.StartedSpeakingEvent;
 import com.rayo.core.verb.Conference;
 import com.rayo.core.verb.ConferenceCompleteEvent;
 import com.rayo.core.verb.KickCommand;
@@ -45,11 +47,11 @@ public class ConferenceProvider extends BaseProvider {
 	}
 
 	private Object buildSpeakingEvent(Element element) {
-		return new SpeakingEvent(new Conference(), element.attributeValue("call-id"));
+		return new ConferenceSpeakingEvent(new Conference(), element.attributeValue("call-id"));
 	}
 
 	private Object buildFinishedSpeakingEvent(Element element) {
-		return new FinishedSpeakingEvent(new Conference(), element.attributeValue("call-id"));
+		return new ConferenceFinishedSpeakingEvent(new Conference(), element.attributeValue("call-id"));
 	}
 
 	private Object buildConference(Element element) throws URISyntaxException {
@@ -136,10 +138,10 @@ public class ConferenceProvider extends BaseProvider {
 			createOnHoldEvent(object, document);
 		} else if (object instanceof OffHoldEvent) {
 			createOffHoldEvent(object, document);
-        } else if (object instanceof SpeakingEvent) {
-            createSpeakingEvent((SpeakingEvent)object, document);
-        } else if (object instanceof FinishedSpeakingEvent) {
-            createFinishedSpeakingEvent((FinishedSpeakingEvent)object, document);
+        } else if (object instanceof StartedSpeakingEvent) {
+            createSpeakingEvent((StartedSpeakingEvent)object, document);
+        } else if (object instanceof StoppedSpeakingEvent) {
+            createFinishedSpeakingEvent((StoppedSpeakingEvent)object, document);
         }
 	}
 
@@ -200,13 +202,13 @@ public class ConferenceProvider extends BaseProvider {
 		document.addElement(new QName("off-hold", NAMESPACE));
 	}
 
-	private void createSpeakingEvent(SpeakingEvent event, Document document) {
+	private void createSpeakingEvent(StartedSpeakingEvent event, Document document) {
 		
 		Element element = document.addElement(new QName("started-speaking", NAMESPACE));
 		element.addAttribute("call-id", event.getSpeakerId());
 	}
 
-	private void createFinishedSpeakingEvent(FinishedSpeakingEvent event, Document document) {
+	private void createFinishedSpeakingEvent(StoppedSpeakingEvent event, Document document) {
 		Element element = document.addElement(new QName("stopped-speaking", NAMESPACE));
 		element.addAttribute("call-id", event.getSpeakerId());
 	}

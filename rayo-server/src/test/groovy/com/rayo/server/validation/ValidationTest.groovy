@@ -1150,7 +1150,7 @@ class ValidationTest {
 	@Test
 	public void validateSpeakingMissingCallId() {
 				
-		def output = parseXml("""<started-speaking xmlns="urn:xmpp:tropo:conference:1"/>""")
+		def output = parseXml("""<started-speaking xmlns="urn:xmpp:rayo:1"/>""")
 		
 		def errorMapping = assertValidationException(output)
 		assertNotNull errorMapping
@@ -1162,7 +1162,7 @@ class ValidationTest {
 	@Test
 	public void validateFinishedSpeakingMissingCallId() {
 				
-		def output = parseXml("""<stopped-speaking xmlns="urn:xmpp:tropo:conference:1"/>""")
+		def output = parseXml("""<stopped-speaking xmlns="urn:xmpp:rayo:1"/>""")
 		
 		def errorMapping = assertValidationException(output)
 		assertNotNull errorMapping

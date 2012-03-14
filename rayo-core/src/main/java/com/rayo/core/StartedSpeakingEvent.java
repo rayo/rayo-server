@@ -6,31 +6,43 @@ import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
 import com.rayo.core.validation.Messages;
-import com.rayo.core.verb.AbstractVerbEvent;
-import com.rayo.core.verb.Conference;
+import com.voxeo.moho.Mixer;
+import com.voxeo.moho.Participant;
 
-public class FinishedSpeakingEvent extends AbstractVerbEvent {
+public class StartedSpeakingEvent extends AbstractMixerEvent {
 
 	@NotNull(message=Messages.MISSING_SPEAKER_ID)
 	private String speakerId;
 	
-    public FinishedSpeakingEvent(Conference conference, String speakerId) {
+	public StartedSpeakingEvent() {
+		
+		super(null);
+	}
+	
+    public StartedSpeakingEvent(Mixer mixer, String speakerId) {
 
-    	super(conference);
+    	super(mixer.getName());
     	this.speakerId = speakerId;
+    	for (Participant participant: mixer.getParticipants()) {
+    		addParticipant(participant.getId());
+    	}
     }
 
     public String getSpeakerId() {
 		return speakerId;
 	}
     
-    @Override
+    public void setSpeakerId(String speakerId) {
+		this.speakerId = speakerId;
+	}
+
+	@Override
     public String toString() {
 
     	return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)    		
 			.append("speakerId", getSpeakerId())
-    		.append("callId", getCallId())
-    		.append("verbId", getVerbId())
+    		.append("mixerId", getMixerId())
+    		.append("participants", getParticipantIds())
     		.toString();
     }
 }
