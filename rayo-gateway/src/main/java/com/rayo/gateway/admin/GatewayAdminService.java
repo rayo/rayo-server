@@ -55,6 +55,11 @@ public class GatewayAdminService extends AdminService {
 
 		return "Rayo Gateway";
 	}
+	
+	public void removeNode(String jid) throws GatewayException {
+		
+		storageService.unregisterRayoNode(jid);
+	}
 
 	public void setStorageService(GatewayStorageService storageService) {
 		this.storageService = storageService;

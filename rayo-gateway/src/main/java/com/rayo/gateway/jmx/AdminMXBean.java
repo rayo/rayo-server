@@ -11,4 +11,5 @@ public interface AdminMXBean {
 	void maxDialRetries(String retries);
 	void ban(String jid);
 	void unban(String jid);
+	void removeNode(String jid);
 }
