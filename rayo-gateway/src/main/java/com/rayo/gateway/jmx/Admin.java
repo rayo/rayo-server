@@ -8,6 +8,7 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 
 import com.rayo.gateway.admin.GatewayAdminService;
 import com.rayo.storage.exception.GatewayException;
+import com.rayo.storage.model.Application;
 import com.voxeo.logging.Loggerf;
 
 @ManagedResource(objectName = "com.rayo.gateway:Type=Admin,name=Admin", description = "Admin Interface")
@@ -115,5 +116,32 @@ public class Admin implements AdminMXBean {
 		} catch (GatewayException ge) {
 			log.error(ge.getMessage(),ge);
 		}
+	}
+	
+	@Override
+	@ManagedOperation(description = "Removes a node from the gateway")
+	public void registerApplication(String platform, String name, String jid) {
+
+		Application app = new Application(name, jid, platform);
+		app.setName(name);
+		//TODO: Set proper permissions and account id
+		app.setPermissions("");
+		app.setAccountId("");
+		try {
+			adminService.registerApplication(app);
+		} catch (GatewayException ge) {
+			log.error(ge.getMessage(),ge);
+		}
+	}
+	
+	@Override
+	@ManagedOperation(description = "Adds an address to an application")
+	public void registerAddress(String appId, String address) {
+
+		try {
+			adminService.registerAddress(appId, address);
+		} catch (GatewayException ge) {
+			log.error(ge.getMessage(),ge);
+		}		
 	}
 }

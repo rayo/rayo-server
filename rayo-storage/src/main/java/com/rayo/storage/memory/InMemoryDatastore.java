@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -21,6 +22,8 @@ import com.rayo.storage.exception.RayoNodeNotFoundException;
 import com.rayo.storage.model.Application;
 import com.rayo.storage.model.GatewayCall;
 import com.rayo.storage.model.GatewayClient;
+import com.rayo.storage.model.GatewayMixer;
+import com.rayo.storage.model.GatewayVerb;
 import com.rayo.storage.model.RayoNode;
 import com.rayo.storage.util.JIDUtils;
 
@@ -39,6 +42,7 @@ public class InMemoryDatastore implements GatewayDatastore {
 	private ReadWriteLock applicationsLock = new ReentrantReadWriteLock();
 	private ReadWriteLock nodesLock = new ReentrantReadWriteLock();
 	private ReadWriteLock callsLock = new ReentrantReadWriteLock();
+	private ReadWriteLock mixersLock = new ReentrantReadWriteLock();
 	
 	private Map<String, RayoNode> nodesMap = new ConcurrentHashMap<String, RayoNode>();
 	private Map<String, RayoNode> ipsMap = new ConcurrentHashMap<String, RayoNode>();
@@ -52,7 +56,10 @@ public class InMemoryDatastore implements GatewayDatastore {
 	private Map<String, Application> applicationsMap = new ConcurrentHashMap<String, Application>();
 	private Map<String, Application> addressesMap = new ConcurrentHashMap<String, Application>();
 	private Map<String, List<String>> appToAddressesMap = new ConcurrentHashMap<String, List<String>>();
-	
+
+	private Map<String, GatewayMixer> mixersMap = new ConcurrentHashMap<String, GatewayMixer>();
+	private Map<String, List<GatewayVerb>> verbsMap = new ConcurrentHashMap<String, List<GatewayVerb>>();
+
 	@Override
 	public RayoNode storeNode(RayoNode node) throws DatastoreException {
 
@@ -542,6 +549,164 @@ public class InMemoryDatastore implements GatewayDatastore {
 			}
 		} finally {
 			applicationLock.unlock();
+		}
+	}
+	
+	@Override
+	public GatewayMixer getMixer(String mixerName) {
+
+		Lock mixerLock = mixersLock.readLock();
+		mixerLock.lock();
+		try {
+			return mixersMap.get(mixerName);
+		} finally {
+			mixerLock.unlock();
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public Collection<GatewayMixer> getMixers() {
+
+		Lock mixerLock = mixersLock.readLock();
+		mixerLock.lock();
+		try {
+			return new ArrayList(mixersMap.values());
+		} finally {
+			mixerLock.unlock();
+		}
+	}
+	
+	@Override
+	public GatewayMixer removeMixer(String mixerName) throws DatastoreException {
+
+		Lock mixerLock = mixersLock.writeLock();
+		mixerLock.lock();
+		try {
+			return mixersMap.remove(mixerName);
+		} finally {
+			mixerLock.unlock();
+		}
+	}
+	
+	@Override
+	public GatewayMixer storeMixer(GatewayMixer mixer) throws DatastoreException {
+
+		Lock mixerLock = mixersLock.writeLock();
+		mixerLock.lock();
+		try {
+			mixersMap.put(mixer.getName(), mixer);
+			return mixer;
+		} finally {
+			mixerLock.unlock();
+		}
+	}
+	
+	@Override
+	public void addCallToMixer(String callId, String mixerName) throws DatastoreException {
+
+		Lock mixerLock = mixersLock.writeLock();
+		mixerLock.lock();
+		try {
+			GatewayMixer mixer = mixersMap.get(mixerName);
+			mixer.addCall(callId);
+		} finally {
+			mixerLock.unlock();
+		}
+	}
+	
+	
+	@Override
+	public void removeCallFromMixer(String callId, String mixerName) throws DatastoreException {
+
+		Lock mixerLock = mixersLock.writeLock();
+		mixerLock.lock();
+		try {
+			GatewayMixer mixer = mixersMap.get(mixerName);
+			mixer.removeCall(callId);
+		} finally {
+			mixerLock.unlock();
+		}
+	}
+	
+	@Override
+	public void addVerbToMixer(GatewayVerb verb, String mixerName)
+			throws DatastoreException {
+
+		Lock mixerLock = mixersLock.writeLock();
+		mixerLock.lock();
+		try {
+			List<GatewayVerb> verbs = verbsMap.get(mixerName);
+			if (verbs == null) {
+				verbs = new ArrayList<GatewayVerb>();
+				verbsMap.put(mixerName, verbs);				
+			}
+			if (!verbs.contains(verb)) {
+				verbs.add(verb);
+			}
+		} finally {
+			mixerLock.unlock();
+		}
+	}
+	
+	@Override
+	public void removeVerbFromMixer(String verbId, String mixerName)
+			throws DatastoreException {
+
+		Lock mixerLock = mixersLock.writeLock();
+		mixerLock.lock();
+		try {
+			List<GatewayVerb> verbs = verbsMap.get(mixerName);
+			if (verbs != null) {
+				Iterator<GatewayVerb> it = verbs.iterator();
+				while (it.hasNext()) {
+					if (it.next().getVerbId().equals(verbId)) {
+						it.remove();
+					}
+				}
+			}
+		} finally {
+			mixerLock.unlock();
+		}
+	}
+	
+	@Override
+	public GatewayVerb getVerb(String mixerName, String verbId)
+			throws DatastoreException {
+
+		Lock mixerLock = mixersLock.readLock();
+		mixerLock.lock();
+		try {
+			List<GatewayVerb> verbs = verbsMap.get(mixerName);
+			if (verbs != null) {
+				for(GatewayVerb verb: verbs) {
+					if (verb.getVerbId().equals(verbId)) {
+						return verb;
+					}
+				}
+			}
+		} finally {
+			mixerLock.unlock();
+		}
+		return null;
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<GatewayVerb> getVerbs(String mixerName)
+			throws DatastoreException {
+
+
+		Lock mixerLock = mixersLock.readLock();
+		mixerLock.lock();
+		try {
+			List<GatewayVerb> verbs = verbsMap.get(mixerName);
+			if (verbs == null) {
+				verbs = Collections.EMPTY_LIST;
+			}
+			return verbs;
+		} finally {
+			mixerLock.unlock();
 		}
 	}
 }

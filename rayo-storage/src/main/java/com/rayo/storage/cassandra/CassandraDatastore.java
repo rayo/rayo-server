@@ -35,6 +35,8 @@ import com.rayo.storage.exception.RayoNodeNotFoundException;
 import com.rayo.storage.model.Application;
 import com.rayo.storage.model.GatewayCall;
 import com.rayo.storage.model.GatewayClient;
+import com.rayo.storage.model.GatewayMixer;
+import com.rayo.storage.model.GatewayVerb;
 import com.rayo.storage.model.RayoNode;
 import com.rayo.storage.util.JIDUtils;
 import com.voxeo.logging.Loggerf;
@@ -74,7 +76,7 @@ public class CassandraDatastore implements GatewayDatastore {
 			//   1. The property that forces us to create a new schema is set, or
 			//   2. The schema has not been created yet
 			schemaHandler.buildSchema(cluster, schemaName);
-		} else if (!schemaHandler.validSchema(cluster, schemaName)) {
+		} else {
 			// if the current schema is somehow screwed, try to fix it
 			schemaHandler.buildSchema(cluster, schemaName, false);
 		}					
@@ -241,21 +243,22 @@ public class CassandraDatastore implements GatewayDatastore {
 		log.debug("Removing call with id: [%s]", id);
 		GatewayCall call = getCall(id);
 
-		Mutator mutator = Pelops.createMutator(schemaName);
-		mutator.deleteSubColumns("jids", "clients", call.getClientJid(), id);
-		mutator.deleteSubColumns("jids", "nodes", call.getNodeJid(), id);
-
-		try {
-			RowDeletor deletor = Pelops.createRowDeletor(schemaName);
-			deletor.deleteRow("calls", Bytes.fromUTF8(id), ConsistencyLevel.ONE);
-			
-			mutator.execute(ConsistencyLevel.ONE);
-			log.debug("Call [%s] removed successfully", id);
-		} catch (Exception e) {
-			log.error(e.getMessage(),e);
-			throw new DatastoreException("Could not remove call");
-		}
-		
+		if (call != null) {
+			Mutator mutator = Pelops.createMutator(schemaName);
+			mutator.deleteSubColumns("jids", "clients", call.getClientJid(), id);
+			mutator.deleteSubColumns("jids", "nodes", call.getNodeJid(), id);
+	
+			try {
+				RowDeletor deletor = Pelops.createRowDeletor(schemaName);
+				deletor.deleteRow("calls", Bytes.fromUTF8(id), ConsistencyLevel.ONE);
+				
+				mutator.execute(ConsistencyLevel.ONE);
+				log.debug("Call [%s] removed successfully", id);
+			} catch (Exception e) {
+				log.error(e.getMessage(),e);
+				throw new DatastoreException("Could not remove call");
+			}
+		}		
 		return call;
 	}
 	
@@ -477,6 +480,7 @@ public class CassandraDatastore implements GatewayDatastore {
 		return application;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public List<Application> getApplications() {
 
@@ -491,9 +495,11 @@ public class CassandraDatastore implements GatewayDatastore {
 					false, ConsistencyLevel.ONE);
 					
 			for(Map.Entry<Bytes, List<Column>> row: rows.entrySet()) {
-				Application application = new Application(row.getKey().toUTF8());
-				populateApplicationData(application, row.getValue());
-				applications.add(application);
+				if (row.getValue().size() > 0) {
+					Application application = new Application(row.getKey().toUTF8());
+					populateApplicationData(application, row.getValue());
+					applications.add(application);
+				}
 			}
 
 			return applications;
@@ -785,6 +791,226 @@ public class CassandraDatastore implements GatewayDatastore {
 		}		
 		
 		return result;
+	}
+	
+	
+	@Override
+	public GatewayMixer storeMixer(GatewayMixer mixer) throws DatastoreException {
+		
+		log.debug("Storing mixer: [%s]", mixer);
+		
+		Mutator mutator = Pelops.createMutator(schemaName);
+		mutator.writeColumns("mixers", Bytes.fromUTF8(mixer.getName()), 
+			mutator.newColumnList(
+					mutator.newColumn(Bytes.fromUTF8("node"), Bytes.fromUTF8(mixer.getNodeJid()))));
+		
+		try {
+			mutator.execute(ConsistencyLevel.ONE);
+			log.debug("Mixer [%s] stored successfully", mixer);
+		} catch (Exception e) {
+			log.error(e.getMessage(),e);
+			throw new DatastoreException("Could not store mixer");
+		}
+		
+		return mixer;
+	}
+	
+	@Override
+	public GatewayMixer getMixer(String name) {
+		
+		log.debug("Getting mixer with name [%s]", name);
+		Selector selector = Pelops.createSelector(schemaName);
+		try {
+			List<Column> columns = selector.getColumnsFromRow("mixers", name, false, ConsistencyLevel.ONE);
+			
+			return buildMixer(columns, name);
+		} catch (PelopsException pe) {
+			log.error(pe.getMessage(),pe);
+			return null;
+		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public Collection<GatewayMixer> getMixers() {
+		
+		log.debug("Getting list with all active mixers");
+		try {
+
+			List<GatewayMixer> mixers = new ArrayList<GatewayMixer>();
+			Selector selector = Pelops.createSelector(schemaName);
+			LinkedHashMap<Bytes, List<Column>> rows = selector.getColumnsFromRows(
+					"mixers", 
+					Selector.newKeyRange("", "", 10000), // 10000 mixers limit, 
+					false, ConsistencyLevel.ONE);
+					
+			for(Map.Entry<Bytes, List<Column>> row: rows.entrySet()) {
+				if (row.getValue().size() > 0) {
+					mixers.add(buildMixer(row.getValue(), row.getKey().toUTF8())); 
+				}
+			}
+
+			return mixers;
+		} catch (PelopsException pe) {
+			log.error(pe.getMessage(),pe);
+			return Collections.EMPTY_LIST;
+		}
+	}
+	
+	private GatewayMixer buildMixer(List<Column> columns, String name) {
+		
+		String nodeJid = null;
+		List<String> participants = new ArrayList<String>();
+		if (columns != null && columns.size() > 0) {
+			for(Column column: columns) {
+				String columnName = Bytes.toUTF8(column.getName());
+				if (columnName.equals("node")) {
+					nodeJid = Bytes.toUTF8(column.getValue());
+				} else {
+					participants.add(Bytes.toUTF8(column.getName()));
+				}
+			}
+			if (nodeJid != null) {
+				GatewayMixer mixer = new GatewayMixer(name, nodeJid);
+				mixer.addCalls(participants);
+				return mixer;
+			}
+		}
+		return null;
+	}
+	
+	@Override
+	public GatewayMixer removeMixer(String name) throws DatastoreException {
+		
+		log.debug("Removing mixer with name: [%s]", name);
+		GatewayMixer mixer = getMixer(name);
+
+		Mutator mutator = Pelops.createMutator(schemaName);
+		try {
+			RowDeletor deletor = Pelops.createRowDeletor(schemaName);
+			deletor.deleteRow("mixers", Bytes.fromUTF8(name), ConsistencyLevel.ONE);
+			
+			mutator.execute(ConsistencyLevel.ONE);
+			log.debug("Mixer [%s] removed successfully", mixer);
+		} catch (Exception e) {
+			log.error(e.getMessage(),e);
+			throw new DatastoreException("Could not remove mixer");
+		}
+		
+		return mixer;
+	}
+	
+	@Override
+	public void addCallToMixer(String callId, String mixerName) throws DatastoreException {
+		
+		log.debug("Adding call [%s] to mixer [%s]", callId, mixerName);
+		
+		Mutator mutator = Pelops.createMutator(schemaName);
+		mutator.writeColumns("mixers", Bytes.fromUTF8(mixerName), 
+			mutator.newColumnList(
+					mutator.newColumn(Bytes.fromUTF8(callId), Bytes.fromUTF8(callId))));
+		
+		try {
+			mutator.execute(ConsistencyLevel.ONE);
+			log.debug("Call [%s] added successfully to mixer [%s]", callId, mixerName);
+		} catch (Exception e) {
+			log.error(e.getMessage(),e);
+			throw new DatastoreException("Could not add call to mixer");
+		}		
+	}
+	
+	@Override
+	public void removeCallFromMixer(String callId, String mixerName) throws DatastoreException {
+		
+		log.debug("Removing call [%s] from mixer [%s]", callId, mixerName);
+		
+		Mutator mutator = Pelops.createMutator(schemaName);
+		mutator.deleteColumn("mixers", mixerName, callId);
+		
+		try {
+			mutator.execute(ConsistencyLevel.ONE);
+			log.debug("Call [%s] removed successfully from mixer [%s]", callId, mixerName);
+		} catch (Exception e) {
+			log.error(e.getMessage(),e);
+			throw new DatastoreException("Could not remove call from mixer");
+		}		
+	}
+	
+	@Override
+	public void removeVerbFromMixer(String verbId, String mixerName) throws DatastoreException {
+		
+		log.debug("Removing verb [%s] from mixer [%s]", verbId, mixerName);
+		
+		Mutator mutator = Pelops.createMutator(schemaName);
+		mutator.deleteColumn("verbs", mixerName, verbId);
+		
+		try {
+			mutator.execute(ConsistencyLevel.ONE);
+			log.debug("Verb [%s] removed successfully from mixer [%s]", verbId, mixerName);
+		} catch (Exception e) {
+			log.error(e.getMessage(),e);
+			throw new DatastoreException("Could not remove verb from mixer");
+		}		
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<GatewayVerb> getVerbs(String mixerName) {
+		
+		log.debug("Getting the list of active verbs for mixer [%s]", mixerName);
+		List<GatewayVerb> ids = new ArrayList<GatewayVerb>();
+		Selector selector = Pelops.createSelector(schemaName);		
+		try {
+			List<Column> columns = 
+					selector.getColumnsFromRow("verbs", mixerName, false, ConsistencyLevel.ONE);
+			for (Column column: columns) {
+				GatewayVerb verb = new GatewayVerb(Bytes.toUTF8(column.getName()), 
+						Bytes.toUTF8(column.getValue()));
+				ids.add(verb);
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage(),e);
+			return Collections.EMPTY_LIST;
+		}		
+		return ids;
+	}
+	
+	@Override
+	public GatewayVerb getVerb(String mixerName, String id) {
+		
+		log.debug("Getting the verb [%s] from mixer [%s]", id, mixerName);
+		Selector selector = Pelops.createSelector(schemaName);		
+		try {
+			List<Column> columns = 
+					selector.getColumnsFromRow("verbs", mixerName, false, ConsistencyLevel.ONE);
+			for (Column column: columns) {
+				if (Bytes.toUTF8(column.getName()).equals(id)) {
+					return new GatewayVerb(id, Bytes.toUTF8(column.getValue()));
+				}
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage(),e);
+		}		
+		return null;
+	}
+
+	@Override
+	public void addVerbToMixer(GatewayVerb verb, String mixerName) throws DatastoreException {
+		
+		log.debug("Adding verb [%s] to mixer [%s]", verb.getVerbId(), mixerName);
+		
+		Mutator mutator = Pelops.createMutator(schemaName);
+		mutator.writeColumns("verbs", Bytes.fromUTF8(mixerName), 
+			mutator.newColumnList(
+					mutator.newColumn(Bytes.fromUTF8(verb.getVerbId()), Bytes.fromUTF8(verb.getAppJid()))));
+		
+		try {
+			mutator.execute(ConsistencyLevel.ONE);
+			log.debug("Verb [%s] added successfully to mixer [%s]", verb.getVerbId(), mixerName);
+		} catch (Exception e) {
+			log.error(e.getMessage(),e);
+			throw new DatastoreException("Could not add verb to mixer");
+		}		
 	}
 	
 	/**

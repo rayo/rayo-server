@@ -7,6 +7,7 @@ import java.util.Set;
 import com.rayo.server.admin.AdminService;
 import com.rayo.storage.GatewayStorageService;
 import com.rayo.storage.exception.GatewayException;
+import com.rayo.storage.model.Application;
 import com.rayo.storage.model.RayoNode;
 import com.voxeo.logging.Loggerf;
 
@@ -60,7 +61,17 @@ public class GatewayAdminService extends AdminService {
 		
 		storageService.unregisterRayoNode(jid);
 	}
+	
+	public void registerApplication(Application application) throws GatewayException {
+		
+		storageService.registerApplication(application);
+	}
 
+	public void registerAddress(String appId, String address) throws GatewayException {
+		
+		storageService.storeAddress(address, appId);
+	}
+	
 	public void setStorageService(GatewayStorageService storageService) {
 		this.storageService = storageService;
 	}

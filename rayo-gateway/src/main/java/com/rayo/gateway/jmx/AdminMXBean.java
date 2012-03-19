@@ -12,4 +12,6 @@ public interface AdminMXBean {
 	void ban(String jid);
 	void unban(String jid);
 	void removeNode(String jid);
+	void registerApplication(String platform, String name, String jid);
+	public void registerAddress(String appId, String address);
 }

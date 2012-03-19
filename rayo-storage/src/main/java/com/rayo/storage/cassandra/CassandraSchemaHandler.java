@@ -290,6 +290,33 @@ public class CassandraSchemaHandler {
 		} else {
 			log.debug("Found Column Family: jids");
 		}
+				
+		CfDef cfMixers = getCfDef(ksDef, "mixers");
+		if (cfMixers == null) {
+			log.debug("Creating new Column Family: mixers");
+			cfMixers = new CfDef(schemaName, "mixers")
+				.setComparator_type(ColumnFamilyManager.CFDEF_COMPARATOR_BYTES);
+			cfMixers.default_validation_class = "UTF8Type";
+			ksDef.addToCf_defs(cfMixers);			
+			cfManager.addColumnFamily(cfMixers);
+			waitToPropagate();
+		} else {
+			log.debug("Found Column Family: mixers");
+		}
+		
+		CfDef cvVerbs = getCfDef(ksDef, "verbs");
+		if (cvVerbs == null) {
+			log.debug("Creating new Column Family: verbs");
+			cvVerbs = new CfDef(schemaName, "verbs")
+				.setComparator_type(ColumnFamilyManager.CFDEF_COMPARATOR_BYTES);
+			cvVerbs.default_validation_class = "UTF8Type";
+			ksDef.addToCf_defs(cvVerbs);			
+			cfManager.addColumnFamily(cvVerbs);
+			waitToPropagate();
+		} else {
+			log.debug("Found Column Family: verbs");
+		}
+
 	}
 	
 	private void waitToPropagate() throws Exception {

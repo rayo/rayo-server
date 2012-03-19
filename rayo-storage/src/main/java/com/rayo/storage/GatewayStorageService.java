@@ -8,6 +8,8 @@ import com.rayo.storage.exception.DatastoreException;
 import com.rayo.storage.exception.GatewayException;
 import com.rayo.storage.model.Application;
 import com.rayo.storage.model.GatewayClient;
+import com.rayo.storage.model.GatewayMixer;
+import com.rayo.storage.model.GatewayVerb;
 import com.rayo.storage.model.RayoNode;
 import com.voxeo.servlet.xmpp.JID;
 
@@ -327,11 +329,11 @@ public interface GatewayStorageService {
 	 * Stores an address (e.g. phone number) for a given application. 
 	 * 
 	 * @param address Address that we want to store
-	 * @param jid Application's jid
+	 * @param appId Application's id
 	 * 
 	 * @throws DataStoreException If the address cannot be stored.
 	 */
-	void storeAddress(String address, String jid) throws DatastoreException;
+	void storeAddress(String address, String appId) throws DatastoreException;
 	
 	/**
 	 * Stores a collection of addresses (e.g. phone numbers) for a given application. 
@@ -359,4 +361,84 @@ public interface GatewayStorageService {
 	 * @throws DatastoreException If the address cannot be removed
 	 */
 	void removeAddress(String address) throws DatastoreException;
+	
+	/**
+	 * Returns a gateway mixer with the given id
+	 * 
+	 * @param id Id of the mixer
+	 * @return GatewayMixer mixer or <code>null</code> if the mixer cannot be found
+	 */
+	GatewayMixer getMixer(String id);
+	
+	/**
+	 * Register a mixer in the gateway
+	 * 
+	 * @param mixerName Name of the mixer
+	 * @param hostname Name of the rayo node that will host the mixer
+	 * @throws DatastoreException If the mixer cannot be stored
+	 */
+	void registerMixer(String mixerName, String hostname) throws DatastoreException;
+	
+	/**
+	 * Unregisters a mixer from the gateway
+	 * 
+	 * @param mixerName Name of the mixer to unregister
+	 * @throws DatastoreException If the mixer cannot be unregistered
+	 */
+	void unregisterMixer(String mixerName) throws DatastoreException;
+
+	/**
+	 * Adds a call from a mixer
+	 * 
+	 * @param callId Id of the call
+	 * @param mixerName Name of the mixer
+	 * @throws DatastoreException if the call cannot be added to the mixer
+	 */
+	void addCallToMixer(String callId, String mixerName) throws DatastoreException;
+
+	/**
+	 * Adds a call to a mixer
+	 * 
+	 * @param callId Id of the call
+	 * @param mixerName Name of the mixer
+	 * @throws DatastoreException if the call cannot be removed from the mixer
+	 */
+	void removeCallFromMixer(String callId, String mixerName) throws DatastoreException;
+	
+	
+	/**
+	 * Adds a verb to the given mixer
+	 * 
+	 * @param Id of the verb
+	 * @param appJid JID of the application that started the verb
+	 * @param mixerName Name of the mixer
+	 * @throws DatastoreException If the verb cannot be added to the mixer
+	 */
+	void addVerbToMixer(String verbId, String appJid, String mixerName) throws DatastoreException;
+	
+	/**
+	 * Removes a verb from the given mixer
+	 * 
+	 * @param verbId Id of the verb to be removed
+	 * @param mixerName Name of the mixer
+	 * @throws DatastoreException If the verb cannot be removed from the mixer
+	 */
+	void removeVerbFromMixer(String verbId, String mixerName) throws DatastoreException;
+	
+	/**
+	 * Returns the list of active verbs for a mixer or an empty collection if there 
+	 * is no active verbs or the mixer cannot be found.
+	 * 
+	 * @param mixerName Name of the mixer
+	 */
+	List<GatewayVerb> getVerbs(String mixerName) throws DatastoreException;
+	
+	/**
+	 * Returns the verb with the given id in the specified mixer. This method will 
+	 * return <code>null</code> if the verb id does not exist within the specified 
+	 * mixer.
+	 * 
+	 * @param mixerName Name of the mixer
+	 */
+	GatewayVerb getVerb(String mixerName, String verbId) throws DatastoreException;
 }

@@ -3,6 +3,7 @@ package com.rayo.storage;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
@@ -171,6 +172,83 @@ public abstract class BaseGatewayStorageServiceTest {
 		
 		storageService.unregistercall(callId);
 		assertEquals(0, storageService.getCallsForClient(clientJid.toString()).size());		
+	}
+	
+	@Test
+	public void testRegisterMixers() throws Exception {
+		
+		String[] platforms = new String[]{"staging"};
+		RayoNode node = buildRayoNode("node",platforms);
+		storageService.registerRayoNode(node);
+		
+		assertNull(storageService.getMixer("1234"));
+		storageService.registerMixer("1234", node.getHostname());
+		assertNotNull(storageService.getMixer("1234"));
+		assertEquals(storageService.getMixer("1234").getNodeJid(),node.getHostname());
+		
+		storageService.unregisterMixer("1234");
+		assertNull(storageService.getMixer("1234"));
+	}
+	
+	@Test
+	public void testAddAndRemoveCallsFromMixers() throws Exception {
+		
+		String[] platforms = new String[]{"staging"};
+		RayoNode node = buildRayoNode("node",platforms);
+		storageService.registerRayoNode(node);
+		storageService.registerMixer("1234", node.getHostname());
+		assertNotNull(storageService.getMixer("1234"));
+		assertTrue(storageService.getMixer("1234").getParticipants().isEmpty());
+		
+		storageService.addCallToMixer("a", "1234");
+		assertEquals(storageService.getMixer("1234").getParticipants().size(), 1);
+		storageService.addCallToMixer("b", "1234");
+		assertEquals(storageService.getMixer("1234").getParticipants().size(), 2);
+
+		storageService.removeCallFromMixer("a", "1234");
+		assertEquals(storageService.getMixer("1234").getParticipants().size(), 1);
+		storageService.removeCallFromMixer("b", "1234");
+		assertTrue(storageService.getMixer("1234").getParticipants().isEmpty());		
+	}
+	
+	@Test
+	public void testAddAndRemoveVerbsFromMixers() throws Exception {
+		
+		String[] platforms = new String[]{"staging"};
+		RayoNode node = buildRayoNode("node",platforms);
+		storageService.registerRayoNode(node);
+		storageService.registerMixer("1234", node.getHostname());
+		assertNotNull(storageService.getMixer("1234"));
+		assertTrue(storageService.getVerbs("1234").isEmpty());
+		
+		storageService.addVerbToMixer("verb1", "app1@jid.com", "1234");
+		assertEquals(storageService.getVerbs("1234").size(), 1);
+		storageService.addVerbToMixer("verb2", "app2@jid.com", "1234");
+		assertEquals(storageService.getVerbs("1234").size(), 2);
+
+		storageService.removeVerbFromMixer("verb1", "1234");
+		assertEquals(storageService.getVerbs("1234").size(), 1);
+		storageService.removeVerbFromMixer("verb2", "1234");
+		assertTrue(storageService.getVerbs("1234").isEmpty());		
+	}
+	
+	@Test
+	public void testFindVerbsOnMixer() throws Exception {
+		
+		String[] platforms = new String[]{"staging"};
+		RayoNode node = buildRayoNode("node",platforms);
+		storageService.registerRayoNode(node);
+		storageService.registerMixer("1234", node.getHostname());		
+		storageService.addVerbToMixer("verb1", "app1@jid.com", "1234");
+		storageService.addVerbToMixer("verb2", "app2@jid.com", "1234");
+
+		assertNotNull(storageService.getVerb("1234", "verb1"));
+		assertNotNull(storageService.getVerb("1234", "verb2"));
+		assertNull(storageService.getVerb("1234", "abcd"));
+		assertNull(storageService.getVerb("lalala", "abcd"));
+		
+		storageService.removeVerbFromMixer("verb1", "1234");
+		assertNull(storageService.getVerb("1234", "verb1"));
 	}
 	
 	@Test

@@ -15,6 +15,8 @@ import com.rayo.storage.exception.RayoNodeNotFoundException;
 import com.rayo.storage.model.Application;
 import com.rayo.storage.model.GatewayCall;
 import com.rayo.storage.model.GatewayClient;
+import com.rayo.storage.model.GatewayMixer;
+import com.rayo.storage.model.GatewayVerb;
 import com.rayo.storage.model.RayoNode;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.util.ParticipantIDParser;
@@ -311,9 +313,9 @@ public class DefaultGatewayStorageService implements GatewayStorageService {
 	}
 	
 	@Override
-	public void storeAddress(String address, String jid) throws DatastoreException {
+	public void storeAddress(String address, String appId) throws DatastoreException {
 
-		store.storeAddress(address, jid);
+		store.storeAddress(address, appId);
 	}
 	
 	@Override
@@ -321,7 +323,68 @@ public class DefaultGatewayStorageService implements GatewayStorageService {
 		
 		store.storeAddresses(addresses, jid);
 	}
+	
+	@Override
+	public GatewayMixer getMixer(String id) {
 
+		return store.getMixer(id);
+	}
+	
+	@Override
+	public void registerMixer(String mixerName, String hostname)
+			throws DatastoreException {
+
+		GatewayMixer mixer = new GatewayMixer(mixerName, hostname);
+		store.storeMixer(mixer);
+	}
+	
+	@Override
+	public void unregisterMixer(String mixerName) throws DatastoreException {
+
+		store.removeMixer(mixerName);
+	}
+	
+	@Override
+	public void addCallToMixer(String callId, String mixerName) throws DatastoreException {
+		
+		store.addCallToMixer(callId, mixerName);
+	}
+	
+	@Override
+	public void removeCallFromMixer(String callId, String mixerName) throws DatastoreException {
+
+		store.removeCallFromMixer(callId, mixerName);
+	}
+
+	@Override
+	public void addVerbToMixer(String verbId, String appJid, String mixerName)
+			throws DatastoreException {
+
+		GatewayVerb verb = new GatewayVerb(verbId, appJid);
+		store.addVerbToMixer(verb, mixerName);
+	}
+	
+	@Override
+	public void removeVerbFromMixer(String verbId, String mixerName)
+			throws DatastoreException {
+
+		store.removeVerbFromMixer(verbId, mixerName);
+	}
+	
+	@Override
+	public List<GatewayVerb> getVerbs(String mixerName)
+			throws DatastoreException {
+
+		return store.getVerbs(mixerName);
+	}
+	
+	@Override
+	public GatewayVerb getVerb(String mixerName, String verbId)
+			throws DatastoreException {
+
+		return store.getVerb(mixerName, verbId);
+	}
+	
 	public void setStore(GatewayDatastore store) {
 		
 		this.store = store;

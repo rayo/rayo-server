@@ -26,6 +26,8 @@ import com.rayo.storage.GatewayStorageService;
 import com.rayo.storage.exception.GatewayException;
 import com.rayo.storage.lb.GatewayLoadBalancingStrategy;
 import com.rayo.storage.model.Application;
+import com.rayo.storage.model.GatewayMixer;
+import com.rayo.storage.model.GatewayVerb;
 import com.rayo.storage.model.RayoNode;
 import com.rayo.storage.util.JIDUtils;
 import com.voxeo.exceptions.NotFoundException;
@@ -124,7 +126,13 @@ public class GatewayServlet extends AbstractRayoServlet {
 		if (message.getFrom().getNode() == null) {
 			processRayoNodePresence(message);
 		} else {
-			processCallPresence(message);
+			// find if presence is from a mixer or from a call
+			GatewayMixer mixer = gatewayStorageService.getMixer(message.getFrom().getNode());
+			if (mixer != null) {
+				processMixerPresence(message, mixer);
+			} else {
+				processCallPresence(message);
+			}
 		}
 	}
 
@@ -163,7 +171,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 		
 		Collection<String> calls = gatewayStorageService.getCallsForNode(message.getFrom().toString());
 		for (String callId : calls) {
-			JID fromJid = createInternalCallJid(callId);
+			JID fromJid = createInternalJid(callId);
 			String target = gatewayStorageService.getclientJID(callId);
 			JID targetJid = getXmppFactory().createJID(target);
 			CoreDocumentImpl document = new CoreDocumentImpl(false);
@@ -228,7 +236,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 		
 		gatewayStorageService.registerRayoNode(node);		
 	}
-
+	
 	/*
 	 * Process an incoming Rayo Node event which is originated from a call id
 	 *  
@@ -236,66 +244,88 @@ public class GatewayServlet extends AbstractRayoServlet {
 	 */
 	private void processCallPresence(PresenceMessage message) throws Exception {
 						
-		JID toJid = message.getTo();
 		JID fromJid = message.getFrom();		
 		String callId = fromJid.getNode();
 		
-		Element offerElement = message.getElement("offer", "urn:xmpp:rayo:1");
-		String resource = null;
-		
-		if (offerElement != null) {			
-			if (getAdminService().isQuiesceMode()) {
-				log.warn("Gateway is on Quiesce mode. Discarding incoming job offer for call id: [%s]", callId);
-				sendPresenceError(message.getTo(), message.getFrom(), Condition.SERVICE_UNAVAILABLE, Type.CANCEL, "Gateway is on Quiesce mode.");
-				return;
-			}			
-			
-			Application application = gatewayStorageService.getApplicationForAddress(offerElement.getAttribute("to"));
-			if (application == null) {
-				String errorMessage = String.format("Could not find application for URI [%s]", offerElement.getAttribute("to"));
-				log.error(errorMessage);
-				sendPresenceError(message.getTo(), message.getFrom(), Condition.RECIPIENT_UNAVAILABLE, Type.CANCEL, errorMessage);
+		if (isOffer(message)) {			
+			if (!processOffer(message, callId)) {
 				return;
 			}
-			JID callTo = getXmppFactory().createJID(application.getJid());
-    		
-    		resource = loadBalancer.pickClientResource(callTo.getBareJID().toString()); // picks and load balances
-    		if (resource == null) {
-    			String errorMessage = String.format("Could not find an available resource for JID [%s]", callTo.getBareJID());
-    			log.error(errorMessage);
-				sendPresenceError(toJid, fromJid, Condition.RECIPIENT_UNAVAILABLE, Type.CANCEL, errorMessage);
-				return;
-			}
-
-    		callTo.setResource(resource);
-    		
-    		// Register call in DHT 
-    		gatewayStorageService.registerCall(callId, callTo.toString());
-    		gatewayStatistics.callRegistered();
+		} else if (isUnjoinedMixer(message)) {
+			processUnjoinedMixer(message);
+		} else if (isJoinedMixer(message)) {
+			processJoinedMixer(message);			
 		}
-		  	
-    	String jid = gatewayStorageService.getclientJID(callId);  
-    	if (jid == null) {
-    		log.error("Could not find registered client JID for call id [%s]", callId);
-    		sendPresenceError(toJid, fromJid, Condition.RECIPIENT_UNAVAILABLE, Type.CANCEL, "Could not find registered client JID for call");
-    		gatewayStatistics.errorProcessed();
-    		return;
-    	}
-    	JID to = getXmppFactory().createJID(jid);
-    	JID from = createExternalCallJid(callId, fromJid.getResource());
 		
 		if (message.getElement("end", "urn:xmpp:rayo:1") != null) {
 			gatewayStorageService.unregistercall(callId);
 		}
+		  	
+    	JID from = createExternalJid(callId, fromJid.getResource());
+		String jid = gatewayStorageService.getclientJID(callId);  
+	   	if (jid == null) {
+		    log.error("Could not find registered JID for call id [%s]", callId);
+		    sendPresenceError(message.getTo(), message.getFrom(), Condition.RECIPIENT_UNAVAILABLE, Type.CANCEL, "Could not find registered JID for id " + callId);
+		    gatewayStatistics.errorProcessed();
+	    	return;
+	   	}
+    	JID to = getXmppFactory().createJID(jid);		
+
+	   	forwardPresence(message, from, to, callId);					
+	}
+
+	private void forwardPresence(PresenceMessage message, JID fromJid, JID to, String callId) throws IOException, ServletException {
+		    		
+		sendPresence(message, fromJid, to, callId);
+	}
+	
+	private void processMixerPresence(PresenceMessage message, GatewayMixer mixer) throws Exception {
+		
+		JID fromJid = message.getFrom();						
+    	JID from = createExternalJid(mixer.getName(), fromJid.getResource());
+
+		String resource = message.getFrom().getResource();
+		if (resource != null) {
+			GatewayVerb verb = gatewayStorageService.getVerb(mixer.getName(), resource);
+			if (verb != null) {
+				if (message.getElement("complete","urn:xmpp:rayo:ext:1") != null) {
+					gatewayStorageService.removeVerbFromMixer(resource, fromJid.getNode());
+				}
+				JID to = getXmppFactory().createJID(verb.getAppJid());
+				sendPresence(message, from, to, mixer.getName());
+			} else {
+				log.error("Received presence [%s] but could not find the application JID for it.", message);
+				return;
+			}
+		} else {
+			// Generic Mixer event (e.g. active speaker). Send it to all apps in the mixer.
+			List<String> appIds = new ArrayList<String>();
+			for(String participant: mixer.getParticipants()) {
+				String jid = gatewayStorageService.getclientJID(participant);
+				if (jid != null) {
+					if (!appIds.contains(jid)) {
+						appIds.add(jid);
+						JID to = getXmppFactory().createJID(jid);
+						forwardPresence(message, fromJid, to, participant);
+					}
+				}
+			}
+			appIds.clear();
+		}	
+	}
+	
+	private void sendPresence(PresenceMessage message, JID from, JID to, String id) {
 		
 		try {
+			log.debug("Senting presence [%s] from [%s] to [%s]", message, from, to);
 			// Send presence
 			PresenceMessage presence = getXmppFactory().createPresence(from, to, null, 
 					message.getElement());
 			
 	    	if (presence == null) {
-	    		log.error("Could not find registered client session for call id [%s]", callId);
-	    		sendPresenceError(toJid, fromJid, Condition.RECIPIENT_UNAVAILABLE, Type.CANCEL, "Could not find registered client session for call");
+	    		log.error("Could not find registered client session for id [%s]", id);
+	    		sendPresenceError(message.getTo(), message.getFrom(), 
+	    				Condition.RECIPIENT_UNAVAILABLE, Type.CANCEL, "Could not find registered client session for call");
 	    		return;
 	    	}
 			presence.send();
@@ -305,25 +335,120 @@ public class GatewayServlet extends AbstractRayoServlet {
 			}
 		} catch (Exception e) {
 			// In the event of an error, continue dispatching to all remaining JIDs
-			log.error("Failed to dispatch event [jid=%s, event=%s]", jid, message, e);
-		}					
+			log.error("Failed to dispatch event [jid=%s, event=%s]", to.getBareJID(), message, e);
+		}	
 	}
 	
-	private JID createInternalCallJid(String callId) {
+	private boolean isJoinedMixer(PresenceMessage message) {
 		
-		String nodeIp = null;
-		try {
-			nodeIp = ParticipantIDParser.getIpAddress(callId);
-		} catch (Exception e) {
-			throw new NotFoundException(String.format("Could not find rayo node for callId [%s]", callId));
+		Element joined =  message.getElement("joined", "urn:xmpp:rayo:1");
+		if (joined != null) {
+			return joined.hasAttribute("mixer-name");
 		}
-		return getXmppFactory().createJID(callId + "@" + nodeIp);
+		return false;
+	}
+	
+	private boolean isUnjoinedMixer(PresenceMessage message) {
+		
+		Element unjoined =  message.getElement("unjoined", "urn:xmpp:rayo:1");
+		if (unjoined != null) {
+			return unjoined.hasAttribute("mixer-name");
+		}
+		return false;
+	}
+	
+	private boolean isOffer(PresenceMessage message) {
+		
+		return message.getElement("offer", "urn:xmpp:rayo:1") != null;
+	}
+	
+	private boolean isJoinMixer(IQRequest request) {
+		
+		Element join = request.getElement("join", "urn:xmpp:rayo:1");
+		if (join != null) {
+			return join.hasAttribute("mixer-name");
+		}
+		return false;
+	}
+	
+	private void processJoinedMixer(PresenceMessage message) throws Exception {
+		
+		String callId = message.getFrom().getNode();
+		String mixerName = message.getElement("joined", "urn:xmpp:rayo:1").getAttribute("mixer-name");
+		gatewayStorageService.addCallToMixer(callId, mixerName);
+	}
+	
+	private void processUnjoinedMixer(PresenceMessage message) throws Exception {
+		
+		String callId = message.getFrom().getNode();
+		String mixerName = message.getElement("unjoined", "urn:xmpp:rayo:1").getAttribute("mixer-name");
+		gatewayStorageService.removeCallFromMixer(callId, mixerName);
+		
+		GatewayMixer mixer = gatewayStorageService.getMixer(mixerName);
+		if (mixer.getParticipants().size() == 0) {
+			gatewayStorageService.unregisterMixer(mixerName);
+		}
+	}
+	
+	private boolean processOffer(PresenceMessage message, String callId) throws Exception {
+		
+		Element offerElement = message.getElement("offer", "urn:xmpp:rayo:1");
+		
+		JID toJid = message.getTo();
+		JID fromJid = message.getFrom();
+		
+		if (getAdminService().isQuiesceMode()) {
+			log.warn("Gateway is on Quiesce mode. Discarding incoming job offer for call id: [%s]", callId);
+			sendPresenceError(message.getTo(), message.getFrom(), Condition.SERVICE_UNAVAILABLE, Type.CANCEL, "Gateway is on Quiesce mode.");
+			return false;
+		}			
+		
+		Application application = gatewayStorageService.getApplicationForAddress(offerElement.getAttribute("to"));
+		if (application == null) {
+			String errorMessage = String.format("Could not find application for URI [%s]", offerElement.getAttribute("to"));
+			log.error(errorMessage);
+			sendPresenceError(message.getTo(), message.getFrom(), Condition.RECIPIENT_UNAVAILABLE, Type.CANCEL, errorMessage);
+			return false;
+		}
+		JID callTo = getXmppFactory().createJID(application.getJid());
+		
+		String resource = loadBalancer.pickClientResource(callTo.getBareJID().toString()); // picks and load balances
+		if (resource == null) {
+			String errorMessage = String.format("Could not find an available resource for JID [%s]", callTo.getBareJID());
+			log.error(errorMessage);
+			sendPresenceError(toJid, fromJid, Condition.RECIPIENT_UNAVAILABLE, Type.CANCEL, errorMessage);
+			return false;
+		}
+
+		callTo.setResource(resource);
+		
+		// Register call in DHT 
+		gatewayStorageService.registerCall(callId, callTo.toString());
+		gatewayStatistics.callRegistered();
+
+		return true;
+	}
+	
+	private JID createInternalJid(String id) {
+		
+		String nodeAddress = null;
+		GatewayMixer mixer = gatewayStorageService.getMixer(id);
+		if (mixer != null) {
+			nodeAddress = mixer.getNodeJid();
+		} else {
+			try {
+				nodeAddress = ParticipantIDParser.getIpAddress(id);
+			} catch (Exception e) {
+				throw new NotFoundException(String.format("Could not find rayo node for id [%s]", id));
+			}
+		}
+		return getXmppFactory().createJID(id + "@" + nodeAddress);
 			
 	}
 	
-	private JID createExternalCallJid(String callId, String resource) {
+	private JID createExternalJid(String id, String resource) {
 		
-		JID jid = getXmppFactory().createJID(callId + "@" + getExternalDomain());
+		JID jid = getXmppFactory().createJID(id + "@" + getExternalDomain());
 		if (resource != null) {
 			jid.setResource(resource);
 		}
@@ -413,6 +538,11 @@ public class GatewayServlet extends AbstractRayoServlet {
 			if (isMyExternalDomain(request.getTo())) {
 				if (isDial(request)) {
 					processDialRequest(request);
+				} else if (isJoinMixer(request)) {
+					if (!createMixer(request)) {
+						return;
+					}
+					processClientIQRequest(request);
 				} else {
 					processClientIQRequest(request);
 				}
@@ -431,16 +561,30 @@ public class GatewayServlet extends AbstractRayoServlet {
 		}	
 	}
 	
+	private boolean createMixer(IQRequest request) throws Exception {
+		
+		String mixerName = request.getElement("join").getAttribute("mixer-name");
+		String platformId = gatewayStorageService.getPlatformForClient(request.getFrom());
+		RayoNode rayoNode = loadBalancer.pickRayoNode(platformId);
+		if (rayoNode == null) {
+			sendIqError(request, Type.CANCEL, Condition.SERVICE_UNAVAILABLE, 
+					String.format("Could not find an available Rayo Node in platform %s", platformId));				
+			return false;
+		}
+		gatewayStorageService.registerMixer(mixerName, rayoNode.getHostname());
+		return true;
+	}
+
 	/*
 	 * It process a Client IQ request that it is not a dial
 	 */
 	private void processClientIQRequest(IQRequest request) throws Exception {
 		
-		String callId = request.getTo().getNode();
+		String id = request.getTo().getNode();
 		Element payload = request.getElement();
 		
 		JID fromJidInternal = getXmppFactory().createJID(getInternalDomain());
-		JID toJidInternal = createInternalCallJid(callId);
+		JID toJidInternal = createInternalJid(id);
 		if (request.getTo().getResource() != null) {
 			toJidInternal.setResource(request.getTo().getResource());
 		}
@@ -612,19 +756,6 @@ public class GatewayServlet extends AbstractRayoServlet {
 								resendDialRequest(response, nattedRequest, originalRequest, nodesDialed);
 								return;								
 							}
-									
-							/*
-							switch(condition) {
-								case GONE: 
-								case INTERNAL_SERVER_ERROR:
-								case REMOTE_SERVER_TIMEOUT:
-								case REMOTE_SERVER_NOT_FOUND:
-								case SERVICE_UNAVAILABLE:
-									loadBalancer.nodeOperationFailed(nodesDialed.get(nodesDialed.size()-1));
-									resendDialRequest(response, nattedRequest, originalRequest, nodesDialed);
-									return;
-							}
-							*/
 						} catch (Exception e) {
 							log.error("Could not parse condition [%s]", errorNode.getNodeName());
 						}
@@ -632,6 +763,24 @@ public class GatewayServlet extends AbstractRayoServlet {
 				}				
 			}
 			loadBalancer.nodeOperationSuceeded(nodesDialed.get(nodesDialed.size()-1));
+		} else {
+			Element refElement = response.getElement("ref");
+			if (refElement != null) {
+				// Check if the ref element comes from a mixer. In such case we need to track it, so 
+				// subsequent events on that resource get forwarded to the appropriate app id
+				String id = response.getFrom().getNode();
+				GatewayMixer mixer = gatewayStorageService.getMixer(id);
+				if (mixer != null) {
+					String verbId = refElement.getAttribute("id");
+					String appJid = originalRequest.getFrom().toString();
+					try {
+						gatewayStorageService.addVerbToMixer(verbId, appJid, mixer.getName());
+					} catch (Exception e) {
+						log.error(e.getMessage(),e);
+					}
+				}
+			}
+
 		}
 		forwardResponse(response, originalRequest);
 	}

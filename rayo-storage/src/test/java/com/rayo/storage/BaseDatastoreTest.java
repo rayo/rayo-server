@@ -21,6 +21,8 @@ import com.rayo.storage.exception.RayoNodeNotFoundException;
 import com.rayo.storage.model.Application;
 import com.rayo.storage.model.GatewayCall;
 import com.rayo.storage.model.GatewayClient;
+import com.rayo.storage.model.GatewayMixer;
+import com.rayo.storage.model.GatewayVerb;
 import com.rayo.storage.model.RayoNode;
 
 public abstract class BaseDatastoreTest {
@@ -218,9 +220,10 @@ public abstract class BaseDatastoreTest {
 				"clienta@jabber.org");
 
 		store.storeCall(call);
-		GatewayCall removed = store.removeCall(call.getCallId());
-		assertNotNull(removed);
-		assertEquals(removed, call);
+
+		GatewayCall stored = store.getCall(call.getCallId());
+		assertNotNull(stored);
+		assertEquals(stored, call);
 	}
 
 	@Test
@@ -286,9 +289,9 @@ public abstract class BaseDatastoreTest {
 
 		GatewayCall call1 = store.storeCall(new GatewayCall("1234", node1
 				.getHostname(), "clienta@jabber.org"));
-		GatewayCall call2 = store.storeCall(new GatewayCall("abcd", node1
+		store.storeCall(new GatewayCall("abcd", node1
 				.getHostname(), "clienta@jabber.org"));
-		GatewayCall call3 = store.storeCall(new GatewayCall("zzzz", node2
+		store.storeCall(new GatewayCall("zzzz", node2
 				.getHostname(), "clienta@jabber.org"));
 
 		assertEquals(2, store.getCallsForNode(node1.getHostname()).size());
@@ -300,6 +303,319 @@ public abstract class BaseDatastoreTest {
 		assertEquals(1, store.getCallsForNode(node2.getHostname()).size());
 		assertEquals(2, store.getCalls().size());
 	}
+	
+	@Test
+	public void testStoreMixer() throws Exception {
+
+		RayoNode node1 = buildRayoNode("localhost","127.0.0.1", new String[] { "staging" });
+		store.storeNode(node1);
+
+		GatewayMixer mixer = new GatewayMixer("1234", node1.getHostname());
+
+		GatewayMixer stored = store.storeMixer(mixer);
+		assertNotNull(stored);
+		assertEquals(stored, mixer);
+	}
+
+	@Test
+	public void testRemoveMixer() throws Exception {
+
+		RayoNode node1 = buildRayoNode("localhost","127.0.0.1", new String[] { "staging" });
+		store.storeNode(node1);
+
+		GatewayMixer mixer = new GatewayMixer("1234", node1.getHostname());
+		store.storeMixer(mixer);
+
+		GatewayMixer removed = store.removeMixer(mixer.getName());
+		assertNotNull(removed);
+		assertEquals(removed, mixer);
+	}
+
+	@Test
+	public void testGetMixer() throws Exception {
+
+		RayoNode node1 = buildRayoNode("localhost","127.0.0.1", new String[] { "staging" });
+		store.storeNode(node1);
+
+		GatewayMixer mixer = new GatewayMixer("1234", node1.getHostname());
+		store.storeMixer(mixer);
+
+		GatewayMixer stored = store.getMixer(mixer.getName());
+		assertNotNull(stored);
+		assertEquals(stored, mixer);
+	}
+
+	@Test
+	public void testGetNodeForMixer() throws Exception {
+
+		RayoNode node1 = buildRayoNode("localhost","127.0.0.1", new String[] { "staging" });
+		store.storeNode(node1);
+
+		GatewayMixer mixer = new GatewayMixer("1234", node1.getHostname());
+		store.storeMixer(mixer);
+
+		GatewayMixer stored = store.getMixer(mixer.getName());
+		RayoNode storedNode = store.getNode(stored.getNodeJid());
+		assertNotNull(storedNode);
+		assertEquals(storedNode, node1);
+	}
+
+	@Test
+	public void testMixerNotFound() throws Exception {
+
+		assertNull(store.getMixer("1234"));
+	}
+	
+	@Test
+	public void testAddCallsToMixer() throws Exception {
+
+		RayoNode node = buildRayoNode("localhost","127.0.0.1", new String[] { "staging" });
+		store.storeNode(node);
+
+		GatewayMixer mixer = new GatewayMixer("1234", node.getHostname());
+		mixer = store.storeMixer(mixer);
+		assertTrue(mixer.getParticipants().isEmpty());
+		
+		GatewayCall call1 = new GatewayCall("call1", node.getHostname(), "clienta@jabber.org");
+		GatewayCall call2 = new GatewayCall("call2", node.getHostname(), "clienta@jabber.org");
+
+		store.addCallToMixer(call1.getCallId(), mixer.getName());
+		GatewayMixer stored = store.getMixer(mixer.getName());
+		assertEquals(stored.getParticipants().size(), 1);
+		
+		store.addCallToMixer(call2.getCallId(), mixer.getName());
+		stored = store.getMixer(mixer.getName());
+		assertEquals(stored.getParticipants().size(), 2);
+	}
+	
+	@Test
+	public void testAddCallSeveralTimesToMixerHasNoEffect() throws Exception {
+
+		RayoNode node = buildRayoNode("localhost","127.0.0.1", new String[] { "staging" });
+		store.storeNode(node);
+
+		GatewayMixer mixer = new GatewayMixer("1234", node.getHostname());
+		mixer = store.storeMixer(mixer);
+		assertTrue(mixer.getParticipants().isEmpty());
+		
+		GatewayCall call1 = new GatewayCall("call1", node.getHostname(), "clienta@jabber.org");
+
+		store.addCallToMixer(call1.getCallId(), mixer.getName());
+		store.addCallToMixer(call1.getCallId(), mixer.getName());
+		store.addCallToMixer(call1.getCallId(), mixer.getName());
+		GatewayMixer stored = store.getMixer(mixer.getName());
+		assertEquals(stored.getParticipants().size(), 1);		
+	}
+	
+	@Test
+	public void testRemoveCallFromMixer() throws Exception {
+
+		RayoNode node = buildRayoNode("localhost","127.0.0.1", new String[] { "staging" });
+		store.storeNode(node);
+
+		GatewayMixer mixer = new GatewayMixer("1234", node.getHostname());
+		mixer = store.storeMixer(mixer);
+		
+		GatewayCall call1 = new GatewayCall("call1", node.getHostname(), "clienta@jabber.org");
+		GatewayCall call2 = new GatewayCall("call2", node.getHostname(), "clienta@jabber.org");
+
+		store.addCallToMixer(call1.getCallId(), mixer.getName());
+		store.addCallToMixer(call2.getCallId(), mixer.getName());
+		mixer = store.getMixer(mixer.getName());
+		assertEquals(mixer.getParticipants().size(),2);
+
+		store.removeCallFromMixer(call1.getCallId(), mixer.getName());
+		mixer = store.getMixer(mixer.getName());
+		assertEquals(mixer.getParticipants().size(),1);
+
+		store.removeCallFromMixer(call2.getCallId(), mixer.getName());
+		mixer = store.getMixer(mixer.getName());
+		assertEquals(mixer.getParticipants().size(),0);
+	}
+	
+	@Test
+	public void testRemoveCallSeveralTimesToMixerHasNoEffect() throws Exception {
+
+		RayoNode node = buildRayoNode("localhost","127.0.0.1", new String[] { "staging" });
+		store.storeNode(node);
+
+		GatewayMixer mixer = new GatewayMixer("1234", node.getHostname());
+		mixer = store.storeMixer(mixer);
+		assertTrue(mixer.getParticipants().isEmpty());
+		
+		GatewayCall call1 = new GatewayCall("call1", node.getHostname(), "clienta@jabber.org");
+		GatewayCall call2 = new GatewayCall("call2", node.getHostname(), "clienta@jabber.org");
+
+		store.addCallToMixer(call1.getCallId(), mixer.getName());
+		store.addCallToMixer(call2.getCallId(), mixer.getName());
+		mixer = store.getMixer(mixer.getName());
+		assertEquals(mixer.getParticipants().size(),2);	
+		
+		store.removeCallFromMixer(call1.getCallId(), mixer.getName());
+		store.removeCallFromMixer(call1.getCallId(), mixer.getName());
+		store.removeCallFromMixer(call1.getCallId(), mixer.getName());
+		mixer = store.getMixer(mixer.getName());
+		assertEquals(mixer.getParticipants().size(),1);
+	}
+	
+	@Test
+	public void testAddVerbsToMixer() throws Exception {
+
+		RayoNode node = buildRayoNode("localhost","127.0.0.1", new String[] { "staging" });
+		store.storeNode(node);
+
+		GatewayMixer mixer = new GatewayMixer("1234", node.getHostname());
+		mixer = store.storeMixer(mixer);
+		assertTrue(mixer.getParticipants().isEmpty());
+
+		GatewayVerb verb1 = new GatewayVerb("verb1", "app1@tropo.com");
+		GatewayVerb verb2 = new GatewayVerb("verb2", "app1@tropo.com");
+
+		store.addVerbToMixer(verb1, mixer.getName());
+		assertEquals(store.getVerbs(mixer.getName()).size(), 1);
+		assertTrue(store.getVerbs(mixer.getName()).contains(verb1));
+		GatewayVerb stored = store.getVerbs(mixer.getName()).get(0);
+		assertEquals(stored.getAppJid(), verb1.getAppJid());
+		
+		store.addVerbToMixer(verb2, mixer.getName());
+		assertEquals(store.getVerbs(mixer.getName()).size(), 2);
+		assertTrue(store.getVerbs(mixer.getName()).contains(verb2));
+		stored = store.getVerbs(mixer.getName()).get(1);
+		assertEquals(stored.getAppJid(), verb2.getAppJid());
+	}
+	
+	@Test
+	public void testAddVerbSeveralTimesToMixerHasNoEffect() throws Exception {
+
+		RayoNode node = buildRayoNode("localhost","127.0.0.1", new String[] { "staging" });
+		store.storeNode(node);
+
+		GatewayMixer mixer = new GatewayMixer("1234", node.getHostname());
+		mixer = store.storeMixer(mixer);
+		assertTrue(mixer.getParticipants().isEmpty());
+
+		GatewayVerb verb1 = new GatewayVerb("verb1", "app1@tropo.com");
+		
+		store.addVerbToMixer(verb1, mixer.getName());
+		store.addVerbToMixer(verb1, mixer.getName());
+		store.addVerbToMixer(verb1, mixer.getName());
+		assertEquals(store.getVerbs(mixer.getName()).size(), 1);		
+	}
+	
+	@Test
+	public void testRemoveVerbFromMixer() throws Exception {
+
+		RayoNode node = buildRayoNode("localhost","127.0.0.1", new String[] { "staging" });
+		store.storeNode(node);
+
+		GatewayMixer mixer = new GatewayMixer("1234", node.getHostname());
+		mixer = store.storeMixer(mixer);
+		
+		GatewayVerb verb1 = new GatewayVerb("verb1", "app1@tropo.com");
+		GatewayVerb verb2 = new GatewayVerb("verb2", "app1@tropo.com");
+
+		store.addVerbToMixer(verb1, mixer.getName());
+		store.addVerbToMixer(verb2, mixer.getName());
+		mixer = store.getMixer(mixer.getName());
+		assertEquals(store.getVerbs(mixer.getName()).size(),2);
+
+		store.removeVerbFromMixer(verb1.getVerbId(), mixer.getName());
+		mixer = store.getMixer(mixer.getName());
+		assertEquals(store.getVerbs(mixer.getName()).size(),1);
+		assertTrue(!store.getVerbs(mixer.getName()).contains("verb1"));
+
+		store.removeVerbFromMixer(verb2.getVerbId(), mixer.getName());
+		mixer = store.getMixer(mixer.getName());
+		assertEquals(store.getVerbs(mixer.getName()).size(),0);
+		assertTrue(!store.getVerbs(mixer.getName()).contains("verb2"));
+	}
+	
+	@Test
+	public void testRemoveMixerSeveralTimesToMixerHasNoEffect() throws Exception {
+
+		RayoNode node = buildRayoNode("localhost","127.0.0.1", new String[] { "staging" });
+		store.storeNode(node);
+
+		GatewayMixer mixer = new GatewayMixer("1234", node.getHostname());
+		mixer = store.storeMixer(mixer);
+		assertTrue(mixer.getParticipants().isEmpty());
+
+		GatewayVerb verb1 = new GatewayVerb("verb1", "app1@tropo.com");
+		GatewayVerb verb2 = new GatewayVerb("verb2", "app1@tropo.com");
+
+		store.addVerbToMixer(verb1, mixer.getName());
+		store.addVerbToMixer(verb2, mixer.getName());
+		mixer = store.getMixer(mixer.getName());
+		assertEquals(store.getVerbs(mixer.getName()).size(),2);	
+		
+		store.removeVerbFromMixer(verb1.getVerbId(), mixer.getName());
+		store.removeVerbFromMixer(verb1.getVerbId(), mixer.getName());
+		store.removeVerbFromMixer(verb1.getVerbId(), mixer.getName());
+		mixer = store.getMixer(mixer.getName());
+		assertEquals(store.getVerbs(mixer.getName()).size(),1);
+	}
+	
+	@Test
+	public void testGetVerbFromMixer() throws Exception {
+
+		RayoNode node = buildRayoNode("localhost","127.0.0.1", new String[] { "staging" });
+		store.storeNode(node);
+
+		GatewayMixer mixer = new GatewayMixer("1234", node.getHostname());
+		mixer = store.storeMixer(mixer);
+		assertTrue(mixer.getParticipants().isEmpty());
+
+		GatewayVerb verb1 = new GatewayVerb("verb1", "app1@tropo.com");
+		GatewayVerb verb2 = new GatewayVerb("verb2", "app1@tropo.com");
+
+		store.addVerbToMixer(verb1, mixer.getName());
+		store.addVerbToMixer(verb2, mixer.getName());
+		
+		assertEquals(verb1, store.getVerb("1234", "verb1"));
+		assertEquals(verb2, store.getVerb("1234", "verb2"));
+	}
+	
+	@Test
+	public void testVerbNotFoundOnMixer() throws Exception {
+
+		RayoNode node = buildRayoNode("localhost","127.0.0.1", new String[] { "staging" });
+		store.storeNode(node);
+
+		GatewayMixer mixer = new GatewayMixer("1234", node.getHostname());
+		mixer = store.storeMixer(mixer);
+
+		assertNull(store.getVerb("1234", "verb1"));
+	}
+	
+	@Test
+	public void testVerbNotFoundWhenMixerDoesNotExist() throws Exception {
+
+		assertNull(store.getVerb("lalala", "verb1"));
+	}
+	
+	@Test
+	public void testGetMixers() throws Exception {
+
+		RayoNode node1 = buildRayoNode("localhost","127.0.0.1", new String[] { "staging" });
+		store.storeNode(node1);
+
+		assertEquals(0, store.getMixers().size());
+		GatewayMixer mixer1 = store.storeMixer(new GatewayMixer("a", node1.getHostname()));
+		GatewayMixer mixer2 = store.storeMixer(new GatewayMixer("b", node1.getHostname()));
+		GatewayMixer mixer3 = store.storeMixer(new GatewayMixer("c", node1.getHostname()));
+
+		assertEquals(3, store.getMixers().size());
+
+		store.removeMixer(mixer2.getName());
+		assertEquals(2, store.getMixers().size());
+
+		store.removeMixer(mixer1.getName());
+		store.removeMixer(mixer3.getName());
+
+		assertEquals(0, store.getMixers().size());
+	}
+	
+
 	
 	@Test
 	public void testStoreApplication() throws Exception {
@@ -336,6 +652,10 @@ public abstract class BaseDatastoreTest {
 		assertEquals(stored.size(), 2);
 		assertTrue(stored.contains(application1));
 		assertTrue(stored.contains(application2));
+		
+		store.removeApplication("app@tropo.com");
+		stored = store.getApplications();
+		assertEquals(stored.size(), 1);
 	}
 	
 	@Test
@@ -623,6 +943,24 @@ public abstract class BaseDatastoreTest {
 		assertTrue(clients.contains("clientb@jabber.org"));
 	}
 
+
+	@Test
+	public void testStoreDuplicateClientsHasNoEffect() throws Exception {
+
+		Application application = buildApplication("voxeo");
+		store.storeApplication(application);
+
+		assertEquals(0, store.getClients().size());
+		GatewayClient client = new GatewayClient("client@jabber.org/a", "staging");
+		store.storeClient(client);
+		store.storeClient(client);
+		store.storeClient(client);
+
+		List<String> clients = store.getClients();
+		assertEquals(1, clients.size());
+		assertTrue(clients.contains("client@jabber.org"));
+	}
+	
 	public static RayoNode buildRayoNode(String hostname,String ipAddress, String[] platforms) {
 	
 		return buildRayoNode(hostname, ipAddress, platforms, RayoNode.DEFAULT_WEIGHT);
