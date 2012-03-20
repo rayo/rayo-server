@@ -256,11 +256,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 		} else if (isJoinedMixer(message)) {
 			processJoinedMixer(message);			
 		}
-		
-		if (message.getElement("end", "urn:xmpp:rayo:1") != null) {
-			gatewayStorageService.unregistercall(callId);
-		}
-		  	
+				  	
     	JID from = createExternalJid(callId, fromJid.getResource());
 		String jid = gatewayStorageService.getclientJID(callId);  
 	   	if (jid == null) {
@@ -271,6 +267,10 @@ public class GatewayServlet extends AbstractRayoServlet {
 	   	}
     	JID to = getXmppFactory().createJID(jid);		
 
+		if (message.getElement("end", "urn:xmpp:rayo:1") != null) {
+			gatewayStorageService.unregistercall(callId);
+		}
+		
 	   	forwardPresence(message, from, to, callId);					
 	}
 
