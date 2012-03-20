@@ -903,6 +903,13 @@ class ValidationTest {
 		assertNotNull fromXML(output)
 	}
 	
+	@Test
+	public void validateOutputValid2() {
+				
+		def output = parseXml("""<output xmlns=\"urn:xmpp:rayo:output:1\"><speak version="1.0" xml:lang="en-US"><audio src="digits/3"/></speak></output>""")
+		assertNotNull fromXML(output)
+	}
+	
 	// Input
 	// ====================================================================================
 	
