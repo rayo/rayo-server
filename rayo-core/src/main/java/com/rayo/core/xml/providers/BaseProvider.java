@@ -106,8 +106,12 @@ public abstract class BaseProvider implements XmlProvider {
         for (Node element : elements) {
             if (element instanceof Text || element instanceof Element) {
                 String xml = element.asXML();
-                //TODO: Better namespaces cleanup
+                //TODO: Better namespaces cleanup. See for exmaple GH issue #19. Options are
+                // move everything to DOM or change the rayo spec to use CDATA. But currently 
+                // speak elements let people enter arbitrary xml which causes lot of trouble
                 xml = xml.replaceAll(" xmlns=\"[^\"]*\"", "");
+                xml = xml.replaceAll(" xmlns:xml=\"[^\"]*\"", "");
+                xml = xml.replaceAll(" xml:xml", " xml");
                 builder.append(xml);
             }
         }
