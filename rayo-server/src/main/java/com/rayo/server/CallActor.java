@@ -1,11 +1,16 @@
 package com.rayo.server;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import javax.jms.IllegalStateException;
+import javax.media.mscontrol.EventType;
+import javax.media.mscontrol.mixer.MediaMixer;
+import javax.media.mscontrol.mixer.MixerEvent;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
@@ -36,6 +41,7 @@ import com.voxeo.moho.Call;
 import com.voxeo.moho.Call.State;
 import com.voxeo.moho.Joint;
 import com.voxeo.moho.Mixer;
+import com.voxeo.moho.MixerEndpoint;
 import com.voxeo.moho.Participant;
 import com.voxeo.moho.Participant.JoinType;
 import com.voxeo.moho.common.event.AutowiredEventListener;
@@ -237,6 +243,13 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     	
 		Participant destination = getDestinationParticipant(participant, message.getFrom(), message.getType());
     	try {
+    		if (destination == null && message.getType() == JoinDestinationType.MIXER) {
+        		MixerEndpoint endpoint = (MixerEndpoint)participant.getApplicationContext()
+        				.createEndpoint(MixerEndpoint.DEFAULT_MIXER_ENDPOINT);
+        		Map<Object, Object> parameters = new HashMap<Object, Object>();
+        		parameters.put(MediaMixer.ENABLED_EVENTS, new EventType[]{MixerEvent.ACTIVE_INPUTS_CHANGED});    			
+        		destination = endpoint.create(message.getFrom(), parameters);
+    		}
     		if (destination == null) {
     			throw new NotFoundException("Participant " + message.getFrom() + " not found");
     		}

@@ -171,7 +171,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 		
 		Collection<String> calls = gatewayStorageService.getCallsForNode(message.getFrom().toString());
 		for (String callId : calls) {
-			JID fromJid = createInternalJid(callId);
+			JID fromJid = createInternalJid(callId, message);
 			String target = gatewayStorageService.getclientJID(callId);
 			JID targetJid = getXmppFactory().createJID(target);
 			CoreDocumentImpl document = new CoreDocumentImpl(false);
@@ -306,7 +306,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 					if (!appIds.contains(jid)) {
 						appIds.add(jid);
 						JID to = getXmppFactory().createJID(jid);
-						forwardPresence(message, fromJid, to, participant);
+						forwardPresence(message, from, to, participant);
 					}
 				}
 			}
@@ -317,7 +317,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 	private void sendPresence(PresenceMessage message, JID from, JID to, String id) {
 		
 		try {
-			log.debug("Senting presence [%s] from [%s] to [%s]", message, from, to);
+			log.debug("Sending presence [%s] from [%s] to [%s]", message, from, to);
 			// Send presence
 			PresenceMessage presence = getXmppFactory().createPresence(from, to, null, 
 					message.getElement());
@@ -365,6 +365,15 @@ public class GatewayServlet extends AbstractRayoServlet {
 	private boolean isJoinMixer(IQRequest request) {
 		
 		Element join = request.getElement("join", "urn:xmpp:rayo:1");
+		if (join != null) {
+			return join.hasAttribute("mixer-name");
+		}
+		return false;
+	}
+	
+	private boolean isUnjoinMixer(XmppServletRequest request) {
+		
+		Element join = request.getElement("unjoin", "urn:xmpp:rayo:1");
 		if (join != null) {
 			return join.hasAttribute("mixer-name");
 		}
@@ -429,7 +438,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 		return true;
 	}
 	
-	private JID createInternalJid(String id) {
+	private JID createInternalJid(String id, XmppServletRequest request) {
 		
 		String nodeAddress = null;
 		GatewayMixer mixer = gatewayStorageService.getMixer(id);
@@ -442,8 +451,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 				throw new NotFoundException(String.format("Could not find rayo node for id [%s]", id));
 			}
 		}
-		return getXmppFactory().createJID(id + "@" + nodeAddress);
-			
+		return getXmppFactory().createJID(id + "@" + nodeAddress);		
 	}
 	
 	private JID createExternalJid(String id, String resource) {
@@ -564,14 +572,19 @@ public class GatewayServlet extends AbstractRayoServlet {
 	private boolean createMixer(IQRequest request) throws Exception {
 		
 		String mixerName = request.getElement("join").getAttribute("mixer-name");
-		String platformId = gatewayStorageService.getPlatformForClient(request.getFrom());
-		RayoNode rayoNode = loadBalancer.pickRayoNode(platformId);
-		if (rayoNode == null) {
-			sendIqError(request, Type.CANCEL, Condition.SERVICE_UNAVAILABLE, 
-					String.format("Could not find an available Rayo Node in platform %s", platformId));				
-			return false;
+		GatewayMixer mixer = gatewayStorageService.getMixer(mixerName);
+		if (mixer == null) {
+			// In the current implementation, mixer lives where the first call lives
+			String nodename;
+			try {
+				nodename = ParticipantIDParser.getIpAddress(request.getTo().getNode());
+			} catch (Exception e) {
+				throw new NotFoundException(String.format("Could not find rayo node for id [%s]", request.getTo()));
+			}
+			gatewayStorageService.registerMixer(mixerName, nodename);
+		} else {
+			log.debug("Mixer [%s] already exists", mixerName);
 		}
-		gatewayStorageService.registerMixer(mixerName, rayoNode.getHostname());
 		return true;
 	}
 
@@ -584,7 +597,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 		Element payload = request.getElement();
 		
 		JID fromJidInternal = getXmppFactory().createJID(getInternalDomain());
-		JID toJidInternal = createInternalJid(id);
+		JID toJidInternal = createInternalJid(id, request);
 		if (request.getTo().getResource() != null) {
 			toJidInternal.setResource(request.getTo().getResource());
 		}
