@@ -25,4 +25,8 @@ public interface GatewayMXBean {
 	List<String> getAddressesForJid(String jid);
 
 	Call callInfo(String callId);
+	
+	List<Mixer> getActiveMixers();
+	
+	Mixer mixerInfo(String mixerName);
 }

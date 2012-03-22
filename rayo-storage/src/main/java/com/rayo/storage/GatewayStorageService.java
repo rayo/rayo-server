@@ -371,6 +371,14 @@ public interface GatewayStorageService {
 	GatewayMixer getMixer(String id);
 	
 	/**
+	 * Returns a list with all the mixers registered in the Gateway
+	 * 
+	 * @return List<GatewayMixer> List with all mixers registered in the gateway or 
+	 * an empty list if no mixers are found. 
+	 */
+	List<GatewayMixer> getMixers();
+	
+	/**
 	 * Register a mixer in the gateway
 	 * 
 	 * @param mixerName Name of the mixer

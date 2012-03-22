@@ -16,6 +16,7 @@ public class GatewayStatistics implements GatewayStatisticsMXBean {
 	private GatewayStorageService gatewayStorageService;
 	
 	private AtomicLong totalCallsCount = new AtomicLong();
+	private AtomicLong totalMixersCount = new AtomicLong();
 	private AtomicLong messagesCount = new AtomicLong();
 	private AtomicLong errorsCount = new AtomicLong();
 	
@@ -23,7 +24,7 @@ public class GatewayStatistics implements GatewayStatisticsMXBean {
 	private Set<String> resources = new HashSet<String>();
 	
 	@Override
-	@ManagedAttribute(description="Active Calls")	
+	@ManagedAttribute(description="Active Calls Count")	
 	public long getActiveCallsCount() {
 
 		return gatewayStorageService.getCalls().size();
@@ -34,6 +35,20 @@ public class GatewayStatistics implements GatewayStatisticsMXBean {
 	public long getTotalCallsCount() {
 
 		return totalCallsCount.longValue();
+	}
+	
+	@Override
+	@ManagedAttribute(description="Active Mixers Count")	
+	public long getActiveMixersCount() {
+
+		return gatewayStorageService.getMixers().size();
+	}
+
+	@Override
+	@ManagedAttribute(description="Total Mixers")	
+	public long getTotalMixersCount() {
+
+		return totalMixersCount.longValue();
 	}
 
 	@Override
@@ -102,7 +117,12 @@ public class GatewayStatistics implements GatewayStatisticsMXBean {
 		
 		totalCallsCount.incrementAndGet();
 	}
-
+	
+	public void mixerRegistered() {
+		
+		totalMixersCount.incrementAndGet();
+	}
+	
 	public void setGatewayStorageService(GatewayStorageService gatewayStorageService) {
 		this.gatewayStorageService = gatewayStorageService;
 	}

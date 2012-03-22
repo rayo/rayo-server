@@ -582,6 +582,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 				throw new NotFoundException(String.format("Could not find rayo node for id [%s]", request.getTo()));
 			}
 			gatewayStorageService.registerMixer(mixerName, nodename);
+			gatewayStatistics.mixerRegistered();
 		} else {
 			log.debug("Mixer [%s] already exists", mixerName);
 		}

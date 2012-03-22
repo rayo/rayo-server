@@ -2,6 +2,7 @@ package com.rayo.storage;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -383,6 +384,12 @@ public class DefaultGatewayStorageService implements GatewayStorageService {
 			throws DatastoreException {
 
 		return store.getVerb(mixerName, verbId);
+	}
+
+	@Override
+	public List<GatewayMixer> getMixers() {
+
+		return new ArrayList<GatewayMixer>(store.getMixers());
 	}
 	
 	public void setStore(GatewayDatastore store) {

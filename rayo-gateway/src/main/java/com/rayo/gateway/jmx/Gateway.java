@@ -12,6 +12,7 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 
 import com.rayo.storage.GatewayStorageService;
 import com.rayo.storage.model.Application;
+import com.rayo.storage.model.GatewayMixer;
 import com.rayo.storage.model.RayoNode;
 
 /**
@@ -77,8 +78,7 @@ public class Gateway implements GatewayMXBean {
 		}
 		return null;
 	}
-	
-	
+		
 	@Override
 	@ManagedAttribute(description="Returns a list with all active clients")
 	public List<String> getActiveClients() {
@@ -140,6 +140,7 @@ public class Gateway implements GatewayMXBean {
 		return new ArrayList<Node>(nodes);
 	}
 
+	@Override
 	@ManagedOperation(description = "Returns call information")
 	public Call callInfo(String callId) {
 		
@@ -147,6 +148,30 @@ public class Gateway implements GatewayMXBean {
 		String clientJID = gatewayStorageService.getclientJID(callId);
 		
 		return new Call(callId, rayoNode, clientJID);
+	}
+
+	@Override
+	@ManagedAttribute(description="Mixers")
+	public List<Mixer> getActiveMixers() {
+		
+		List<Mixer> mixers = new ArrayList<Mixer>();
+		for(GatewayMixer it: gatewayStorageService.getMixers()) {
+			mixers.add(new Mixer(it.getName(), it.getNodeJid(), it.getParticipants()));
+		}
+
+		return mixers;
+	}	
+
+	@Override
+	@ManagedOperation(description = "Returns mixer information")
+	public Mixer mixerInfo(String mixerName) {
+		
+		GatewayMixer mixer = gatewayStorageService.getMixer(mixerName);
+		if (mixer != null) {
+			return new Mixer(mixer.getName(), mixer.getNodeJid(), mixer.getParticipants());
+			
+		}
+		return null;
 	}
 	
 	public void setGatewayStorageService(GatewayStorageService gatewayStorageService) {
