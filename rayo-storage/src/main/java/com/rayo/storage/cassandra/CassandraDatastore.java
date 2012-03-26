@@ -1013,6 +1013,76 @@ public class CassandraDatastore implements GatewayDatastore {
 		}		
 	}
 	
+	@Override
+	public void createFilter(String jid, String id) throws DatastoreException {
+
+		log.debug("Filering id [%s] for app [%s]", id, jid);
+		
+		Mutator mutator = Pelops.createMutator(schemaName);
+		mutator.writeColumns("filters", Bytes.fromUTF8(id), 
+			mutator.newColumnList(
+					mutator.newColumn(Bytes.fromUTF8(jid), Bytes.fromUTF8(jid))));
+		
+		try {
+			mutator.execute(ConsistencyLevel.ONE);
+			log.debug("Id [%s] has been filtered for app [%s]", id, jid);
+		} catch (Exception e) {
+			log.error(e.getMessage(),e);
+			throw new DatastoreException("Could not create new filter");
+		}		
+	}
+
+	@Override
+	public void removeFilter(String jid, String id) throws DatastoreException {
+
+		log.debug("Unfiltering id [%s] for app [%s]", id, jid);
+		
+		Mutator mutator = Pelops.createMutator(schemaName);
+		mutator.deleteColumn("filters", id, jid);
+		
+		try {
+			mutator.execute(ConsistencyLevel.ONE);
+			log.debug("Id [%s] has been removed from the filters of application [%s]", id, jid);
+		} catch (Exception e) {
+			log.error(e.getMessage(),e);
+			throw new DatastoreException("Could not remove filter");
+		}			
+	}
+
+	@Override
+	public void removeFilters(String id) throws DatastoreException {
+
+		log.debug("Removing all filters for id [%s]", id);
+		
+		try {
+			RowDeletor deletor = Pelops.createRowDeletor(schemaName);
+			deletor.deleteRow("filters", id, ConsistencyLevel.ONE);
+			log.debug("Filters removed successfully for id [%s]", id);
+		} catch (Exception e) {
+			log.error(e.getMessage(),e);
+			throw new DatastoreException("Could not remove filters");
+		}	
+	}
+	
+	@Override
+	public List<String> getFilteredApplications(String id) throws DatastoreException {
+
+		log.debug("Getting the list of filtered jids for id [%s]", id);
+		List<String> ids = new ArrayList<String>();
+		Selector selector = Pelops.createSelector(schemaName);		
+		try {
+			List<Column> columns = 
+					selector.getColumnsFromRow("filters", id, false, ConsistencyLevel.ONE);
+			for (Column column: columns) {
+				ids.add(Bytes.toUTF8(column.getName()));
+			}
+		} catch (Exception e) {
+			log.error(e.getMessage(),e);
+			return Collections.EMPTY_LIST;
+		}		
+		return ids;
+	}
+	
 	/**
 	 * Gets the domain that Cassandra is running on
 	 * 

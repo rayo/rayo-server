@@ -392,6 +392,30 @@ public class DefaultGatewayStorageService implements GatewayStorageService {
 		return new ArrayList<GatewayMixer>(store.getMixers());
 	}
 	
+	@Override
+	public void createFilter(String jid, String id) throws DatastoreException {
+
+		store.createFilter(jid, id);
+	}
+	
+	@Override
+	public List<String> getFilteredApplications(String id) throws DatastoreException {
+
+		return store.getFilteredApplications(id);
+	}
+	
+	@Override
+	public void removeFilter(String jid, String id) throws DatastoreException {
+
+		store.removeFilter(jid, id);
+	}
+	
+	@Override
+	public void removeFilters(String id) throws DatastoreException {
+
+		store.removeFilters(id);
+	}
+	
 	public void setStore(GatewayDatastore store) {
 		
 		this.store = store;

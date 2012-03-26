@@ -615,7 +615,86 @@ public abstract class BaseDatastoreTest {
 		assertEquals(0, store.getMixers().size());
 	}
 	
+	@Test
+	public void testAddFilter() throws Exception {
 
+		store.createFilter("app1@tropo.com", "12345");
+	}
+	
+	@Test
+	public void testGetFilters() throws Exception {
+
+		assertTrue(store.getFilteredApplications("12345").isEmpty());
+		store.createFilter("app1@tropo.com", "12345");
+		store.createFilter("app2@tropo.com", "12345");
+	
+		store.createFilter("app2@tropo.com", "aaaa");
+		
+		List<String> filters = store.getFilteredApplications("12345");
+		assertEquals(filters.size(), 2);
+		assertTrue(filters.contains("app1@tropo.com"));
+		assertTrue(filters.contains("app2@tropo.com"));
+		
+		filters = store.getFilteredApplications("aaaa");
+		assertEquals(filters.size(), 1);
+		assertTrue(filters.contains("app2@tropo.com"));		
+	}
+	
+	@Test
+	public void testAddFilterSeveralTimesHasNoEffect() throws Exception {
+
+		assertTrue(store.getFilteredApplications("12345").isEmpty());
+		store.createFilter("app1@tropo.com", "12345");
+		store.createFilter("app1@tropo.com", "12345");
+		store.createFilter("app1@tropo.com", "12345");
+
+		List<String> filters = store.getFilteredApplications("12345");
+		assertEquals(filters.size(), 1);
+		assertTrue(filters.contains("app1@tropo.com"));
+	}
+	
+	@Test
+	public void testRemoveFilter() throws Exception {
+
+		assertTrue(store.getFilteredApplications("12345").isEmpty());
+		store.createFilter("app1@tropo.com", "12345");
+		store.createFilter("app2@tropo.com", "12345");
+	
+		List<String> filters = store.getFilteredApplications("12345");
+		assertEquals(filters.size(), 2);
+		assertTrue(filters.contains("app1@tropo.com"));
+		assertTrue(filters.contains("app2@tropo.com"));
+		
+		store.removeFilter("app1@tropo.com", "12345");
+		filters = store.getFilteredApplications("12345");
+		assertEquals(filters.size(), 1);
+		assertTrue(filters.contains("app2@tropo.com"));
+		
+		store.removeFilter("app2@tropo.com", "12345");
+		assertTrue(store.getFilteredApplications("12345").isEmpty());		
+	}
+	
+	@Test
+	public void testRemoveNonExistingFilterHasNoEffect() throws Exception {
+
+		store.removeFilter("app1@kk.com", "12345");
+	}
+	
+	@Test
+	public void testRemoveFilters() throws Exception {
+
+		assertTrue(store.getFilteredApplications("12345").isEmpty());
+		store.createFilter("app1@tropo.com", "12345");
+		store.createFilter("app2@tropo.com", "12345");
+	
+		List<String> filters = store.getFilteredApplications("12345");
+		assertEquals(filters.size(), 2);
+		assertTrue(filters.contains("app1@tropo.com"));
+		assertTrue(filters.contains("app2@tropo.com"));
+		
+		store.removeFilters("12345");
+		assertTrue(store.getFilteredApplications("12345").isEmpty());	
+	}
 	
 	@Test
 	public void testStoreApplication() throws Exception {

@@ -119,7 +119,7 @@ public class Admin implements AdminMXBean {
 	}
 	
 	@Override
-	@ManagedOperation(description = "Removes a node from the gateway")
+	@ManagedOperation(description = "Registers an application in the gateway")
 	public void registerApplication(String platform, String name, String jid) {
 
 		Application app = new Application(name, jid, platform);

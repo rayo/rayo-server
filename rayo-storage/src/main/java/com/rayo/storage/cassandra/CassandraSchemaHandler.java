@@ -304,19 +304,31 @@ public class CassandraSchemaHandler {
 			log.debug("Found Column Family: mixers");
 		}
 		
-		CfDef cvVerbs = getCfDef(ksDef, "verbs");
-		if (cvVerbs == null) {
+		CfDef cfVerbs = getCfDef(ksDef, "verbs");
+		if (cfVerbs == null) {
 			log.debug("Creating new Column Family: verbs");
-			cvVerbs = new CfDef(schemaName, "verbs")
+			cfVerbs = new CfDef(schemaName, "verbs")
 				.setComparator_type(ColumnFamilyManager.CFDEF_COMPARATOR_BYTES);
-			cvVerbs.default_validation_class = "UTF8Type";
-			ksDef.addToCf_defs(cvVerbs);			
-			cfManager.addColumnFamily(cvVerbs);
+			cfVerbs.default_validation_class = "UTF8Type";
+			ksDef.addToCf_defs(cfVerbs);			
+			cfManager.addColumnFamily(cfVerbs);
 			waitToPropagate();
 		} else {
 			log.debug("Found Column Family: verbs");
 		}
-
+		
+		CfDef cfFilters = getCfDef(ksDef, "filters");
+		if (cfFilters == null) {
+			log.debug("Creating new Column Family: filters");
+			cfFilters = new CfDef(schemaName, "filters")
+				.setComparator_type(ColumnFamilyManager.CFDEF_COMPARATOR_BYTES);
+			cfFilters.default_validation_class = "UTF8Type";
+			ksDef.addToCf_defs(cfFilters);			
+			cfManager.addColumnFamily(cfFilters);
+			waitToPropagate();
+		} else {
+			log.debug("Found Column Family: filters");
+		}
 	}
 	
 	private void waitToPropagate() throws Exception {

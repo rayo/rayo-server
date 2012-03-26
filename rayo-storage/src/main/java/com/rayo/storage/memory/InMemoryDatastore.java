@@ -43,6 +43,7 @@ public class InMemoryDatastore implements GatewayDatastore {
 	private ReadWriteLock nodesLock = new ReentrantReadWriteLock();
 	private ReadWriteLock callsLock = new ReentrantReadWriteLock();
 	private ReadWriteLock mixersLock = new ReentrantReadWriteLock();
+	private ReadWriteLock filtersLock = new ReentrantReadWriteLock();
 	
 	private Map<String, RayoNode> nodesMap = new ConcurrentHashMap<String, RayoNode>();
 	private Map<String, RayoNode> ipsMap = new ConcurrentHashMap<String, RayoNode>();
@@ -59,6 +60,7 @@ public class InMemoryDatastore implements GatewayDatastore {
 
 	private Map<String, GatewayMixer> mixersMap = new ConcurrentHashMap<String, GatewayMixer>();
 	private Map<String, List<GatewayVerb>> verbsMap = new ConcurrentHashMap<String, List<GatewayVerb>>();
+	private Map<String, List<String>> filtersMap = new ConcurrentHashMap<String, List<String>>();
 
 	@Override
 	public RayoNode storeNode(RayoNode node) throws DatastoreException {
@@ -564,7 +566,7 @@ public class InMemoryDatastore implements GatewayDatastore {
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public Collection<GatewayMixer> getMixers() {
 
@@ -708,5 +710,69 @@ public class InMemoryDatastore implements GatewayDatastore {
 		} finally {
 			mixerLock.unlock();
 		}
+	}
+	
+	@Override
+	public void createFilter(String jid, String id) throws DatastoreException {
+
+		Lock filterLock = filtersLock.writeLock();
+		filterLock.lock();
+		try {
+			List<String> filters = filtersMap.get(id);
+			if (filters == null) {
+				filters = new ArrayList<String>();
+				filtersMap.put(id, filters);				
+			}
+			if (!filters.contains(jid)) {
+				filters.add(jid);
+			}
+		} finally {
+			filterLock.unlock();
+		}		
+	}
+	
+	@Override
+	public void removeFilter(String jid, String id) throws DatastoreException {
+
+		Lock filterLock = filtersLock.writeLock();
+		filterLock.lock();
+		try {
+			List<String> filters = filtersMap.get(id);
+			if (filters != null) {
+				filters.remove(jid);
+			}
+		} finally {
+			filterLock.unlock();
+		}			
+	}
+	
+	@Override
+	public void removeFilters(String id) throws DatastoreException {
+
+		Lock filterLock = filtersLock.writeLock();
+		filterLock.lock();
+		try {
+			filtersMap.remove(id);
+		} finally {
+			filterLock.unlock();
+		}		
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<String> getFilteredApplications(String id) throws DatastoreException {
+
+		Lock filterLock = filtersLock.writeLock();
+		filterLock.lock();
+		try {
+			List<String> filters = filtersMap.get(id);
+			if (filters != null) {
+				return new ArrayList<String>(filters);
+			} else {
+				return Collections.EMPTY_LIST;
+			}
+		} finally {
+			filterLock.unlock();
+		}	
 	}
 }

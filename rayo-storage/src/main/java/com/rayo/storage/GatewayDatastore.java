@@ -401,4 +401,39 @@ public interface GatewayDatastore {
 	 * @param mixerName Name of the mixer
 	 */
 	GatewayVerb getVerb(String mixerName, String verbId) throws DatastoreException;
+	
+	
+	/**
+	 * Creates a filter for a given JID. The Rayo Gateway will filter and will not send
+	 * messages to the ids that have been flagged for being filtered out.
+	 * 
+	 * @param jid Application's jid
+	 * @param id Id of the call or mixers that we wish to filter out for the given application
+	 * @throws DatastoreException If the filter cannot be created
+	 */
+	void createFilter(String jid, String id) throws DatastoreException;
+	
+	/**
+	 * Removes a filter from the given application
+	 * 
+	 * @param jid JID of the application
+	 * @param id Id of the call or mixer that was filtered
+	 * @throws DatastoreException If the filter cannot be removed
+	 */
+	void removeFilter(String jid, String id) throws DatastoreException;
+	
+	/**
+	 * Removes all the filters from the given call or mixer
+	 * 
+	 * @param id Id of the call or mixer that was filtered
+	 * @throws DatastoreException If the filters cannot be removed
+	 */
+	void removeFilters(String id) throws DatastoreException;
+	
+	/**
+	 * Returns the list of filtered applications for the given id
+	 * 
+	 * @param id Id of the mixer or call for which we want to get the list of filtered apps
+	 */
+	List<String> getFilteredApplications(String id) throws DatastoreException;	
 }

@@ -105,7 +105,13 @@ public class GatewayServlet extends AbstractRayoServlet {
 		
 		try {
 			if (isMyExternalDomain(message.getTo())) {
-				processClientPresence(message);
+				String to = message.getTo().getNode();
+				GatewayMixer mixer = gatewayStorageService.getMixer(to);
+				if (mixer != null) {
+					processClientPresenceToMixer(message, mixer);
+				} else {
+					processClientPresence(message);
+				}
 			} else if (isMyInternalDomain(message.getTo())) {
 				processServerPresence(message);
 			} else {
@@ -283,6 +289,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 		
 		JID fromJid = message.getFrom();						
     	JID from = createExternalJid(mixer.getName(), fromJid.getResource());
+    	List<String> filteredApplications = gatewayStorageService.getFilteredApplications(mixer.getName());
 
 		String resource = message.getFrom().getResource();
 		if (resource != null) {
@@ -291,8 +298,10 @@ public class GatewayServlet extends AbstractRayoServlet {
 				if (message.getElement("complete","urn:xmpp:rayo:ext:1") != null) {
 					gatewayStorageService.removeVerbFromMixer(resource, fromJid.getNode());
 				}
-				JID to = getXmppFactory().createJID(verb.getAppJid());
-				sendPresence(message, from, to, mixer.getName());
+				if (!filteredApplications.contains(JIDUtils.getBareJid(verb.getAppJid()))) {
+					JID to = getXmppFactory().createJID(verb.getAppJid());
+					sendPresence(message, from, to, mixer.getName());
+				}
 			} else {
 				log.error("Received presence [%s] but could not find the application JID for it.", message);
 				return;
@@ -300,9 +309,31 @@ public class GatewayServlet extends AbstractRayoServlet {
 		} else {
 			// Generic Mixer event (e.g. active speaker). Send it to all apps in the mixer.
 			List<String> appIds = new ArrayList<String>();
-			for(String participant: mixer.getParticipants()) {
+			
+			List<String> participants = mixer.getParticipants();
+			// Race condition here. For joined events, we might receive the joined from the mixer when 
+			// we haven't received the "joined" from the call yet. Which means the call id is not a participant
+			// yet. So, we need to cope with that and add the id if necessary
+			Element joined =  message.getElement("joined", "urn:xmpp:rayo:1");
+			if (joined != null) {
+				String callId = joined.getAttribute("call-id");
+				if (!participants.contains(callId)) {
+					participants.add(callId);
+				}
+			}
+			
+			// Same for unjoined
+			Element unjoined =  message.getElement("unjoined", "urn:xmpp:rayo:1");
+			if (unjoined != null) {
+				String callId = unjoined.getAttribute("call-id");
+				if (!participants.contains(callId)) {
+					participants.add(callId);
+				}
+			}
+			
+			for(String participant: participants) {
 				String jid = gatewayStorageService.getclientJID(participant);
-				if (jid != null) {
+				if (jid != null && !filteredApplications.contains(JIDUtils.getBareJid(jid))) {
 					if (!appIds.contains(jid)) {
 						appIds.add(jid);
 						JID to = getXmppFactory().createJID(jid);
@@ -371,15 +402,6 @@ public class GatewayServlet extends AbstractRayoServlet {
 		return false;
 	}
 	
-	private boolean isUnjoinMixer(XmppServletRequest request) {
-		
-		Element join = request.getElement("unjoin", "urn:xmpp:rayo:1");
-		if (join != null) {
-			return join.hasAttribute("mixer-name");
-		}
-		return false;
-	}
-	
 	private void processJoinedMixer(PresenceMessage message) throws Exception {
 		
 		String callId = message.getFrom().getNode();
@@ -396,6 +418,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 		GatewayMixer mixer = gatewayStorageService.getMixer(mixerName);
 		if (mixer.getParticipants().size() == 0) {
 			gatewayStorageService.unregisterMixer(mixerName);
+			gatewayStorageService.removeFilters(mixerName);
 		}
 	}
 	
@@ -494,7 +517,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 				log.warn("Application [%s] is not registered as a valid Rayo application", message.getFrom());
 				sendPresenceError(message.getTo(), message.getFrom(), Condition.RECIPIENT_UNAVAILABLE, Type.CANCEL, "The application does not exist");
 			}
-		} else if (message.getType().equals("unavailable")) {
+		} else if (message.getType().equals("unavailable")) {			
 			gatewayStorageService.unregisterClient(message.getFrom());
 			
 			// Note that the following method does include the resource as we only want to 
@@ -519,6 +542,24 @@ public class GatewayServlet extends AbstractRayoServlet {
 		} else if (message.getType().equals("subscribe")) {
 			//TODO:
 		}		
+	}
+	
+	/*
+	 * Processes a Presence Message from a Rayo Client directed to a mixer. Client 
+	 * applications will use directed presence to mixers for subscribing and unsubscribing
+	 * to mixer participant events.
+	 */
+	private void processClientPresenceToMixer(PresenceMessage message, GatewayMixer mixer) throws Exception {
+
+		if (log.isDebugEnabled()) {
+			log.debug("Received client presence message to mixer: [%s]", message);
+		}
+
+		if (message.getType().equals("unavailable")) {			
+			gatewayStorageService.createFilter(message.getFrom().getBareJID().toString(), mixer.getName());
+		} else {
+			gatewayStorageService.removeFilter(message.getFrom().getBareJID().toString(), mixer.getName());
+		}	
 	}
 
 	private boolean validApplicationJid(JID fromJid) {

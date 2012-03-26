@@ -364,6 +364,10 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
                 		log.debug("Firing Joined event. Participant id: [%s]. Peer id: [%s]. Join type: [%s]", participant.getId(), peer.getId(), type);
                 	}
                     fire(new JoinedEvent(participant.getId(), destination, type));
+                    if (type == JoinDestinationType.MIXER) {
+                    	// If mixer, we send a participant notification as per Rayo Mixer's spec
+                    	fire(new JoinedEvent(destination, participant.getId(), JoinDestinationType.CALL));
+                    }
                 }
             } else {
             	if (log.isDebugEnabled()) {
@@ -436,6 +440,10 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
             	}
             }
 			fire(new UnjoinedEvent(participant.getId(), destination, type));
+            if (type == JoinDestinationType.MIXER) {
+            	// If mixer, we send a participant notification as per Rayo Mixer's spec
+            	fire(new UnjoinedEvent(destination, participant.getId(), JoinDestinationType.CALL));
+            }
 		}
 	}
 
