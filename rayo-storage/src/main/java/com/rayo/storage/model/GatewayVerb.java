@@ -18,18 +18,21 @@ public class GatewayVerb implements Serializable {
 	
 	private String verbId;
 	private String appJid;
+	private String mixerName;
 
 	/**
 	 * Builds a new verb object with the given verb id and app jid. The app JID represents
 	 * the client application that created the verb.
 	 * 
+	 * @param mixerName Mixer that owns the verb
 	 * @param verbId Id of the verb
 	 * @param appJid JID of the client application that started the verb
 	 */ 
-	public GatewayVerb(String verbId, String appJid) {
+	public GatewayVerb(String mixerName, String verbId, String appJid) {
 		
 		this.appJid = appJid;
 		this.verbId = verbId;
+		this.mixerName = mixerName;
 	}
 	
 	/**
@@ -37,6 +40,11 @@ public class GatewayVerb implements Serializable {
 	 */
 	public GatewayVerb() {
 		
+	}
+	
+	public String getMixerName() {
+		
+		return mixerName;
 	}
 	
 	public String getVerbId() {

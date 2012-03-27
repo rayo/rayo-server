@@ -16,12 +16,16 @@ public class Mixer implements MixerMXBean {
 	private String name;
 	private String rayoNode;
 	private List<String> participants;
+	private Integer activeVerbs = new Integer(0);
 
-	public Mixer(String name, String rayoNode, List<String> participants) {
+	public Mixer(String name, String rayoNode, List<String> participants, Integer activeVerbs) {
 
 		this.rayoNode = rayoNode;
 		this.name = name;
 		this.participants = participants;
+		if (activeVerbs != null) {
+			this.activeVerbs = activeVerbs;
+		}
 	}
 
 	public String getRayoNode() {
@@ -38,6 +42,13 @@ public class Mixer implements MixerMXBean {
 	public List<String> getParticipants() {
 
 		return participants;
+	}
+	
+	
+	@Override
+	public int getActiveVerbs() {
+
+		return activeVerbs;
 	}
 	
 	@Override

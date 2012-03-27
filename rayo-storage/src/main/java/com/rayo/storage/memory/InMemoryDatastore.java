@@ -632,8 +632,7 @@ public class InMemoryDatastore implements GatewayDatastore {
 	}
 	
 	@Override
-	public void addVerbToMixer(GatewayVerb verb, String mixerName)
-			throws DatastoreException {
+	public void addVerbToMixer(GatewayVerb verb, String mixerName) {
 
 		Lock mixerLock = mixersLock.writeLock();
 		mixerLock.lock();
@@ -673,8 +672,7 @@ public class InMemoryDatastore implements GatewayDatastore {
 	}
 	
 	@Override
-	public GatewayVerb getVerb(String mixerName, String verbId)
-			throws DatastoreException {
+	public GatewayVerb getVerb(String mixerName, String verbId) {
 
 		Lock mixerLock = mixersLock.readLock();
 		mixerLock.lock();
@@ -695,8 +693,7 @@ public class InMemoryDatastore implements GatewayDatastore {
 	
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<GatewayVerb> getVerbs(String mixerName)
-			throws DatastoreException {
+	public List<GatewayVerb> getVerbs(String mixerName) {
 
 
 		Lock mixerLock = mixersLock.readLock();
@@ -710,6 +707,24 @@ public class InMemoryDatastore implements GatewayDatastore {
 		} finally {
 			mixerLock.unlock();
 		}
+	}
+	
+	@Override
+	public List<GatewayVerb> getVerbs() {
+
+		List<GatewayVerb> verbs = new ArrayList<GatewayVerb>();
+		Lock mixerLock = mixersLock.readLock();
+		mixerLock.lock();
+		try {
+			for (List<GatewayVerb> it: verbsMap.values()) {
+				if (!it.isEmpty()) {
+					verbs.addAll(it);
+				}
+			}
+		} finally {
+			mixerLock.unlock();
+		}
+		return verbs;
 	}
 	
 	@Override

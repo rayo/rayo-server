@@ -468,8 +468,8 @@ public abstract class BaseDatastoreTest {
 		mixer = store.storeMixer(mixer);
 		assertTrue(mixer.getParticipants().isEmpty());
 
-		GatewayVerb verb1 = new GatewayVerb("verb1", "app1@tropo.com");
-		GatewayVerb verb2 = new GatewayVerb("verb2", "app1@tropo.com");
+		GatewayVerb verb1 = new GatewayVerb(mixer.getName(), "verb1", "app1@tropo.com");
+		GatewayVerb verb2 = new GatewayVerb(mixer.getName(),"verb2", "app1@tropo.com");
 
 		store.addVerbToMixer(verb1, mixer.getName());
 		assertEquals(store.getVerbs(mixer.getName()).size(), 1);
@@ -485,6 +485,37 @@ public abstract class BaseDatastoreTest {
 	}
 	
 	@Test
+	public void testGetAllVerbsFromMixers() throws Exception {
+
+		RayoNode node = buildRayoNode("localhost","127.0.0.1", new String[] { "staging" });
+		store.storeNode(node);
+
+		GatewayMixer mixer1 = new GatewayMixer("1234", node.getHostname());
+		mixer1 = store.storeMixer(mixer1);
+
+		GatewayMixer mixer2 = new GatewayMixer("abcd", node.getHostname());
+		mixer2 = store.storeMixer(mixer2);
+
+		GatewayVerb verb1 = new GatewayVerb(mixer1.getName(), "verb1", "app1@tropo.com");
+		GatewayVerb verb2 = new GatewayVerb(mixer1.getName(),"verb2", "app1@tropo.com");
+		GatewayVerb verb3 = new GatewayVerb(mixer2.getName(),"verb3", "app1@tropo.com");
+
+		store.addVerbToMixer(verb1, mixer1.getName());
+		store.addVerbToMixer(verb2, mixer1.getName());
+		store.addVerbToMixer(verb3, mixer2.getName());
+
+		List<GatewayVerb> verbs = store.getVerbs();
+		assertEquals(verbs.size(), 3);
+		for(GatewayVerb verb: verbs) {
+			if (verb.getVerbId().equals("verb3")) {
+				assertEquals(verb.getMixerName(), mixer2.getName());
+			} else {
+				assertEquals(verb.getMixerName(), mixer1.getName());				
+			}
+		}
+	}
+	
+	@Test
 	public void testAddVerbSeveralTimesToMixerHasNoEffect() throws Exception {
 
 		RayoNode node = buildRayoNode("localhost","127.0.0.1", new String[] { "staging" });
@@ -494,7 +525,7 @@ public abstract class BaseDatastoreTest {
 		mixer = store.storeMixer(mixer);
 		assertTrue(mixer.getParticipants().isEmpty());
 
-		GatewayVerb verb1 = new GatewayVerb("verb1", "app1@tropo.com");
+		GatewayVerb verb1 = new GatewayVerb(mixer.getName(),"verb1", "app1@tropo.com");
 		
 		store.addVerbToMixer(verb1, mixer.getName());
 		store.addVerbToMixer(verb1, mixer.getName());
@@ -511,8 +542,8 @@ public abstract class BaseDatastoreTest {
 		GatewayMixer mixer = new GatewayMixer("1234", node.getHostname());
 		mixer = store.storeMixer(mixer);
 		
-		GatewayVerb verb1 = new GatewayVerb("verb1", "app1@tropo.com");
-		GatewayVerb verb2 = new GatewayVerb("verb2", "app1@tropo.com");
+		GatewayVerb verb1 = new GatewayVerb(mixer.getName(),"verb1", "app1@tropo.com");
+		GatewayVerb verb2 = new GatewayVerb(mixer.getName(),"verb2", "app1@tropo.com");
 
 		store.addVerbToMixer(verb1, mixer.getName());
 		store.addVerbToMixer(verb2, mixer.getName());
@@ -540,8 +571,8 @@ public abstract class BaseDatastoreTest {
 		mixer = store.storeMixer(mixer);
 		assertTrue(mixer.getParticipants().isEmpty());
 
-		GatewayVerb verb1 = new GatewayVerb("verb1", "app1@tropo.com");
-		GatewayVerb verb2 = new GatewayVerb("verb2", "app1@tropo.com");
+		GatewayVerb verb1 = new GatewayVerb(mixer.getName(),"verb1", "app1@tropo.com");
+		GatewayVerb verb2 = new GatewayVerb(mixer.getName(),"verb2", "app1@tropo.com");
 
 		store.addVerbToMixer(verb1, mixer.getName());
 		store.addVerbToMixer(verb2, mixer.getName());
@@ -565,8 +596,8 @@ public abstract class BaseDatastoreTest {
 		mixer = store.storeMixer(mixer);
 		assertTrue(mixer.getParticipants().isEmpty());
 
-		GatewayVerb verb1 = new GatewayVerb("verb1", "app1@tropo.com");
-		GatewayVerb verb2 = new GatewayVerb("verb2", "app1@tropo.com");
+		GatewayVerb verb1 = new GatewayVerb(mixer.getName(),"verb1", "app1@tropo.com");
+		GatewayVerb verb2 = new GatewayVerb(mixer.getName(),"verb2", "app1@tropo.com");
 
 		store.addVerbToMixer(verb1, mixer.getName());
 		store.addVerbToMixer(verb2, mixer.getName());

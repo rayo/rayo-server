@@ -379,6 +379,14 @@ public interface GatewayStorageService {
 	List<GatewayMixer> getMixers();
 	
 	/**
+	 * Returns a list with all the active verbs active in the Gateway
+	 * 
+	 * @return List<GatewayVerb> List with all verbs active in the gateway or 
+	 * an empty list if no verbs are found. 
+	 */
+	List<GatewayVerb> getVerbs();
+	
+	/**
 	 * Register a mixer in the gateway
 	 * 
 	 * @param mixerName Name of the mixer
@@ -439,7 +447,7 @@ public interface GatewayStorageService {
 	 * 
 	 * @param mixerName Name of the mixer
 	 */
-	List<GatewayVerb> getVerbs(String mixerName) throws DatastoreException;
+	List<GatewayVerb> getVerbs(String mixerName);
 	
 	/**
 	 * Returns the verb with the given id in the specified mixer. This method will 
@@ -448,7 +456,7 @@ public interface GatewayStorageService {
 	 * 
 	 * @param mixerName Name of the mixer
 	 */
-	GatewayVerb getVerb(String mixerName, String verbId) throws DatastoreException;
+	GatewayVerb getVerb(String mixerName, String verbId);
 	
 	/**
 	 * Creates a filter for a given JID. The Rayo Gateway will filter and will not send

@@ -29,4 +29,6 @@ public interface GatewayMXBean {
 	List<Mixer> getActiveMixers();
 	
 	Mixer mixerInfo(String mixerName);
+	
+	List<Verb> activeVerbs(String mixerName);
 }

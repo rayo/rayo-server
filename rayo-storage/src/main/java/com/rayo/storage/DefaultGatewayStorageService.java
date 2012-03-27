@@ -361,7 +361,7 @@ public class DefaultGatewayStorageService implements GatewayStorageService {
 	public void addVerbToMixer(String verbId, String appJid, String mixerName)
 			throws DatastoreException {
 
-		GatewayVerb verb = new GatewayVerb(verbId, appJid);
+		GatewayVerb verb = new GatewayVerb(mixerName, verbId, appJid);
 		store.addVerbToMixer(verb, mixerName);
 	}
 	
@@ -373,15 +373,19 @@ public class DefaultGatewayStorageService implements GatewayStorageService {
 	}
 	
 	@Override
-	public List<GatewayVerb> getVerbs(String mixerName)
-			throws DatastoreException {
+	public List<GatewayVerb> getVerbs(String mixerName) {
 
 		return store.getVerbs(mixerName);
 	}
 	
 	@Override
-	public GatewayVerb getVerb(String mixerName, String verbId)
-			throws DatastoreException {
+	public List<GatewayVerb> getVerbs() {
+
+		return store.getVerbs();
+	}
+	
+	@Override
+	public GatewayVerb getVerb(String mixerName, String verbId) {
 
 		return store.getVerb(mixerName, verbId);
 	}

@@ -2,8 +2,10 @@ package com.rayo.gateway.jmx;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.springframework.jmx.export.annotation.ManagedAttribute;
@@ -13,7 +15,9 @@ import org.springframework.jmx.export.annotation.ManagedResource;
 import com.rayo.storage.GatewayStorageService;
 import com.rayo.storage.model.Application;
 import com.rayo.storage.model.GatewayMixer;
+import com.rayo.storage.model.GatewayVerb;
 import com.rayo.storage.model.RayoNode;
+import com.voxeo.logging.Loggerf;
 
 /**
  * <p>This Mbean exposes relevant information on the Distributed hash table. It 
@@ -25,6 +29,8 @@ import com.rayo.storage.model.RayoNode;
  */
 @ManagedResource(objectName="com.rayo.gateway:Type=Gateway", description="Rayo Gateway")
 public class Gateway implements GatewayMXBean {
+	
+	private static final Loggerf log = Loggerf.getLogger(Gateway.class);
 	
 	private GatewayStorageService gatewayStorageService;
 
@@ -154,9 +160,18 @@ public class Gateway implements GatewayMXBean {
 	@ManagedAttribute(description="Mixers")
 	public List<Mixer> getActiveMixers() {
 		
+		Map<String, Integer> verbsMap = new HashMap<String, Integer>();
+		for(GatewayVerb verb: gatewayStorageService.getVerbs()) {
+			Integer i = verbsMap.get(verb.getMixerName());
+			if (i == null) {
+				i = new Integer(0);
+			}
+			verbsMap.put(verb.getMixerName(), i+1);
+		}
+		
 		List<Mixer> mixers = new ArrayList<Mixer>();
 		for(GatewayMixer it: gatewayStorageService.getMixers()) {
-			mixers.add(new Mixer(it.getName(), it.getNodeJid(), it.getParticipants()));
+			mixers.add(new Mixer(it.getName(), it.getNodeJid(), it.getParticipants(), verbsMap.get(it.getName())));
 		}
 
 		return mixers;
@@ -168,11 +183,31 @@ public class Gateway implements GatewayMXBean {
 		
 		GatewayMixer mixer = gatewayStorageService.getMixer(mixerName);
 		if (mixer != null) {
-			return new Mixer(mixer.getName(), mixer.getNodeJid(), mixer.getParticipants());
-			
+			List<String> verbs = new ArrayList<String>();
+			try {
+				for(GatewayVerb verb: gatewayStorageService.getVerbs(mixerName)) {
+					verbs.add(verb.getVerbId());
+				}
+			} catch (Exception e) {
+				log.error(e.getMessage(),e);
+			}
+			return new Mixer(mixer.getName(), mixer.getNodeJid(), 
+					mixer.getParticipants(), gatewayStorageService.getVerbs(mixerName).size());
 		}
 		return null;
 	}
+	
+	@Override
+	@ManagedOperation(description = "Returns verbs active for a mixer")
+	public List<Verb> activeVerbs(String mixerName) {
+		
+		List<Verb> verbs = new ArrayList<Verb>();
+		for(GatewayVerb it: gatewayStorageService.getVerbs(mixerName)) {
+			verbs.add(new Verb(it.getMixerName(), it.getVerbId(), it.getAppJid()));
+		}
+
+		return verbs;
+	}	
 	
 	public void setGatewayStorageService(GatewayStorageService gatewayStorageService) {
 		this.gatewayStorageService = gatewayStorageService;

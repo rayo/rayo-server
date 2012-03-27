@@ -10,4 +10,6 @@ public interface MixerMXBean {
 	public String getName();
 	
 	public List<String> getParticipants();
+	
+	public int getActiveVerbs();
 }

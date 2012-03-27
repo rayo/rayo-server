@@ -964,7 +964,9 @@ public class CassandraDatastore implements GatewayDatastore {
 			List<Column> columns = 
 					selector.getColumnsFromRow("verbs", mixerName, false, ConsistencyLevel.ONE);
 			for (Column column: columns) {
-				GatewayVerb verb = new GatewayVerb(Bytes.toUTF8(column.getName()), 
+				GatewayVerb verb = new GatewayVerb(
+						mixerName,
+						Bytes.toUTF8(column.getName()), 
 						Bytes.toUTF8(column.getValue()));
 				ids.add(verb);
 			}
@@ -973,6 +975,39 @@ public class CassandraDatastore implements GatewayDatastore {
 			return Collections.EMPTY_LIST;
 		}		
 		return ids;
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public List<GatewayVerb> getVerbs() {
+		
+		log.debug("Getting list with all active verb");
+		try {
+
+			List<GatewayVerb> verbs = new ArrayList<GatewayVerb>();
+			Selector selector = Pelops.createSelector(schemaName);
+			LinkedHashMap<Bytes, List<Column>> rows = selector.getColumnsFromRows(
+					"verbs", 
+					Selector.newKeyRange("", "", 10000), // 10000 mixers limit, 
+					false, ConsistencyLevel.ONE);
+					
+			for(Map.Entry<Bytes, List<Column>> row: rows.entrySet()) {
+				if (row.getValue().size() > 0) {
+					for (Column column: row.getValue()) {
+						GatewayVerb verb = new GatewayVerb(
+								row.getKey().toUTF8(),
+								Bytes.toUTF8(column.getName()), 
+								Bytes.toUTF8(column.getValue()));
+						verbs.add(verb);
+					}					
+				}
+			}
+
+			return verbs;
+		} catch (PelopsException pe) {
+			log.error(pe.getMessage(),pe);
+			return Collections.EMPTY_LIST;
+		}
 	}
 	
 	@Override
@@ -985,7 +1020,7 @@ public class CassandraDatastore implements GatewayDatastore {
 					selector.getColumnsFromRow("verbs", mixerName, false, ConsistencyLevel.ONE);
 			for (Column column: columns) {
 				if (Bytes.toUTF8(column.getName()).equals(id)) {
-					return new GatewayVerb(id, Bytes.toUTF8(column.getValue()));
+					return new GatewayVerb(mixerName, id, Bytes.toUTF8(column.getValue()));
 				}
 			}
 		} catch (Exception e) {
