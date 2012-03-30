@@ -1,4 +1,4 @@
-package com.rayo.storage.cassandra;
+package com.rayo.storage.test;
 
 import org.junit.BeforeClass;
 
