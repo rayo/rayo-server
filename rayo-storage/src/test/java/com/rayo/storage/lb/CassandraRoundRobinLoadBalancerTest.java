@@ -5,7 +5,7 @@ import org.junit.BeforeClass;
 
 import com.rayo.storage.cassandra.CassandraDatastore;
 import com.rayo.storage.cassandra.CassandraDatastoreTest;
-import com.rayo.storage.cassandra.EmbeddedCassandraTestServer;
+import com.rayo.storage.test.EmbeddedCassandraTestServer;
 
 public class CassandraRoundRobinLoadBalancerTest extends RoundRobinLoadBalancerTest {
 	
