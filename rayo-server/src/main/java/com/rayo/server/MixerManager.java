@@ -55,6 +55,11 @@ public class MixerManager {
 		}
 		return null;
 	}
+	
+	public void removeMixer(Mixer mixer) {
+		
+		mixerRegistry.remove(mixer.getName());
+	}
 
 	public void setMixerActorFactory(MixerActorFactory mixerActorFactory) {
 		this.mixerActorFactory = mixerActorFactory;

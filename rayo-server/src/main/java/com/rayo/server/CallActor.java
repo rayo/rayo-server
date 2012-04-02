@@ -216,18 +216,33 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     		}
     	}
     	Boolean force = message.getForce() == null ? Boolean.FALSE : message.getForce();
-
-    	//#1579867. This may change in the future. 
-    	if (destination instanceof Call) {    		
-    		if (!isAnswered(destination) && !isAnswered(participant)) {
-    			throw new IllegalStateException("None of the calls you are trying to join have been answered.");
-    		}
-    	}
     	
+    	if (message.getType() == JoinDestinationType.MIXER) {
+			// This synchronized block is required due to the way mixers work in moho. Mixers are 
+			// created and disposed automatically. So before joining and unjoining mixers we need to 
+			// synchronize code to avoid race conditions like would be to disconnect a mixer and at 
+			// the same time having another call trying to join it
+    		synchronized(destination) {
+    			doJoin(destination, message, force);
+    		}
+    	} else {
+        	//#1579867. This may change in the future. 
+        	if (destination instanceof Call) {    		
+        		if (!isAnswered(destination) && !isAnswered(participant)) {
+        			throw new IllegalStateException("None of the calls you are trying to join have been answered.");
+        		}
+        	}
+			doJoin(destination, message, force);
+    	}    	
+    }
+
+	private void doJoin(Participant destination, JoinCommand message, boolean force) throws Exception {
+		
 		Joint joint = participant.join(destination, message.getMedia(), force, message.getDirection());
         waitForJoin(joint);	
         joinees.add(destination);
-    }
+
+	}
 
 	private void waitForJoin(Joint join) throws Exception {
 		
@@ -253,7 +268,8 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     		if (destination == null) {
     			throw new NotFoundException("Participant " + message.getFrom() + " not found");
     		}
-            participant.unjoin(destination).get(JOIN_TIMEOUT, TimeUnit.MILLISECONDS);
+    		  		
+    		participant.unjoin(destination).get(JOIN_TIMEOUT, TimeUnit.MILLISECONDS);
         } catch (TimeoutException e) {
             throw new TimeoutException("Timed out while trying to unjoin.");
         }
@@ -400,12 +416,29 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 
 	@com.voxeo.moho.State
 	public void onUnjoinEvent(com.voxeo.moho.event.UnjoinCompleteEvent event) {
-	    if(event.getSource().equals(participant)) {
+	    
+		if(event.getSource().equals(participant)) {
 	    	log.debug("Unjoin event received. Participant: [%s], Peer: [%s], Cause: [%s]", participant, event.getParticipant(), event.getCause());
 	        Participant peer = event.getParticipant();
+	        
+        	if (peer instanceof Mixer) {        		
+        		synchronized(peer) {
+        			// This synchronized block is required due to the way mixers work in moho. Mixers are 
+        			// created and disposed automatically. So before joining and unjoining mixers we need to 
+        			// synchronize code to avoid race conditions like would be to disconnect a mixer and at 
+        			// the same time having another call trying to join it
+    				log.debug("Unjoining mixer %s which has %s participants", peer, peer.getParticipants().length);
+
+        			if (peer.getParticipants().length == 0) {
+        				peer.disconnect();
+        			}
+        			mixerManager.removeMixer((Mixer)peer);
+        		}
+        	}
+
 	        switch(event.getCause()) {
 	        case SUCCESS_UNJOIN:
-	        case DISCONNECT:
+	        case DISCONNECT:	        	
 	            if(joinees.contains(peer)) {
 	                fireUnjoinedEvent(event);
 	                joinees.remove(peer);
