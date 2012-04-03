@@ -44,6 +44,7 @@ import com.rayo.server.CdrManager;
 import com.rayo.server.EventHandler;
 import com.rayo.server.JIDRegistry;
 import com.rayo.server.MixerActor;
+import com.rayo.server.MixerManager;
 import com.rayo.server.MixerRegistry;
 import com.rayo.server.RayoStatistics;
 import com.rayo.server.Request;
@@ -92,6 +93,7 @@ public class RayoServlet extends AbstractRayoServlet {
     private XmlProvider provider;
     private CallManager callManager;
     private CallRegistry callRegistry;
+    private MixerManager mixerManager;
     private MixerRegistry mixerRegistry;
     private RayoStatistics rayoStatistics;
     private CdrManager cdrManager;
@@ -110,6 +112,14 @@ public class RayoServlet extends AbstractRayoServlet {
     public void init(ServletConfig config) throws ServletException {
     	
         super.init(config);
+        
+		RayoAdminService adminService = (RayoAdminService)getAdminService();
+        String gatewayDomain = adminService.getGatewayDomain();
+        if (gatewayDomain != null) {
+        	// It will be the gateway who takes care of disposing mixers
+        	mixerManager.setGatewayHandlingMixers(true);
+        }
+        
         broadcastPresence("chat");
     }
     
@@ -719,5 +729,13 @@ public class RayoServlet extends AbstractRayoServlet {
 	
 	public void setRayoLookupService(RayoJIDLookupService<OfferEvent> rayoLookupService) {
 		this.rayoLookupService = rayoLookupService;
+	}
+
+	public MixerManager getMixerManager() {
+		return mixerManager;
+	}
+
+	public void setMixerManager(MixerManager mixerManager) {
+		this.mixerManager = mixerManager;
 	}
 }

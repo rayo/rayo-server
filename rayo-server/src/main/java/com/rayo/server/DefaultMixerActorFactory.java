@@ -9,6 +9,7 @@ public class DefaultMixerActorFactory implements MixerActorFactory {
 
 	private PoolFiberFactory fiberFactory;
 	private VerbManager verbManager;
+	private MixerManager mixerManager;
 	
     @Override
     public MixerActor create(Mixer mixer, String mixerName) {
@@ -16,6 +17,7 @@ public class DefaultMixerActorFactory implements MixerActorFactory {
     	MixerActor actor = new MixerActor(mixer, mixerName);
         actor.setFiberFactory(fiberFactory);
         actor.setVerbManager(verbManager);
+        actor.setMixerManager(mixerManager);
         return actor;
     }
 
@@ -34,4 +36,8 @@ public class DefaultMixerActorFactory implements MixerActorFactory {
     public PoolFiberFactory getFiberFactory() {
         return fiberFactory;
     }
+
+	public void setMixerManager(MixerManager mixerManager) {
+		this.mixerManager = mixerManager;
+	}
 }

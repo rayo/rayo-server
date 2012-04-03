@@ -15,6 +15,7 @@ import com.rayo.core.AcceptCommand;
 import com.rayo.core.AnswerCommand;
 import com.rayo.core.AnsweredEvent;
 import com.rayo.core.CallRejectReason;
+import com.rayo.core.DestroyMixerCommand;
 import com.rayo.core.DialCommand;
 import com.rayo.core.DtmfCommand;
 import com.rayo.core.DtmfEvent;
@@ -97,6 +98,8 @@ public class RayoProvider extends BaseProvider {
         		return buildDtmfEvent(element);
         	}
         	return buildDtmfCommand(element);
+        } else if (element.getName().equals("destroy-if-empty")) {
+        	return buildDestroyIfEmptyCommand(element);
         }
         
         return null;
@@ -341,6 +344,12 @@ public class RayoProvider extends BaseProvider {
     private Object buildStopCommand(Element element) throws URISyntaxException {
         return new StopCommand();
     }
+    
+    private Object buildDestroyIfEmptyCommand(Element element) {
+    	
+    	DestroyMixerCommand command = new DestroyMixerCommand();
+    	return command;
+    }
 
     @Override
     protected void generateDocument(Object object, Document document) throws Exception {
@@ -391,6 +400,8 @@ public class RayoProvider extends BaseProvider {
             createStartedSpeakingEvent((StartedSpeakingEvent)object, document);
         } else if (object instanceof StoppedSpeakingEvent) {
             createStoppedSpeakingEvent((StoppedSpeakingEvent)object, document);
+        } else if (object instanceof DestroyMixerCommand) {
+        	createDestroyIfEmptyCommand((DestroyMixerCommand)object, document);
         }
     }
 
@@ -637,5 +648,12 @@ public class RayoProvider extends BaseProvider {
         root.addAttribute("call-id", event.getSpeakerId());
 
         return document;
+    }
+    
+    private Document createDestroyIfEmptyCommand(Object object, Document document) {
+    	
+    	document.addElement(new QName("destroy-if-empty", RAYO_NAMESPACE));
+    	
+    	return document;
     }
 }

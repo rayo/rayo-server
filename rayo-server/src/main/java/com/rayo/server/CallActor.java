@@ -421,19 +421,8 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 	    	log.debug("Unjoin event received. Participant: [%s], Peer: [%s], Cause: [%s]", participant, event.getParticipant(), event.getCause());
 	        Participant peer = event.getParticipant();
 	        
-        	if (peer instanceof Mixer) {        		
-        		synchronized(peer) {
-        			// This synchronized block is required due to the way mixers work in moho. Mixers are 
-        			// created and disposed automatically. So before joining and unjoining mixers we need to 
-        			// synchronize code to avoid race conditions like would be to disconnect a mixer and at 
-        			// the same time having another call trying to join it
-    				log.debug("Unjoining mixer %s which has %s participants", peer, peer.getParticipants().length);
-
-        			if (peer.getParticipants().length == 0) {
-        				peer.disconnect();
-        			}
-        			mixerManager.removeMixer((Mixer)peer);
-        		}
+        	if (peer instanceof Mixer) {   
+        		mixerManager.disconnect((Mixer)peer);
         	}
 
 	        switch(event.getCause()) {

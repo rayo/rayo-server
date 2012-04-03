@@ -419,6 +419,23 @@ public class GatewayServlet extends AbstractRayoServlet {
 		if (mixer.getParticipants().size() == 0) {
 			gatewayStorageService.unregisterMixer(mixerName);
 			gatewayStorageService.removeFilters(mixerName);
+			
+			// Send message to the rayo node
+			JID fromJidInternal = getXmppFactory().createJID(getInternalDomain());
+			JID toJid = getXmppFactory().createJID(mixerName + "@" + mixer.getNodeJid());
+			
+			CoreDocumentImpl document = new CoreDocumentImpl(false);
+			org.w3c.dom.Element destroyElement = document.createElementNS("urn:xmpp:rayo:1", "destroy-if-empty");
+
+			IQRequest destroyMixerRequest = getXmppFactory().createIQ(
+					fromJidInternal, toJid, XmppServletRequest.TYPE_SET, destroyElement);
+			
+			log.debug("Sending destroy mixer command to mixer %s in node %s", mixerName, mixer.getNodeJid());
+			destroyMixerRequest.send();
+			if (getWireLogger().isDebugEnabled()) {
+				getWireLogger().debug("%s :: %s", destroyMixerRequest,
+						destroyMixerRequest.getSession().getId());
+			}
 		}
 	}
 	

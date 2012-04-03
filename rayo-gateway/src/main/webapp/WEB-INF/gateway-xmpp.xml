@@ -75,4 +75,10 @@
   	
 	<!-- In-memory Map based Datastore -->
 	<bean id="inMemoryDatastore" class="com.rayo.storage.memory.InMemoryDatastore"/>
+	
+	<!-- Provisioning SPI -->
+  	<bean id="spiMessageFilters"
+	      class="org.springframework.beans.factory.serviceloader.ServiceListFactoryBean"
+	      p:serviceType="com.rayo.provisioning.ProvisioningService"/>
+	
 </beans>

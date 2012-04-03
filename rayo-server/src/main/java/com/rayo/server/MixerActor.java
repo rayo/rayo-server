@@ -4,8 +4,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import com.rayo.core.StoppedSpeakingEvent;
+import com.rayo.core.DestroyMixerCommand;
 import com.rayo.core.StartedSpeakingEvent;
+import com.rayo.core.StoppedSpeakingEvent;
 import com.rayo.server.verb.ConferenceHandler;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.Mixer;
@@ -21,6 +22,8 @@ public class MixerActor extends AbstractActor<Mixer> {
 	private String mixerName;
 	
     private List<String> activeSpeakers = new ArrayList<String>();
+    
+    private MixerManager mixerManager;
     
     public MixerActor(Mixer mixer, String mixerName) {
 
@@ -43,6 +46,17 @@ public class MixerActor extends AbstractActor<Mixer> {
     	
         mohoListeners.add(new AutowiredEventListener(this));
         mixer.addObserver(new ActorEventListener(this));
+    }
+        
+    @Message
+    public void destroyIfEmpty(DestroyMixerCommand message) {
+
+    	synchronized(participant) {
+	    	if (participant.getParticipants().length == 0) {
+	        	log.debug("Destroying mixer %s", participant);
+	    		mixerManager.disconnect(participant, true);
+	    	}
+    	}
     }
     
     @State
@@ -88,4 +102,8 @@ public class MixerActor extends AbstractActor<Mixer> {
     	
     	return mixerName;
     }
+
+	public void setMixerManager(MixerManager mixerManager) {
+		this.mixerManager = mixerManager;
+	}
 }

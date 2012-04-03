@@ -27,6 +27,7 @@ import com.rayo.core.AcceptCommand
 import com.rayo.core.AnswerCommand
 import com.rayo.core.AnsweredEvent
 import com.rayo.core.CallRejectReason
+import com.rayo.core.DestroyMixerCommand;
 import com.rayo.core.DialCommand
 import com.rayo.core.DtmfCommand
 import com.rayo.core.DtmfEvent
@@ -1923,6 +1924,22 @@ public class RayoProviderTest {
 		assertNotNull event.headers
 		assertEquals event.headers["test1"], "value1"
 		assertEquals event.headers["test2"], "value2"
+	}
+	
+	// Destroy Mixer If Empty command
+	// ====================================================================================
+	
+	@Test
+	public void destroyMixerToXml() {
+		
+		DestroyMixerCommand dmc = new DestroyMixerCommand();
+		assertEquals("""<destroy-if-empty xmlns="urn:xmpp:rayo:1"/>""", toXml(dmc));
+	}
+	
+	@Test
+	public void destroyMixerFromXml() {
+		
+		assertNotNull fromXml("""<destroy-if-empty xmlns="urn:xmpp:rayo:1"/>""")
 	}
 	
     // Utility

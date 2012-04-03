@@ -67,6 +67,7 @@
 	<bean id="mixerActorFactory" class="com.rayo.server.DefaultMixerActorFactory">
 		<property name="fiberFactory" ref="fiberFactory" />
 		<property name="verbManager" ref="mixerVerbManager" />
+		<property name="mixerManager" ref="mixerManager" />
 	</bean>
 	
 	<!-- Mixer Manager: Responsible for maintaining the Mixer Registry and creating new MixerActors -->
@@ -353,4 +354,13 @@
   		<property name="cleanupC2SResources" value="true"/>
   		<property name="cleanupS2SResources" value="false"/>
   	</bean>
+  	
+  	<!-- Provisioning SPI -->
+  	<bean id="spiProvisioning"
+	      class="org.springframework.beans.factory.serviceloader.ServiceListFactoryBean"
+	      p:serviceType="com.rayo.provisioning.ProvisioningService"/>
+	<bean id="provisioningServiceLoader" class="com.rayo.provisioning.ProvisioningServiceLoader">
+		<property name="services" ref="spiProvisioning"/>
+	</bean>      
+	      
 </beans>
