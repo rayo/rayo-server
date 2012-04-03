@@ -345,6 +345,7 @@
     <module>rayo-sbcrouter</module>
     <module>rayo-storage</module>
     <module>rayo-gateway</module>
+    <module>rayo-provisioning</module>
   </modules>
   <profiles>
     <profile>
