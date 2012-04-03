@@ -1,0 +1,2 @@
+#Rayo Storage and Cassandra based service implementation
+com.rayo.provisioning.DefaultProvisioningService
