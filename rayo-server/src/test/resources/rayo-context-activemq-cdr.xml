@@ -57,11 +57,6 @@
 		<property name="fiberFactory" ref="fiberFactory" />
 		<property name="verbManager" ref="mixerVerbManager" />
 	</bean>	
-
-	<!-- Conference Manager -->	
-	<bean id="conferenceController" class="com.rayo.server.conference.MohoConferenceController">
-		<property name="mixerRegistry" ref="mixerRegistry" />
-	</bean>
 	
 	<!-- Model / Request Validation -->
 	<bean id="validator" class="com.rayo.core.validation.Validator"/>
@@ -101,15 +96,7 @@
 				<value>urn:xmpp:tropo:transfer:1</value>
 			</list>
 		</property>		
-	</bean>
-	<bean id="conferenceProvider" class="com.rayo.core.xml.providers.ConferenceProvider">
-		<property name="validator" ref="validator" />
-		<property name="namespaces">
-			<list>
-				<value>urn:xmpp:tropo:conference:1</value>
-			</list>
-		</property>		
-	</bean>				
+	</bean>			
 	<bean id="outputProvider" class="com.rayo.core.xml.providers.OutputProvider">
 		<property name="validator" ref="validator" />
 		<property name="namespaces">
@@ -145,7 +132,6 @@
 				<ref bean="sayProvider"/>
 				<ref bean="askProvider"/>
 				<ref bean="transferProvider"/>
-				<ref bean="conferenceProvider"/>
 			</list>
 		</property>		
 	</bean>
@@ -176,12 +162,6 @@
 					<property name="xmlProvider" ref="transferProvider" />
 					<property name="modelClass" value="com.rayo.core.verb.Transfer" />
 					<lookup-method name="createVerbHandler" bean="transferHandler" />
-				</bean>
-				<!-- Conference -->
-				<bean class="com.rayo.server.verb.AbstractVerbFactory">
-					<property name="xmlProvider" ref="conferenceProvider" />
-					<property name="modelClass" value="com.rayo.core.verb.Conference" />
-					<lookup-method name="createVerbHandler" bean="conferenceHandler" />
 				</bean>
 				<!-- Output -->
 				<bean class="com.rayo.server.verb.AbstractVerbFactory">
@@ -257,11 +237,6 @@
 	<bean id="sayHandler" class="com.rayo.server.verb.SayHandler" scope="prototype" />
 	<bean id="askHandler" class="com.rayo.server.verb.AskHandler" scope="prototype" />
 	<bean id="transferHandler" class="com.rayo.server.verb.TransferHandler" scope="prototype" />
-	<bean id="conferenceHandler" class="com.rayo.server.verb.ConferenceHandler" scope="prototype">
-		<property name="mohoConferenceController" ref="conferenceController" />
-		<property name="mixerActoryFactory" ref="mixerActorFactory"/>
-		<property name="callManager" ref="callManager"/>
-	</bean>
 	<bean id="outputHandler" class="com.rayo.server.verb.OutputHandler" scope="prototype" />
 	<bean id="inputHandler" class="com.rayo.server.verb.InputHandler" scope="prototype" />
 	<bean id="recordHandler" class="com.rayo.server.verb.RecordHandler" scope="prototype">
