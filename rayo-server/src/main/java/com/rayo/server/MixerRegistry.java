@@ -6,7 +6,7 @@ public interface MixerRegistry {
 
     public void add(MixerActor actor);
 
-    public void remove(String id);
+    public MixerActor remove(String id);
     
     public int size();
 

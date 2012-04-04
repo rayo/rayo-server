@@ -155,26 +155,6 @@
 	    	</list>
 	    </property>			
 	</bean>
-	<bean id="conferenceProvider" class="com.rayo.core.xml.providers.ConferenceProvider">
-		<property name="validator" ref="validator" />
-		<property name="namespaces">
-			<list>
-				<value>urn:xmpp:tropo:conference:1</value>
-                <value>urn:xmpp:tropo:conference:complete:1</value>
-			</list>
-		</property>
-		<property name="classes">
-	    	<list>
-	    		<value>com.rayo.core.verb.Conference</value>
-	    		<value>com.rayo.core.verb.KickCommand</value>
-	    		<value>com.rayo.core.verb.OnHoldEvent</value>
-	    		<value>com.rayo.core.verb.OffHoldEvent</value>
-	    		<value>com.rayo.core.ConferenceSpeakingEvent</value>
-	    		<value>com.rayo.core.ConferenceFinishedSpeakingEvent</value>
-	    		<value>com.rayo.core.verb.ConferenceCompleteEvent</value>
-	    	</list>
-	    </property>				
-	</bean>	
 	
 	<!-- Create a global XML Provider -->
 	<bean id="xmlProviderManager" class="com.rayo.core.xml.DefaultXmlProviderManagerFactoryBean">
@@ -184,7 +164,6 @@
 				<ref bean="sayProvider"/>
 				<ref bean="askProvider"/>
 				<ref bean="transferProvider"/>
-				<ref bean="conferenceProvider"/>
 				<ref bean="outputProvider"/>
 				<ref bean="inputProvider"/>
 				<ref bean="recordProvider"/>

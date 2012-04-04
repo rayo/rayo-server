@@ -4,14 +4,14 @@ import java.net.URI;
 
 import javax.validation.ConstraintValidatorContext;
 
-import com.rayo.server.Actor;
-import com.rayo.server.validation.ValidHandlerState;
 import com.rayo.core.verb.InputMode;
 import com.rayo.core.verb.Ssml;
 import com.rayo.core.verb.Verb;
 import com.rayo.core.verb.VerbCommand;
 import com.rayo.core.verb.VerbCompleteEvent;
 import com.rayo.core.verb.VerbEvent;
+import com.rayo.server.Actor;
+import com.rayo.server.validation.ValidHandlerState;
 import com.voxeo.moho.Call;
 import com.voxeo.moho.Call.State;
 import com.voxeo.moho.MediaService;
@@ -20,7 +20,6 @@ import com.voxeo.moho.Participant;
 import com.voxeo.moho.Participant.JoinType;
 import com.voxeo.moho.media.output.AudibleResource;
 import com.voxeo.moho.media.output.OutputCommand;
-import com.voxeo.moho.sip.SIPCallImpl;
 
 @ValidHandlerState
 public abstract class AbstractLocalVerbHandler<T extends Verb, S extends Participant> implements VerbHandler<T, S> {
@@ -128,19 +127,6 @@ public abstract class AbstractLocalVerbHandler<T extends Verb, S extends Partici
     protected MediaService<Participant> getMediaService() {
         return (MediaService<Participant>) participant;
     }
-    
-    boolean isOnConference(Participant participant) {
-
-    	if (participant instanceof Call) {
-    		Call call = (Call)participant;
-	    	for (String key: call.getAttributeMap().keySet()) {
-	    		if (key.startsWith(ConferenceHandler.PARTICIPANT_KEY)) {
-	    			return true;
-	    		}
-	    	}
-    	}
-    	return false;
-	}
     
     boolean isOnHold(Participant participant) {
     	

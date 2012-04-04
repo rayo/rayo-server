@@ -53,17 +53,9 @@ public class SayHandler extends AbstractLocalVerbHandler<Say, Participant> {
             context.buildConstraintViolationWithTemplate("Call is not ready yet.")
         		.addNode(ExceptionMapper.toString(StanzaError.Condition.RESOURCE_CONSTRAINT))
         		.addConstraintViolation();
-            return false;
-    		
+            return false;    		
     	}
-    	
-        if (isOnConference(participant)) {
-        	context.buildConstraintViolationWithTemplate(
-        			"Call is joined to a conference.")
-        			.addNode(ExceptionMapper.toString(StanzaError.Condition.RESOURCE_CONSTRAINT))
-        			.addConstraintViolation();
-        	return false;
-        }
+
         if (isOnHold(participant)) {
         	context.buildConstraintViolationWithTemplate(
 				"Call is currently on hold.")

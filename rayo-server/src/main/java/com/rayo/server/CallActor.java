@@ -45,7 +45,6 @@ import com.voxeo.moho.MixerEndpoint;
 import com.voxeo.moho.Participant;
 import com.voxeo.moho.Participant.JoinType;
 import com.voxeo.moho.common.event.AutowiredEventListener;
-import com.voxeo.moho.conference.ConferenceManager;
 import com.voxeo.moho.event.CallCompleteEvent;
 import com.voxeo.moho.event.HangupEvent;
 import com.voxeo.moho.event.InputDetectedEvent;
@@ -286,11 +285,6 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     		}
     	} else if (type == JoinDestinationType.MIXER) {
     		participant = mixerManager.getMixer(destination);
-    		if (participant == null) {
-    			//TODO: Backwards compatibility. Remove
-				ConferenceManager conferenceManager = this.participant.getApplicationContext().getConferenceManager();
-	    		participant = conferenceManager.getConference(destination);
-    		}
     	} else {
     		throw new RayoProtocolException(Condition.BAD_REQUEST, Type.CANCEL, "Unknown destination type");
     	}
@@ -422,7 +416,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 	        Participant peer = event.getParticipant();
 	        
         	if (peer instanceof Mixer) {   
-        		mixerManager.disconnect((Mixer)peer);
+        		mixerManager.handleCallDisconnect((Mixer)peer, participant);
         	}
 
 	        switch(event.getCause()) {

@@ -81,12 +81,6 @@ public class OutputHandler extends AbstractLocalVerbHandler<Output, Participant>
     		
     	}
     	
-        if (isOnConference(participant)) {
-            context.buildConstraintViolationWithTemplate("Call is joined to a conference.")
-            	.addNode(ExceptionMapper.toString(StanzaError.Condition.RESOURCE_CONSTRAINT))
-            		.addConstraintViolation();
-            return false;
-        }
         if (isOnHold(participant)) {
             context.buildConstraintViolationWithTemplate("Call is currently on hold.")
             	.addNode(ExceptionMapper.toString(StanzaError.Condition.RESOURCE_CONSTRAINT))

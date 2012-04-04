@@ -281,7 +281,7 @@ public abstract class AbstractActor<T extends Participant> extends ReflectiveAct
     protected void unjoinAll() {
         for(Participant peer : participant.getParticipants()) {
             try {
-                log.info("Call is disconnecting. Unjoining peer [%s]", peer);
+                log.info("Disconnecting. Unjoining peer [%s]", peer);
                 participant.unjoin(peer).get(10, TimeUnit.SECONDS);
                 log.info("Peer unjoined [%s]", peer);
             } catch (Exception e) {

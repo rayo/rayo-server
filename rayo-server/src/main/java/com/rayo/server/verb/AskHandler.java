@@ -83,14 +83,7 @@ public class AskHandler extends AbstractLocalVerbHandler<Ask,Participant> {
             return false;
     		
     	}
-    	
-        if (isOnConference(participant)) {
-        	context.buildConstraintViolationWithTemplate(
-        			"Call is joined to a conference.")
-        			.addNode(ExceptionMapper.toString(StanzaError.Condition.RESOURCE_CONSTRAINT))
-        			.addConstraintViolation();
-        	return false;
-        }
+
         if (isOnHold(participant)) {
         	context.buildConstraintViolationWithTemplate(
 				"Call is currently on hold.")

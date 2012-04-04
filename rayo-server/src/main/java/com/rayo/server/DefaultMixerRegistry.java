@@ -15,8 +15,8 @@ public class DefaultMixerRegistry implements MixerRegistry {
     }
 
     @Override
-    public void remove(String id) {
-        mixers.remove(id);
+    public MixerActor remove(String id) {
+        return mixers.remove(id);
     }
 
     @Override

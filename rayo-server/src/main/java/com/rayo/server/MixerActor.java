@@ -7,19 +7,19 @@ import java.util.List;
 import com.rayo.core.DestroyMixerCommand;
 import com.rayo.core.StartedSpeakingEvent;
 import com.rayo.core.StoppedSpeakingEvent;
-import com.rayo.server.verb.ConferenceHandler;
+import com.rayo.server.verb.VerbHandler;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.Mixer;
 import com.voxeo.moho.Participant;
 import com.voxeo.moho.State;
 import com.voxeo.moho.common.event.AutowiredEventListener;
-import com.voxeo.moho.conference.Conference;
 import com.voxeo.moho.event.ActiveSpeakerEvent;
 
 public class MixerActor extends AbstractActor<Mixer> {
 
 	private Loggerf log = Loggerf.getLogger(MixerActor.class);
 	private String mixerName;
+	private ActorEventListener mohoObserver;
 	
     private List<String> activeSpeakers = new ArrayList<String>();
     
@@ -35,17 +35,34 @@ public class MixerActor extends AbstractActor<Mixer> {
     @Override
     protected void verbCreated() {}
     
-    public void setupMohoListeners(Conference mohoConference, ConferenceHandler handler) {
-    	
-        // Now we setup the moho handlers
-        mohoListeners.add(new AutowiredEventListener(handler));
-        mohoConference.addObserver(new ActorEventListener(this));
-    }
-    
     public void setupMohoListeners(Mixer mixer) {
     	
+    	mohoObserver = new ActorEventListener(this);
         mohoListeners.add(new AutowiredEventListener(this));
-        mixer.addObserver(new ActorEventListener(this));
+        mixer.addObserver(mohoObserver);
+    }
+    
+    public void dispose() {
+
+    	mohoListeners.clear();
+    	
+    	if (participant != null) {
+    		((Mixer)participant).removeObserver(mohoObserver);
+    	}
+
+    	stop();    	
+    	unjoinAll();
+    	if (participant != null) {
+    		participant.disconnect();
+    	}
+    	
+        for (VerbHandler<?,?> handler : getVerbs()) {
+            try {
+                handler.stop(false);
+            } catch (Exception e) {
+                log.error("Verb Handler did not shut down cleanly", e);
+            }
+        }
     }
         
     @Message
@@ -54,7 +71,7 @@ public class MixerActor extends AbstractActor<Mixer> {
     	synchronized(participant) {
 	    	if (participant.getParticipants().length == 0) {
 	        	log.debug("Destroying mixer %s", participant);
-	    		mixerManager.disconnect(participant, true);
+	    		mixerManager.removeMixer((Mixer)participant);
 	    	}
     	}
     }

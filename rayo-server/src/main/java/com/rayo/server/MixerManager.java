@@ -2,6 +2,9 @@ package com.rayo.server;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.media.mscontrol.EventType;
 import javax.media.mscontrol.mixer.MediaMixer;
@@ -11,6 +14,7 @@ import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.ApplicationContext;
 import com.voxeo.moho.Mixer;
 import com.voxeo.moho.MixerEndpoint;
+import com.voxeo.moho.Participant;
 
 /**
  * <p>Manages mixers. Encapsulates all the logic related with mixers and mixer actors 
@@ -30,45 +34,89 @@ public class MixerManager {
 	
 	private boolean gatewayHandlingMixers = false;
 	
+	private Map<String, ReentrantReadWriteLock> locks = new ConcurrentHashMap<String, ReentrantReadWriteLock>();
+	
+	private ReentrantReadWriteLock globalLock = new ReentrantReadWriteLock();
+	
 	public Mixer create(ApplicationContext ctx, String mixerName) {
 		
-		log.debug("Creating mixer %s", mixerName);
-		// mixer creation
-		MixerEndpoint endpoint = (MixerEndpoint)ctx
-				.createEndpoint(MixerEndpoint.DEFAULT_MIXER_ENDPOINT);
-		Map<Object, Object> parameters = new HashMap<Object, Object>();
-		parameters.put(MediaMixer.ENABLED_EVENTS, new EventType[]{MixerEvent.ACTIVE_INPUTS_CHANGED});    			
-		Mixer mixer = endpoint.create(mixerName, parameters);
-		
-        MixerActor actor = mixerActorFactory.create(mixer, mixerName);
-        actor.setupMohoListeners(mixer);
-        // Wire up default call handlers
-        for (EventHandler handler : callManager.getEventHandlers()) {
-            actor.addEventHandler(handler);
-        }
-        actor.start();
-        mixerRegistry.add(actor);
-        mixerStatistics.mixerCreated();
-        
-		log.debug("Mixer %s created successfully", mixerName);
-
-        return mixer;
+		Lock lock = globalLock.writeLock();
+		lock.lock();		
+		try {
+			Mixer mixer = getMixer(mixerName);
+			if (mixer != null) {
+				log.debug("Mixer with name %s already exists", mixerName);
+				return mixer; 
+			}
+			
+			log.debug("Creating mixer %s", mixerName);
+			// mixer creation
+			MixerEndpoint endpoint = (MixerEndpoint)ctx
+					.createEndpoint(MixerEndpoint.DEFAULT_MIXER_ENDPOINT);
+			Map<Object, Object> parameters = new HashMap<Object, Object>();
+			parameters.put(MediaMixer.ENABLED_EVENTS, new EventType[]{MixerEvent.ACTIVE_INPUTS_CHANGED});    			
+			mixer = endpoint.create(mixerName, parameters);
+			
+	        MixerActor actor = mixerActorFactory.create(mixer, mixerName);
+	        actor.setupMohoListeners(mixer);
+	        // Wire up default call handlers
+	        for (EventHandler handler : callManager.getEventHandlers()) {
+	            actor.addEventHandler(handler);
+	        }
+	        locks.put(mixerName, new ReentrantReadWriteLock());
+	        actor.start();
+	        mixerRegistry.add(actor);
+	        mixerStatistics.mixerCreated();
+	        
+			log.debug("Mixer %s created successfully", mixerName);
+	
+	        return mixer;
+		} finally {
+			lock.unlock();
+		}
 	}
 	
 	public Mixer getMixer(String mixerName) {
 		
-		MixerActor actor = mixerRegistry.get(mixerName);
-		if (actor != null) {
-			return actor.getMixer();
+		Lock lock = getReadLock(mixerName);
+		lock.lock();
+		try {
+			MixerActor actor = mixerRegistry.get(mixerName);
+			if (actor != null) {
+				return actor.getMixer();
+			}
+			return null;
+		} finally {
+			lock.unlock();
 		}
-		return null;
 	}
 	
 	public void removeMixer(Mixer mixer) {
+	
+		Lock lock = getWriteLock(mixer.getName());
+		lock.lock();
 		
-		mixerRegistry.remove(mixer.getName());
+		try {
+			if (getMixer(mixer.getName()) == null) {
+				log.error("Mixer %s does not exist", mixer.getName());
+				return;
+			}
+			
+			log.debug("Removing mixer: %s", mixer);
+			MixerActor actor = mixerRegistry.remove(mixer.getName());
+			
+			if (actor != null) {
+		        for (EventHandler handler : callManager.getEventHandlers()) {
+		            actor.removeEventHandler(handler);
+		        }
+		        actor.dispose();
+			}
+		} finally {
+			removeLock(mixer.getName());			
+			lock.unlock();
+		}
 	}
-
+	
 	public void setMixerActorFactory(MixerActorFactory mixerActorFactory) {
 		this.mixerActorFactory = mixerActorFactory;
 	}
@@ -92,30 +140,46 @@ public class MixerManager {
 	public void setGatewayHandlingMixers(boolean gatewayHandlingMixers) {
 		this.gatewayHandlingMixers = gatewayHandlingMixers;
 	}
-
-	public void disconnect(Mixer peer) {
-		
-		disconnect(peer, false);
-	}
 	
-	public void disconnect(Mixer mixer, boolean fromGateway) {
+	public void handleCallDisconnect(Mixer mixer, Participant participant) {
 		
-		if (!fromGateway && gatewayHandlingMixers) {
-			// skip. Gateway is synchronizing mixer access
-			return;
-		}
-		synchronized(mixer) {
-			// This synchronized block is required due to the way mixers work in moho. Mixers are 
-			// created and disposed automatically. So before joining and unjoining mixers we need to 
-			// synchronize code to avoid race conditions like would be to disconnect a mixer and at 
-			// the same time having another call trying to join it
+		log.debug("Participant %s is disconnecting from mixer %s", participant, mixer);
+		
+		Lock lock = getWriteLock(mixer.getName());
+		lock.lock();
+		try {
+
 			log.debug("Unjoining mixer %s which has %s participants", mixer, mixer.getParticipants().length);
 
 			if (mixer.getParticipants().length == 0) {
-				log.debug("Mixer %s has 0 participants. Disconnecting it", mixer);
-				mixer.disconnect();
+				log.debug("Mixer %s has 0 participants. Disposing it", mixer);
+				removeMixer((Mixer)mixer);
 			}
-			removeMixer((Mixer)mixer);
+		} finally {
+			lock.unlock();
 		}
+	}
+	
+	private Lock getWriteLock(String mixerName) {
+		
+		ReentrantReadWriteLock lock = locks.get(mixerName);
+		if (lock == null) {
+			lock = globalLock;
+		}
+		return lock.writeLock();
+	}
+	
+	private void removeLock(String mixerName) {
+		
+		locks.remove(mixerName);
+	}
+	
+	private Lock getReadLock(String mixerName) {
+		
+		ReentrantReadWriteLock lock = locks.get(mixerName);
+		if (lock == null) {
+			lock = globalLock;
+		}
+		return lock.readLock();
 	}
 }

@@ -15,7 +15,6 @@ import com.rayo.core.validation.ValidationException
 import com.rayo.core.validation.Validator
 import com.rayo.core.xml.DefaultXmlProviderManager;
 import com.rayo.core.xml.providers.AskProvider
-import com.rayo.core.xml.providers.ConferenceProvider
 import com.rayo.core.xml.providers.InputProvider;
 import com.rayo.core.xml.providers.OutputProvider;
 import com.rayo.core.xml.providers.RayoProvider;
@@ -39,7 +38,6 @@ class ValidationTest {
 					 new SayProvider(validator:validator,namespaces:['urn:xmpp:tropo:say:1']),
 					 new AskProvider(validator:validator,namespaces:['urn:xmpp:tropo:ask:1']),
 					 new TransferProvider(validator:validator,namespaces:['urn:xmpp:tropo:transfer:1']),
-					 new ConferenceProvider(validator:validator,namespaces:['urn:xmpp:tropo:conference:1']),
 					 new RecordProvider(validator:validator,namespaces:['urn:xmpp:rayo:record:1']),
 					 new OutputProvider(validator:validator,namespaces:['urn:xmpp:rayo:output:1']),
 					 new InputProvider(validator:validator,namespaces:['urn:xmpp:rayo:input:1'])
@@ -364,85 +362,15 @@ class ValidationTest {
 		assertNotNull fromXML(transfer)
 	}
 
-	// Conference
-	// ====================================================================================
-	
-	@Test
-	public void validateConferenceNullRoomName() {
-				
-		def conference = parseXml("""<conference xmlns=\"urn:xmpp:tropo:conference:1\"></conference>""")
-		
-		def errorMapping = assertValidationException(conference)
-		assertNotNull errorMapping
-		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
-		assertEquals errorMapping.condition, ExceptionMapper.toString(StanzaError.Condition.BAD_REQUEST)
-		assertEquals errorMapping.text, Messages.MISSING_ROOM_NAME
-	}
-	
-	@Test
-	public void validateConferenceInvalidBeep() {
-				
-		def conference = parseXml("""<conference xmlns=\"urn:xmpp:tropo:conference:1\" name="1" beep="123"></conference>""")
-		
-		def errorMapping = assertValidationException(conference)
-		assertNotNull errorMapping
-		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
-		assertEquals errorMapping.condition, ExceptionMapper.toString(StanzaError.Condition.BAD_REQUEST)
-		assertEquals errorMapping.text, String.format(Messages.INVALID_BOOLEAN,"beep")
-	}
-	
-	@Test
-	public void validateConferenceInvalidMute() {
-				
-		def conference = parseXml("""<conference xmlns=\"urn:xmpp:tropo:conference:1\" name="1" mute="123"></conference>""")
-		
-		def errorMapping = assertValidationException(conference)
-		assertNotNull errorMapping
-		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
-		assertEquals errorMapping.condition, ExceptionMapper.toString(StanzaError.Condition.BAD_REQUEST)
-		assertEquals errorMapping.text, String.format(Messages.INVALID_BOOLEAN,"mute")
-	}
-	
-	@Test
-	public void validateConferenceInvalidTonePassThrough() {
-				
-		def conference = parseXml("""<conference xmlns=\"urn:xmpp:tropo:conference:1\" name="1" tone-passthrough="123"></conference>""")
-		
-		def errorMapping = assertValidationException(conference)
-		assertNotNull errorMapping
-		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
-		assertEquals errorMapping.condition, ExceptionMapper.toString(StanzaError.Condition.BAD_REQUEST)
-		assertEquals errorMapping.text, String.format(Messages.INVALID_BOOLEAN,"tone-passthrough")
-	}
-	
-	@Test
-	public void validateConferenceInvalidTerminator() {
-				
-		def conference = parseXml("""<conference xmlns=\"urn:xmpp:tropo:conference:1\" name="1" terminator="123"></conference>""")
-		
-		def errorMapping = assertValidationException(conference)
-		assertNotNull errorMapping
-		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
-		assertEquals errorMapping.condition, ExceptionMapper.toString(StanzaError.Condition.BAD_REQUEST)
-		assertEquals errorMapping.text, Messages.INVALID_TERMINATOR
-	}
-	
-	@Test
-	public void validateConferenceValid() {
-				
-		def conference = parseXml("""<conference xmlns=\"urn:xmpp:tropo:conference:1\" mute="false" beep="false" tone-passthrough="true" name="123456"/>""")
-		assertNotNull fromXML(conference)
-	}
-
 	// Redirect
 	// ====================================================================================
 	
 	@Test
 	public void validateRedirectMissingDestination() {
 				
-		def conference = parseXml("""<redirect xmlns="urn:xmpp:rayo:1"/>""")
+		def redirect = parseXml("""<redirect xmlns="urn:xmpp:rayo:1"/>""")
 		
-		def errorMapping = assertValidationException(conference)
+		def errorMapping = assertValidationException(redirect)
 		assertNotNull errorMapping
 		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
 		assertEquals errorMapping.condition, ExceptionMapper.toString(StanzaError.Condition.BAD_REQUEST)
@@ -452,9 +380,9 @@ class ValidationTest {
 	@Test
 	public void validateRedirectInvalidURI() {
 				
-		def conference = parseXml("""<redirect xmlns="urn:xmpp:rayo:1" to="\$?\\.com"/>""")
+		def redirect = parseXml("""<redirect xmlns="urn:xmpp:rayo:1" to="\$?\\.com"/>""")
 		
-		def errorMapping = assertValidationException(conference)
+		def errorMapping = assertValidationException(redirect)
 		assertNotNull errorMapping
 		assertEquals errorMapping.type, StanzaError.Type.MODIFY.toString()
 		assertEquals errorMapping.condition, ExceptionMapper.toString(StanzaError.Condition.BAD_REQUEST)
@@ -904,9 +832,9 @@ class ValidationTest {
 	}
 	
 	@Test
-	public void validateOutputValid2() {
+	public void validateOutputValidSpeak() {
 				
-		def output = parseXml("""<output xmlns=\"urn:xmpp:rayo:output:1\"><speak version="1.0" xml:lang="en-US"><audio src="digits/3"/></speak></output>""")
+		def output = parseXml("""<output xmlns=\"urn:xmpp:rayo:output:1\"><speak xmlns=\"http://www.w3.org/2001/10/synthesis\" version=\"1.0\" xml:lang=\"en-US\"><audio src=\"digits/3\"/></speak></output>""")
 		assertNotNull fromXML(output)
 	}
 	

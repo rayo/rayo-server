@@ -48,8 +48,6 @@ import com.rayo.core.validation.Validator
 import com.rayo.core.verb.Ask
 import com.rayo.core.verb.AskCompleteEvent
 import com.rayo.core.verb.Choices
-import com.rayo.core.verb.Conference
-import com.rayo.core.verb.ConferenceCompleteEvent
 import com.rayo.core.verb.HoldCommand
 import com.rayo.core.verb.Input
 import com.rayo.core.verb.InputCompleteEvent
@@ -81,7 +79,6 @@ import com.rayo.core.verb.VolumeDownCommand
 import com.rayo.core.verb.VolumeUpCommand
 import com.rayo.core.verb.AskCompleteEvent.Reason
 import com.rayo.core.xml.providers.AskProvider
-import com.rayo.core.xml.providers.ConferenceProvider
 import com.rayo.core.xml.providers.InputProvider
 import com.rayo.core.xml.providers.OutputProvider
 import com.rayo.core.xml.providers.RayoProvider
@@ -653,19 +650,6 @@ public class RayoProviderTest {
             headers: [test:"atest"]
         ])
     }
-
-    // Kick
-    // ====================================================================================
-    @Test
-    public void kickFromXml() {
-        assertNotNull fromXml("""<kick xmlns="urn:xmpp:tropo:conference:1" />""")
-    }
-    
-    @Test
-    public void kickToXml() {
-        KickCommand kick = new KickCommand();
-        assertEquals("""<kick xmlns="urn:xmpp:tropo:conference:1"/>""", toXml(kick));
-    }
     
     // Pause
     // ====================================================================================
@@ -891,49 +875,6 @@ public class RayoProviderTest {
         assertEquals("""<ask xmlns="urn:xmpp:tropo:ask:1" voice="allison" min-confidence="0.8" mode="dtmf" recognizer="en-us" terminator="#" timeout="3000" bargein="true"><prompt>Hello World.</prompt><choices content-type="vxml" url="http://test"><![CDATA[sales,support]]></choices></ask>""", toXml(ask));
     }
     
-    // Conference
-    // ====================================================================================
-
-    @Test
-    public void conferenceFromXml() {
-        
-        def conference = fromXml("""<conference xmlns="urn:xmpp:tropo:conference:1" terminator="#" name="123456" beep="true" mute="true" tone-passthrough="true" moderator="false"><announcement>hello</announcement><music>music</music></conference>""")
-        assertNotNull conference
-        assertEquals conference.terminator, '#' as char
-        assertTrue conference.beep
-        assertTrue conference.tonePassthrough
-        assertTrue conference.mute
-        assertEquals conference.roomName,"123456"
-        assertFalse conference.moderator
-        assertEquals conference.holdMusic.text , "music"
-        assertEquals conference.announcement.text , "hello"
-    }
-    
-    @Test
-    public void emptyConferenceToXml() {
-        
-        def conference = new Conference([
-            roomName: "1234"
-        ])
-        assertEquals("""<conference xmlns="urn:xmpp:tropo:conference:1" name="1234" mute="false" terminator="#" tone-passthrough="true" beep="true" moderator="true"/>""", toXml(conference));
-    }
-    
-    @Test
-    public void conferenceToXml() {
-        
-        def conference = new Conference()
-        conference.roomName = "1234"
-        conference.terminator = '#' as char
-        conference.beep = true
-        conference.mute = true
-        conference.tonePassthrough = true
-        conference.moderator = false
-        conference.announcement = new Ssml("hello")
-        conference.holdMusic = new Ssml("music")
-        
-        assertEquals("""<conference xmlns="urn:xmpp:tropo:conference:1" name="1234" mute="true" terminator="#" tone-passthrough="true" beep="true" moderator="false"><announcement>hello</announcement><music>music</music></conference>""", toXml(conference));
-    }
-
     // Transfer
     // ====================================================================================
     @Test
@@ -1208,42 +1149,6 @@ public class RayoProviderTest {
     public void transferCompleteWithErrorsToXml() {
         
         def complete = new TransferCompleteEvent(new Transfer(), VerbCompleteEvent.Reason.ERROR)
-        complete.errorText = "this is an error"
-        
-        assertEquals("""<complete xmlns="urn:xmpp:rayo:ext:1"><error xmlns="urn:xmpp:rayo:ext:complete:1">this is an error</error></complete>""", toXml(complete));
-    }
-    
-    // Conference Complete
-    // ====================================================================================
-    @Test
-    public void conferenceCompleteFromXml() {
-        
-        def complete = fromXml("""<complete xmlns="urn:xmpp:rayo:ext:1"><hangup xmlns="urn:xmpp:rayo:ext:complete:1"/></complete>""")
-        assertNotNull complete
-        assertEquals complete.reason, VerbCompleteEvent.Reason.HANGUP
-    }
-    
-    @Test
-    public void conferenceCompleteWithErrorsFromXml() {
-        
-        def complete = fromXml("""<complete xmlns="urn:xmpp:rayo:ext:1"><error xmlns="urn:xmpp:rayo:ext:complete:1">this is an error</error></complete>""")
-        assertNotNull complete
-        assertEquals complete.reason, VerbCompleteEvent.Reason.ERROR
-        assertEquals complete.errorText, "this is an error"
-    }
-    
-    @Test
-    public void conferenceCompleteToXml() {
-        
-        def complete = new ConferenceCompleteEvent(new Conference(), VerbCompleteEvent.Reason.HANGUP)
-        
-        assertEquals("""<complete xmlns="urn:xmpp:rayo:ext:1"><hangup xmlns="urn:xmpp:rayo:ext:complete:1"/></complete>""", toXml(complete));
-    }
-    
-    @Test
-    public void conferenceCompleteWithErrorsToXml() {
-        
-        def complete = new ConferenceCompleteEvent(new Conference(), VerbCompleteEvent.Reason.ERROR)
         complete.errorText = "this is an error"
         
         assertEquals("""<complete xmlns="urn:xmpp:rayo:ext:1"><error xmlns="urn:xmpp:rayo:ext:complete:1">this is an error</error></complete>""", toXml(complete));
