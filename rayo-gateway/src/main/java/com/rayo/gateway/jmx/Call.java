@@ -32,7 +32,7 @@ public class Call implements CallMXBean {
 		return callId;
 	}
 	
-	public String getClientJID() {
+	public String getClientJid() {
 		
 		return clientJid.toString();
 	}

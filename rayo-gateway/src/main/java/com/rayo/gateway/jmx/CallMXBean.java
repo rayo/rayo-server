@@ -7,5 +7,5 @@ public interface CallMXBean {
 	
 	public String getCallId();
 	
-	public String getClientJID();
+	public String getClientJid();
 }
