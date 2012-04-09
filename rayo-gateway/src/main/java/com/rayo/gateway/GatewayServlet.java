@@ -106,7 +106,10 @@ public class GatewayServlet extends AbstractRayoServlet {
 		try {
 			if (isMyExternalDomain(message.getTo())) {
 				String to = message.getTo().getNode();
-				GatewayMixer mixer = gatewayStorageService.getMixer(to);
+				GatewayMixer mixer = null;
+				if (to != null) {
+					mixer = gatewayStorageService.getMixer(to);
+				}
 				if (mixer != null) {
 					processClientPresenceToMixer(message, mixer);
 				} else {
