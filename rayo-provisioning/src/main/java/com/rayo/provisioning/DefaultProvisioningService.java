@@ -44,8 +44,11 @@ public class DefaultProvisioningService implements ProvisioningService {
 	private static final String RETRIES="com.rayo.provisioning.jms.retries";
 	private static final String RETRY_INTERVAL="com.rayo.provisioning.jms.retryInterval";
 	private static final String PROVISIONING_QUEUE="com.rayo.provisioning.jms.notifications.queue";
+	private static final String PROVISIONING_ENDPOINT="com.rayo.provisioning.api";
+	public static final String PROVISIONING_DEFAULT_PERMISSIONS="com.rayo.provisioning.default.permissions";
 	
 	private static final String DOMAIN_NAME="com.rayo.domain.name";
+	
 	
 	private ReentrantLock initLock = new ReentrantLock();
 	
@@ -61,10 +64,12 @@ public class DefaultProvisioningService implements ProvisioningService {
 	private boolean connected;
 	
 	private String domainName;
+	private String provisioningEndpoint;
 	
 	private MessageProcessor messageProcessor = new MessageProcessor();
 	
 	private StorageServiceClient storageServiceClient;
+	private ProvisioningServiceClient provisioningServiceClient;
 	
 	public void init(Properties properties) {
 		
@@ -125,8 +130,10 @@ public class DefaultProvisioningService implements ProvisioningService {
 			storageServiceClient = new StorageServiceClient();
 			storageServiceClient.init();
 			
-			storageServiceClient.setDomainName(domainName);
+			provisioningServiceClient = new ProvisioningServiceClient(provisioningEndpoint);
+			
 			messageProcessor.setStorageServiceClient(storageServiceClient);
+			messageProcessor.setProvisioningServiceClient(provisioningServiceClient);
 		} finally {
 			initLock.unlock();
 		}
@@ -147,6 +154,7 @@ public class DefaultProvisioningService implements ProvisioningService {
 		}
 		
 		domainName = checkProperty(properties, DOMAIN_NAME);
+		provisioningEndpoint = checkProperty(properties, PROVISIONING_ENDPOINT);
 	}
 	
 	public void shutdown() {
@@ -200,4 +208,9 @@ public class DefaultProvisioningService implements ProvisioningService {
 		
 		return messageProcessor.getMessagesFailed();
 	}
+
+	public void setProvisioningServiceClient(
+			ProvisioningServiceClient provisioningServiceClient) {
+		this.provisioningServiceClient = provisioningServiceClient;
+	}	
 }

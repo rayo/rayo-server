@@ -8,8 +8,11 @@ import javax.jms.TextMessage;
 
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
+import org.mortbay.log.Log;
 
+import com.google.gson.GsonBuilder;
 import com.rayo.storage.model.Application;
+import com.tropo.provisioning.rest.model.UpdateNotification;
 import com.voxeo.logging.Loggerf;
 
 /**
@@ -28,6 +31,7 @@ public class MessageProcessor implements MessageListener {
 	private AtomicLong messagesFailed = new AtomicLong();
 	
 	private StorageServiceClient storageServiceClient;
+	private ProvisioningServiceClient provisioningServiceClient;
 	
 	@Override
 	public void onMessage(Message message) {
@@ -36,25 +40,31 @@ public class MessageProcessor implements MessageListener {
 		if (message instanceof TextMessage) {
 			try {
 				String body = ((TextMessage)message).getText();
-				JSONObject object = (JSONObject)JSONValue.parse(body);
-				logger.info("Found object %s", object);
 				messagesProcessed.incrementAndGet();
 				
-				String appName = (String)object.get("appName");
-				if (appName == null) {
-					logger.debug("Could not find app name on incoming text. Ignoring message.");
+				GsonBuilder builder = new GsonBuilder();
+				UpdateNotification notification = builder.create().fromJson(body, UpdateNotification.class);
+				logger.debug("Found notification %s", notification);
+				
+				// Fetch the application from the provisioning service
+				Application application = provisioningServiceClient.getApplication(notification.getAccountId(), notification.getAppId());				
+				if (application == null) {
+					logger.debug("Application [%s] not found.", notification.getAppId());
 					return;
 				}
 				
-				// Try to find the application in Rayo
-				Application application = storageServiceClient.findApplication(appName);
-				if (application == null) {
-					
+				// Find in Rayo
+				Application rayoApplication = storageServiceClient.findApplication(application.getBareJid());
+				if (rayoApplication ==  null) {
+					logger.debug("Application [%s] not found on Rayo. Creating it", application.getBareJid());
+					application.setAccountId(notification.getAccountId());
+					application.setPermissions(provisioningServiceClient.getFeatures(notification.getAccountId()));
+					storageServiceClient.createApplication(application);
 				} else {
-					// Create the application
+					// TODO: update addresses
 					
+					storageServiceClient.updateApplication(application);
 				}
-				
 				
 			} catch (Exception e) {
 				logger.error("Could not handle message: " + e.getMessage(), e);
@@ -79,5 +89,10 @@ public class MessageProcessor implements MessageListener {
 	protected void setStorageServiceClient(StorageServiceClient storageServiceClient) {
 		
 		this.storageServiceClient = storageServiceClient;
+	}
+
+	public void setProvisioningServiceClient(
+			ProvisioningServiceClient provisioningServiceClient) {
+		this.provisioningServiceClient = provisioningServiceClient;
 	}
 }

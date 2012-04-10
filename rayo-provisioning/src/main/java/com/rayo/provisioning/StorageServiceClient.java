@@ -23,7 +23,6 @@ public class StorageServiceClient {
 	private static final Loggerf logger = Loggerf.getLogger(StorageServiceClient.class);
 	
 	private DefaultGatewayStorageService storageService;
-	private String domainName;
 	
 	/**
 	 * Initializes the client
@@ -45,9 +44,8 @@ public class StorageServiceClient {
 		storageService.setStore(datastore);
 	}
 	
-	public Application findApplication(String name) throws ApplicationNotFoundException {
+	public Application findApplication(String jid) throws ApplicationNotFoundException {
 		
-		String jid = buildJid(name);
 		Application application = storageService.getApplication(jid);
 		return application;
 	}
@@ -57,12 +55,8 @@ public class StorageServiceClient {
 		storageService.registerApplication(application);
 	}
 
-	private String buildJid(String name) {
-		
-		return name + "@" + domainName;
-	}
-	
-	public void setDomainName(String domainName) {
-		this.domainName = domainName;
+	public void updateApplication(Application rayoApplication) throws DatastoreException {
+
+		storageService.updateApplication(rayoApplication);
 	}
 }
