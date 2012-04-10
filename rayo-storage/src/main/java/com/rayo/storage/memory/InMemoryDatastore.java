@@ -406,6 +406,23 @@ public class InMemoryDatastore implements GatewayDatastore {
 			throw new ApplicationAlreadyExistsException();
 		}
 		
+		return saveApplication(application);
+	}
+	
+	
+	@Override
+	public Application updateApplication(Application application) throws DatastoreException {
+
+		if (getApplication(application.getBareJid()) == null) {
+			throw new ApplicationNotFoundException();
+		}
+		
+		return saveApplication(application);
+	}
+	
+	
+	private Application saveApplication(Application application) throws DatastoreException {
+
 		Lock applicationLock = applicationsLock.writeLock();
 		applicationLock.lock();
 		try {

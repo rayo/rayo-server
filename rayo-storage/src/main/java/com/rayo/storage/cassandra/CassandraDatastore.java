@@ -421,8 +421,25 @@ public class CassandraDatastore implements GatewayDatastore {
 			throw new ApplicationAlreadyExistsException();
 		}
 		
+		return saveApplication(application);
+	}
+	
+	
+	@Override
+	public Application updateApplication(Application application) throws DatastoreException {
+		
+		log.debug("Updating application: [%s]", application);
+		if (getApplication(application.getBareJid()) == null) {
+			log.error("Application [%s] does not exist", application);
+			throw new ApplicationNotFoundException();
+		}
+		return saveApplication(application);
+	}
+	
+	private Application saveApplication(Application application) throws DatastoreException {
+				
 		Mutator mutator = Pelops.createMutator(schemaName);
-
+	
 		mutator.writeColumns("applications", application.getBareJid(), 
 			mutator.newColumnList(
 					mutator.newColumn(Bytes.fromUTF8("appId"), Bytes.fromUTF8(application.getAppId())),
@@ -430,7 +447,7 @@ public class CassandraDatastore implements GatewayDatastore {
 					mutator.newColumn(Bytes.fromUTF8("name"), Bytes.fromUTF8(application.getName())),
 					mutator.newColumn(Bytes.fromUTF8("accountId"), Bytes.fromUTF8(application.getAccountId())),
 					mutator.newColumn(Bytes.fromUTF8("permissions"), Bytes.fromUTF8(application.getPermissions()))));
-
+	
 		try {
 			mutator.execute(ConsistencyLevel.ONE);
 			log.debug("Application [%s] stored successfully", application);

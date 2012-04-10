@@ -276,6 +276,12 @@ public class DefaultGatewayStorageService implements GatewayStorageService {
 		
 		return store.storeApplication(application);
 	}
+
+	@Override
+	public Application updateApplication(Application application) throws DatastoreException {
+		
+		return store.updateApplication(application);
+	}
 	
 	@Override
 	public Application unregisterApplication(String jid) throws DatastoreException {

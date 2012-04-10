@@ -287,6 +287,17 @@ public interface GatewayStorageService {
 	 */
 	public Application registerApplication(Application application) throws DatastoreException;
 	
+	
+	/**
+	 * Updates an application in the storage service
+	 * 
+	 * @param application Application object to update
+	 * @return Application updated application
+	 * 
+	 * @throws DatastoreException If there is any problem while registering the application
+	 */
+	public Application updateApplication(Application application) throws DatastoreException;
+	
 	/**
 	 * Unregisters an application from the storage service
 	 * 

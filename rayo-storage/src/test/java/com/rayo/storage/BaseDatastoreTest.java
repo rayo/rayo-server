@@ -735,6 +735,26 @@ public abstract class BaseDatastoreTest {
 		assertNotNull(stored);
 		assertEquals(stored, application);
 	}
+	
+	@Test
+	public void testUpdateApplication() throws Exception {
+
+		Application application = buildApplication();
+		Application stored = store.storeApplication(application);
+		assertNotNull(stored);
+		assertEquals(stored, application);
+		
+		application.setName("another name");
+		stored = store.updateApplication(application);
+		assertEquals(stored.getName(), "another name");
+	}
+	
+	@Test(expected=ApplicationNotFoundException.class)
+	public void testUpdateUnexistingApplication() throws Exception {
+
+		Application app = new Application("132dsg", "unexisting@jid", "platform");
+		store.updateApplication(app);
+	}
 
 	@Test
 	public void testFindApplication() throws Exception {

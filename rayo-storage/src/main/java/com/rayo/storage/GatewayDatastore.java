@@ -201,6 +201,15 @@ public interface GatewayDatastore {
 	Application storeApplication(Application application) throws DatastoreException;
 
 	/**
+	 * <p>Updates a Rayo application on the DHT.</p>
+	 * 
+	 * @param application Client application
+	 * @return {@link Application} Rayo application
+	 * @throws DatastoreException If there is any problems updating the client application
+	 */
+	Application updateApplication(Application application) throws DatastoreException;
+	
+	/**
 	 * <p>Returns a Rayo application on the DHT with the given jid key. If the application does 
 	 * not exist then this method will return <code>null</code>.</p>
 	 * 
