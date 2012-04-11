@@ -340,11 +340,11 @@ public interface GatewayStorageService {
 	 * Stores an address (e.g. phone number) for a given application. 
 	 * 
 	 * @param address Address that we want to store
-	 * @param appId Application's id
+	 * @param appId Application's jid
 	 * 
 	 * @throws DataStoreException If the address cannot be stored.
 	 */
-	void storeAddress(String address, String appId) throws DatastoreException;
+	void storeAddress(String address, String jid) throws DatastoreException;
 	
 	/**
 	 * Stores a collection of addresses (e.g. phone numbers) for a given application. 

@@ -527,19 +527,19 @@ public class CassandraDatastore implements GatewayDatastore {
 	}
 	
 	@Override
-	public Application removeApplication(String id) throws DatastoreException {
+	public Application removeApplication(String jid) throws DatastoreException {
 		
-		log.debug("Removing application with id: [%s]", id);
-		Application application = getApplication(id);
+		log.debug("Removing application with id: [%s]", jid);
+		Application application = getApplication(jid);
 		if (application != null) {
 			RowDeletor deletor = Pelops.createRowDeletor(schemaName);
-			deletor.deleteRow("applications", id, ConsistencyLevel.ONE);
+			deletor.deleteRow("applications", jid, ConsistencyLevel.ONE);
 			
-			List<String> addresses = getAddressesForApplication(id);
+			List<String> addresses = getAddressesForApplication(jid);
 			removeAddresses(addresses);
 			
 		} else {
-			log.debug("No application found with id: [%s]", id);
+			log.debug("No application found with jid: [%s]", jid);
 			throw new ApplicationNotFoundException();
 		}
 		return application;
