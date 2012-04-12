@@ -22,7 +22,12 @@ public class RestServlet extends HttpServlet {
 
 		String restKey = getRestKey(request);
 		response.setContentType("application/json");
-		response.getOutputStream().write(RestTestStore.getJson(restKey).getBytes());
+		String json = RestTestStore.getJson(restKey);
+		if (json !=  null) {
+			response.getOutputStream().write(json.getBytes());
+		} else {
+			response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+		}
 
 		response.getOutputStream().flush();
 	}

@@ -1,5 +1,7 @@
 package com.rayo.provisioning;
 
+import java.util.List;
+
 import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -58,5 +60,25 @@ public class StorageServiceClient {
 	public void updateApplication(Application rayoApplication) throws DatastoreException {
 
 		storageService.updateApplication(rayoApplication);
+	}
+	
+	public void storeAddress(String appId, String address) throws DatastoreException {
+		
+		storageService.storeAddress(address, appId);
+	}
+	
+	public List<String> findAddressesForApplication(String jid) throws DatastoreException {
+		
+		return storageService.getAddressesForApplication(jid);
+	}
+	
+	public void removeAddressFromApplication(String address) throws DatastoreException {
+		
+		storageService.removeAddress(address);
+	}
+	
+	public void removeApplication(String jid) throws DatastoreException {
+		
+		storageService.unregisterApplication(jid);
 	}
 }

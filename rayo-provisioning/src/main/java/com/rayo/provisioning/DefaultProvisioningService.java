@@ -104,6 +104,7 @@ public class DefaultProvisioningService implements ProvisioningService {
 					consumer = session.createConsumer(destination);
 					logger.debug("JMS system is connected");
 				
+					messageProcessor.setDomainName(domainName);
 					consumer.setMessageListener(messageProcessor);
 
 					logger.debug("Starting JMS connection");

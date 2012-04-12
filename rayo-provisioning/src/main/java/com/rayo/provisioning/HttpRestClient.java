@@ -38,7 +38,10 @@ public class HttpRestClient {
 	 
 			HttpResponse response = httpClient.execute(getRequest);
 	 
-			if (response.getStatusLine().getStatusCode() != 200) {
+			if (response.getStatusLine().getStatusCode() == 404) {				
+				return null;
+			}
+			if (response.getStatusLine().getStatusCode() != 200) {				
 				throw new RestException(response.getStatusLine().getStatusCode());
 			}
 	 
