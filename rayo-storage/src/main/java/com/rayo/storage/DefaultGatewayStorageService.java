@@ -320,9 +320,9 @@ public class DefaultGatewayStorageService implements GatewayStorageService {
 	}
 	
 	@Override
-	public void storeAddress(String address, String appId) throws DatastoreException {
+	public void storeAddress(String address, String jid) throws DatastoreException {
 
-		store.storeAddress(address, appId);
+		store.storeAddress(address, jid);
 	}
 	
 	@Override
