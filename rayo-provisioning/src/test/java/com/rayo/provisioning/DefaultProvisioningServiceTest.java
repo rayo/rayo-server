@@ -18,7 +18,7 @@ import com.rayo.storage.test.EmbeddedCassandraTestServer;
 import com.tropo.provisioning.jms.DefaultJmsNotificationService;
 import com.tropo.provisioning.model.Address;
 import com.tropo.provisioning.model.Application;
-import com.tropo.provisioning.model.TestApplication;
+import com.tropo.provisioning.model.MockApplication;
 
 public class DefaultProvisioningServiceTest extends BaseProvisioningTest {
 
@@ -171,7 +171,7 @@ public class DefaultProvisioningServiceTest extends BaseProvisioningTest {
 		provisioningService.init(loadPropertiesFromFile("test-provisioning.properties"));
 		long messages = provisioningService.getMessagesProcessed();
 		
-		TestApplication application = createSampleApplication(1, "test1", "test1@apps.tropo.com");
+		MockApplication application = createSampleApplication(1, "test1", "test1@apps.tropo.com");
 		jmsNotificationService.notifyApplicationUpdated(application);
 		Thread.sleep(1000);
 		
@@ -192,7 +192,7 @@ public class DefaultProvisioningServiceTest extends BaseProvisioningTest {
 		provisioningService.init(loadPropertiesFromFile("test-provisioning.properties"));
 		long messages = provisioningService.getMessagesProcessed();
 		
-		TestApplication application = createSampleApplication(1, "test1", "test1@apps.tropo.com");
+		MockApplication application = createSampleApplication(1, "test1", "test1@apps.tropo.com");
 		jmsNotificationService.notifyApplicationUpdated(application);
 		Thread.sleep(1000);
 		
@@ -218,7 +218,7 @@ public class DefaultProvisioningServiceTest extends BaseProvisioningTest {
 		provisioningService.init(loadPropertiesFromFile("test-provisioning.properties"));
 		long messages = provisioningService.getMessagesProcessed();
 		
-		TestApplication application = createSampleApplication(1, "test1", "test1@apps.tropo.com");
+		MockApplication application = createSampleApplication(1, "test1", "test1@apps.tropo.com");
 		jmsNotificationService.notifyApplicationUpdated(application);
 		Thread.sleep(1000);
 		
@@ -247,7 +247,7 @@ public class DefaultProvisioningServiceTest extends BaseProvisioningTest {
 		provisioningService.init(loadPropertiesFromFile("test-provisioning.properties"));
 		long messages = provisioningService.getMessagesProcessed();
 		
-		TestApplication application = createSampleApplication(1, "test1", "test1@apps.tropo.com");
+		MockApplication application = createSampleApplication(1, "test1", "test1@apps.tropo.com");
 		jmsNotificationService.notifyApplicationUpdated(application);
 		Thread.sleep(1000);
 		
@@ -273,7 +273,7 @@ public class DefaultProvisioningServiceTest extends BaseProvisioningTest {
 		provisioningService.init(loadPropertiesFromFile("test-provisioning.properties"));
 		long messages = provisioningService.getMessagesProcessed();
 		
-		TestApplication application = createSampleApplication(1, "test1", "test1@apps.tropo.com");
+		MockApplication application = createSampleApplication(1, "test1", "test1@apps.tropo.com");
 		jmsNotificationService.notifyApplicationUpdated(application);
 		Thread.sleep(1000);
 		
@@ -302,7 +302,7 @@ public class DefaultProvisioningServiceTest extends BaseProvisioningTest {
 		provisioningService.init(loadPropertiesFromFile("test-provisioning.properties"));
 		long messages = provisioningService.getMessagesProcessed();
 		
-		TestApplication application = createSampleApplication(1, "test1", "test1@apps.tropo.com");
+		MockApplication application = createSampleApplication(1, "test1", "test1@apps.tropo.com");
 		jmsNotificationService.notifyApplicationUpdated(application);
 		Thread.sleep(1000);
 		
@@ -332,7 +332,7 @@ public class DefaultProvisioningServiceTest extends BaseProvisioningTest {
 		provisioningService.init(loadPropertiesFromFile("test-provisioning.properties"));
 		long messages = provisioningService.getMessagesProcessed();
 		
-		TestApplication application = createSampleApplication(1, "test1", "test1@apps.tropo.com");
+		MockApplication application = createSampleApplication(1, "test1", "test1@apps.tropo.com");
 		jmsNotificationService.notifyApplicationUpdated(application);
 		Thread.sleep(1000);
 		
@@ -359,7 +359,7 @@ public class DefaultProvisioningServiceTest extends BaseProvisioningTest {
 		provisioningService.init(loadPropertiesFromFile("test-provisioning.properties"));
 		long messages = provisioningService.getMessagesProcessed();
 		
-		TestApplication application = createSampleApplication(1, "test1", "test1@apps.tropo.com");
+		MockApplication application = createSampleApplication(1, "test1", "test1@apps.tropo.com");
 		jmsNotificationService.notifyApplicationUpdated(application);
 		Thread.sleep(1000);
 		
@@ -391,7 +391,7 @@ public class DefaultProvisioningServiceTest extends BaseProvisioningTest {
 		provisioningService.init(loadPropertiesFromFile("test-provisioning.properties"));
 		long messages = provisioningService.getMessagesProcessed();
 		
-		TestApplication application = createSampleApplication(1, "test1", "test1@apps.tropo.com");
+		MockApplication application = createSampleApplication(1, "test1", "test1@apps.tropo.com");
 		jmsNotificationService.notifyApplicationUpdated(application);
 		Thread.sleep(1000);
 		
@@ -418,7 +418,7 @@ public class DefaultProvisioningServiceTest extends BaseProvisioningTest {
 		provisioningService.init(loadPropertiesFromFile("test-provisioning.properties"));
 		long messages = provisioningService.getMessagesProcessed();
 		
-		TestApplication application = createSampleApplication(1, "test1", "test1@apps.tropo.com");
+		MockApplication application = createSampleApplication(1, "test1", "test1@apps.tropo.com");
 		jmsNotificationService.notifyApplicationUpdated(application);
 		Thread.sleep(1000);
 		
@@ -451,7 +451,7 @@ public class DefaultProvisioningServiceTest extends BaseProvisioningTest {
 		provisioningService.init(loadPropertiesFromFile("test-provisioning.properties"));
 		long messages = provisioningService.getMessagesProcessed();
 		
-		TestApplication application = createSampleApplication(1, "test1", "test1@apps.tropo.com");
+		MockApplication application = createSampleApplication(1, "test1", "test1@apps.tropo.com");
 		jmsNotificationService.notifyApplicationUpdated(application);
 		Thread.sleep(1000);
 		

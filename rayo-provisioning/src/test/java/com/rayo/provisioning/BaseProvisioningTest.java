@@ -22,10 +22,10 @@ import com.tropo.provisioning.model.Account;
 import com.tropo.provisioning.model.Address;
 import com.tropo.provisioning.model.AddressType;
 import com.tropo.provisioning.model.ChannelType;
-import com.tropo.provisioning.model.TestAddress;
-import com.tropo.provisioning.model.TestApplication;
+import com.tropo.provisioning.model.MockAddress;
+import com.tropo.provisioning.model.MockApplication;
 
-public class BaseProvisioningTest {
+public abstract class BaseProvisioningTest {
 
 	 static Server server;
 
@@ -87,9 +87,9 @@ public class BaseProvisioningTest {
 		return jmsNotificationService;
 	}
 
-	 TestApplication createSampleApplication(Integer appId, String appName, String jid) throws Exception {
+	 MockApplication createSampleApplication(Integer appId, String appName, String jid) throws Exception {
 		
-		TestApplication application = new TestApplication();
+		MockApplication application = new MockApplication();
 		application.setId(appId);
 		application.setName(appName);
 		application.setAccount(createSampleAccount());
@@ -112,9 +112,9 @@ public class BaseProvisioningTest {
 		return application;
 	}
 	
-	 Address addAddress(TestApplication application, Integer id, String value) {
+	 Address addAddress(MockApplication application, Integer id, String value) {
 		
-		TestAddress address = new TestAddress();
+		MockAddress address = new MockAddress();
 		address.setChannel(ChannelType.VOICE);
 		address.setId(id);
 		address.setOwner(application.getAccount());
@@ -148,7 +148,7 @@ public class BaseProvisioningTest {
 		return address;
 	}
 	
-	 void removeAddress(TestApplication application, String address) {
+	 void removeAddress(MockApplication application, String address) {
 		
 		application.removeAddress(address);
 		
@@ -165,7 +165,7 @@ public class BaseProvisioningTest {
 		removeJsonFromEndpoint(endpoint2, jsonBlock);
 	}
 	
-	 void removeApplication(TestApplication application) {
+	 void removeApplication(MockApplication application) {
 		
 		List<Address> addresses = new ArrayList<Address>();
 		application.getAddresses(ChannelType.VOICE, addresses);

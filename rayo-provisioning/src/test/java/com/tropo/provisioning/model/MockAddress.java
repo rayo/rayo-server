@@ -7,7 +7,7 @@ package com.tropo.provisioning.model;
  * @author martin
  *
  */
-public class TestAddress extends Address {
+public class MockAddress extends Address {
 
 	public void setApplication(Application application) {
 		

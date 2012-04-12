@@ -12,7 +12,7 @@ import com.tropo.provisioning.model.Application;
  * @author martin
  *
  */
-public class TestApplication extends Application {
+public class MockApplication extends Application {
 
 	public void addAddress(Address address) {
 		
