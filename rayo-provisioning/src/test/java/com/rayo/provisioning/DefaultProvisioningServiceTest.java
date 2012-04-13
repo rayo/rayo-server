@@ -9,42 +9,25 @@ import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import com.rayo.provisioning.rest.RestTestStore;
-import com.rayo.storage.cassandra.CassandraDatastore;
-import com.rayo.storage.test.EmbeddedCassandraTestServer;
+import com.rayo.provisioning.storage.StorageServiceClient;
+import com.rayo.storage.GatewayDatastore;
 import com.tropo.provisioning.jms.DefaultJmsNotificationService;
 import com.tropo.provisioning.model.Address;
 import com.tropo.provisioning.model.Application;
 import com.tropo.provisioning.model.MockApplication;
 
-public class DefaultProvisioningServiceTest extends BaseProvisioningTest {
+public abstract class DefaultProvisioningServiceTest extends BaseProvisioningTest {
 
 	final DefaultProvisioningService provisioningService = new DefaultProvisioningService();
-
-	private CassandraDatastore store;
-	
-	// tests use a different port so if there is any existing Cassandra instance
-	// nothing bad will happen
-	public static final String CASSANDRA_TESTING_PORT = "9164";
-	
-    @BeforeClass
-    public static void startCassandraServer() throws Exception {
-
-    	EmbeddedCassandraTestServer.start();
-    }  
     
+	GatewayDatastore store;
+	StorageServiceClient storageServiceClient;
+	
 	@Before
 	public void setup() throws Exception {
-		
-		store = new CassandraDatastore();
-		
-		((CassandraDatastore)store).setPort(CASSANDRA_TESTING_PORT); 	
-		((CassandraDatastore)store).getSchemaHandler().setWaitForSyncing(false);
-		((CassandraDatastore)store).setOverrideExistingSchema(false);
-		((CassandraDatastore)store).init();
 		
 		RestTestStore.put("/users/1/features", "[" +
 		    "{\"href\": \"http://localhost:8080/rest/users/mpermar22/features/4\"," +
@@ -59,6 +42,8 @@ public class DefaultProvisioningServiceTest extends BaseProvisioningTest {
 		    "\"feature\": \"http://localhost:8080/rest/features/1\"," +
 		    "\"featureName\": \"Override Caller ID\"," +
 		    "\"featureFlag\": \"c\"}]");
+		
+		provisioningService.setStorageServiceClient(storageServiceClient);
 	}
     
     @After

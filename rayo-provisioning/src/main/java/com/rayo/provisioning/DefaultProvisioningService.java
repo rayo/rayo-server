@@ -2,24 +2,18 @@ package com.rayo.provisioning;
 
 import java.util.Hashtable;
 import java.util.Properties;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
 
 import javax.jms.Connection;
 import javax.jms.Destination;
 import javax.jms.JMSException;
-import javax.jms.Message;
 import javax.jms.MessageConsumer;
-import javax.jms.MessageListener;
 import javax.jms.QueueConnectionFactory;
 import javax.jms.Session;
-import javax.jms.TextMessage;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
-
+import com.rayo.provisioning.storage.StorageServiceClient;
 import com.voxeo.logging.Loggerf;
 
 /**
@@ -128,7 +122,6 @@ public class DefaultProvisioningService implements ProvisioningService {
 				throw new IllegalStateException("Could not initialize JMS Service. Is the JMS service running?");
 			}
 
-			storageServiceClient = new StorageServiceClient();
 			storageServiceClient.init();
 			
 			provisioningServiceClient = new ProvisioningServiceClient(provisioningEndpoint);
@@ -213,5 +206,9 @@ public class DefaultProvisioningService implements ProvisioningService {
 	public void setProvisioningServiceClient(
 			ProvisioningServiceClient provisioningServiceClient) {
 		this.provisioningServiceClient = provisioningServiceClient;
+	}
+
+	public void setStorageServiceClient(StorageServiceClient storageServiceClient) {
+		this.storageServiceClient = storageServiceClient;
 	}	
 }

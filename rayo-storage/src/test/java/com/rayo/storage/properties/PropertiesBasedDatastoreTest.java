@@ -1,0 +1,192 @@
+package com.rayo.storage.properties;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.io.FileUtils;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+
+import com.rayo.storage.BaseDatastoreTest;
+import com.rayo.storage.model.Application;
+
+public class PropertiesBasedDatastoreTest extends BaseDatastoreTest {
+
+	private File tempFile;
+	
+	@Before
+	public void setup() throws Exception {
+		
+		store = new PropertiesBasedDatastore(getEmptyPropertiesResource());
+	}
+	
+	@After
+	public void cleanup() throws Exception {
+		
+		clearCurrentTempFile();
+	}
+	
+	private void clearCurrentTempFile() {
+
+		if (tempFile != null && tempFile.exists()) {
+			tempFile.delete();
+		}
+		tempFile = null;		
+	}
+
+	@Test
+	public void testLoadFromProperties() throws Exception {
+		
+		clearCurrentTempFile();
+		store = new PropertiesBasedDatastore(getRayoPropertiesResource());
+		
+		assertEquals(((PropertiesBasedDatastore)store).getLoadFailures(), 0);
+	}
+	
+	private Resource getEmptyPropertiesResource() throws Exception {
+		
+		tempFile = File.createTempFile("test", ".properties");
+		tempFile.deleteOnExit();		
+		return new FileSystemResource(tempFile);
+	}
+	
+	private Resource getRayoPropertiesResource() throws Exception {
+		
+		ClassPathResource resource = new ClassPathResource("rayo-routing.properties");
+		tempFile = File.createTempFile("test", ".properties");
+		tempFile.deleteOnExit();
+		
+		File sourceFile = resource.getFile();
+		FileUtils.copyFile(sourceFile, tempFile);
+				
+		return new FileSystemResource(tempFile);
+	}
+	
+	@Test
+	public void testApplicationsCreatedWhenLoadedFromProperties() throws Exception {
+		
+		clearCurrentTempFile();
+		store = new PropertiesBasedDatastore(getRayoPropertiesResource());
+		
+		assertEquals(((PropertiesBasedDatastore)store).getLoadFailures(), 0);
+		List<Application> applications = store.getApplications();
+		assertEquals(applications.size(),3);
+		List<String> jids = new ArrayList<String>();
+		for (Application app: applications) {
+			jids.add(app.getBareJid());
+		}
+		assertTrue(jids.contains("usera@localhost"));
+		assertTrue(jids.contains("userb@localhost"));
+		assertTrue(jids.contains("userc@localhost"));
+	}
+	
+	@Test
+	public void testAdddressesCreatedWhenLoadedFromProperties() throws Exception {
+		
+		clearCurrentTempFile();
+		store = new PropertiesBasedDatastore(getRayoPropertiesResource());
+		testDefaultAddresses();
+	}
+	
+	@Test
+	public void testMappingsAddedWhenResourceChanges() throws Exception {
+		
+		clearCurrentTempFile();
+		store = new PropertiesBasedDatastore(getRayoPropertiesResource(), 1000);
+		testDefaultAddresses();
+		assertFalse(store.getAddressesForApplication("userd@localhost").contains(".*userd.*"));
+
+		// now add change the mappings. We add another resource
+		String newMappings = 
+				  ".*usera.*=usera@localhost\n" + 
+				  ".*userb.*=userb@localhost\n" +
+				  ".*userc.*=userc@localhost\n" + 
+				  ".*userd.*=userd@localhost\n" +
+				  ".*=usera@localhost\n";
+		FileUtils.writeStringToFile(tempFile, newMappings);		
+		// give some time to reload
+		Thread.sleep(2000);
+		
+		testDefaultAddresses();
+		// check new address
+		assertTrue(store.getAddressesForApplication("userd@localhost").contains(".*userd.*"));
+	}
+	
+	@Test
+	public void testMappingsRemovedWhenResourceChanges() throws Exception {
+		
+		clearCurrentTempFile();
+		store = new PropertiesBasedDatastore(getRayoPropertiesResource(), 1000);
+		testDefaultAddresses();
+		assertFalse(store.getAddressesForApplication("userd@localhost").contains(".*userd.*"));
+
+		// now add change the mappings. We add another resource
+		String newMappings = 
+				  ".*usera.*=usera@localhost\n" + 
+				  ".*userb.*=userb@localhost\n" +
+				  ".*=usera@localhost\n" + 
+				  "                                       \n"; // erase existing stuff
+		FileUtils.writeStringToFile(tempFile, newMappings);		
+		// give some time to reload
+		Thread.sleep(2000);
+		
+		// one of the old addresses gone, but there others still there
+		assertEquals(store.getAddressesForApplication("usera@localhost").size(),2);
+		assertFalse(store.getAddressesForApplication("userc@localhost").contains(".*userc.*"));
+	}
+	
+	@Test
+	public void testFileContentsChangeWhenMappingAdded() throws Exception {
+		
+		clearCurrentTempFile();
+		store = new PropertiesBasedDatastore(getRayoPropertiesResource());
+		testDefaultAddresses();
+		assertFalse(store.getAddressesForApplication("userd@localhost").contains(".*userd.*"));
+
+		store.storeAddress(".*userd.*", "usera@localhost");
+		
+		String filecontents = FileUtils.readFileToString(tempFile);
+		assertTrue(filecontents.contains(".*userd.*=usera@localhost"));
+	}
+	
+	@Test
+	public void testFileContentsChangeWhenMappingRemoved() throws Exception {
+		
+		clearCurrentTempFile();
+		store = new PropertiesBasedDatastore(getRayoPropertiesResource());
+		testDefaultAddresses();
+		assertFalse(store.getAddressesForApplication("userd@localhost").contains(".*userd.*"));
+
+		store.removeAddress(".*userb.*");
+		
+		String filecontents = FileUtils.readFileToString(tempFile);
+		assertFalse(filecontents.contains(".*userb.*"));
+	}
+	
+	void testDefaultAddresses() throws Exception {
+		
+		assertEquals(store.getAddressesForApplication("usera@localhost").size(),2);
+		assertTrue(store.getAddressesForApplication("usera@localhost").contains(".*usera.*"));
+		assertTrue(store.getAddressesForApplication("usera@localhost").contains(".*"));
+		assertTrue(store.getAddressesForApplication("userb@localhost").contains(".*userb.*"));
+		assertTrue(store.getAddressesForApplication("userc@localhost").contains(".*userc.*"));
+		
+		// validate file contents
+		if (tempFile != null) {
+			String content = FileUtils.readFileToString(tempFile);
+			assertTrue(content.contains(".*usera.*=usera@localhost"));
+			assertTrue(content.contains(".*=usera@localhost"));
+			assertTrue(content.contains(".*userb.*=userb@localhost"));
+			assertTrue(content.contains(".*userc.*=userc@localhost"));
+		}
+	}
+}

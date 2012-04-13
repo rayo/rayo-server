@@ -11,6 +11,7 @@ import javax.jms.MessageListener;
 import javax.jms.TextMessage;
 
 import com.google.gson.GsonBuilder;
+import com.rayo.provisioning.storage.StorageServiceClient;
 import com.rayo.storage.model.Application;
 import com.tropo.provisioning.rest.model.AddressNotification;
 import com.tropo.provisioning.rest.model.UpdateNotification;
