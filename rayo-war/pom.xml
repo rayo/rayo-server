@@ -28,13 +28,18 @@
 			<artifactId>rayo-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>com.rayo</groupId> 
+			<artifactId>rayo-provisioning</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		
 		<!-- Moho Remote / Used for test installation -->
         <dependency>
           <groupId>com.voxeo.moho</groupId>
           <artifactId>moho-remote</artifactId>
           <version>0.8-SNAPSHOT</version>
-        </dependency> 
-        
+        </dependency>                 
 		<dependency>
 			<groupId>com.voxeo.xmpp</groupId>
 			<artifactId>xmppservlet-api</artifactId>

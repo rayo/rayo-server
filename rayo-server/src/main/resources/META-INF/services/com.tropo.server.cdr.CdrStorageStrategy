@@ -1,2 +1,0 @@
-#Add below your custom CDR Storage implementations
-#foo.bar.MyCdrStorageImplementation    # Full name of the class that implements your CDR Storage strategy

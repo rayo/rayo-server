@@ -1,7 +1,11 @@
 package com.rayo.provisioning.storage;
 
 import java.util.List;
+import java.util.Properties;
 
+import org.springframework.context.ApplicationContext;
+
+import com.rayo.storage.GatewayDatastore;
 import com.rayo.storage.GatewayStorageService;
 import com.rayo.storage.exception.ApplicationNotFoundException;
 import com.rayo.storage.exception.DatastoreException;
@@ -16,7 +20,7 @@ import com.rayo.storage.model.Application;
  */
 public interface StorageServiceClient {
 
-	void init();
+	void init(ApplicationContext context, Properties properties);
 	
 	Application findApplication(String jid) throws ApplicationNotFoundException;
 	
@@ -31,4 +35,6 @@ public interface StorageServiceClient {
 	public void removeAddressFromApplication(String address) throws DatastoreException;
 	
 	public void removeApplication(String jid) throws DatastoreException;
+	
+	public GatewayDatastore getStore();
 }

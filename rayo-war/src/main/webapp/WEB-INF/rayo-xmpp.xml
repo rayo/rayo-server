@@ -11,6 +11,16 @@
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd"
     default-autowire="byName">
 	
+	<bean id="datastore" class="com.rayo.storage.properties.PropertiesBasedDatastore">
+		<constructor-arg value="classpath:rayo-routing.properties"/> <!-- properties file -->
+		<constructor-arg value="60000"/> <!-- reload interval in milliseconds -->
+	</bean>
+
+  	<!-- JID Redirection --> 
+	<bean id="rayoJIDLookupService" class="com.rayo.server.lookup.RegexpJIDLookupService">
+		<property name="datastore" ref="datastore"/>
+	</bean>  		
+
 	<bean id="rayo" class="com.rayo.server.servlet.RayoServlet" init-method="start">
 		<!-- These dependencies come from the parent: rayo-context.xml -->
 		<property name="provider" ref="xmlProviderManager" />
@@ -24,12 +34,7 @@
 		<property name="cdrManager" ref="cdrManager" />	
 		<property name="jidRegistry" ref="jidRegistry"/>	
 		<property name="filtersChain" ref="filtersChain"/>
-		<property name="rayoLookupService">
-		  	<!-- JID Redirection --> 
-			<bean id="rayoJIDLookupService" class="com.rayo.server.lookup.RegexpJIDLookupService">
-				<constructor-arg value="classpath:rayo-routing.properties"/>
-			</bean>  		
-		</property>
+		<property name="rayoLookupService" ref="rayoJIDLookupService"/>
 		<property name="xmppMessageListenersGroup" ref="xmppMessageListenersGroup"/>
 	</bean>	
 </beans>

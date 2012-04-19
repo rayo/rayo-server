@@ -1,8 +1,10 @@
 package com.rayo.provisioning.storage;
 
 import java.util.List;
+import java.util.Properties;
 
-import com.rayo.storage.DefaultGatewayStorageService;
+import org.springframework.context.ApplicationContext;
+
 import com.rayo.storage.GatewayStorageService;
 import com.rayo.storage.exception.ApplicationNotFoundException;
 import com.rayo.storage.exception.DatastoreException;
@@ -18,12 +20,12 @@ import com.rayo.storage.model.Application;
  */
 public abstract class AbstractStorageServiceClient implements StorageServiceClient {
 
-	DefaultGatewayStorageService storageService;
+	GatewayStorageService storageService;
 	
 	/**
 	 * Initializes the client
 	 */
-	public abstract void init();
+	public abstract void init(ApplicationContext context, Properties properties);
 	
 	public Application findApplication(String jid) throws ApplicationNotFoundException {
 		
@@ -59,5 +61,9 @@ public abstract class AbstractStorageServiceClient implements StorageServiceClie
 	public void removeApplication(String jid) throws DatastoreException {
 		
 		storageService.unregisterApplication(jid);
+	}
+
+	protected void setStorageService(GatewayStorageService storageService) {
+		this.storageService = storageService;
 	}
 }

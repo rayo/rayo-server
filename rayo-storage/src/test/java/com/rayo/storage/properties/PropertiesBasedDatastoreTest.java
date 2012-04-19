@@ -3,12 +3,15 @@ package com.rayo.storage.properties;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.StringUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -144,6 +147,22 @@ public class PropertiesBasedDatastoreTest extends BaseDatastoreTest {
 		assertFalse(store.getAddressesForApplication("userc@localhost").contains(".*userc.*"));
 	}
 	
+	
+	@Test
+	public void testPhoneNumberMappingsPreserved() throws Exception {
+		
+		clearCurrentTempFile();
+		store = new PropertiesBasedDatastore(getRayoPropertiesResource(), 1000);
+		store.storeAddress("+14422225010", "userb@localhost");
+		assertTrue(store.getAddressesForApplication("userb@localhost").contains("+14422225010"));
+		
+		// let the file to be reloaded
+		Thread.sleep(1500);
+
+		// No nasty regexp changes on address for the data store.
+		assertTrue(store.getAddressesForApplication("userb@localhost").contains("+14422225010"));
+	}	
+	
 	@Test
 	public void testFileContentsChangeWhenMappingAdded() throws Exception {
 		
@@ -172,6 +191,100 @@ public class PropertiesBasedDatastoreTest extends BaseDatastoreTest {
 		assertFalse(filecontents.contains(".*userb.*"));
 	}
 	
+	@Test
+	public void testDuplicateAddressDoesNotCreateDuplicateMapping() throws Exception {
+		
+		clearCurrentTempFile();
+		store = new PropertiesBasedDatastore(getRayoPropertiesResource());
+		testDefaultAddresses();
+		assertFalse(store.getAddressesForApplication("userd@localhost").contains(".*userd.*"));
+
+		store.storeAddress(".*userd.*", "usera@localhost");
+		String filecontents = FileUtils.readFileToString(tempFile);
+		assertEquals(StringUtils.countMatches(filecontents, ".*userd.*"), 1);
+		
+		store.storeAddress(".*userd.*", "usera@localhost");
+		filecontents = FileUtils.readFileToString(tempFile);
+		assertEquals(StringUtils.countMatches(filecontents, ".*userd.*"), 1);
+	}
+	
+	@Test
+	public void testDoNotLoadDuplicatesFromFile() throws Exception {
+		
+		clearCurrentTempFile();
+		
+		tempFile = File.createTempFile("test", ".properties");
+		tempFile.deleteOnExit();
+		String newMappings = 
+				  ".*usera.*=usera@localhost\n" + 
+				  ".*usera.*=usera@localhost\n" + 
+				  ".*usera.*=usera@localhost\n" + 
+				  "                                       \n"; // erase existing stuff
+		FileUtils.writeStringToFile(tempFile, newMappings);		
+		
+		store = new PropertiesBasedDatastore(new FileSystemResource(tempFile), 1000);
+		assertEquals(store.getAddressesForApplication("usera@localhost").size(),1);
+	}
+	
+	@Test
+	public void testLookup() throws Exception {
+		
+		clearCurrentTempFile();
+		store = new PropertiesBasedDatastore(getRayoPropertiesResource());
+
+		assertNotNull(((PropertiesBasedDatastore)store).lookup(new URI("sip:usera@localhost")));
+	}
+	
+	@Test
+	public void testMultipleMatchingRulesReturnFirstOne() throws Exception {
+		
+		clearCurrentTempFile();
+		
+		tempFile = File.createTempFile("test", ".properties");
+		tempFile.deleteOnExit();
+		String newMappings = 
+				  ".*usera.*=usera@localhost\n" + 
+				  ".*sip.*=userb@localhost\n" + 
+				  ".*=userc@localhost\n" + 
+				  "                                       \n"; // erase existing stuff
+		FileUtils.writeStringToFile(tempFile, newMappings);		
+		store = new PropertiesBasedDatastore(new FileSystemResource(tempFile), 100000);
+		assertEquals(((PropertiesBasedDatastore)store).lookup(new URI("sip:usera@localhost")),"usera@localhost");
+		assertEquals(((PropertiesBasedDatastore)store).lookup(new URI("sip:userb@localhost")),"userb@localhost");
+		assertEquals(((PropertiesBasedDatastore)store).lookup(new URI("userc@localhost")),"userc@localhost");	
+	}
+
+	@Test
+	public void testMultipleMatchingRulesReturnFirstOne2() throws Exception {
+		
+		store.storeApplication(createApplication("usera@localhost"));
+		store.storeApplication(createApplication("userb@localhost"));
+		store.storeApplication(createApplication("userc@localhost"));
+		store.storeAddress(".*usera.*", "usera@localhost");
+		store.storeAddress(".*sip.*", "userb@localhost");
+		store.storeAddress(".*", "userc@localhost");
+		
+		assertEquals(((PropertiesBasedDatastore)store).lookup(new URI("sip:usera@localhost")),"usera@localhost");
+		assertEquals(((PropertiesBasedDatastore)store).lookup(new URI("sip:userb@localhost")),"userb@localhost");
+		assertEquals(((PropertiesBasedDatastore)store).lookup(new URI("userc@localhost")),"userc@localhost");
+	}
+	
+	@Test
+	public void testMultipleMatchingRulesReturnFirstOne3() throws Exception {
+		
+		clearCurrentTempFile();
+		
+		tempFile = File.createTempFile("test", ".properties");
+		tempFile.deleteOnExit();
+		String newMappings = 
+				  "	.*usera@localhost.*=usera@conference.jabber.org\n" +
+				  ".*@localhost.*=others@conference.jabber.org\n";
+		
+		FileUtils.writeStringToFile(tempFile, newMappings);		
+		store = new PropertiesBasedDatastore(new FileSystemResource(tempFile), 1000);
+		assertEquals(((PropertiesBasedDatastore)store).lookup(new URI("sip:usera@localhost")),"usera@conference.jabber.org");
+	}
+	
 	void testDefaultAddresses() throws Exception {
 		
 		assertEquals(store.getAddressesForApplication("usera@localhost").size(),2);
@@ -188,5 +301,12 @@ public class PropertiesBasedDatastoreTest extends BaseDatastoreTest {
 			assertTrue(content.contains(".*userb.*=userb@localhost"));
 			assertTrue(content.contains(".*userc.*=userc@localhost"));
 		}
+	}
+	
+	Application createApplication(String jid) {
+		
+		Application app = buildApplication(jid);
+		app.setJid(jid);
+		return app;
 	}
 }

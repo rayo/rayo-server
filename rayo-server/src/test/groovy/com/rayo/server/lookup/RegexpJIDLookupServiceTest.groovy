@@ -1,15 +1,21 @@
 package com.rayo.server.lookup
 
 import static org.junit.Assert.*
+
+import org.apache.commons.io.FileUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.FileSystemResource;
+import com.rayo.storage.properties.PropertiesBasedDatastore
 
 import com.rayo.core.OfferEvent;
 
 class RegexpJIDLookupServiceTest {
 
 	def regexpJIDLookupService
+	
+	def propertiesFile
 		
 	@Test
 	public void testInit() {
@@ -152,10 +158,11 @@ class RegexpJIDLookupServiceTest {
 		def domain = regexpJIDLookupService.lookup(offer)
 		assertEquals domain, "domain1.com"
 
-		def resource = new ByteArrayResource("""
+		String updatedMappings = """
 			.*=domain2.com
-		""".getBytes())
-		regexpJIDLookupService.read(resource)
+		"""
+		FileUtils.writeStringToFile(propertiesFile, updatedMappings)
+		Thread.sleep(2000)
 
 		domain = regexpJIDLookupService.lookup(offer)
 		assertEquals domain, "domain2.com"
@@ -176,7 +183,22 @@ class RegexpJIDLookupServiceTest {
 
 	def buildLookupService(String config) {
 		
-		def resource = new ByteArrayResource(config.getBytes())
-		regexpJIDLookupService = new RegexpJIDLookupService(resource)
+		propertiesFile = File.createTempFile("temp", ".properties")
+		propertiesFile.deleteOnExit()
+		
+		FileUtils.writeStringToFile(propertiesFile, config)
+		
+		def resource = new FileSystemResource(propertiesFile)
+		def datastore = new PropertiesBasedDatastore(resource, 1000)
+		regexpJIDLookupService = new RegexpJIDLookupService()
+		regexpJIDLookupService.setDatastore(datastore)
+	}
+	
+	@After
+	public void shutdown() {
+		
+		if (propertiesFile) {
+			propertiesFile.delete()
+		}
 	}
 }

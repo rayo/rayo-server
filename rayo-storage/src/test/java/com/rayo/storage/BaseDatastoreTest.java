@@ -870,6 +870,29 @@ public abstract class BaseDatastoreTest {
 	}
 	
 	@Test
+	public void testAddDuplicateAddressesToApplication1() throws Exception {
+
+		Application application = buildApplication();
+		store.storeApplication(application);
+		store.storeAddress("+348005551212", application.getBareJid());
+		assertEquals(store.getAddressesForApplication(application.getBareJid()).size(),1);
+		store.storeAddress("+348005551212", application.getBareJid());
+		assertEquals(store.getAddressesForApplication(application.getBareJid()).size(),1);		
+	}
+	
+	@Test
+	public void testAddDuplicateAddressesToApplication2() throws Exception {
+
+		Application application = buildApplication();
+		store.storeApplication(application);
+		List<String> addresses = new ArrayList<String>();
+		addresses.add("+348005551212");
+		addresses.add("+348005551212");		
+		store.storeAddresses(addresses, application.getBareJid());
+		assertEquals(store.getAddressesForApplication(application.getBareJid()).size(),1);
+	}
+	
+	@Test
 	public void testFindAddressesForApplication() throws Exception {
 
 		Application application = buildApplication();

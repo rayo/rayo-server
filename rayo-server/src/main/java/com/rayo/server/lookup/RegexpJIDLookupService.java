@@ -1,24 +1,13 @@
 package com.rayo.server.lookup;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.springframework.core.io.Resource;
 
 import com.rayo.core.OfferEvent;
 import com.rayo.server.exception.RayoProtocolException;
+import com.rayo.storage.properties.PropertiesBasedDatastore;
 import com.voxeo.logging.Loggerf;
 
 /**
@@ -43,108 +32,24 @@ import com.voxeo.logging.Loggerf;
 public class RegexpJIDLookupService implements RayoJIDLookupService<OfferEvent> {
 
 	private static final Loggerf logger = Loggerf.getLogger(RegexpJIDLookupService.class);
-	
-	private Map<Pattern, String> patterns = new LinkedHashMap<Pattern, String>();
-	
-	private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
-	
-	/**
-	 * Creates the lookup service with the given properties file. 
-	 * 
-	 * @param properties Properties file with all the mappings
-	 * @throws IOException If the service cannot be created
-	 */
-	public RegexpJIDLookupService(final Resource properties) throws IOException {
-		
-		read(properties);
-		
-		TimerTask readTask = new TimerTask() {
-			
-			@Override
-			public void run() {
 
-				Lock lock = RegexpJIDLookupService.this.lock.writeLock();
-				try {
-					lock.lock();
-					read(properties);
-				} catch (IOException e) {
-					logger.error(e.getMessage(),e);
-				} finally {
-					lock.unlock();
-				}
-			}
-		};
-		new Timer().schedule(readTask, 60000, 60000);
-	}
-	
-	void read(Resource properties) throws IOException {
-		
-		try {
-			logger.debug("Reading JID Lookup Service configuration from disk [%s]", properties.getFilename());
-		} catch (IllegalStateException ise) {
-			// Ignore. On testing a byte array does not have a filename property and throws an exception
-		}
-		
-		patterns.clear();
-		if (properties.isReadable()) {
-
-			InputStream is = null;
-			try {
-				File file = properties.getFile();
-				if (file.exists()) {
-					is = new FileInputStream(file);
-				}			
-			} catch (IOException e) {
-				is = properties.getInputStream();
-			}
-			Scanner scanner = new Scanner(is);
-			while(scanner.hasNextLine()) {
-				String line = scanner.nextLine();
-				if (line.trim().length() > 0 && !line.trim().startsWith("#")) {
-					String[] elements = line.trim().split("=");
-					if (!(elements.length == 2)) {
-						logger.error("Could not parse line %s", line);
-						continue;
-					}
-					String key = elements[0].trim();
-					Pattern p = Pattern.compile(key);
-					patterns.put(p,elements[1].trim());
-				}
-			}
-		} else {
-			logger.warn("Could not find JID lookup service configuration file [%s]", properties);
-		}
-	}
+	private PropertiesBasedDatastore datastore;
 
 	@Override
 	public String lookup(OfferEvent event) throws RayoProtocolException {
 		
 		return lookup(event.getTo());
 	}
-	
 
 	@Override
 	public String lookup(URI uri) throws RayoProtocolException {
 		
-		Lock lock = RegexpJIDLookupService.this.lock.readLock();
-		try {
-			lock.lock();
-			for (Pattern pattern: patterns.keySet()) {
-				Matcher matcher = pattern.matcher(uri.toString());
-				if (matcher.matches()) {
-					String value = patterns.get(pattern);
-					if (logger.isDebugEnabled()) {
-						logger.debug("Found a match for %s : %s", uri.toString(), value);
-					}
-					return value;
-				}
-			}
-			if (logger.isDebugEnabled()) {
-				logger.debug("We didn't find any Regexp match for %s", uri.toString());
-			}
-			return null;
-		} finally {
-			lock.unlock();
-		}
+		logger.debug("Trying to find a match for URI [%s]", uri);
+		return datastore.lookup(uri);
+	}
+
+
+	public void setDatastore(PropertiesBasedDatastore datastore) {
+		this.datastore = datastore;
 	}
 }

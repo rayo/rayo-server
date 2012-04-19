@@ -35,6 +35,11 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>com.rayo</groupId> 
+			<artifactId>rayo-provisioning</artifactId>
+			<version>${project.version}</version>
+		</dependency>		
+		<dependency>
 			<groupId>com.voxeo</groupId>
 			<artifactId>vlib-core</artifactId>
 		</dependency>

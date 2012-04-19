@@ -346,6 +346,8 @@
     <module>rayo-storage</module>
     <module>rayo-gateway</module>
     <module>rayo-provisioning</module>
+    <module>rayo-provisioning-cassandra-agent</module>
+    <module>rayo-provisioning-properties-agent</module>
   </modules>
   <profiles>
     <profile>

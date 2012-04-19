@@ -7,8 +7,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Writer;
-import java.util.ArrayList;
+import java.net.URI;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +18,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 
 import org.springframework.core.io.Resource;
 
@@ -72,9 +73,7 @@ public class PropertiesBasedDatastore implements GatewayDatastore {
 
 	private static final Loggerf logger = Loggerf.getLogger(PropertiesBasedDatastore.class);
 	
-	private Map<Pattern, String> patterns = new LinkedHashMap<Pattern, String>();
-	private Map<String, String> addressMap = new LinkedHashMap<String, String>();
-	private List<String> sortedKeys = new ArrayList<String>();
+	Map<String, PropertiesValue> map = Collections.synchronizedMap(new LinkedHashMap<String, PropertiesValue>());
 	
 	private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 	
@@ -364,7 +363,6 @@ public class PropertiesBasedDatastore implements GatewayDatastore {
 		Lock lock = PropertiesBasedDatastore.this.lock.writeLock();
 		try {
 			lock.lock();
-			
 			addPattern(address, jid);		
 			delegateStore.storeAddress(address, jid);
 		} finally {
@@ -415,21 +413,10 @@ public class PropertiesBasedDatastore implements GatewayDatastore {
 	
 	private void addPattern(String address, String jid) {
 		
-		patterns.put(getPattern(address),jid);
-		addressMap.put(address, jid);
-		sortedKeys.add(address);
-	}
-	
-	private Pattern getPattern(String address) {
-		
-		String regexp = address.trim();
-		// We will ignore leading + in the regexps
-		if (regexp.startsWith("+")) {
-			regexp = "\\+" + regexp.substring(1,regexp.length()); 
+		if (map.get(address) == null) {
+			PropertiesValue entry = new PropertiesValue(address,jid);
+			map.put(address, entry);
 		}
-
-		Pattern p = Pattern.compile(regexp);
-		return p;
 	}
 
 	public void removeAddress(String address) throws DatastoreException {
@@ -442,12 +429,7 @@ public class PropertiesBasedDatastore implements GatewayDatastore {
 		Lock lock = PropertiesBasedDatastore.this.lock.writeLock();
 		try {
 			lock.lock();
-
-			Pattern p = getPattern(address);
-			patterns.remove(p);
-			addressMap.remove(address);
-			sortedKeys.remove(address);
-			
+			map.remove(address);			
 			delegateStore.removeAddress(address);
 		} finally {
 			try {
@@ -517,10 +499,20 @@ public class PropertiesBasedDatastore implements GatewayDatastore {
 		Writer writer = null;
 		try {
 			lock.lock();
-
 			writer = new BufferedWriter(new FileWriter(file));
-			for(String address: sortedKeys) {
-				writer.write(address + "=" + addressMap.get(address) + "\n");
+			PropertiesValue global = null;
+			for (String key: map.keySet()) {
+				PropertiesValue entry = map.get(key);
+				if (entry.getPattern().toString().startsWith(".*=")) {
+					// skip global
+					global = entry;
+					continue;
+				}
+				writer.write(entry.getAddress() + "=" + entry.getApplication() + "\n");
+			}
+
+			if (global != null) {
+				writer.write(global + "\n");
 			}
 			writer.flush();
 			
@@ -549,10 +541,7 @@ public class PropertiesBasedDatastore implements GatewayDatastore {
 		Lock lock = PropertiesBasedDatastore.this.lock.writeLock();
 		try {
 			lock.lock();
-		
-			patterns.clear();
-			sortedKeys.clear();
-			addressMap.clear();
+			map.clear();
 			if (properties.isReadable()) {
 	
 				InputStream is = null;
@@ -591,7 +580,8 @@ public class PropertiesBasedDatastore implements GatewayDatastore {
 				for(Application application: applications) {
 					List<String> addresses = getAddressesForApplication(application.getBareJid());
 					for(String address: addresses) {
-						if (!sortedKeys.contains(address)) {
+						PropertiesValue entry = map.get(address);
+						if (entry == null) {
 							logger.debug("Removing mapping for pattern [%s]", address);
 							removeAddress(address, false);
 						}
@@ -609,8 +599,41 @@ public class PropertiesBasedDatastore implements GatewayDatastore {
 		}			
 	}
 	
+	/**
+	 * Returns an application jid for the given address URI. It will go through all the 
+	 * different regexp expressions associated with the application and get the first one
+	 * 
+	 * @param uri Address
+	 * @return String JId of the application that matches the address
+	 */
+	public String lookup(URI uri) {
+		
+		Lock lock = this.lock.readLock();
+		try {
+			lock.lock();
+			for(String key: map.keySet()) {
+				PropertiesValue entry = map.get(key);
+				Matcher matcher = entry.getPattern().matcher(uri.toString());
+				if (matcher.matches()) {
+					String value = entry.getApplication();
+					if (logger.isDebugEnabled()) {
+						logger.debug("Found a match for %s : %s", uri.toString(), value);
+					}
+					return value;
+				}
+			}
+			if (logger.isDebugEnabled()) {
+				logger.debug("We didn't find any Regexp match for %s", uri.toString());
+			}
+			return null;
+		} finally {
+			lock.unlock();
+		}
+	}
+	
 	int getLoadFailures() {
 		
 		return failures;
 	}
 }
+

@@ -1,0 +1,2 @@
+# Cassandra based provisioning agent
+com.rayo.provisioning.CassandraProvisioningAgent

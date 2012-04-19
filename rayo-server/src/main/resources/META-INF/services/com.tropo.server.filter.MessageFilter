@@ -1,2 +1,0 @@
-#Add below your custom MessageFilter implementations
-#foo.bar.MyMessageFilter    # Full name of the class that implements your Message Filter

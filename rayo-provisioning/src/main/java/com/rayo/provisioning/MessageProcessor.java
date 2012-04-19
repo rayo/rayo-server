@@ -11,10 +11,10 @@ import javax.jms.MessageListener;
 import javax.jms.TextMessage;
 
 import com.google.gson.GsonBuilder;
+import com.rayo.provisioning.model.AddressNotification;
+import com.rayo.provisioning.model.UpdateNotification;
 import com.rayo.provisioning.storage.StorageServiceClient;
 import com.rayo.storage.model.Application;
-import com.tropo.provisioning.rest.model.AddressNotification;
-import com.tropo.provisioning.rest.model.UpdateNotification;
 import com.voxeo.logging.Loggerf;
 
 /**
@@ -33,9 +33,9 @@ public class MessageProcessor implements MessageListener {
 	private AtomicLong messagesFailed = new AtomicLong();
 	
 	private StorageServiceClient storageServiceClient;
-	private ProvisioningServiceClient provisioningServiceClient;
+	private ProvisioningClient provisioningServiceClient;
 	
-	private String domainName;
+	private String domainName = "localhost";
 	
 	@Override
 	public void onMessage(Message message) {
@@ -74,18 +74,22 @@ public class MessageProcessor implements MessageListener {
 				logger.debug("Application [%s] not found.", notification.getAppId());
 				storageServiceClient.removeApplication(notification.getVoiceUrl());
 			} else {		
-				// Find in Rayo
-				Application rayoApplication = storageServiceClient.findApplication(application.getBareJid());
-				if (rayoApplication ==  null) {
-					logger.debug("Application [%s] not found on Rayo. Creating it", application.getBareJid());
-					application.setAccountId(notification.getAccountId());
-					application.setPermissions(provisioningServiceClient.getFeatures(notification.getAccountId()));
-					storageServiceClient.createApplication(application);
-				} else {			
-					storageServiceClient.updateApplication(application);
-				}
-				if (!notification.getAddresses().isEmpty()) {
-					processAddresses(notification);
+				if (application.getPlatform().equalsIgnoreCase("rayo")) {
+					// Find in Rayo
+					Application rayoApplication = storageServiceClient.findApplication(application.getBareJid());
+					if (rayoApplication ==  null) {
+						logger.debug("Application [%s] not found on Rayo. Creating it", application.getBareJid());
+						application.setAccountId(notification.getAccountId());
+						application.setPermissions(provisioningServiceClient.getFeatures(notification.getAccountId()));
+						storageServiceClient.createApplication(application);
+					} else {			
+						storageServiceClient.updateApplication(application);
+					}
+					if (!notification.getAddresses().isEmpty()) {
+						processAddresses(notification);
+					}
+				} else {
+					logger.debug("Received notification for a non Rayo application. Drpping it off.");
 				}
 			}
 		}
@@ -138,7 +142,6 @@ public class MessageProcessor implements MessageListener {
 		List<String> rayoAddresses = loadRayoAddresses(notification, applicationsMap);
 		
 		for (AddressNotification address: notification.getAddresses()) {
-			String adr = buildAddress(notification, address);
 			String jid = notification.getVoiceUrl();
 			if (jid == null) {
 				Application app = applicationsMap.get(address.getAppId());
@@ -154,26 +157,37 @@ public class MessageProcessor implements MessageListener {
 						address.getAppId(), jid);
 				continue;
 			}
-			if (!rayoAddresses.contains(adr)) {
+			String addr = createAddress(address);
+			if (!rayoAddresses.contains(addr)) {
 				// new address
-				storageServiceClient.storeAddress(jid, adr);
+				storageServiceClient.storeAddress(jid, addr);
 			} else {
-				if (!currentAddresses.contains(adr)) {
+				if (!currentAddresses.contains(addr)) {
 					// delete
-					storageServiceClient.removeAddressFromApplication(adr);
+					storageServiceClient.removeAddressFromApplication(addr);
 				} else {
 					// update?
 				}
 			}
 		}
 	}
-	
-	private String buildAddress(UpdateNotification notification, AddressNotification address) {
+
+	private String createAddress(AddressNotification address) {
 
 		if (address.getType().equalsIgnoreCase("sip")) {
-			return "sip:" + address.getAddress() + "@" + domainName;
+			StringBuilder buffer = new StringBuilder();
+			if (!address.getAddress().startsWith("sip:")) {
+				buffer.append("sip:");
+			}
+			buffer.append(address.getAddress());
+			if (buffer.indexOf("@") == -1) {
+				// set default domain
+				buffer.append("@" + domainName);
+			}
+			return buffer.toString();
+		} else {
+			return address.getAddress();
 		}
-		return address.getAddress();
 	}
 
 	private Map<String, Application> loadApplications(UpdateNotification notification) throws Exception {
@@ -192,13 +206,17 @@ public class MessageProcessor implements MessageListener {
 		List<String> addresses = new ArrayList<String>();
 		List<String> processedApps = new ArrayList<String>();
 		for (AddressNotification address: notification.getAddresses()) {
+			String appId = notification.getAppId();
 			if (address.getAppId() != null) {
-				if (!processedApps.contains(address.getAppId())) {
-					Application application = applicationsMap.get(address.getAppId());
+				appId = address.getAppId();
+			}
+			if (appId != null) {
+				if (!processedApps.contains(appId)) {
+					Application application = applicationsMap.get(appId);
 					if (application != null) {
 						addresses.addAll(storageServiceClient.findAddressesForApplication(application.getBareJid()));
 					}
-					processedApps.add(address.getAppId());
+					processedApps.add(appId);
 				}
 			}
 		}
@@ -221,12 +239,11 @@ public class MessageProcessor implements MessageListener {
 	}
 
 	public void setProvisioningServiceClient(
-			ProvisioningServiceClient provisioningServiceClient) {
+			ProvisioningClient provisioningServiceClient) {
 		this.provisioningServiceClient = provisioningServiceClient;
 	}
 
 	public void setDomainName(String domainName) {
-
 		this.domainName = domainName;
 	}
 }
