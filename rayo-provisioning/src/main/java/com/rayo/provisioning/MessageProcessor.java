@@ -89,7 +89,7 @@ public class MessageProcessor implements MessageListener {
 						processAddresses(notification);
 					}
 				} else {
-					logger.debug("Received notification for a non Rayo application. Drpping it off.");
+					logger.debug("Received notification for a non Rayo application. Dropping it off.");
 				}
 			}
 		}

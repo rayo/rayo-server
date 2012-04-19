@@ -324,9 +324,14 @@
 	<!-- Default filter chain -->
   	<bean id="filtersChain" class="com.rayo.server.filter.DefaultFilterChain"/> 
 	 
-	<!-- JID Redirection --> 
+	<bean id="datastore" class="com.rayo.storage.properties.PropertiesBasedDatastore">
+		<constructor-arg value="classpath:rayo-routing.properties"/> <!-- properties file -->
+		<constructor-arg value="60000"/> <!-- reload interval in milliseconds -->
+	</bean>
+	
+  	<!-- JID Redirection --> 
 	<bean id="rayoJIDLookupService" class="com.rayo.server.lookup.RegexpJIDLookupService">
-		<constructor-arg value="classpath:rayo-routing.properties"/>
+		<property name="datastore" ref="datastore"/>
 	</bean> 
 	
 	  	
