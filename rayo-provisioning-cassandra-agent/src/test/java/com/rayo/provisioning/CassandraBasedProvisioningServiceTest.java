@@ -16,7 +16,7 @@ public class CassandraBasedProvisioningServiceTest extends DefaultProvisioningAg
 	
 	// tests use a different port so if there is any existing Cassandra instance
 	// nothing bad will happen
-	public static final String CASSANDRA_TESTING_PORT = "9164";
+	public static final String CASSANDRA_TESTING_PORT = "9167";
 	
     @BeforeClass
     public static void startCassandraServer() throws Exception {

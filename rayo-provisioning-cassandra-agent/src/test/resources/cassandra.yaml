@@ -192,7 +192,7 @@ listen_address: localhost
 # (i.e. it will be based on the configured hostname of the node).
 rpc_address: localhost
 # port for Thrift to listen for clients on
-rpc_port: 9164
+rpc_port: 9167
 
 # enable or disable keepalive on rpc connections
 rpc_keepalive: true
