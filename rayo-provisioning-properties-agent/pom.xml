@@ -29,12 +29,13 @@
 	        <version>1.0-SNAPSHOT</version>
 	        <scope>test</scope>
 	    </dependency>	    	
-	    <dependency>
-	        <groupId>com.tropo</groupId>
-	        <artifactId>rest-api</artifactId>
-	        <version>1.0-SNAPSHOT</version>
-	        <scope>test</scope>
-	    </dependency>	    	    
+		<dependency>
+			<groupId>com.tropo</groupId>
+			<artifactId>rest-api</artifactId>
+			<version>1.0-SNAPSHOT</version>
+			<classifier>classes</classifier>
+			<scope>test</scope>			
+		</dependency>	    	    
 	</dependencies>
 	
     <build>
