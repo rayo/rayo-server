@@ -15,6 +15,13 @@
 	        <groupId>com.rayo</groupId>
 	        <artifactId>rayo-provisioning</artifactId>
 	        <version>${project.version}</version>
+	    </dependency>	    	
+	    <dependency>
+	        <groupId>com.rayo</groupId>
+	        <artifactId>rayo-provisioning</artifactId>
+	        <version>${project.version}</version>
+	        <type>test-jar</type>
+      		<scope>test</scope>		
 	    </dependency>
 	    <dependency>
 	        <groupId>com.tropo</groupId>
@@ -23,12 +30,11 @@
 	        <scope>test</scope>
 	    </dependency>	    	
 	    <dependency>
-	        <groupId>com.rayo</groupId>
-	        <artifactId>rayo-provisioning</artifactId>
-	        <version>${project.version}</version>
-	        <type>test-jar</type>
-      		<scope>test</scope>		
-	    </dependency>		    
+	        <groupId>com.tropo</groupId>
+	        <artifactId>rest-api</artifactId>
+	        <version>1.0-SNAPSHOT</version>
+	        <scope>test</scope>
+	    </dependency>	    	    
 	</dependencies>
 	
     <build>
