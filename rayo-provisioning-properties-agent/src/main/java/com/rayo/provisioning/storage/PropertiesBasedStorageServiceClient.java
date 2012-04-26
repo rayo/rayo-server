@@ -1,5 +1,6 @@
 package com.rayo.provisioning.storage;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Properties;
 
@@ -45,7 +46,15 @@ public class PropertiesBasedStorageServiceClient extends AbstractStorageServiceC
 		if (propertiesFile == null) {
 			propertiesFile = DEFAULT_ROUTING_PROPERTIES_FILE;
 		}
-		Resource resource = new ClassPathResource(propertiesFile);
+		
+		Resource resource = null;
+		File pFile = new File(propertiesFile);
+		if (pFile.exists()) {
+			resource = new FileSystemResource(pFile);
+		} else {
+			resource = new ClassPathResource(propertiesFile);
+		}
+		
 		logger.debug("Loading configuration file from classpath [%s]", propertiesFile);
 		if (!resource.isReadable()) {
 			logger.debug("Could not find configuration file in classpath. Loading it from file system instead.");
