@@ -98,7 +98,7 @@ public abstract class BaseProvisioningAgentTest {
 				"org.apache.activemq.jndi.ActiveMQInitialContextFactory");
 		env.put(Context.PROVIDER_URL, "vm://localhost?broker.persistent=false");
 		jmsNotificationService.setEnvironment(env);
-		jmsNotificationService.setTopic("dynamicTopics/notifications");
+		jmsNotificationService.setTopic("VirtualTopic.Provisioning");
 		jmsNotificationService.setConnectionFactory("TopicConnectionFactory");
 		jmsNotificationService.setSipDomain("sip.tropo.com");
 

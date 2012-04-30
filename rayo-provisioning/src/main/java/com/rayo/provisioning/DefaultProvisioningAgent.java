@@ -8,11 +8,12 @@ import javax.jms.Connection;
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.MessageConsumer;
-import javax.jms.TopicConnectionFactory;
+import javax.jms.QueueConnectionFactory;
 import javax.jms.Session;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 
+import org.apache.activemq.command.ActiveMQQueue;
 import org.springframework.context.ApplicationContext;
 
 import com.rayo.provisioning.storage.StorageServiceClient;
@@ -38,12 +39,11 @@ public abstract class DefaultProvisioningAgent implements ProvisioningAgent {
 
 	private static final String CONTEXT_FACTORY="com.rayo.provisioning.jms.context.factory";
 	private static final String PROVIDER_URL="com.rayo.provisioning.jms.provider.url";
-	private static final String CONNECTION_FACTORY="com.rayo.provisioning.jms.connection.factory";
 	private static final String USERNAME="com.rayo.provisioning.jms.username";
 	private static final String PASSWORD="com.rayo.provisioning.jms.password";
 	private static final String RETRIES="com.rayo.provisioning.jms.retries";
 	private static final String RETRY_INTERVAL="com.rayo.provisioning.jms.retryInterval";
-	private static final String PROVISIONING_TOPIC="com.rayo.provisioning.jms.notifications.topic";
+	private static final String PROVISIONING_QUEUE="com.rayo.provisioning.jms.notifications.queue";
 	private static final String PROVISIONING_ENDPOINT="com.rayo.provisioning.api";
 	private static final String PROVISIONING_ENDPOINT_USERNAME="com.rayo.provisioning.api.username";
 	private static final String PROVISIONING_ENDPOINT_PASSWORD="com.rayo.provisioning.api.password";
@@ -84,29 +84,39 @@ public abstract class DefaultProvisioningAgent implements ProvisioningAgent {
 				try {					
 					loadProperties(properties);
 					
-					String topicName = checkProperty(properties, PROVISIONING_TOPIC);
+					String queueName = checkProperty(properties, PROVISIONING_QUEUE);
 					Hashtable<String, String> env = new Hashtable<String, String>();
 					env.put(Context.INITIAL_CONTEXT_FACTORY, checkProperty(properties, CONTEXT_FACTORY));
 					env.put(Context.PROVIDER_URL, checkProperty(properties, PROVIDER_URL));
-					env.put("topic." + TOPIC_NAME_CONSTANT, topicName);
 					context = new InitialContext(env);
 					
-					TopicConnectionFactory connectionFactory = (TopicConnectionFactory)context.lookup(checkProperty(properties, CONNECTION_FACTORY));
-	
+					logger.debug("Getting connection factory");
+					QueueConnectionFactory connectionFactory = (QueueConnectionFactory)context.lookup("QueueConnectionFactory");
 					if (properties.get(USERNAME) != null && !properties.get(USERNAME).equals("")) {
 						logger.debug("Connecting to JMS Provider with username %s", properties.get(USERNAME));
 						connection = connectionFactory.createConnection((String)properties.get(USERNAME), (String)properties.get(PASSWORD));
 					} else {
+						logger.debug("Connecting to JMS Provider with empty username and password");
 						connection = connectionFactory.createConnection();
 					}
-					logger.debug("Connection created successfully");
+					logger.debug("Starting connection");
+					connection.start();	
 					
-					destination = (Destination)context.lookup(TOPIC_NAME_CONSTANT);
-					session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
+					String virtualQueue = queueName;
+					if (!virtualQueue.startsWith("Consumer.")) { 
+						// make it a virtual topic
+						logger.warn("Queue name %s does not start with Consumer. Converting it to ActiveMQ's virtual topic syntax");
+						virtualQueue = "Consumer." + queueName + ".VirtualTopic.Provisioning";
+					}
+							
+					logger.debug("Connecting to virtual queue " + virtualQueue);					
+					destination = new ActiveMQQueue(virtualQueue);
+			        session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);			        
 					String selector = "voicePlatform='rayo' or messagingPlatform='rayo' or (voicePlatform='' and messagingPlatform='')";
+					
+					logger.debug("Creating consumer in %s with selector %s", destination, selector);
 					consumer = session.createConsumer(destination, selector);
-					logger.debug("JMS system is connected");
-				
+					logger.debug("JMS system is connected now");				
 					consumer.setMessageListener(messageProcessor);
 
 					logger.debug("Starting JMS connection");
