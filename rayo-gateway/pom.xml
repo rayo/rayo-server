@@ -79,6 +79,19 @@
 			<version>1.0.4-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
+	<!-- Maven repository hosting Jolokia -->
+	<repositories>
+      <repository>
+        <id>labs-consol-release</id>
+        <name>ConSol* Labs Repository (Releases)</name>
+        <url>http://labs.consol.de/maven/repository</url>
+      </repository>
+      <repository>
+        <id>labs-consol-snapshots</id>
+        <name>ConSol* Labs Repository (Releases)</name>
+        <url>http://labs.consol.de/maven/snapshots-repository</url>
+      </repository>      
+    </repositories>	
 	<profiles>
 		<profile>
 			<id>production</id>
