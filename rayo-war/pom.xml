@@ -100,6 +100,11 @@
         <name>ConSol* Labs Repository (Releases)</name>
         <url>http://labs.consol.de/maven/repository</url>
       </repository>
+      <repository>
+        <id>labs-consol-snapshots</id>
+        <name>ConSol* Labs Repository (Releases)</name>
+        <url>http://labs.consol.de/maven/snapshots-repository</url>
+      </repository>      
     </repositories>
     <profiles>
 	  <profile> 
