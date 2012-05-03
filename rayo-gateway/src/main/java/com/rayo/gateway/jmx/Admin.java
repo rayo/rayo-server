@@ -136,10 +136,10 @@ public class Admin implements AdminMXBean {
 	
 	@Override
 	@ManagedOperation(description = "Adds an address to an application")
-	public void registerAddress(String appId, String address) {
+	public void registerAddress(String jid, String address) {
 
 		try {
-			adminService.registerAddress(appId, address);
+			adminService.registerAddress(jid, address);
 		} catch (GatewayException ge) {
 			log.error(ge.getMessage(),ge);
 		}		

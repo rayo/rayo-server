@@ -59,6 +59,7 @@ public class CassandraDatastore implements GatewayDatastore {
 	private String port = "9160";
 	private CassandraPrimer primer = null;
 	private boolean overrideExistingSchema = true;
+	private boolean primeTestData = false;
 	private String schemaName = "rayo";
 	private CassandraSchemaHandler schemaHandler = new CassandraSchemaHandler();
 	
@@ -85,7 +86,12 @@ public class CassandraDatastore implements GatewayDatastore {
 		Pelops.addPool(schemaName, cluster, schemaName);
 		
 		if (primer != null) {
-			primer.prime(this);
+			if (primeTestData) {
+				log.debug("Priming test data");
+				primer.prime(this);
+			} else {
+				log.debug("Test data will not be primed as per configuration settings");
+			}
 		}
 	}
 
@@ -1206,5 +1212,13 @@ public class CassandraDatastore implements GatewayDatastore {
 
 	public void setPrimer(CassandraPrimer primer) {
 		this.primer = primer;
+	}
+
+	public boolean isPrimeTestData() {
+		return primeTestData;
+	}
+
+	public void setPrimeTestData(boolean primeTestData) {
+		this.primeTestData = primeTestData;
 	}
 }

@@ -25,5 +25,6 @@
 		<property name="port" value="${cassandra.port}"/>
 		<property name="overrideExistingSchema" value="${cassandra.create.new.schema}"/>
 		<property name="schemaName" value="${cassandra.schema.name}"/>
+		<property name="primeTestData" value="${cassandra.prime.test.data}"/>
 	</bean>
 </beans>

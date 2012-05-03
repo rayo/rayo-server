@@ -69,6 +69,7 @@ public class CassandraDatastoreTest extends BaseDatastoreTest {
 		CassandraDatastore datastore = new CassandraDatastore();
 		datastore.setPort(CASSANDRA_TESTING_PORT);
 		datastore.setPrimer(primer);
+		datastore.setPrimeTestData(true);
 		datastore.init();
 
 		String jid = primer.getDefaultRayoUsername() + "@" + primer.getXmppServer();
@@ -86,6 +87,7 @@ public class CassandraDatastoreTest extends BaseDatastoreTest {
 		CassandraDatastore datastore = new CassandraDatastore();
 		datastore.setPort(CASSANDRA_TESTING_PORT);
 		datastore.setPrimer(primer);
+		datastore.setPrimeTestData(true);
 		datastore.init();
 
 		String jid = primer.getDefaultRayoUsername() + "@" + primer.getXmppServer();
@@ -112,6 +114,7 @@ public class CassandraDatastoreTest extends BaseDatastoreTest {
 		datastore.setPort(CASSANDRA_TESTING_PORT);
 		datastore.setOverrideExistingSchema(false);
 		datastore.setPrimer(primer);
+		datastore.setPrimeTestData(true);
 		datastore.init();
 
 		String jid = primer.getDefaultRayoUsername() + "@" + primer.getXmppServer();

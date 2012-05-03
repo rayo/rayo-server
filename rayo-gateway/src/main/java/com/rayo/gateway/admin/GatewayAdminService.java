@@ -67,9 +67,9 @@ public class GatewayAdminService extends AdminService {
 		storageService.registerApplication(application);
 	}
 
-	public void registerAddress(String appId, String address) throws GatewayException {
+	public void registerAddress(String jid, String address) throws GatewayException {
 		
-		storageService.storeAddress(address, appId);
+		storageService.storeAddress(address, jid);
 	}
 	
 	public void setStorageService(GatewayStorageService storageService) {

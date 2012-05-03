@@ -683,7 +683,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 			sendDialRequest(request, platformId, new ArrayList<RayoNode>(), 0);
 		} else {
 			sendIqError(request, Type.CANCEL, Condition.SERVICE_UNAVAILABLE, 
-					String.format("Could not find associated platform for client JID",request.getFrom()));
+					String.format("Could not find associated platform for client JID %s",request.getFrom()));
 		}
 	}
 	
