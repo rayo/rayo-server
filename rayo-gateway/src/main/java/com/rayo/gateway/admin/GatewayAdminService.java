@@ -72,6 +72,17 @@ public class GatewayAdminService extends AdminService {
 		storageService.storeAddress(address, jid);
 	}
 	
+	
+	public void unregisterApplication(String jid) throws GatewayException {
+		
+		storageService.unregisterApplication(jid);
+	}
+
+	public void unregisterAddress(String address) throws GatewayException {
+		
+		storageService.removeAddress(address);
+	}
+	
 	public void setStorageService(GatewayStorageService storageService) {
 		this.storageService = storageService;
 	}

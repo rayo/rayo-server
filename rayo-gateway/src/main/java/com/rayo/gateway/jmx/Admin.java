@@ -120,28 +120,36 @@ public class Admin implements AdminMXBean {
 	
 	@Override
 	@ManagedOperation(description = "Registers an application in the gateway")
-	public void registerApplication(String platform, String name, String jid) {
+	public void registerApplication(String platform, String name, String jid) throws GatewayException {
 
 		Application app = new Application(name, jid, platform);
 		app.setName(name);
 		//TODO: Set proper permissions and account id
 		app.setPermissions("");
 		app.setAccountId("");
-		try {
-			adminService.registerApplication(app);
-		} catch (GatewayException ge) {
-			log.error(ge.getMessage(),ge);
-		}
+
+		adminService.registerApplication(app);
 	}
 	
 	@Override
 	@ManagedOperation(description = "Adds an address to an application")
-	public void registerAddress(String jid, String address) {
+	public void registerAddress(String jid, String address) throws GatewayException {
 
-		try {
-			adminService.registerAddress(jid, address);
-		} catch (GatewayException ge) {
-			log.error(ge.getMessage(),ge);
-		}		
+		adminService.registerAddress(jid, address);
+	}
+	
+	
+	@Override
+	@ManagedOperation(description = "Unregisters an application from the gateway")
+	public void unregisterApplication(String jid) throws GatewayException {
+
+		adminService.unregisterApplication(jid);
+	}
+	
+	@Override
+	@ManagedOperation(description = "Removes an address from an application")
+	public void unregisterAddress(String address) throws GatewayException {
+
+		adminService.unregisterAddress(address);
 	}
 }
