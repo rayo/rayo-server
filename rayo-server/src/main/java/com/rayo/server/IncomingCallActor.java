@@ -42,7 +42,7 @@ public class IncomingCallActor extends CallActor<IncomingCall> {
         for (String headerName : iterable(headerNames)) {
           if (headerName.equalsIgnoreCase("route")) {
             StringBuffer value = new StringBuffer();
-            for (String route : iterable(call.getHeaderNames())) {
+            for (String route : iterable(call.getHeaders(headerName))) {
               value.append(route).append("|||");
             }
             headers.put(headerName, value.substring(0, value.lastIndexOf("|||")));
