@@ -33,7 +33,22 @@
 			<groupId>org.apache.cassandra</groupId>
 			<artifactId>cassandra-all</artifactId>
 			<version>1.0.5</version>
-		</dependency>										 		
+      		<exclusions>
+        		<exclusion>
+          			<groupId>org.codehaus.jackson</groupId>
+          			<artifactId>jackson-core-asl</artifactId>
+        		</exclusion>
+        		<exclusion>
+          			<groupId>org.codehaus.jackson</groupId>
+          			<artifactId>jackson-mapper-asl</artifactId>
+        		</exclusion>
+			</exclusions>			
+		</dependency>				
+	    <dependency>
+	    	<groupId>com.basho.riak</groupId>
+	    	<artifactId>riak-client</artifactId>
+	    	<version>1.0.5</version>
+	    </dependency>								 		
 	</dependencies>
 	<repositories>
 	    <repository>
