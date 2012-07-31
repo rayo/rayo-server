@@ -40,7 +40,16 @@ public class IncomingCallActor extends CallActor<IncomingCall> {
         Iterator<String> headerNames = call.getHeaderNames();
         Map<String, String> headers = new HashMap<String, String>();
         for (String headerName : iterable(headerNames)) {
+          if (headerName.equalsIgnoreCase("route")) {
+            StringBuffer value = new StringBuffer();
+            for (String route : iterable(call.getHeaders(headerName))) {
+              value.append(route).append("|||");
+            }
+            headers.put(headerName, value.substring(0, value.lastIndexOf("|||")));
+          }
+          else {
             headers.put(headerName, call.getHeader(headerName));
+          }
         }
 
         offer.setHeaders(headers);
