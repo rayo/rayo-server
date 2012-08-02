@@ -2,9 +2,11 @@ package com.rayo.storage.riak;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 
 import com.rayo.storage.BaseDatastoreTest;
 
+@Ignore
 public class RiakDatastoreTest extends BaseDatastoreTest {
 
 	@After

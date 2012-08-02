@@ -1,14 +1,15 @@
 package com.rayo.storage.riak;
 
 import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
+import java.util.Collection;
 
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 
+import com.basho.riak.client.RiakLink;
 import com.basho.riak.client.convert.RiakKey;
+import com.basho.riak.client.convert.RiakLinks;
 import com.rayo.storage.model.RayoNode;
 
 public class RiakRayoNode {
@@ -27,7 +28,8 @@ public class RiakRayoNode {
 	@JsonProperty
 	private Boolean blackListed;	
 	
-	private List<String> platforms = new ArrayList<String>();
+	@RiakLinks
+	private transient Collection<RiakLink> platformLinks;
 
 	public RiakRayoNode(RayoNode node) {
 		
@@ -37,7 +39,11 @@ public class RiakRayoNode {
 		this.ipAddress = node.getIpAddress();
 		this.consecutiveErrors = node.getConsecutiveErrors();
 		this.blackListed = node.isBlackListed();
-		platforms.addAll(node.getPlatforms());
+		
+		platformLinks = new ArrayList<RiakLink>();
+		for (String platform: node.getPlatforms()) {
+			platformLinks.add(new RiakLink("platforms", platform, "platforms"));
+		}
 	}
 	
 	@JsonCreator
@@ -56,7 +62,10 @@ public class RiakRayoNode {
 		node.setPriority(priority);
 		node.setWeight(weight);
 		node.setBlackListed(blackListed);
-		node.setPlatforms(new HashSet<String>(getPlatforms()));
+		
+		for (RiakLink link: platformLinks) {
+			node.addPlatform(link.getKey());
+		}
 		
 		return node;
 	}
@@ -109,11 +118,11 @@ public class RiakRayoNode {
 		this.blackListed = blackListed;
 	}
 
-	public List<String> getPlatforms() {
-		return platforms;
+	public Collection<RiakLink> getPlatformLinks() {
+		return platformLinks;
 	}
 
-	public void setPlatforms(List<String> platforms) {
-		this.platforms = platforms;
+	public void setPlatformLinks(Collection<RiakLink> platformLinks) {
+		this.platformLinks = platformLinks;
 	}
 }

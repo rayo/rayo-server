@@ -2,12 +2,12 @@ package com.rayo.storage.riak;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 import com.basho.riak.client.IRiakClient;
 import com.basho.riak.client.RiakException;
 import com.basho.riak.client.RiakFactory;
+import com.basho.riak.client.RiakLink;
 import com.basho.riak.client.RiakRetryFailedException;
 import com.basho.riak.client.bucket.Bucket;
 import com.basho.riak.client.query.MapReduceResult;
@@ -36,7 +36,7 @@ import com.voxeo.logging.Loggerf;
  * 
  * IMPORTANT. BEFORE USING THIS CLASS FOR ANY PRODUCTION CODE THE FOLLOWING TODOS SHOULD BE FIXED:
  * 
- * @TODO: Use links instead of the direct collections I am using
+ * @TODO: Use links instead of the direct collections. I have added a few but just for testing.
  * @TODO: Find a better way to run queries on properties like the one on getNodeForIpAddress
  * 
  * @author martin
@@ -118,9 +118,7 @@ public class RiakDatastore implements GatewayDatastore {
 				if (rp == null) {
 					rp = new RiakPlatform(platform);
 				}
-				if (!rp.getNodes().contains(node.getHostname())) {
-					rp.addNode(node.getHostname());					
-				}
+				rp.addNode(node.getHostname());					
 				platformsBucket.store(rp).execute();
 			}
 			
@@ -219,8 +217,8 @@ public class RiakDatastore implements GatewayDatastore {
 		List<RayoNode> nodes = new ArrayList<RayoNode>();
 		RiakPlatform platform = getPlatform(platformId);
 		if (platform != null) {
-			for (String hostname: platform.getNodes()) {
-				nodes.add(getNode(hostname));
+			for (RiakLink link: platform.getNodeLinks()) {
+				nodes.add(getNode(link.getKey()));
 			}
 		}		
 		return nodes;
@@ -875,11 +873,14 @@ public class RiakDatastore implements GatewayDatastore {
 	@Override
 	public List<String> getFilteredApplications(String id) throws DatastoreException {
 
+		List<String> filters = new ArrayList<String>();
 		RiakFilter rf = getRiakFilter(id);
-		if (rf != null && rf.getFilteredApplications() != null) {
-			return new ArrayList<String>(rf.getFilteredApplications());
+		if (rf != null && rf.getApplicationLinks() != null) {
+			for(RiakLink link: rf.getApplicationLinks()) {
+				filters.add(link.getKey());
+			}
 		}
-		return new ArrayList<String>();
+		return filters;
 	}
 
 	protected void removeAllData() throws Exception {

@@ -377,8 +377,10 @@ public abstract class BaseDatastoreTest {
 		assertTrue(mixer.getParticipants().isEmpty());
 		
 		GatewayCall call1 = new GatewayCall("call1", node.getHostname(), "clienta@jabber.org");
+		store.storeCall(call1);
 		GatewayCall call2 = new GatewayCall("call2", node.getHostname(), "clienta@jabber.org");
-
+		store.storeCall(call2);
+		
 		store.addCallToMixer(call1.getCallId(), mixer.getName());
 		GatewayMixer stored = store.getMixer(mixer.getName());
 		assertEquals(stored.getParticipants().size(), 1);
@@ -417,7 +419,9 @@ public abstract class BaseDatastoreTest {
 		mixer = store.storeMixer(mixer);
 		
 		GatewayCall call1 = new GatewayCall("call1", node.getHostname(), "clienta@jabber.org");
+		store.storeCall(call1);
 		GatewayCall call2 = new GatewayCall("call2", node.getHostname(), "clienta@jabber.org");
+		store.storeCall(call2);
 
 		store.addCallToMixer(call1.getCallId(), mixer.getName());
 		store.addCallToMixer(call2.getCallId(), mixer.getName());

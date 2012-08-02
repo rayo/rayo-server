@@ -1,13 +1,14 @@
 package com.rayo.storage.riak;
 
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.Collection;
 
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 
+import com.basho.riak.client.RiakLink;
 import com.basho.riak.client.convert.RiakKey;
+import com.basho.riak.client.convert.RiakLinks;
 import com.rayo.storage.model.GatewayMixer;
 
 public class RiakMixer {
@@ -17,9 +18,9 @@ public class RiakMixer {
 	
 	@JsonProperty
 	private String rayoNode;
-	
-	@JsonProperty
-	private Set<String> calls = new TreeSet<String>();
+
+	@RiakLinks
+	private transient Collection<RiakLink> callLinks;
 	
 	public RiakMixer(GatewayMixer call) {
 		
@@ -36,9 +37,11 @@ public class RiakMixer {
 	@JsonIgnore
 	public GatewayMixer getGatewayMixer() {
 		
-		GatewayMixer mixer = new GatewayMixer(name, rayoNode);		
-		for (String call: calls) {
-			mixer.addCall(call);
+		GatewayMixer mixer = new GatewayMixer(name, rayoNode);	
+		if (callLinks != null) {
+			for (RiakLink link: callLinks) {
+				mixer.addCall(link.getKey());
+			}
 		}
 		return mixer;
 	}
@@ -59,21 +62,21 @@ public class RiakMixer {
 		this.rayoNode = rayoNode;
 	}
 
-	public Set<String> getCalls() {
-		return calls;
-	}
-
-	public void setCalls(Set<String> calls) {
-		this.calls = calls;
-	}
-	
 	public void addCall(String callId) {
 		
-		calls.add(callId);
+		callLinks.add(new RiakLink("calls", callId, "calls"));
 	}
 	
 	public void removeCall(String callId) {
 		
-		calls.remove(callId);
+		callLinks.remove(new RiakLink("calls", callId, "calls"));
+	}
+
+	public Collection<RiakLink> getCallLinks() {
+		return callLinks;
+	}
+
+	public void setCallLinks(Collection<RiakLink> callLinks) {
+		this.callLinks = callLinks;
 	}
 }

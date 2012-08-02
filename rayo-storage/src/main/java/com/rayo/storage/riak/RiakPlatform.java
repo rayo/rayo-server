@@ -1,24 +1,42 @@
 package com.rayo.storage.riak;
 
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonProperty;
 
+import com.basho.riak.client.RiakLink;
 import com.basho.riak.client.convert.RiakKey;
+import com.basho.riak.client.convert.RiakLinks;
 
 public class RiakPlatform {
 
 	@RiakKey
 	private String name;
+
+	@JsonProperty
+	private String description;
 	
-	private List<String> nodes = new ArrayList<String>();
+	@RiakLinks
+	private transient Collection<RiakLink> nodeLinks;
 
 	@JsonCreator
 	public RiakPlatform(@JsonProperty("name") String name) {
 		
 		this.name = name;
+		this.description = name;
+		nodeLinks = new ArrayList<RiakLink>();
+	}
+
+
+	public String getDescription() {
+		return description;
+	}
+
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 
@@ -30,24 +48,24 @@ public class RiakPlatform {
 	public void setName(String name) {
 		this.name = name;
 	}
-
-
-	public List<String> getNodes() {
-		return nodes;
-	}
-
-
-	public void setNodes(List<String> nodes) {
-		this.nodes = nodes;
-	}
 	
 	public void addNode(String hostname) {
 		
-		nodes.add(hostname);
+		nodeLinks.add(new RiakLink("nodes", hostname, "nodes"));
 	}
 	
 	public void removeNode(String hostname) {
 				
-		nodes.remove(hostname);
+		nodeLinks.remove(new RiakLink("nodes", hostname, "nodes"));
+	}
+
+
+	public Collection<RiakLink> getNodeLinks() {
+		return nodeLinks;
+	}
+
+
+	public void setNodeLinks(Collection<RiakLink> nodeLinks) {
+		this.nodeLinks = nodeLinks;
 	}
 }

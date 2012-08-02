@@ -1,25 +1,32 @@
 package com.rayo.storage.riak;
 
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.ArrayList;
+import java.util.Collection;
 
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonProperty;
 
+import com.basho.riak.client.RiakLink;
 import com.basho.riak.client.convert.RiakKey;
+import com.basho.riak.client.convert.RiakLinks;
 
 public class RiakFilter {
 
 	@RiakKey
 	private String id;
-	
+
 	@JsonProperty
-	private Set<String> filteredApplications = new TreeSet<String>();
+	private String name;
+
+	@RiakLinks
+	private transient Collection<RiakLink> applicationLinks;
 	
 	@JsonCreator
 	public RiakFilter(@JsonProperty("id") String id) {
 		
 		this.id = id;
+		this.name = id;
+		applicationLinks = new ArrayList<RiakLink>();
 	}
 
 	public String getId() {
@@ -30,27 +37,37 @@ public class RiakFilter {
 		this.id = id;
 	}
 
-	public void addFilter(String appId) {
+	public void addFilter(String jid) {
 		
-		filteredApplications.add(appId);
+		RiakLink link = new RiakLink("applications", jid, "applications");
+		if (!applicationLinks.contains(link)) {
+			applicationLinks.add(link);
+		}
 	}
 	
-	public void removeFilter(String appId) {
+	public void removeFilter(String jid) {
 		
-		filteredApplications.remove(appId);
+		applicationLinks.remove(new RiakLink("applications", jid, "applications"));
 	}
 	
 	public void removeAllFilters() {
 		
-		filteredApplications.clear();
-		filteredApplications = null;
-	}
-	
-	public Set<String> getFilteredApplications() {
-		return filteredApplications;
+		applicationLinks.clear();
 	}
 
-	public void setFilteredApplications(Set<String> filteredApplications) {
-		this.filteredApplications = filteredApplications;
+	public Collection<RiakLink> getApplicationLinks() {
+		return applicationLinks;
+	}
+
+	public void setApplicationLinks(Collection<RiakLink> applicationLinks) {
+		this.applicationLinks = applicationLinks;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
 	}
 }
