@@ -1456,10 +1456,18 @@ public class RayoProviderTest {
 
 	@Test
 	public void inputCompleteToXml() {
+		def nlsml = """<result xmlns="" xmlns:xf="http://www.w3.org/2000/xforms" grammar="http://grammar" x-model="http://dataModel"><interpretation/></result>"""
+		def event = new InputCompleteEvent(
+			reason: InputCompleteEvent.Reason.SUCCESS, 
+			confidence:0.65, 
+			mode:InputMode.VOICE, 
+			interpretation:"yes", 
+			utterance:"yes", 
+			tag:"yes", 
+			concept:"yes",
+			nlsml:nlsml)
 		
-		def event = new InputCompleteEvent(reason: InputCompleteEvent.Reason.SUCCESS, confidence:0.65, mode:InputMode.VOICE, interpretation:"yes", utterance:"yes", tag:"yes", concept:"yes")
-		
-		assertEquals toXml(event), """<complete xmlns="urn:xmpp:rayo:ext:1"><success xmlns="urn:xmpp:rayo:input:complete:1" confidence="0.65" mode="voice"><interpretation>yes</interpretation><utterance>yes</utterance><tag>yes</tag><concept>yes</concept></success></complete>"""
+		assertEquals toXml(event), """<complete xmlns="urn:xmpp:rayo:ext:1"><success xmlns="urn:xmpp:rayo:input:complete:1" confidence="0.65" mode="voice"><interpretation>yes</interpretation><utterance>yes</utterance><tag>yes</tag><concept>yes</concept><nlsml>${nlsml}</nlsml></success></complete>""" as String
 	}
 	
 	@Test

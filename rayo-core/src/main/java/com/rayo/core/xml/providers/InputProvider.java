@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.dom4j.Document;
+import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.dom4j.Namespace;
 import org.dom4j.QName;
@@ -206,9 +207,15 @@ public class InputProvider extends BaseProvider {
                 	completeElement.addElement("concept").setText(event.getConcept());
                 }
                 if (event.getNlsml() != null) {
-                	completeElement.addElement("nlsml").setText(event.getNlsml());
+                	Element nlsml = completeElement.addElement("nlsml");
+                	nlsml.add(buildNsmlElement(event.getNlsml()));
                 }    
             }
         }
+    }
+    
+    private Element buildNsmlElement(String nlsml) throws Exception {
+    	
+    	return (Element)DocumentHelper.parseText(nlsml).getRootElement();
     }
 }
