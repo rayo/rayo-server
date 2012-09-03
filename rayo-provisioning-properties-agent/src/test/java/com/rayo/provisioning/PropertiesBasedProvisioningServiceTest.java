@@ -1,5 +1,7 @@
 package com.rayo.provisioning;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -7,11 +9,14 @@ import java.util.Properties;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
 import org.springframework.core.io.FileSystemResource;
 
 import com.rayo.provisioning.PropertiesBasedProvisioningAgent;
 import com.rayo.provisioning.storage.PropertiesBasedStorageServiceClient;
 import com.rayo.storage.properties.PropertiesBasedDatastore;
+import com.tropo.provisioning.jms.DefaultJmsNotificationService;
+import com.tropo.provisioning.model.Application;
 
 /**
  * Set of provisioning tests using a datastore backed by a properties file

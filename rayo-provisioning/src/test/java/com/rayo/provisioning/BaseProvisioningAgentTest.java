@@ -110,7 +110,7 @@ public abstract class BaseProvisioningAgentTest {
 
 	MockApplication createSampleApplication(Integer appId, String appName, String jid) throws Exception {
 		
-		Environment environment = createEnvironment(410, "staging-rayo", "staging");
+		Environment environment = createEnvironment(410, "staging-rayo", "rayo");
 		
 		MockApplication application = new MockApplication();
 		application.setId(appId);
