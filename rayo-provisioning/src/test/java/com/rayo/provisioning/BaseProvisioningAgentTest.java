@@ -9,13 +9,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 
+import javax.naming.Context;
+
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.mortbay.jetty.Server;
 import org.mortbay.jetty.handler.ContextHandlerCollection;
 import org.mortbay.jetty.servlet.ServletHolder;
-
-import javax.naming.Context;
 
 import com.rayo.provisioning.rest.RestServlet;
 import com.rayo.provisioning.rest.RestTestStore;
@@ -24,10 +24,9 @@ import com.tropo.provisioning.model.Account;
 import com.tropo.provisioning.model.Address;
 import com.tropo.provisioning.model.AddressType;
 import com.tropo.provisioning.model.ChannelType;
+import com.tropo.provisioning.model.Environment;
 import com.tropo.provisioning.model.MockAddress;
 import com.tropo.provisioning.model.MockApplication;
-import com.tropo.provisioning.model.Partition;
-import com.tropo.provisioning.model.PartitionPlatform;
 import com.tropo.provisioning.model.Platform;
 
 public abstract class BaseProvisioningAgentTest {
@@ -111,15 +110,15 @@ public abstract class BaseProvisioningAgentTest {
 
 	MockApplication createSampleApplication(Integer appId, String appName, String jid) throws Exception {
 		
-		PartitionPlatform pp = createPartitionPlatform("staging","rayo");
+		Environment environment = createEnvironment(410, "staging-rayo", "staging");
 		
 		MockApplication application = new MockApplication();
 		application.setId(appId);
 		application.setName(appName);
 		application.setAccount(createSampleAccount());
 		application.setUrl1(ChannelType.VOICE, new URI(jid));
-		application.setPartitionPlatform(ChannelType.VOICE, pp);
-		application.setPartitionPlatform(ChannelType.MESSAGING, pp);
+		application.setEnvironment(ChannelType.VOICE, environment);
+		application.setEnvironment(ChannelType.MESSAGING, environment);
 		
 		Integer accountId = application.getAccount().getId();
 		
@@ -261,18 +260,17 @@ public abstract class BaseProvisioningAgentTest {
 		return account;
 	}
 
-	PartitionPlatform createPartitionPlatform(String partitionName, String platformName) {
+	Environment createEnvironment(int id, String envName, String platformName) {
 
-		Partition partition = new Partition();
-		partition.setName(partitionName);
-		partition.setId(1);
+		Environment environment = new Environment();
+		environment.setName(envName);
+		environment.setId(id);
+		
 		Platform platform = new Platform();
 		platform.setName(platformName);
 		platform.setId(2);
-		PartitionPlatform pp = new PartitionPlatform();
-		pp.setPartition(partition);
-		pp.setPlatform(platform);
 
-		return pp;
+		environment.setPlatform(platform);
+		return environment;
 	}
 }

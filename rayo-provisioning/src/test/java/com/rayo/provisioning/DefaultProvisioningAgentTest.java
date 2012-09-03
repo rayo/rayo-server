@@ -17,8 +17,8 @@ import com.tropo.provisioning.jms.DefaultJmsNotificationService;
 import com.tropo.provisioning.model.Address;
 import com.tropo.provisioning.model.Application;
 import com.tropo.provisioning.model.ChannelType;
+import com.tropo.provisioning.model.Environment;
 import com.tropo.provisioning.model.MockApplication;
-import com.tropo.provisioning.model.PartitionPlatform;
 
 public abstract class DefaultProvisioningAgentTest extends BaseProvisioningAgentTest {
 
@@ -467,9 +467,9 @@ public abstract class DefaultProvisioningAgentTest extends BaseProvisioningAgent
 		long messages = provisioningService.getMessagesProcessed();
 		
 		Application application = createSampleApplication(1, "test1", "test1@apps.tropo.com");
-		PartitionPlatform pp = createPartitionPlatform("staging","webapi");
-		application.setPartitionPlatform(ChannelType.VOICE, pp);
-		application.setPartitionPlatform(ChannelType.MESSAGING, pp);
+		Environment environment = createEnvironment(410, "staging-webapi", "staging");
+		application.setEnvironment(ChannelType.VOICE, environment);
+		application.setEnvironment(ChannelType.MESSAGING, environment);
 		
 		jmsNotificationService.notifyApplicationUpdated(application);
 		Thread.sleep(1000);
@@ -484,8 +484,8 @@ public abstract class DefaultProvisioningAgentTest extends BaseProvisioningAgent
 		long messages = provisioningService.getMessagesProcessed();
 		
 		Application application = createSampleApplication(1, "test1", "test1@apps.tropo.com");
-		application.setPartitionPlatform(ChannelType.VOICE, null);
-		application.setPartitionPlatform(ChannelType.MESSAGING, null);
+		application.setEnvironment(ChannelType.VOICE, null);
+		application.setEnvironment(ChannelType.MESSAGING, null);
 		
 		jmsNotificationService.notifyApplicationUpdated(application);
 		Thread.sleep(1000);
