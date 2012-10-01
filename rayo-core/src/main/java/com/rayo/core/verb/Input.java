@@ -19,9 +19,7 @@ public class Input extends BaseVerb {
 	@NotEmpty(message = Messages.MISSING_CHOICES)
 	private List<Choices> grammars;
 
-	@ValidRecognizer
 	private String recognizer;
-
 	private Duration initialTimeout;
 	private Duration interDigitTimeout;
 	private Float minConfidence = 0.3f;
