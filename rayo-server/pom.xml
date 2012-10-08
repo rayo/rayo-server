@@ -113,11 +113,11 @@
 		</dependency>
 		<!-- Xmpp-based CDR delivery -->
 		<dependency>
-			<groupId>jivesoftware</groupId>
+			<groupId>org.igniterealtime.smack</groupId>
 			<artifactId>smack</artifactId>
 		</dependency>		
 		<dependency>
-			<groupId>jivesoftware</groupId>
+			<groupId>org.igniterealtime.smack</groupId>
 			<artifactId>smackx</artifactId>
 		</dependency>
 		<!-- AMQP CDR delivery -->

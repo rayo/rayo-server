@@ -12,26 +12,21 @@
   <properties>
       <spring.version>3.0.5.RELEASE</spring.version>
   </properties>
-  
+ 
   <repositories>
     <repository>
-      <id>voxeo-public</id>
-      <name>Uncle Voxeo's Public Maven Repo</name>
-      <url>http://maven.voxeo.net/nexus/content/groups/public</url>
+      <id>maven.voxeolabs.net</id>
+      <url>http://maven.voxeolabs.net:8081/nexus/content/groups/public/</url>
     </repository>
-<!--
     <repository>
-      <id>glassfish-maven-repository'</id>
-      <name>Glassfish Maven Repository</name>
-      <url>http://maven.glassfish.org/content/repositories/maven.hudson-labs.org</url>
+      <id>maven.voxeo.net</id>
+      <url>http://maven.voxeo.net/nexus/content/groups/public/</url>
     </repository>
--->
     <repository>
       <id>Jenkins</id>
       <name>Jenkins Server</name>
       <url>http://maven.jenkins-ci.org/content/groups/artifacts/</url>
     </repository>
-
   </repositories>  
   
   <dependencyManagement>
@@ -185,14 +180,14 @@
         <scope>test</scope>
       </dependency>
       <dependency>
-	<groupId>jivesoftware</groupId>
+	<groupId>org.igniterealtime.smack</groupId>
 	<artifactId>smack</artifactId>
-	<version>3.2.0</version>	
+	<version>3.2.1</version>	
       </dependency>		
       <dependency>
-	<groupId>jivesoftware</groupId>
+	<groupId>org.igniterealtime.smack</groupId>
 	<artifactId>smackx</artifactId>
-	<version>3.2.0</version>	
+	<version>3.2.1</version>	
       </dependency>      
       <!-- AMQP CDR delivery -->
       <dependency>
