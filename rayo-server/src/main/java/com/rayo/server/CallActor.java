@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -73,7 +74,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     // an answered event before the media is joined
     // Also note that no further synchronization is needed as we are within an Actor
     private boolean initialJoinReceived = false;
-    private Set<String> pendingAnswer = new HashSet<String>();
+    private Map<String, AnsweredEvent> pendingAnswer = new ConcurrentHashMap<String, AnsweredEvent>();
     
     
     public CallActor(T call) {
@@ -322,10 +323,11 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 
     private void validateMediaOnAnswer(com.voxeo.moho.event.AnsweredEvent<Participant> event) {
     	
+    	AnsweredEvent answeredEvent = new AnsweredEvent(getParticipantId(), event.getHeaders());
     	if (initialJoinReceived) {
-    		fire(new AnsweredEvent(getParticipantId(), event.getHeaders()));
+    		fire(answeredEvent);
     	} else {
-    		pendingAnswer.add(getParticipantId());
+    		pendingAnswer.put(getParticipantId(), answeredEvent);
     	}
 	}
         
@@ -401,9 +403,10 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     private void validateAnswer(Participant participant) {
     	
     	if (participant != null) {
-    		if (pendingAnswer.contains(participant.getId())) {
-    			fire(new AnsweredEvent(participant.getId()));
+    		AnsweredEvent answeredEvent = pendingAnswer.get(participant.getId());
+    		if (answeredEvent != null) {
     			pendingAnswer.remove(participant.getId());
+    			fire(answeredEvent);
     		}
     	}
     }
