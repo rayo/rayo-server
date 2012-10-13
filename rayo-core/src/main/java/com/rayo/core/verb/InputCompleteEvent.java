@@ -7,7 +7,7 @@ import org.apache.commons.lang.builder.ToStringStyle;
 public class InputCompleteEvent extends VerbCompleteEvent {
 
     public enum Reason implements VerbCompleteReason {
-        SUCCESS, NOMATCH, NOINPUT, TIMEOUT
+        MATCH, NOMATCH, NOINPUT, TIMEOUT
     }
 
     private String concept;
@@ -86,7 +86,7 @@ public class InputCompleteEvent extends VerbCompleteEvent {
 
     @Override
     public boolean isSuccess() {
-        return reason == Reason.SUCCESS;
+        return reason == Reason.MATCH;
     }
 
     @Override
