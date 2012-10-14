@@ -225,7 +225,7 @@ public class InputProvider extends BaseProvider {
     
     private Element buildNsmlElement(String nlsml) throws Exception {
         //FIXME: We can't set the namespace after parsing sinc that would only update the namespace for the root element 
-        nlsml = nlsml.replace("<result ", "<result xmlns=\"http://www.w3c.org/2000/11/nlsml\" ");
+        nlsml = nlsml.replace("<result", "<result xmlns=\"http://www.w3c.org/2000/11/nlsml\" ");
     	Element element = (Element)DocumentHelper.parseText(nlsml).getRootElement();
         return element;
     }
