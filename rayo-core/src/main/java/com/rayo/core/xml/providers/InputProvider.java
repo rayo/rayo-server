@@ -78,8 +78,8 @@ public class InputProvider extends BaseProvider {
         if (reasonElement.element("tag") != null) {
             event.setTag(reasonElement.element("tag").getText());            
         }
-        if (reasonElement.element("nlsml") != null) {
-            event.setNlsml(reasonElement.element("nlsml").getText());            
+        if (reasonElement.element("result") != null) {
+            event.setNlsml(reasonElement.element("result").asXML());            
         }    	
     	return event;
     }
