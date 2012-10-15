@@ -1434,18 +1434,23 @@ public class RayoProviderTest {
 	@Test
 	public void inputCompleteFromXml() {
 		
-		def complete = fromXml("""<complete xmlns="urn:xmpp:rayo:ext:1"><success xmlns="urn:xmpp:rayo:input:complete:1" confidence="0.65" mode="voice"><interpretation>yes</interpretation><utterance>yes</utterance><tag>yes</tag><concept>yes</concept>
-			<nlsml>&lt;?xml version="1.0"?&gt;
-				&lt;result grammar="0@c898304f.vxmlgrammar"&gt;
-				&lt;interpretation grammar="0@c898304f.vxmlgrammar" confidence="65"&gt;
-				&lt;input mode="speech"&gt;yes&lt;/input&gt;
-				&lt;/interpretation&gt;
-				&lt;/result&gt;
-			</nlsml></success></complete>""")
+		def complete = fromXml("""<complete xmlns="urn:xmpp:rayo:ext:1">
+            <match xmlns="urn:xmpp:rayo:input:complete:1" confidence="0.65" mode="voice">
+                <interpretation>yes</interpretation>
+                <utterance>yes</utterance>
+                <tag>yes</tag>
+                <concept>yes</concept>
+			    <result xmlns="http://www.w3c.org/2000/11/nlsml" grammar="helloBlueGenie">
+                    <interpretation confidence="37200" grammar="helloBlueGenie">
+                        <input mode="speech">hello blue genie</input>
+                    </interpretation>
+                </result>
+			</match></complete>""")
+        
 		assertNotNull complete
 		
 		assertProperties(complete, [
-			reason: InputCompleteEvent.Reason.SUCCESS,
+			reason: InputCompleteEvent.Reason.MATCH,
 			mode: InputMode.VOICE,
 			interpretation: "yes",
 			concept: "yes",
@@ -1456,9 +1461,11 @@ public class RayoProviderTest {
 
 	@Test
 	public void inputCompleteToXml() {
-		def nlsml = """<result xmlns="" xmlns:xf="http://www.w3.org/2000/xforms" grammar="http://grammar" x-model="http://dataModel"><interpretation/></result>"""
+        
+		def nlsml = """<result grammar="helloBlueGenie"><interpretation confidence="37200" grammar="helloBlueGenie"><input mode="speech">hello blue genie</input></interpretation></result>"""
+        
 		def event = new InputCompleteEvent(
-			reason: InputCompleteEvent.Reason.SUCCESS, 
+			reason: InputCompleteEvent.Reason.MATCH, 
 			confidence:0.65, 
 			mode:InputMode.VOICE, 
 			interpretation:"yes", 
@@ -1467,7 +1474,7 @@ public class RayoProviderTest {
 			concept:"yes",
 			nlsml:nlsml)
 		
-		assertEquals toXml(event), """<complete xmlns="urn:xmpp:rayo:ext:1"><success xmlns="urn:xmpp:rayo:input:complete:1" confidence="0.65" mode="voice"><interpretation>yes</interpretation><utterance>yes</utterance><tag>yes</tag><concept>yes</concept><nlsml>${nlsml}</nlsml></success></complete>""" as String
+		assertEquals toXml(event), """<complete xmlns="urn:xmpp:rayo:ext:1"><match xmlns="urn:xmpp:rayo:input:complete:1" confidence="0.65" mode="voice"><result xmlns="http://www.w3c.org/2000/11/nlsml" grammar="helloBlueGenie"><interpretation confidence="37200" grammar="helloBlueGenie"><input mode="speech">hello blue genie</input></interpretation></result><interpretation>yes</interpretation><utterance>yes</utterance><tag>yes</tag><concept>yes</concept></match></complete>""" as String
 	}
 	
 	@Test

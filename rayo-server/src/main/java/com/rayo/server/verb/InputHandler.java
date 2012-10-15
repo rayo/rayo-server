@@ -119,7 +119,7 @@ public class InputHandler extends AbstractLocalVerbHandler<Input, Participant> {
         
         switch (event.getCause()) {
         case MATCH:
-            completeEvent = new InputCompleteEvent(model, Reason.SUCCESS);
+            completeEvent = new InputCompleteEvent(model, Reason.MATCH);
             completeEvent.setConcept(event.getConcept());
             completeEvent.setInterpretation(event.getInterpretation());
             completeEvent.setConfidence(event.getConfidence());
