@@ -586,4 +586,10 @@ public class MockCall implements IncomingCall {
     public JoinType getJoinType(Participant participant) {
     	return null;
     }
+
+    @Override
+    public Joint join(Participant other, JoinType type, boolean force, Direction direction, boolean dtmfPassThough) {
+      return null;
+    }
+
 }
