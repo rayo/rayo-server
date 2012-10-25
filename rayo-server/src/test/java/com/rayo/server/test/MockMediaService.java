@@ -93,4 +93,9 @@ public class MockMediaService implements MediaService<EventSource> {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+  @Override
+  public MediaGroup getMediaGroup(boolean create) {
+    return null;
+  }
 }

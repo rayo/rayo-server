@@ -592,4 +592,9 @@ public class MockCall implements IncomingCall {
       return null;
     }
 
+    @Override
+    public MediaGroup getMediaGroup(boolean create) {
+      return null;
+    }
+
 }
