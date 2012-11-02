@@ -39,8 +39,7 @@ public class ContextLoaderListener extends org.springframework.web.context.Conte
 	
 	@Override
 	protected WebApplicationContext createWebApplicationContext(
-			ServletContext sc, ApplicationContext parent) {
-
+		ServletContext sc, ApplicationContext parent) {
 		try {
 			return super.createWebApplicationContext(sc, parent);
 		} catch (RuntimeException re) {
@@ -51,7 +50,6 @@ public class ContextLoaderListener extends org.springframework.web.context.Conte
 	
 	@Override
 	public void contextDestroyed(ServletContextEvent event) {
-		
 		if (adminService != null) {
 			adminService.shutdown();
 			super.contextDestroyed(event);

@@ -1,4 +1,4 @@
-<%@ page import="com.rayo.web.*,com.rayo.server.*,com.rayo.server.web.*,com.rayo.server.admin.*,com.rayo.gateway.admin.*,com.rayo.server.jmx.*,com.rayo.gateway.jmx.*" %>
+<%@ page import="com.rayo.gateway.web.*,com.rayo.server.*,com.rayo.server.web.*,com.rayo.server.admin.*,com.rayo.gateway.admin.*,com.rayo.server.jmx.*,com.rayo.gateway.jmx.*" %>
 <%@page import="org.springframework.context.ApplicationContext"%>
 		
 <%

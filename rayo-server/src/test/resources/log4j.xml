@@ -15,6 +15,10 @@
         <priority value="INFO" />
     </category>
 
+    <category name="org.apache.http">
+        <priority value="DEBUG" />
+    </category>
+
     <category name="org.springframework">
         <priority value="INFO" />
     </category>

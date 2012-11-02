@@ -15,6 +15,20 @@
 	
 	<!-- Rayo providers are defined in the rayo-core project -->
 	<import resource="classpath:rayo-providers.xml"/>
+  
+    <bean id="rayoServer" class="com.rayo.server.Server" init-method="start">
+      <property name="provider" ref="xmlProviderManager" />
+      <property name="callManager" ref="callManager" />
+      <property name="callRegistry" ref="callRegistry" />
+      <property name="mixerRegistry" ref="mixerRegistry" />
+      <property name="rayoStatistics" ref="rayoStatistics" />
+      <property name="adminService" ref="adminService" />
+      <property name="cdrManager" ref="cdrManager" /> 
+      <property name="filtersChain" ref="filtersChain"/>
+    </bean>  
+
+    <!-- Global JIDs Registry -->
+    <bean id="jidRegistry" class="com.rayo.server.JIDRegistry" />
 
 	<!-- Actor Thread Pool -->
 	<bean id="executor" class="java.util.concurrent.Executors" factory-method="newCachedThreadPool" />
@@ -24,13 +38,8 @@
 		<constructor-arg ref="executor" />
 	</bean>
 	
-	<!-- Global JIDs Registry -->
-	<bean id="jidRegistry" class="com.rayo.server.JIDRegistry" />
-	
 	<!-- Global Call Registry -->
-	<bean id="callRegistry" class="com.rayo.server.DefaultCallRegistry" >
-		<property name="jidRegistry" ref="jidRegistry"/>	
-	</bean>
+	<bean id="callRegistry" class="com.rayo.server.DefaultCallRegistry" />
 
 	<!-- Global Mixer Registry -->
 	<bean id="mixerRegistry" class="com.rayo.server.DefaultMixerRegistry" />
@@ -197,9 +206,7 @@
 	</bean>
 
 	<!-- Admin Service -->
-	<bean id="adminService" class="com.rayo.server.admin.RayoAdminService">
-		<property name="callRegistry" ref="callRegistry"/>
-	</bean>
+	<bean id="adminService" class="com.rayo.server.admin.RayoAdminService" /> 
 	
 	<!-- JMX Configuration -->
   	<bean id="exporter" class="org.springframework.jmx.export.MBeanExporter">
@@ -316,9 +323,6 @@
   		<property name="spiStorageStrategies" ref="spiCdrStorageStrategies"/>
   	</bean>
   	
-  	<!-- Exception Mapper -->
-  	<bean id="exceptionMapper" class="com.rayo.server.exception.ExceptionMapper"/>
-  	
   	<!-- Message filters from SPI -->
   	<bean id="spiMessageFilters"
 	      class="org.springframework.beans.factory.serviceloader.ServiceListFactoryBean"
@@ -329,8 +333,6 @@
   		<property name="filters" ref="spiMessageFilters"/>
   	</bean> 
   	
-  	<!-- XMPP Message listeners -->
-  	<bean id="xmppMessageListenersGroup" class="com.rayo.server.listener.XmppMessageListenerGroup"/>	
   	
   	<!-- Configuration settings for the RayoSessionListener cleanup code -->
   	<bean id="sessionCleanupConfig" class="com.rayo.server.listener.SessionCleanupConfig">
@@ -342,8 +344,11 @@
   	<bean id="spiProvisioning"
 	      class="org.springframework.beans.factory.serviceloader.ServiceListFactoryBean"
 	      p:serviceType="com.rayo.provisioning.ProvisioningAgent"/>
+        
 	<bean id="provisioningAgentLoader" class="com.rayo.provisioning.ProvisioningAgentLoader">
 		<property name="services" ref="spiProvisioning"/>
-	</bean>      
+	</bean>
+  
+        
 	      
 </beans>

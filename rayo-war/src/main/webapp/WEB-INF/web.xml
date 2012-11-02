@@ -1,26 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" id="WebApp_ID" version="2.5">
+<web-app id="rayo" version="2.5" 
+  xmlns="http://java.sun.com/xml/ns/javaee" 
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" 
+  xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
   <display-name>rayo</display-name>
-  
+
   <!-- JMX Agent -->
   <servlet>
-	<servlet-name>jolokia-agent</servlet-name>
-	<servlet-class>org.jolokia.http.AgentServlet</servlet-class>
-	<load-on-startup>1</load-on-startup>
+    <servlet-name>jolokia-agent</servlet-name>
+    <servlet-class>org.jolokia.http.AgentServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
   </servlet>
-
   <servlet-mapping>
-	<servlet-name>jolokia-agent</servlet-name>
-	<url-pattern>/jmx/*</url-pattern>
-  </servlet-mapping>  
-  
+    <servlet-name>jolokia-agent</servlet-name>
+    <url-pattern>/jmx/*</url-pattern>
+  </servlet-mapping>
+
+  <!-- Ameche HTTP Servlet -->
+  <servlet>
+    <servlet-name>ameche-transport</servlet-name>
+    <servlet-class>com.rayo.server.ameche.AmecheServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>ameche-transport</servlet-name>
+    <url-pattern>/ameche</url-pattern>
+  </servlet-mapping>
+
   <!-- Listens and forwards XMPP Messages to the debug console -->
   <listener>
-	<listener-class>com.rayo.web.websockets.NettyContextListener</listener-class>
-  </listener>  
-  
+    <listener-class>com.rayo.web.websockets.NettyContextListener</listener-class>
+  </listener>
+
   <!-- Clean up listener -->
   <listener>
-	<listener-class>com.rayo.web.RayoServletSessionListener</listener-class>
-  </listener>  
+    <listener-class>com.rayo.web.RayoServletSessionListener</listener-class>
+  </listener>
+  
 </web-app>

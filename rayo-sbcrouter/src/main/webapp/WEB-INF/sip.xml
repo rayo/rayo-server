@@ -7,18 +7,15 @@
 	<app-name>RayoSBCRouter</app-name>
 	<servlet>
 		<javaee:servlet-name>RayoSBCRouter</javaee:servlet-name>
-		<javaee:servlet-class>
-			com.rayo.sbcrouter.SBCRouterServlet</javaee:servlet-class>
-		<javaee:load-on-startup>1</javaee:load-on-startup>
-
+		<javaee:servlet-class>com.rayo.sbcrouter.SBCRouterServlet</javaee:servlet-class>
 		<javaee:init-param>
 			<javaee:param-name>CassandraHost</javaee:param-name>
 			<javaee:param-value>127.0.0.1</javaee:param-value>
 		</javaee:init-param>
-		
 		<javaee:init-param>
 			<javaee:param-name>CassandraPort</javaee:param-name>
 			<javaee:param-value>9160</javaee:param-value>
 		</javaee:init-param>
+        <javaee:load-on-startup>1</javaee:load-on-startup>
 	</servlet>
 </sip-app>

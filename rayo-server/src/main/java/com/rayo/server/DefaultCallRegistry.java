@@ -12,8 +12,6 @@ public class DefaultCallRegistry implements CallRegistry {
 	private static Loggerf log = Loggerf.getLogger(DefaultCallRegistry.class);
     private Map<String, CallActor<?>> calls = new ConcurrentHashMap<String, CallActor<?>>();
 
-    private JIDRegistry jidRegistry;
-    
     @Override
     public void add(CallActor<?> actor) {
     	
@@ -30,7 +28,6 @@ public class DefaultCallRegistry implements CallRegistry {
     		log.debug("Removing call [%s] from registry [%s]", id, this);
     	}
     	calls.remove(id);
-        jidRegistry.remove(id);
     }
 
     @Override
@@ -57,7 +54,4 @@ public class DefaultCallRegistry implements CallRegistry {
     	return new ArrayList<CallActor<?>>(calls.values());
     }
     
-    public void setJidRegistry(JIDRegistry jidRegistry) {
-		this.jidRegistry = jidRegistry;
-	}
 }

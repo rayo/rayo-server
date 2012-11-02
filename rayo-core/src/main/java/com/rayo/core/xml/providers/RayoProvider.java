@@ -14,6 +14,7 @@ import org.dom4j.QName;
 import com.rayo.core.AcceptCommand;
 import com.rayo.core.AnswerCommand;
 import com.rayo.core.AnsweredEvent;
+import com.rayo.core.CallRef;
 import com.rayo.core.CallRejectReason;
 import com.rayo.core.DestroyMixerCommand;
 import com.rayo.core.DialCommand;
@@ -100,12 +101,18 @@ public class RayoProvider extends BaseProvider {
         	return buildDtmfCommand(element);
         } else if (element.getName().equals("destroy-if-empty")) {
         	return buildDestroyIfEmptyCommand(element);
+        } else if (element.getName().equals("ref")) {
+        	return buildCallRef(element);
         }
         
         return null;
 	}
 	
-    private Object buildCompleteEvent(Element element) {
+	private Object buildCallRef(Element element) {
+		return new CallRef(element.attributeValue("id"));
+	}
+
+	private Object buildCompleteEvent(Element element) {
         
     	// Complete events may have multiple children that belong to 
     	// a particular namespace. If that's the case then we need to 
@@ -402,10 +409,17 @@ public class RayoProvider extends BaseProvider {
             createStoppedSpeakingEvent((StoppedSpeakingEvent)object, document);
         } else if (object instanceof DestroyMixerCommand) {
         	createDestroyIfEmptyCommand((DestroyMixerCommand)object, document);
+        } else if (object instanceof CallRef) {
+        	createCallRef((CallRef)object, document);
         }
     }
 
-    private void createDtmfEvent(DtmfEvent event, Document document) {
+    private void createCallRef(CallRef ref, Document document) {
+		Element root = document.addElement(new QName("ref", RAYO_NAMESPACE));
+		root.addAttribute("id", ref.getCallId());
+	}
+
+	private void createDtmfEvent(DtmfEvent event, Document document) {
         document.addElement(new QName("dtmf", RAYO_NAMESPACE)).addAttribute("signal", event.getSignal());
     }
 

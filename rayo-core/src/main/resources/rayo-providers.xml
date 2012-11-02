@@ -51,6 +51,7 @@
 	    		<value>com.rayo.core.UnjoinedEvent</value>
 	    		<value>com.rayo.core.DtmfCommand</value>
 	    		<value>com.rayo.core.DestroyMixerCommand</value>
+				<value>com.rayo.core.CallRef</value>
 	      	</list>
 	   	</property>		
 	</bean>

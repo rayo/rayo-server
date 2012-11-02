@@ -1,52 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<xmpp:xmpp-app xmlns:javaee="http://java.sun.com/xml/ns/javaee"
-	xmlns:xmpp="http://www.voxeo.com/sipmethod/xmpp" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.voxeo.com/sipmethod/xmpp xmpp.xsd"
-	version="1.1">
+<xmpp:xmpp-app xmlns:javaee="http://java.sun.com/xml/ns/javaee" xmlns:xmpp="http://www.voxeo.com/sipmethod/xmpp"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.voxeo.com/sipmethod/xmpp xmpp.xsd"
+  version="1.1">
 
-	<xmpp:servlet>
-		<javaee:servlet-name>rayo</javaee:servlet-name>
-		<javaee:servlet-class>
-			com.rayo.server.SpringXmppServlet
-		</javaee:servlet-class>
-		<!-- 
-		
-		Sample settings for a clustered environment		
-		
-		<javaee:init-param>
-     		<javaee:param-name>local-domain</javaee:param-name>
-     		<javaee:param-value>192.168.1.35</javaee:param-value>
-   		</javaee:init-param>
-		<javaee:init-param>
-     		<javaee:param-name>gateway-domain</javaee:param-name>
-     		<javaee:param-value>192.168.1.33</javaee:param-value>
-   		</javaee:init-param>
-		<javaee:init-param>
-     		<javaee:param-name>default-platform-id</javaee:param-name>
-     		<javaee:param-value>staging</javaee:param-value>
-   		</javaee:init-param>
-		<javaee:init-param>
-     		<javaee:param-name>weight</javaee:param-name>
-     		<javaee:param-value>10</javaee:param-value>
-   		</javaee:init-param>
-		<javaee:init-param>
-     		<javaee:param-name>priority</javaee:param-name>
-     		<javaee:param-value>1</javaee:param-value>
-   		</javaee:init-param>   		
-   		-->
-		<javaee:load-on-startup>1</javaee:load-on-startup>
-	</xmpp:servlet>
-	<xmpp:defaultxmppapp />
-	<xmpp:serv-domains>
-		<xmpp:servdomain>127.0.0.1</xmpp:servdomain>
-		<xmpp:servdomain>localhost</xmpp:servdomain>
-	</xmpp:serv-domains>
+  <xmpp:servlet>
+    <javaee:servlet-name>rayo</javaee:servlet-name>
+    <javaee:servlet-class>com.rayo.server.SpringXmppServlet</javaee:servlet-class>
+    <javaee:load-on-startup>1</javaee:load-on-startup>
+  </xmpp:servlet>
+  
+  <xmpp:defaultxmppapp />
+  
+  <xmpp:serv-domains>
+    <xmpp:servdomain>127.0.0.1</xmpp:servdomain>
+    <xmpp:servdomain>localhost</xmpp:servdomain>
+  </xmpp:serv-domains>
 
-	<xmpp:servlet-selection>
-		<xmpp:main-servlet>rayo</xmpp:main-servlet>
-	</xmpp:servlet-selection>
+  <xmpp:servlet-selection>
+    <xmpp:main-servlet>rayo</xmpp:main-servlet>
+  </xmpp:servlet-selection>
 
-  <!-- the following is the main different part with SIP and HTTP descriptor -->
   <xmpp:inboundclient-login-config>
     <xmpp:SASL-configure>
       <xmpp:SASL-mechanism>
@@ -66,7 +39,9 @@
 
   <xmpp:outbound-s2s-config>
   </xmpp:outbound-s2s-config>
+  
   <listener>
-  	<listener-class>com.rayo.server.listener.RayoSessionListener</listener-class>
+    <listener-class>com.rayo.server.listener.RayoSessionListener</listener-class>
   </listener>
+  
 </xmpp:xmpp-app>

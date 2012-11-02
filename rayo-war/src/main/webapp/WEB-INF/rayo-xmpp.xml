@@ -21,20 +21,21 @@
 		<property name="datastore" ref="datastore"/>
 	</bean>  		
 
+    <!-- XMPP Message listeners -->
+    <bean id="xmppMessageListenersGroup" class="com.rayo.server.listener.XmppMessageListenerGroup"/>  
+
+    <!-- Exception Mapper -->
+    <bean id="exceptionMapper" class="com.rayo.server.exception.ExceptionMapper"/>
+
 	<bean id="rayo" class="com.rayo.server.servlet.RayoServlet" init-method="start">
-		<!-- These dependencies come from the parent: rayo-context.xml -->
-		<property name="provider" ref="xmlProviderManager" />
-		<property name="callManager" ref="callManager" />
-		<property name="callRegistry" ref="callRegistry" />
-		<property name="mixerManager" ref="mixerManager" />
-		<property name="mixerRegistry" ref="mixerRegistry" />
-		<property name="exceptionMapper" ref="exceptionMapper" />
-		<property name="rayoStatistics" ref="rayoStatistics" />
-		<property name="adminService" ref="adminService" />
-		<property name="cdrManager" ref="cdrManager" />	
-		<property name="jidRegistry" ref="jidRegistry"/>	
-		<property name="filtersChain" ref="filtersChain"/>
 		<property name="rayoLookupService" ref="rayoJIDLookupService"/>
 		<property name="xmppMessageListenersGroup" ref="xmppMessageListenersGroup"/>
-	</bean>	
+		<property name="jidRegistry" ref="jidRegistry"/>	
+		<!-- These dependencies come from the parent: rayo-context.xml -->
+        <property name="server" ref="rayoServer" />
+		<property name="mixerManager" ref="mixerManager" />
+        <property name="adminService" ref="adminService" />
+        <property name="exceptionMapper" ref="exceptionMapper" />
+	</bean>
+  	
 </beans>

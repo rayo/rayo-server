@@ -622,11 +622,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 			}
 		} catch (Exception e) {		
 			log.error(e.getMessage(),e);
-			try {
-				sendIqError(request, e);
-			} catch (IOException ioe) {
-				log.error(ioe.getMessage(),ioe);
-			}
+			sendIqError(request, e);
 		}	
 	}
 	
@@ -913,7 +909,7 @@ public class GatewayServlet extends AbstractRayoServlet {
 	}
     
 	@Override
-	protected void sendIqError(IQRequest request, Exception e) throws IOException {
+	protected void sendIqError(IQRequest request, Exception e) {
 
 		super.sendIqError(request, e);
 		gatewayStatistics.errorProcessed();

@@ -3,6 +3,7 @@ package com.rayo.server.exception;
 import javax.validation.ConstraintViolation;
 
 import com.rayo.server.exception.ErrorMapping;
+import com.rayo.server.exception.RayoProtocolException.Condition;
 import com.rayo.server.validation.ValidHandlerState;
 import com.rayo.core.validation.ValidationException;
 import com.voxeo.exceptions.NotFoundException;
@@ -60,16 +61,28 @@ public class ExceptionMapper {
 			errorType = StanzaError.Type.WAIT.toString();
 		} else if (e instanceof RayoProtocolException) {
 			RayoProtocolException re = (RayoProtocolException)e;
-			errorCondition = toString(re.getCondition());
-			errorMessage = re.getText();
-			errorType = re.getType().toString();
+			switch (re.getCondition()) {
+            case BAD_REQUEST:
+                errorCondition = Condition.BAD_REQUEST.toString();                
+                break;
+            case ITEM_NOT_FOUND:
+                errorCondition = Condition.ITEM_NOT_FOUND.toString();
+                break;
+            case SERVICE_UNAVAILABLE:
+                errorCondition = Condition.SERVICE_UNAVAILABLE.toString();
+                break;
+            default:
+                log.error("Cound not map RayoProtocolException to XMPP [condition=%s]", re.getCondition());
+            }
+	        errorMessage = re.getMessage();
+			errorType = com.voxeo.servlet.xmpp.StanzaError.Type.CANCEL.toString();
 		}
 		
 		log.debug("Mapping unknown exception [type=%s, message=%s]",e.getClass(), e.getMessage());
 		return new ErrorMapping(errorType, errorCondition, errorMessage);
 	}
 	
-	public static String toString(StanzaError.Condition condition) {
+	public static String toString(com.voxeo.servlet.xmpp.StanzaError.Condition condition) {
 		
 		//TODO: Not needed once https://evolution.voxeo.com/ticket/1520421 is fixed
 		return condition.toString().replaceAll("_", "-");

@@ -16,13 +16,6 @@ public class Admin implements AdminMXBean {
 	private RayoAdminService adminService;
 
 	@Override
-	@ManagedOperation(description = "Send a fake dtmf tone")
-	public void sendDtmf(String callId, String dtmf) {
-		
-		adminService.sendDtmf(callId, dtmf);
-	}
-	
-	@Override
 	@ManagedOperation(description = "Disable Quiesce Mode")
 	public void disableQuiesce() {
 

@@ -314,10 +314,14 @@ public abstract class AbstractRayoServlet extends XmppServlet implements AdminLi
     	return address;
 	}
 	
-    protected void sendIqError(IQRequest request, Exception e) throws IOException {
-    	
-        ErrorMapping error = exceptionMapper.toXmppError(e);
-        sendIqError(request, error.getType(), error.getCondition(), error.getText());
+    protected void sendIqError(IQRequest request, Exception e) {
+        try {
+            ErrorMapping error = exceptionMapper.toXmppError(e);
+            sendIqError(request, error.getType(), error.getCondition(), error.getText());
+        }
+        catch (Exception e1) {
+            throw new IllegalStateException("Cannot dispatch result", e);
+        }
     }
     
 	protected static Loggerf getWireLogger() {
