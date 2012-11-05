@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
@@ -57,7 +56,7 @@ public class AmecheServlet extends HttpServlet implements Transport {
     // Config
     private HttpClient http; 
     private CommandHandler commandHandler;
-    private EndpointResolver endpointResolver;
+    private AppInstanceResolver endpointResolver;
     
     // Internal State
     private Map<String, AmecheCall> calls = new ConcurrentHashMap<String, AmecheCall>();
@@ -90,7 +89,7 @@ public class AmecheServlet extends HttpServlet implements Transport {
         if(event.getName().equals("offer")) {
             
             // Lookup App Instance Endpoints
-            List<URI> apps = endpointResolver.lookup(event);
+            List<AppInstance> apps = endpointResolver.lookup(event);
             
             // Make and register a new ameche call handler 
             machine = new AmecheCall(callId, apps);
@@ -131,10 +130,17 @@ public class AmecheServlet extends HttpServlet implements Transport {
             
             String callId = req.getHeader("call-id");
             String componentId = req.getHeader("component-id");
+            String appInstanceId = req.getHeader("app-instance-id");
             
             if(callId == null) {
                 log.warn("Missing call-id header");
                 resp.setStatus(400, "Missing call-id header");
+                return;
+            }
+            
+            if(appInstanceId == null) {
+                log.warn("Missing app-instance-id header");
+                resp.setStatus(400, "Missing app-instance-id header");
                 return;
             }
             
@@ -146,11 +152,8 @@ public class AmecheServlet extends HttpServlet implements Transport {
                 return;
             }
             
-            // Poor man's auth
-            String remoteAddr = req.getRemoteAddr();
-
             // Send command to call's event machine
-            Element result = call.handleCommand(remoteAddr, callId, componentId, command).get();
+            Element result = call.handleCommand(appInstanceId, callId, componentId, command).get();
             
             if(result != null) {
                 byte[] bytes = ((Element)result).asXML().getBytes("utf-8");
@@ -182,21 +185,27 @@ public class AmecheServlet extends HttpServlet implements Transport {
 
         // Config
         private String parentCallId;
-        private List<URI> apps;
+        private Map<String, AppInstance> apps;
         private Element offer;
         
         // Internal
         private HttpRequest offerRequest;
-        private Iterator<URI> appIterator;
-        private Map<String, URI> componentToAppMapping;
+        private Iterator<AppInstance> appIterator;
         private Set<String> childCallIds;
+        private Map<String, AppInstance> componentToAppMapping;
 
         // Constructor
-        public AmecheCall(String callId, List<URI> apps) {
+        public AmecheCall(String callId, List<AppInstance> apps) {
+            
             this.parentCallId = callId;
-            this.apps = new CopyOnWriteArrayList<URI>(apps);
-            this.componentToAppMapping = new ConcurrentHashMap<String, URI>();
+            
+            this.apps = new ConcurrentHashMap<String, AppInstance>();
+            for(AppInstance appInstance : apps) {
+                this.apps.put(appInstance.getId(), appInstance);
+            }
+
             this.childCallIds = Collections.synchronizedSet(new HashSet<String>());
+            this.componentToAppMapping = new ConcurrentHashMap<String, AppInstance>();
         }
 
         /**
@@ -212,7 +221,7 @@ public class AmecheServlet extends HttpServlet implements Transport {
             // New Call
             if(event.getName().equals("offer")) {
                 this.offer = event;
-                this.appIterator = apps.iterator();
+                this.appIterator = apps.values().iterator();
                 this.offerRequest = buildRequest(offer, callId, null);
                 nextOffer();
             }
@@ -231,12 +240,27 @@ public class AmecheServlet extends HttpServlet implements Transport {
                 }
                 
                 if(componentId != null) {
-                    URI appEndpoint = componentToAppMapping.get(componentId);
-                    dispatchEvent(request, appEndpoint);
+                    
+                    AppInstance appInstance = null;
+                    
+                    if(event.getName().equals("complete")) {
+                        appInstance = componentToAppMapping.remove(componentId);
+                    }
+                    else {
+                        appInstance = componentToAppMapping.get(componentId);
+                    }
+                    
+                    if(appInstance == null) {
+                        log.error("Received event for an unmapped component. Ignoring. [callId=%s, componentId=%s]", callId, componentId);
+                        return;
+                    }
+                    
+                    dispatchEvent(request, appInstance);
+                    
                 }
                 else {
-                    for(URI appEndpoint : apps) {
-                        dispatchEvent(request, appEndpoint);
+                    for(AppInstance appInstance : apps.values()) {
+                        dispatchEvent(request, appInstance);
                     }
                 }
             }
@@ -244,7 +268,9 @@ public class AmecheServlet extends HttpServlet implements Transport {
         }
 
         /**
-         * Synchrnous method that checks for any internal Ameche commands and forward the rest to the {@link Server} for processing
+         * Synchronous method that checks for any internal Ameche commands and forward the rest to the {@link Server} for processing
+         * 
+         * TODO: If/when PRISM supports async http we can just respond in the TransportCallback thread
          * 
          * @param sourceAppAddress
          * @param callId
@@ -252,9 +278,9 @@ public class AmecheServlet extends HttpServlet implements Transport {
          * @param command
          * @param callback
          */
-        public Future<Element> handleCommand(String sourceAppAddress, String callId, String componentId, Element command) {
+        public Future<Element> handleCommand(final String appInstanceId, String callId, String componentId, Element command) {
 
-            // Used to synchronize the until we get a result from the command handler
+            // Used to synchronize return with the result of the command handler
             final SettableResultFuture<Element> resultFuture = new SettableResultFuture<Element>();
 
             if(command.getName().equals("continue")) {
@@ -268,9 +294,17 @@ public class AmecheServlet extends HttpServlet implements Transport {
                 commandHandler.handleCommand(callId, componentId, command, new TransportCallback() {
                     public void handle(Element result, Exception err) {
                         if(err != null) {
-                            resultFuture.setException((Exception)result);                        
+                            resultFuture.setException((Exception)err);                        
                         }
                         else {
+                            // If the command resulteded in a new compionent being created we need
+                            // to assocociate it with the app insatnce that created it since that
+                            // should be the only app to receive its events
+                            if(result != null && result.getName().equals("ref")) {
+                                AppInstance appInstance = apps.get(appInstanceId);
+                                String newComponentId = result.attributeValue("id");
+                                componentToAppMapping.put(newComponentId, appInstance);
+                            }
                             resultFuture.setResult(result);
                         }
                     }
@@ -286,8 +320,8 @@ public class AmecheServlet extends HttpServlet implements Transport {
          */
         private void nextOffer() {
             if(appIterator.hasNext()) {
-                URI appEndpoint = appIterator.next();
-                dispatchEvent(offerRequest, appEndpoint);
+                AppInstance appInstance = appIterator.next();
+                dispatchEvent(offerRequest, appInstance);
             }
             else {
                 completeCall();
@@ -360,7 +394,7 @@ public class AmecheServlet extends HttpServlet implements Transport {
         private HttpRequest buildRequest(Element event, String callId, String componentId) {
             
             // Build HTTP request
-            HttpPost request = new HttpPost(apps.get(0)); // A default uri is required
+            HttpPost request = new HttpPost(URI.create("http://dummy.com")); // A default uri is required
             
             request.setHeader("call-id", callId);
             
@@ -392,10 +426,11 @@ public class AmecheServlet extends HttpServlet implements Transport {
          * @param request
          * @param appEndpoint
          */
-        private void dispatchEvent(HttpRequest request, URI appEndpoint) {
+        private void dispatchEvent(HttpRequest request, AppInstance appInstance) {
+            
+            URI appEndpoint = appInstance.getEndpoint();
             
             try {
-                
                 HttpHost target = new HttpHost(appEndpoint.getHost(), appEndpoint.getPort(), appEndpoint.getScheme());
                 HttpResponse response = http.execute(target, request);
                 
@@ -407,22 +442,22 @@ public class AmecheServlet extends HttpServlet implements Transport {
                 
                 if(statusCode != 203) {
                     log.error("Non-203 Status Code [appEndpoint=%s, callId=%s, componentId=%s, status=%s]", appEndpoint, parentCallId, statusCode);
-                    apps.remove(appEndpoint);
+                    apps.remove(appInstance.getId());
                 }
             }
             catch (IOException e) {
                 log.error("Failed to dispatch event [appEndpoint=%s, callId=%s, componentId=%s]", appEndpoint, parentCallId, e);
-                apps.remove(appEndpoint);
+                apps.remove(appInstance.getId());
             }
             
         }    
     }
 
-    public EndpointResolver getEndpointResolver() {
+    public AppInstanceResolver getEndpointResolver() {
         return endpointResolver;
     }
 
-    public void setEndpointResolver(EndpointResolver endpointResolver) {
+    public void setEndpointResolver(AppInstanceResolver endpointResolver) {
         this.endpointResolver = endpointResolver;
     }
 

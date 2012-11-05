@@ -64,9 +64,13 @@ class AmecheServletTest {
     
         servlet.endpointResolver = {
             apps.collect {
-                URI.create("http://127.0.0.1:" + it.port + "/")
+                new AppInstance(
+                    it.port.toString(), 
+                    URI.create("http://127.0.0.1:" + it.port + "/")
+                )
+                
             }
-        } as EndpointResolver
+        } as AppInstanceResolver
 
         servlet.http = new DefaultHttpClient()
     
@@ -121,8 +125,97 @@ class AmecheServletTest {
         
         assertAppRequests()
         
+        // App #2 is going to start a <say> component
+        
+        commandResponseQueue.push(toXML('<ref id="say-1"/>'))
+        
+        def response = new MockHttpServletResponse()
+        servlet.doPost(buildRequest('<say xmlns="urn:xmpp:rayo:1">bling</say>', apps[1]), response)
+        
+        assertEquals('<ref id="say-1"/>', response.content.toString())
+
+        // Send a <repeating> event and make sure only apps[1] gets it
+        def REPEATING_EVENT = toXML('<repeating/>')
+        
+        apps[0].expectNothing()
+        apps[1].expect(REPEATING_EVENT)
+        apps[2].expectNothing()
+
+        servlet.callEvent('foo', 'say-1', REPEATING_EVENT)
+        assertAppRequests()
+
+        // Send a complete event and make sure only apps[1] gets it
+        def COMPLETE_EVENT = toXML('<complete/>')
+        
+        apps[0].expectNothing()
+        apps[1].expect(COMPLETE_EVENT)
+        apps[2].expectNothing()
+
+        servlet.callEvent('foo', 'say-1', COMPLETE_EVENT)
+        assertAppRequests()
+
+        // Send the complete again and make sure it's ignored 
+        apps[0].expectNothing()
+        apps[1].expectNothing()
+        apps[2].expectNothing()
+
+        servlet.callEvent('foo', 'say-1', COMPLETE_EVENT)
+        assertAppRequests()
+                
     }
     
+    @Test
+    public void failedDialSecondLeg() {
+        
+        apps.each {
+            it.expect(OFFER_EVENT);
+        }
+        
+        commandResponseQueue.push(new IllegalStateException())
+        
+        servlet.callEvent('foo', null, OFFER_EVENT)
+        
+        apps.each{
+            def response = new MockHttpServletResponse()
+            servlet.doPost(CONTINUE_REQUEST, response)
+            assertEquals(203, response.status)
+        }
+        
+        commandQueue.poll(); // discard DialCommand
+        
+        
+        
+    }
+    
+    @Test
+    public void failedCommand() {
+        
+        apps.each {
+            it.expect(OFFER_EVENT);
+        }
+        
+        commandResponseQueue.push(toXML('<ref id="bar"/>'))
+        
+        servlet.callEvent('foo', null, OFFER_EVENT)
+        
+        apps.each{
+            def response = new MockHttpServletResponse()
+            servlet.doPost(CONTINUE_REQUEST, response)
+            assertEquals(203, response.status)
+        }
+        
+        commandQueue.poll(); // discard DialCommand
+
+        // Fail the <output> command        
+        commandResponseQueue.push(new IllegalStateException())
+        
+        def response = new MockHttpServletResponse()
+        servlet.doPost(buildRequest('<output xmlns="urn:xmpp:rayo:output:1">bling</output>', apps[1]), response)
+        
+        assertEquals(500, response.status)
+                
+    }
+
     @Test
     public void failedOffer() {
 
@@ -220,13 +313,19 @@ class AmecheServletTest {
     // UTIL
     // ---------------------------------------------------------------------------------------------------
     
-    private static buildRequest(payload) {
+    private static buildRequest(payload, fromServer=null) {
         def request = new MockHttpServletRequest([
             content: payload.bytes,
             remoteAddr: "127.0.0.1",
             
         ])
         request.addHeader("call-id", "foo")
+        if(fromServer != null) {
+            request.addHeader("app-instance-id", fromServer.port.toString())
+        }
+        else {
+            request.addHeader("app-instance-id", "8881")
+        }
         return request
     }
     
