@@ -1,9 +1,11 @@
 package com.rayo.server.ameche;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.net.URI;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -19,6 +21,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -31,7 +34,10 @@ import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParamBean;
 import org.apache.http.util.EntityUtils;
 import org.dom4j.DocumentException;
+import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
+import org.dom4j.Namespace;
+import org.dom4j.QName;
 import org.dom4j.io.SAXReader;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
@@ -40,6 +46,7 @@ import org.springframework.web.context.support.XmlWebApplicationContext;
 import com.rayo.core.DialCommand;
 import com.rayo.core.HangupCommand;
 import com.rayo.core.JoinCommand;
+import com.rayo.core.sip.SipURI;
 import com.rayo.server.CommandHandler;
 import com.rayo.server.Server;
 import com.rayo.server.Transport;
@@ -47,16 +54,19 @@ import com.rayo.server.TransportCallback;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.Participant.JoinType;
 import com.voxeo.moho.common.util.SettableResultFuture;
+import com.voxeo.utils.Typesafe;
 
 @SuppressWarnings("serial")
 public class AmecheServlet extends HttpServlet implements Transport {
 
     private static final Loggerf log = Loggerf.getLogger(AmecheServlet.class);
+
+    private static final Namespace AMECHE_NS = new Namespace("ameche", "urn:voxeolabs:ameche");
     
     // Config
     private HttpClient http; 
     private CommandHandler commandHandler;
-    private AppInstanceResolver endpointResolver;
+    private AppInstanceResolver appInstanceResolver;
     
     // Internal State
     private Map<String, AmecheCall> calls = new ConcurrentHashMap<String, AmecheCall>();
@@ -73,6 +83,7 @@ public class AmecheServlet extends HttpServlet implements Transport {
         httpTransportContext.refresh();
 
         http = (HttpClient) httpTransportContext.getBean("httpClient");
+        appInstanceResolver = (AppInstanceResolver) httpTransportContext.getBean("appInstanceResolver");
         
         Server server = (Server) httpTransportContext.getBean("rayoServer");
         server.addTransport(this);
@@ -89,7 +100,7 @@ public class AmecheServlet extends HttpServlet implements Transport {
         if(event.getName().equals("offer")) {
             
             // Lookup App Instance Endpoints
-            List<AppInstance> apps = endpointResolver.lookup(event);
+            List<AppInstance> apps = appInstanceResolver.lookup(event);
             
             // Make and register a new ameche call handler 
             machine = new AmecheCall(callId, apps);
@@ -122,11 +133,15 @@ public class AmecheServlet extends HttpServlet implements Transport {
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         
         ServletInputStream is = req.getInputStream();
+        
+        String body = IOUtils.toString(is);
+        log.debug("(i) %s", body);
+        
         SAXReader reader = new SAXReader();
         
         try {
             
-            Element command = reader.read(is).getRootElement();
+            Element command = reader.read(new StringReader(body)).getRootElement();
             
             String callId = req.getHeader("call-id");
             String componentId = req.getHeader("component-id");
@@ -155,6 +170,8 @@ public class AmecheServlet extends HttpServlet implements Transport {
             // Send command to call's event machine
             Element result = call.handleCommand(appInstanceId, callId, componentId, command).get();
             
+            resp.setContentType("application/xml; charset=utf-8");
+            
             if(result != null) {
                 byte[] bytes = ((Element)result).asXML().getBytes("utf-8");
                 resp.setStatus(200);
@@ -181,6 +198,15 @@ public class AmecheServlet extends HttpServlet implements Transport {
         
     }
     
+    private enum CallState {
+        RUNNING, STOPPED 
+    }
+    
+    // FIXME: Event Queueing
+    // FIXME: Continue Timeout
+    // FIXME: Shunned apps will leak memory
+    // TODO: Add 'ameche:direction' to <offer> 
+    // FIXME: Failure to dispatch <offer> results in stalled offer cycle 
     private class AmecheCall {
 
         // Config
@@ -193,7 +219,8 @@ public class AmecheServlet extends HttpServlet implements Transport {
         private Iterator<AppInstance> appIterator;
         private Set<String> childCallIds;
         private Map<String, AppInstance> componentToAppMapping;
-
+        private volatile CallState state;
+        
         // Constructor
         public AmecheCall(String callId, List<AppInstance> apps) {
             
@@ -220,38 +247,37 @@ public class AmecheServlet extends HttpServlet implements Transport {
             
             // New Call
             if(event.getName().equals("offer")) {
+                
+                this.state = CallState.RUNNING;
                 this.offer = event;
                 this.appIterator = apps.values().iterator();
                 this.offerRequest = buildRequest(offer, callId, null);
+                
+                // Add the <offer ameche:direction=""> attribute
+                offer.addAttribute(new QName("direction", AMECHE_NS), resolveCallDirection(offer));
+                
                 nextOffer();
             }
             
             // Call Event
             else {
                 
-                if(event.getName().equals("end")) {
+                if(this.state == CallState.RUNNING && event.getName().equals("end")) {
                     hangupCalls(callId);
                 }
 
                 HttpRequest request = buildRequest(event, callId, componentId);
                 
-                if(this.parentCallId != callId) {
-                    request.addHeader("parent-call-id", parentCallId);
-                }
-                
                 if(componentId != null) {
                     
-                    AppInstance appInstance = null;
+                    AppInstance appInstance = componentToAppMapping.get(componentId);
                     
                     if(event.getName().equals("complete")) {
-                        appInstance = componentToAppMapping.remove(componentId);
-                    }
-                    else {
-                        appInstance = componentToAppMapping.get(componentId);
+                        componentToAppMapping.remove(componentId);
                     }
                     
                     if(appInstance == null) {
-                        log.error("Received event for an unmapped component. Ignoring. [callId=%s, componentId=%s]", callId, componentId);
+                        log.error("Received event for unmapped component. Ignoring. [callId=%s, componentId=%s]", callId, componentId);
                         return;
                     }
                     
@@ -265,6 +291,17 @@ public class AmecheServlet extends HttpServlet implements Transport {
                 }
             }
 
+        }
+
+        
+        // TODO: Make pluggable
+        private String resolveCallDirection(Element offer) {
+            SipURI uri = new SipURI(offer.attributeValue("to"));
+            String role = uri.getParameter("role");
+            if(role == null) {
+                role = "term";
+            }
+            return role;
         }
 
         /**
@@ -334,23 +371,49 @@ public class AmecheServlet extends HttpServlet implements Transport {
             dial.setTo(URI.create(offer.attributeValue("to")));
             dial.setFrom(URI.create(offer.attributeValue("from")));
             
+            Map<String,String> headers = new HashMap<String, String>();
+            for(Element element : Typesafe.list(Element.class, offer.elements("header"))) {
+                if(element.attributeValue("name").equals("Route")) {
+                    headers.put("Route", element.attributeValue("value"));
+                }
+            }
+            
+            dial.setHeaders(headers);
+
+            // Configure nested <join> parameters
+            // FIXME: This should eventually be DIRECT and then have the system upgrade to BRIDGE when needed
             JoinCommand join = new JoinCommand();
             join.setCallId(parentCallId);
-            // FIXME: This should eventually be DIRECT and then have the system upgrade to BRIDGE when needed
             join.setMedia(JoinType.BRIDGE_EXCLUSIVE);
+            
             dial.setJoin(join);
             
             commandHandler.handleCommand(null, null, dial, new TransportCallback() {
                 public void handle(Element result, Exception err) {
+                    
                     if(err != null) {
                         hangupCalls(null);
                     }
                     else {
+                        
                         String childCallId = result.attributeValue("id");
+                        
                         // Register call with outer AmecheServlet's registry
                         calls.put(childCallId, AmecheCall.this);
+                        
                         // Register call internally so we know what to clean up later
                         childCallIds.add(childCallId);
+                        
+                        // Notify apps of new leg. Send <joining call-id="PARENT_CALL_ID" />
+                        Element joiningElement = DocumentHelper.createElement("joining");
+                        joiningElement.addAttribute("call-id", parentCallId);
+                        
+                        HttpRequest request = buildRequest(joiningElement, childCallId, null);
+                        
+                        for(AppInstance appInstance : apps.values()) {
+                            dispatchEvent(request, appInstance);
+                        }
+                        
                     }
                 }
             });
@@ -363,11 +426,7 @@ public class AmecheServlet extends HttpServlet implements Transport {
          */
         private void hangupCalls(String sourceCall) {
             
-            // Clean up AmecheServlet mappings
-            calls.remove(parentCallId);
-            for(String childCallId : childCallIds) {
-                calls.remove(childCallId);
-            }
+            this.state = CallState.STOPPED;
 
             // Build removal list
             Set<String> targetCalls = new HashSet<String>(childCallIds);
@@ -381,6 +440,7 @@ public class AmecheServlet extends HttpServlet implements Transport {
                 HangupCommand hangupCommand = new HangupCommand(targetCall);
                 commandHandler.handleCommand(targetCall, null, hangupCommand, null);
             }
+            
         }
 
         /**
@@ -441,24 +501,24 @@ public class AmecheServlet extends HttpServlet implements Transport {
                 int statusCode = response.getStatusLine().getStatusCode();
                 
                 if(statusCode != 203) {
-                    log.error("Non-203 Status Code [appEndpoint=%s, callId=%s, componentId=%s, status=%s]", appEndpoint, parentCallId, statusCode);
+                    log.error("Non-203 Status Code [appEndpoint=%s, callId=%s, status=%s]", appEndpoint, parentCallId, statusCode);
                     apps.remove(appInstance.getId());
                 }
             }
             catch (IOException e) {
-                log.error("Failed to dispatch event [appEndpoint=%s, callId=%s, componentId=%s]", appEndpoint, parentCallId, e);
+                log.error("Failed to dispatch event [appEndpoint=%s, callId=%s]", appEndpoint, parentCallId, e);
                 apps.remove(appInstance.getId());
             }
             
         }    
     }
 
-    public AppInstanceResolver getEndpointResolver() {
-        return endpointResolver;
+    public AppInstanceResolver getAppInstanceResolver() {
+        return appInstanceResolver;
     }
 
-    public void setEndpointResolver(AppInstanceResolver endpointResolver) {
-        this.endpointResolver = endpointResolver;
+    public void setAppInstanceResolver(AppInstanceResolver endpointResolver) {
+        this.appInstanceResolver = endpointResolver;
     }
 
     public CommandHandler getCommandHandler() {

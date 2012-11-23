@@ -3,11 +3,11 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.voxeo.com/sipmethod/xmpp xmpp.xsd"
   version="1.1">
 
-  <xmpp:servlet>
-    <javaee:servlet-name>rayo</javaee:servlet-name>
-    <javaee:servlet-class>com.rayo.server.SpringXmppServlet</javaee:servlet-class>
-    <javaee:load-on-startup>1</javaee:load-on-startup>
-  </xmpp:servlet>
+<!--   <xmpp:servlet> -->
+<!--     <javaee:servlet-name>rayo</javaee:servlet-name> -->
+<!--     <javaee:servlet-class>com.rayo.server.SpringXmppServlet</javaee:servlet-class> -->
+<!--     <javaee:load-on-startup>1</javaee:load-on-startup> -->
+<!--   </xmpp:servlet> -->
   
   <xmpp:defaultxmppapp />
   

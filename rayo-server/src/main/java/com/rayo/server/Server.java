@@ -251,7 +251,7 @@ public class Server implements EventHandler, CommandHandler {
             ));
 		    
 		// Outbound Disabled
-		} else if (adminService.isOutgoingCallsAllowed()) {
+		} else if (!adminService.isOutgoingCallsAllowed()) {
 		    log.debug("Outbound calls disabled. Rejecting <dial/> command [command=%s]]", command);
 		    if(callback != null) {
 		        TransportCallback.handle(callback, null, new RayoProtocolException(

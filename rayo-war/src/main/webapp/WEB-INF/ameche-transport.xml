@@ -19,5 +19,14 @@
       </bean>
     </constructor-arg>
   </bean>
+  
+  <bean id="appInstanceResolver" class="com.rayo.server.ameche.FixedAppInstanceResolver">
+    <property name="appInstance">
+      <bean class="com.rayo.server.ameche.AppInstance">
+        <constructor-arg value="1" />
+        <constructor-arg value="http://127.0.0.1:4444" />
+      </bean>
+    </property>
+  </bean>
   	
 </beans>
