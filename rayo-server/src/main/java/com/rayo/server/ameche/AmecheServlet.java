@@ -43,9 +43,11 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 
+import com.rayo.core.AnswerCommand;
 import com.rayo.core.DialCommand;
 import com.rayo.core.HangupCommand;
 import com.rayo.core.JoinCommand;
+import com.rayo.core.JoinDestinationType;
 import com.rayo.core.sip.SipURI;
 import com.rayo.server.CommandHandler;
 import com.rayo.server.Server;
@@ -205,7 +207,6 @@ public class AmecheServlet extends HttpServlet implements Transport {
     // FIXME: Event Queueing
     // FIXME: Continue Timeout
     // FIXME: Shunned apps will leak memory
-    // TODO: Add 'ameche:direction' to <offer> 
     // FIXME: Failure to dispatch <offer> results in stalled offer cycle 
     private class AmecheCall {
 
@@ -264,6 +265,16 @@ public class AmecheServlet extends HttpServlet implements Transport {
                 
                 if(this.state == CallState.RUNNING && event.getName().equals("end")) {
                     hangupCalls(callId);
+                }
+                else if(event.getName().equals("answered")) {
+                    // Answer the A Leg
+                    commandHandler.handleCommand(parentCallId, null, new AnswerCommand(), null);
+                    JoinCommand join = new JoinCommand();
+                    join.setTo(callId);
+                    join.setType(JoinDestinationType.CALL);
+                    join.setMedia(JoinType.BRIDGE_EXCLUSIVE);
+                    // Join to the B Leg
+                    commandHandler.handleCommand(parentCallId, componentId, join, null);
                 }
 
                 HttpRequest request = buildRequest(event, callId, componentId);
@@ -373,8 +384,15 @@ public class AmecheServlet extends HttpServlet implements Transport {
             
             Map<String,String> headers = new HashMap<String, String>();
             for(Element element : Typesafe.list(Element.class, offer.elements("header"))) {
-                if(element.attributeValue("name").equals("Route")) {
+                String headerName = element.attributeValue("name");
+                if(headerName.equals("Route")) {
                     headers.put("Route", element.attributeValue("value"));
+                }
+                else if(headerName.equals("P-Asserted-Identity")) {
+                    headers.put("P-Asserted-Identity", element.attributeValue("value"));
+                }
+                else if(headerName.equals("P-Charging-Vector")) {
+                    headers.put("P-Charging-Vector", element.attributeValue("value"));
                 }
             }
             
@@ -382,11 +400,11 @@ public class AmecheServlet extends HttpServlet implements Transport {
 
             // Configure nested <join> parameters
             // FIXME: This should eventually be DIRECT and then have the system upgrade to BRIDGE when needed
-            JoinCommand join = new JoinCommand();
-            join.setCallId(parentCallId);
-            join.setMedia(JoinType.BRIDGE_EXCLUSIVE);
-            
-            dial.setJoin(join);
+//            JoinCommand join = new JoinCommand();
+//            join.setCallId(parentCallId);
+//            join.setMedia(JoinType.BRIDGE_EXCLUSIVE);
+//            
+//            dial.setJoin(join);
             
             commandHandler.handleCommand(null, null, dial, new TransportCallback() {
                 public void handle(Element result, Exception err) {
