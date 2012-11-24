@@ -204,10 +204,6 @@ public class AmecheServlet extends HttpServlet implements Transport {
         RUNNING, STOPPED 
     }
     
-    // FIXME: Event Queueing
-    // FIXME: Continue Timeout
-    // FIXME: Shunned apps will leak memory
-    // FIXME: Failure to dispatch <offer> results in stalled offer cycle 
     private class AmecheCall {
 
         // Config
