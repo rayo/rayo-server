@@ -77,7 +77,11 @@ public class OutputProvider extends BaseProvider {
     	Output output = new Output();
         output.setPrompt(extractSsml(element));
         output.setVoice(element.attributeValue("voice"));
-
+        
+        if (element.attribute("broadcast") != null) {
+        	output.setBroadcast(toBoolean("broadcast", element));
+        }
+        
         if (element.attribute("interrupt-on") != null) {
         	output.setBargeinType(loadBargeinType(element));
         }
@@ -194,6 +198,9 @@ public class OutputProvider extends BaseProvider {
         }
         if (output.getPrompt() != null) {
             addSsml(output.getPrompt(), root);
+        }
+        if (output.getBroadcast() != null && output.getBroadcast()) {
+        	root.addAttribute("broadcast", String.valueOf(output.getBroadcast()));
         }
     }
 

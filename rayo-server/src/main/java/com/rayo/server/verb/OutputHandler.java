@@ -16,9 +16,11 @@ import com.rayo.core.verb.VerbCommand;
 import com.rayo.core.verb.VerbCompleteEvent;
 import com.rayo.core.verb.VolumeDownCommand;
 import com.rayo.core.verb.VolumeUpCommand;
+import com.rayo.server.CallActor;
 import com.rayo.server.exception.ExceptionMapper;
 import com.rayo.server.validation.SsmlValidator;
 import com.voxeo.logging.Loggerf;
+import com.voxeo.moho.MediaService;
 import com.voxeo.moho.Participant;
 import com.voxeo.moho.State;
 import com.voxeo.moho.media.output.AudibleResource;
@@ -66,8 +68,18 @@ public class OutputHandler extends AbstractLocalVerbHandler<Output, Participant>
         if (prompt.getVoice() != null) {
             outcommand.setVoiceName(prompt.getVoice());
         }
-
+        
         output = getMediaService().output(outcommand);
+        
+        if (model.getBroadcast() != null && model.getBroadcast()) {
+        	if (getActor() instanceof CallActor) {
+        		CallActor actor = (CallActor)getActor();
+        		for(Object o: actor.getJoinees()) {
+        			MediaService<Participant> service = (MediaService<Participant>)o;
+        			service.output(outcommand);
+        		}
+        	}
+        }
     }
 
     @Override

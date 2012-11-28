@@ -576,4 +576,9 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 		this.mixerManager = mixerManager;
 	}
 	
+	public Set<Participant> getJoinees() {
+		
+		return new HashSet<Participant>(joinees);
+	}
+	
 }

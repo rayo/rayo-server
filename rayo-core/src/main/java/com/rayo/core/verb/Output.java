@@ -23,6 +23,7 @@ public class Output extends BaseVerb {
     private Integer repeatTimes;
     private Duration maxTime;
     private String voice;
+    private Boolean broadcast;
     
 	@Valid
     @NotNull(message=Output.MISSING_PROMPT)
@@ -167,6 +168,16 @@ public class Output extends BaseVerb {
     public void setMaxTime(Duration maxTime) {
         this.maxTime = maxTime;
     }
+    
+    
+
+	public Boolean getBroadcast() {
+		return broadcast;
+	}
+
+	public void setBroadcast(Boolean broadcast) {
+		this.broadcast = broadcast;
+	}
 
 	@Override
     public String toString() {
@@ -184,7 +195,4 @@ public class Output extends BaseVerb {
     		.append("prompt", getPrompt())
     		.toString();
     }
-
-
-
 }
