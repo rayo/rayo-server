@@ -14,10 +14,38 @@
   </properties>
  
   <repositories>
-    <repository>
-      <id>maven.voxeolabs.net</id>
-      <url>http://maven.voxeolabs.net:8081/nexus/content/groups/public/</url>
-    </repository>
+                <repository>
+                        <id>maven.voxeolabs.net</id>
+                        <name>Voxeo Labs</name>
+                        <releases>
+                                <enabled>true</enabled>
+                                <updatePolicy>never</updatePolicy>
+                                <checksumPolicy>fail</checksumPolicy>
+                        </releases>
+                        <snapshots>
+                                <enabled>true</enabled>
+                                <updatePolicy>always</updatePolicy>
+                                <checksumPolicy>fail</checksumPolicy>
+                        </snapshots>
+                        <url>http://maven.voxeolabs.net:8081/nexus/content/repositories/snapshots</url>
+                        <layout>default</layout>
+                </repository>
+                <repository>
+                        <id>public.maven.voxeolabs.net</id>
+                        <name>Voxeo Labs</name>
+                        <releases>
+                                <enabled>true</enabled>
+                                <updatePolicy>never</updatePolicy>
+                                <checksumPolicy>fail</checksumPolicy>
+                        </releases>
+                        <snapshots>
+                                <enabled>true</enabled>
+                                <updatePolicy>always</updatePolicy>
+                                <checksumPolicy>fail</checksumPolicy>
+                        </snapshots>
+                        <url>http://maven.voxeolabs.net:8081/nexus/content/groups/public/</url>
+                        <layout>default</layout>
+                </repository>
   </repositories>  
   
   <dependencyManagement>
