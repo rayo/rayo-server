@@ -97,8 +97,8 @@ public class RayoSessionListenerTest {
 		sessionCleanupConfig.cleanupS2SResources = true
 		
 		def bareJid = [toString: { "test@localhost" }] as JID
-		def jid = [toString: { value }, getBareJID: { bareJid }] as JID
-		jidRegistry.put(mohoCall.id, jid, "localhost")
+		def jid = [toString: { "test@localhost" }, getBareJID: { bareJid }] as JID
+		jidRegistry.put(mohoCall.id, jid)
 		
 		def session = [getType : { XmppSession.Type.S2S }, getRemoteJID: { jid }] as XmppSession
 		def event = new XmppSessionEvent(session)
@@ -112,8 +112,8 @@ public class RayoSessionListenerTest {
 	public void testResourcesCleanedUpOnC2S() {
 		
 		def bareJid = [toString: { "test@localhost" }] as JID
-		def jid = [toString: { value }, getBareJID: { bareJid }] as JID
-		jidRegistry.put(mohoCall.id, jid, "localhost")
+		def jid = [toString: { "test@localhost" }, getBareJID: { bareJid }] as JID
+		jidRegistry.put(mohoCall.id, jid)
 		
 		def session = [getType : { XmppSession.Type.OUTBOUNDCLIENT }, getRemoteJID: { jid }] as XmppSession
 		def event = new XmppSessionEvent(session)

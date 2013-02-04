@@ -11,7 +11,7 @@ import org.apache.commons.lang.builder.ToStringStyle;
 
 import com.rayo.core.validation.Messages;
 
-public class DialCommand implements ServerCommand {
+public class DialCommand implements CallCommand {
 
     @NotNull(message=Messages.MISSING_TO)
     private URI to;
@@ -55,6 +55,14 @@ public class DialCommand implements ServerCommand {
 	public void setJoin(JoinCommand join) {
 		this.join = join;
 	}
+
+    public String getCallId() {
+        return null;
+    }
+
+    public void setCallId(String callId) {
+        throw new UnsupportedOperationException();
+    }
 
 	@Override
     public String toString() {

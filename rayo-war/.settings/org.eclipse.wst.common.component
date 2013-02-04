@@ -3,20 +3,33 @@
     <wb-module deploy-name="tropo-war">
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/java"/>
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
-        <wb-resource deploy-path="/" source-path="/src/main/webapp"/>
-        <dependent-module deploy-path="/WEB-INF/lib" handle="module:/resource/rayo-server/rayo-server">
+        <wb-resource deploy-path="/" source-path="/target/m2e-wtp/web-resources"/>
+        <wb-resource deploy-path="/" source-path="/src/main/webapp" tag="defaultRootSource"/>
+        <dependent-module archiveName="rayo-server-2.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/rayo-server/rayo-server">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module deploy-path="/WEB-INF/lib" handle="module:/resource/moho-api/moho-api">
+        <dependent-module archiveName="rayo-storage-2.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/rayo-storage/rayo-storage">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module deploy-path="/WEB-INF/lib" handle="module:/resource/moho-impl/moho-impl">
+        <dependent-module archiveName="moho-api-0.8-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/moho-api/moho-api">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module deploy-path="/WEB-INF/lib" handle="module:/resource/rayo-core/rayo-core">
+        <dependent-module archiveName="moho-impl-0.8-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/moho-impl/moho-impl">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="rayo-core-2.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/rayo-core/rayo-core">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="rayo-provisioning-2.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/rayo-provisioning/rayo-provisioning">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="moho-remote-0.8-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/moho-remote/moho-remote">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="moho-common-0.8-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/moho-common/moho-common">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <property name="java-output-path" value="/tropo-war/target/classes"/>
-        <property name="context-root" value="tropo2"/>
+        <property name="context-root" value="rayo"/>
     </wb-module>
 </project-modules>

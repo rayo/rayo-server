@@ -63,7 +63,6 @@
 		<dependency>
 			<groupId>com.voxeo.moho</groupId>
 			<artifactId>sipservlet-api</artifactId>
-			<version>1.1-SNAPSHOT</version>
 			<scope>provided</scope>
 		</dependency>
 	</dependencies>

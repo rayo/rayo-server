@@ -23,9 +23,7 @@
 	<bean id="jidRegistry" class="com.rayo.server.JIDRegistry" />
 	
 	<!-- Global Call Registry -->
-	<bean id="callRegistry" class="com.rayo.server.DefaultCallRegistry" >
-		<property name="jidRegistry" ref="jidRegistry"/>	
-	</bean>
+	<bean id="callRegistry" class="com.rayo.server.DefaultCallRegistry" />
 
 	<!-- Global Mixer Registry -->
 	<bean id="mixerRegistry" class="com.rayo.server.DefaultMixerRegistry" />

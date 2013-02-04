@@ -36,6 +36,7 @@ import com.rayo.core.verb.Ssml;
 import com.rayo.core.verb.UnholdCommand;
 import com.rayo.core.verb.UnmuteCommand;
 import com.rayo.server.exception.RayoProtocolException;
+import com.rayo.server.exception.RayoProtocolException.Condition;
 import com.voxeo.exceptions.NotFoundException;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.Call;
@@ -55,8 +56,6 @@ import com.voxeo.moho.media.output.AudibleResource;
 import com.voxeo.moho.media.output.OutputCommand;
 import com.voxeo.moho.remotejoin.RemoteParticipant;
 import com.voxeo.moho.util.ParticipantIDParser;
-import com.voxeo.servlet.xmpp.StanzaError.Condition;
-import com.voxeo.servlet.xmpp.StanzaError.Type;
 
 public class CallActor <T extends Call> extends AbstractActor<T> {
 
@@ -287,7 +286,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     	} else if (type == JoinDestinationType.MIXER) {
     		participant = mixerManager.getMixer(destination);
     	} else {
-    		throw new RayoProtocolException(Condition.BAD_REQUEST, Type.CANCEL, "Unknown destination type");
+    		throw new RayoProtocolException(Condition.BAD_REQUEST, "Unknown destination type");
     	}
     	if (participant == null && type == JoinDestinationType.CALL) {
     		// Remote join

@@ -111,7 +111,7 @@ public class FilterChainTest {
 		
 		def queue = new LinkedList()
 		def filter1 = [handleCommandRequest:{command, chain -> queue.offer("filter1"); return command}] as MessageFilter
-		def filter2 = [handleCommandRequest:{command, chain -> throw new RayoProtocolException(Condition.BAD_REQUEST,Type.CANCEL,"error")}] as MessageFilter
+		def filter2 = [handleCommandRequest:{command, chain -> throw new RayoProtocolException(RayoProtocolException.Condition.BAD_REQUEST,"error")}] as MessageFilter
 		def filter3 = [handleCommandRequest:{command, chain -> queue.offer("filter3"); return command}] as MessageFilter
 		filtersChain.addFilter(filter1)
 		filtersChain.addFilter(filter2)
@@ -166,7 +166,7 @@ public class FilterChainTest {
 		
 		def queue = new LinkedList()
 		def filter1 = [handleCommandResponse:{response, chain -> queue.offer("filter1"); return response}] as MessageFilter
-		def filter2 = [handleCommandResponse:{response, chain -> throw new RayoProtocolException(Condition.BAD_REQUEST,Type.CANCEL,"error")}] as MessageFilter
+		def filter2 = [handleCommandResponse:{response, chain -> throw new RayoProtocolException(RayoProtocolException.Condition.BAD_REQUEST,"error")}] as MessageFilter
 		def filter3 = [handleCommandResponse:{response, chain -> queue.offer("filter3"); return response}] as MessageFilter
 		filtersChain.addFilter(filter1)
 		filtersChain.addFilter(filter2)
@@ -221,7 +221,7 @@ public class FilterChainTest {
 		
 		def queue = new LinkedList()
 		def filter1 = [handleEvent:{event, chain -> queue.offer("filter1");return event}] as MessageFilter
-		def filter2 = [handleEvent:{event, chain -> throw new RayoProtocolException(Condition.BAD_REQUEST,Type.CANCEL,"error")}] as MessageFilter
+		def filter2 = [handleEvent:{event, chain -> throw new RayoProtocolException(RayoProtocolException.Condition.BAD_REQUEST,"error")}] as MessageFilter
 		def filter3 = [handleEvent:{event, chain -> queue.offer("filter3");return event}] as MessageFilter
 		filtersChain.addFilter(filter1)
 		filtersChain.addFilter(filter2)

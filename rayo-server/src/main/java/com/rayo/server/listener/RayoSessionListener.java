@@ -7,6 +7,8 @@ import javax.servlet.ServletContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 
+import com.rayo.core.EndCommand;
+import com.rayo.core.EndEvent;
 import com.rayo.server.CallActor;
 import com.rayo.server.CallRegistry;
 import com.rayo.server.JIDRegistry;
@@ -76,7 +78,7 @@ public class RayoSessionListener implements XmppSessionListener {
 				try {
 					CallActor<?> actor = callRegistry.get(id);
 					if (actor != null) {
-						actor.getCall().disconnect();
+						actor.publish(new EndCommand(id, EndEvent.Reason.ERROR));
 					}
 				} catch (Exception e) {
 					logger.error(e.getMessage(),e);
