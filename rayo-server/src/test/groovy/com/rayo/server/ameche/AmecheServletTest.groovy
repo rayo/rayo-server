@@ -62,7 +62,7 @@ class AmecheServletTest {
             }
         } as CommandHandler
     
-        servlet.endpointResolver = {
+        servlet.appInstanceResolver = {
             apps.collect {
                 new AppInstance(
                     it.port.toString(), 

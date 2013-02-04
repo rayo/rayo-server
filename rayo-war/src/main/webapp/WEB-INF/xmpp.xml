@@ -3,10 +3,10 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.voxeo.com/sipmethod/xmpp xmpp.xsd"
   version="1.1">
 
-  <xmpp:servlet>
-    <javaee:servlet-name>rayo</javaee:servlet-name>
-    <javaee:servlet-class>com.rayo.server.SpringXmppServlet</javaee:servlet-class>
-    <javaee:load-on-startup>1</javaee:load-on-startup>
+<!--   <xmpp:servlet> -->
+<!--     <javaee:servlet-name>rayo</javaee:servlet-name> -->
+<!--     <javaee:servlet-class>com.rayo.server.SpringXmppServlet</javaee:servlet-class> -->
+<!--     <javaee:load-on-startup>1</javaee:load-on-startup> -->
 	<!-- 
 	
 	Sample settings for a clustered environment		
@@ -32,7 +32,8 @@
     		<javaee:param-value>1</javaee:param-value>
   		</javaee:init-param>   		
   		-->    
-  </xmpp:servlet>
+<!--   </xmpp:servlet> -->
+
   
   <xmpp:defaultxmppapp />
   
