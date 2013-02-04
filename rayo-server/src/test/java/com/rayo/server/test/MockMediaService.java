@@ -94,7 +94,6 @@ public class MockMediaService implements MediaService<EventSource> {
 		return null;
 	}
 
-  @Override
   public MediaGroup getMediaGroup(boolean create) {
     return null;
   }

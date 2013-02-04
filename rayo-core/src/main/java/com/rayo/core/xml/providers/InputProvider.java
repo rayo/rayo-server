@@ -2,25 +2,15 @@ package com.rayo.core.xml.providers;
 
 import static com.voxeo.utils.Strings.isEmpty;
 
-import java.io.StringWriter;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-
 import org.dom4j.Document;
-import org.dom4j.DocumentException;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.dom4j.Namespace;
 import org.dom4j.QName;
-import org.dom4j.io.DOMWriter;
 
 import com.rayo.core.verb.Choices;
 import com.rayo.core.verb.Input;
@@ -225,9 +215,8 @@ public class InputProvider extends BaseProvider {
     
     private Element buildNsmlElement(String nlsml) throws Exception {
         //FIXME: We can't set the namespace after parsing sinc that would only update the namespace for the root element 
-        nlsml = nlsml.replace("<result", "<result xmlns=\"http://www.w3c.org/2000/11/nlsml\" ");
+        nlsml = nlsml.replace("<result ", "<result xmlns=\"http://www.w3c.org/2000/11/nlsml\" ");
     	Element element = (Element)DocumentHelper.parseText(nlsml).getRootElement();
         return element;
-    }
-    
+    }    
 }
