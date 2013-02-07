@@ -190,7 +190,8 @@ public class RayoServlet extends AbstractRayoServlet implements Transport {
                     if (err != null) {
                         sendIqError(request, err);
                     } else {
-                        // TODO: ouch
+                    	String callId = result.attributeValue("id");
+                    	jidRegistry.put(callId, request.getFrom().getBareJID());
                         sendIqResult(request, toDomElement(result));
                     }
                 }

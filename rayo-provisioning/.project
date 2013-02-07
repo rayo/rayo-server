@@ -1,7 +1,11 @@
 <projectDescription>
   <name>rayo-provisioning</name>
   <comment>NO_M2ECLIPSE_SUPPORT: Project files created with the maven-eclipse-plugin are not supported in M2Eclipse.</comment>
-  <projects/>
+  <projects>
+    <project>rayo-core</project>
+    <project>rayo-server</project>
+    <project>rayo-storage</project>
+  </projects>
   <buildSpec>
     <buildCommand>
       <name>org.eclipse.wst.common.project.facet.core.builder</name>

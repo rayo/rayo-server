@@ -67,21 +67,23 @@ public class RayoSessionListener implements XmppSessionListener {
 	
 		logger.debug("Xmpp Session destroyed");
 		XmppSession session = xse.getSession();
-		
-		boolean cleanup = 
-			(session.getType() == Type.S2S && sessionCleanupConfig.isCleanupS2SResources()) ||
-			(session.getType() != Type.S2S && sessionCleanupConfig.isCleanupC2SResources());
 
-		if (cleanup) {
-			List<String> callIds = jidRegistry.getCallsByJID(session.getRemoteJID());
-			for (String id: callIds) {
-				try {
-					CallActor<?> actor = callRegistry.get(id);
-					if (actor != null) {
-						actor.publish(new EndCommand(id, EndEvent.Reason.ERROR));
+		if (session != null) {
+			boolean cleanup = 
+				(session.getType() == Type.S2S && sessionCleanupConfig.isCleanupS2SResources()) ||
+				(session.getType() != Type.S2S && sessionCleanupConfig.isCleanupC2SResources());
+	
+			if (cleanup) {
+				List<String> callIds = jidRegistry.getCallsByJID(session.getRemoteJID());
+				for (String id: callIds) {
+					try {
+						CallActor<?> actor = callRegistry.get(id);
+						if (actor != null) {
+							actor.publish(new EndCommand(id, EndEvent.Reason.ERROR));
+						}
+					} catch (Exception e) {
+						logger.error(e.getMessage(),e);
 					}
-				} catch (Exception e) {
-					logger.error(e.getMessage(),e);
 				}
 			}
 		}

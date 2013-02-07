@@ -121,8 +121,9 @@ public class AmecheServlet extends HttpServlet implements Transport {
             }
         }
 
-        machine.callEvent(callId, componentId, event);
-        
+        if (machine != null) {
+        	machine.callEvent(callId, componentId, event);
+        }
     }
     
     @Override
@@ -303,8 +304,13 @@ public class AmecheServlet extends HttpServlet implements Transport {
         
         // TODO: Make pluggable
         private String resolveCallDirection(Element offer) {
-            SipURI uri = new SipURI(offer.attributeValue("to"));
-            String role = uri.getParameter("role");
+        	
+        	String to = offer.attributeValue("to");
+        	String role = null;
+        	if (to.startsWith("sip:")) {
+        		SipURI uri = new SipURI(to);
+        		role = uri.getParameter("role");
+        	}
             if(role == null) {
                 role = "term";
             }

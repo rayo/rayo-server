@@ -40,6 +40,7 @@ import com.rayo.core.verb.MuteCommand;
 import com.rayo.core.verb.StopCommand;
 import com.rayo.core.verb.UnholdCommand;
 import com.rayo.core.verb.UnmuteCommand;
+import com.rayo.core.verb.VerbRef;
 import com.rayo.core.xml.XmlProvider;
 import com.voxeo.moho.Participant.JoinType;
 
@@ -409,6 +410,8 @@ public class RayoProvider extends BaseProvider {
             createStoppedSpeakingEvent((StoppedSpeakingEvent)object, document);
         } else if (object instanceof DestroyMixerCommand) {
         	createDestroyIfEmptyCommand((DestroyMixerCommand)object, document);
+        } else if (object instanceof VerbRef) {
+        	createVerbRef((VerbRef)object, document);
         } else if (object instanceof CallRef) {
         	createCallRef((CallRef)object, document);
         }
@@ -417,6 +420,11 @@ public class RayoProvider extends BaseProvider {
     private void createCallRef(CallRef ref, Document document) {
 		Element root = document.addElement(new QName("ref", RAYO_NAMESPACE));
 		root.addAttribute("id", ref.getCallId());
+	}
+
+    private void createVerbRef(VerbRef ref, Document document) {
+		Element root = document.addElement(new QName("ref", RAYO_NAMESPACE));
+		root.addAttribute("id", ref.getVerbId());
 	}
 
 	private void createDtmfEvent(DtmfEvent event, Document document) {

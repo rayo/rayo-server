@@ -3,36 +3,35 @@
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.voxeo.com/sipmethod/xmpp xmpp.xsd"
   version="1.1">
 
-<!--   <xmpp:servlet> -->
-<!--     <javaee:servlet-name>rayo</javaee:servlet-name> -->
-<!--     <javaee:servlet-class>com.rayo.server.SpringXmppServlet</javaee:servlet-class> -->
-<!--     <javaee:load-on-startup>1</javaee:load-on-startup> -->
+  <xmpp:servlet> -->
+     <javaee:servlet-name>rayo</javaee:servlet-name>
+     <javaee:servlet-class>com.rayo.server.SpringXmppServlet</javaee:servlet-class>
+     <javaee:load-on-startup>1</javaee:load-on-startup>
+     
 	<!-- 
-	
 	Sample settings for a clustered environment		
-	
-	<javaee:init-param>
-    		<javaee:param-name>local-domain</javaee:param-name>
-    		<javaee:param-value>192.168.1.35</javaee:param-value>
-  		</javaee:init-param>
-	<javaee:init-param>
-    		<javaee:param-name>gateway-domain</javaee:param-name>
-    		<javaee:param-value>192.168.1.33</javaee:param-value>
-  		</javaee:init-param>
-	<javaee:init-param>
-    		<javaee:param-name>default-platform-id</javaee:param-name>
-    		<javaee:param-value>staging</javaee:param-value>
-  		</javaee:init-param>
-	<javaee:init-param>
-    		<javaee:param-name>weight</javaee:param-name>
-    		<javaee:param-value>10</javaee:param-value>
-  		</javaee:init-param>
-	<javaee:init-param>
+		<javaee:init-param>
+	    		<javaee:param-name>local-domain</javaee:param-name>
+	    		<javaee:param-value>192.168.1.35</javaee:param-value>
+	  		</javaee:init-param>
+		<javaee:init-param>
+	    		<javaee:param-name>gateway-domain</javaee:param-name>
+	    		<javaee:param-value>192.168.1.33</javaee:param-value>
+	  		</javaee:init-param>
+		<javaee:init-param>
+	    		<javaee:param-name>default-platform-id</javaee:param-name>
+	    		<javaee:param-value>staging</javaee:param-value>
+	  		</javaee:init-param>
+		<javaee:init-param>
+	    		<javaee:param-name>weight</javaee:param-name>
+	    		<javaee:param-value>10</javaee:param-value>
+	  		</javaee:init-param>
+		<javaee:init-param>
     		<javaee:param-name>priority</javaee:param-name>
     		<javaee:param-value>1</javaee:param-value>
   		</javaee:init-param>   		
   		-->    
-<!--   </xmpp:servlet> -->
+   </xmpp:servlet>
 
   
   <xmpp:defaultxmppapp />

@@ -52,6 +52,7 @@
 	    		<value>com.rayo.core.DtmfCommand</value>
 	    		<value>com.rayo.core.DestroyMixerCommand</value>
 				<value>com.rayo.core.CallRef</value>
+				<value>com.rayo.core.verb.VerbRef</value>
 	      	</list>
 	   	</property>		
 	</bean>

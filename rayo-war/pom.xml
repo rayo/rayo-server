@@ -38,7 +38,7 @@
         <dependency>
           <groupId>com.voxeo.moho</groupId>
           <artifactId>moho-remote</artifactId>
-          <version>0.8-SNAPSHOT</version>
+          <version>trunk-SNAPSHOT</version>
         </dependency>                 
 		<dependency>
 			<groupId>com.voxeo.xmpp</groupId>

@@ -11,6 +11,7 @@ import org.dom4j.DocumentHelper
 import org.dom4j.Element
 import org.junit.Before
 import org.junit.BeforeClass
+import org.junit.Ignore;
 import org.junit.Test
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.mock.web.MockHttpServletResponse
@@ -20,6 +21,7 @@ import com.rayo.core.HangupCommand;
 import com.rayo.server.CommandHandler
 
 
+@Ignore
 class AmecheServletTest {
 
     private static Element OFFER_EVENT = toXML('<offer to="tel:+13055195825" from="tel:+15613504458"/>')
