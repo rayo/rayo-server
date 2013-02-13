@@ -11,6 +11,8 @@
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd"
     default-autowire="byName">
 
+  <context:property-placeholder location="/WEB-INF/ameche.properties"/>
+
   <bean id="httpClient" class="org.apache.http.impl.client.DefaultHttpClient">
     <constructor-arg>
       <bean class="org.apache.http.impl.conn.PoolingClientConnectionManager" destroy-method="shutdown">
@@ -24,7 +26,7 @@
     <property name="appInstance">
       <bean class="com.rayo.server.ameche.AppInstance">
         <constructor-arg value="1" />
-        <constructor-arg value="http://127.0.0.1:4444" />
+        <constructor-arg value="${ameche.instance.uri}"/>
       </bean>
     </property>
   </bean>
