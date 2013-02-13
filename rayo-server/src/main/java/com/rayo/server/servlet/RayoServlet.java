@@ -32,6 +32,7 @@ import com.rayo.server.lookup.RayoJIDLookupService;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.servlet.xmpp.IQRequest;
 import com.voxeo.servlet.xmpp.IQResponse;
+import com.voxeo.servlet.xmpp.InstantMessage;
 import com.voxeo.servlet.xmpp.JID;
 import com.voxeo.servlet.xmpp.PresenceMessage;
 
@@ -335,16 +336,24 @@ public class RayoServlet extends AbstractRayoServlet implements Transport {
         }
     }
     
+	@Override
+    protected void doMessage(InstantMessage message) throws ServletException, IOException {
+    	
+    	server.getRayoStatistics().messageStanzaReceived();
+    }
+	
     @Override
     protected void doPresence(PresenceMessage presence) throws ServletException, IOException {
         
+    	server.getRayoStatistics().presenceStanzaReceived();
         JID toJid = presence.getTo();
         JID fromJid = presence.getFrom();
         RayoAdminService adminService = (RayoAdminService)getAdminService();
-        String gatewayDomain = adminService.getGatewayDomain();
+        String gatewayDomain = adminService.getGatewayDomain();        
         if (fromJid.getNode() == null) {
             if (gatewayDomain != null && fromJid.getDomain().equals(gatewayDomain)) {
                 if (presence.getType().equals("error")) {
+                	server.getRayoStatistics().presenceErrorReceived();
                     String callId = toJid.getNode();
                     if (callId != null) {
                         HangupCommand command = new HangupCommand();
@@ -368,13 +377,17 @@ public class RayoServlet extends AbstractRayoServlet implements Transport {
 
     @Override
     protected void sendIqError(IQRequest request, IQResponse response) throws IOException {
+    	
+    	server.getRayoStatistics().iqError();
     	super.sendIqError(request, response);
         xmppMessageListenersGroup.onErrorSent(response);        
     }
     
     @Override
     protected IQResponse sendIqResult(IQRequest request, org.w3c.dom.Element result) {
+    	
     	try {
+    		server.getRayoStatistics().iqResult();
             IQResponse response = super.sendIqResult(request, result);
             xmppMessageListenersGroup.onIQSent(response);
             return response;
