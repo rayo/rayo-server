@@ -2,7 +2,11 @@ package com.rayo.server.ameche;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.URI;
+import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -380,8 +384,23 @@ public class AmecheServlet extends HttpServlet implements Transport {
         
         private void completeCall() {
             
+        	String offerTo = offer.attributeValue("to");
+        	if (offerTo.startsWith("sip")) {
+            	SipURI toSipUri = new SipURI(offerTo);
+            	try {
+    				InetAddress address = InetAddress.getByName(toSipUri.getHost());
+    				if (isLocal(address)) {
+    					// Offer was directed to this host, i.e. non from IMS. Skip dialing
+    					return;
+    				}
+    			} catch (UnknownHostException e) {
+    				// skip validation and dial anyways
+    				log.error(e.getMessage());
+    			}        		
+        	}        	
+        	
             DialCommand dial = new DialCommand();
-            dial.setTo(URI.create(offer.attributeValue("to")));
+            dial.setTo(URI.create(offerTo));
             dial.setFrom(URI.create(offer.attributeValue("from")));
             
             Map<String,String> headers = new HashMap<String, String>();
@@ -439,7 +458,20 @@ public class AmecheServlet extends HttpServlet implements Transport {
             });
         }
         
-        /**
+        private boolean isLocal(InetAddress address) {
+
+    	    if (address.isAnyLocalAddress() || address.isLoopbackAddress()) {
+    	        return true;
+    	    }
+
+    	    try {
+    	        return NetworkInterface.getByInetAddress(address) != null;
+    	    } catch (SocketException e) {
+    	        return false;
+    	    }
+		}
+
+		/**
          * Hangs up all related calls
          * 
          * @param sourceCall If specified, this is the call that that triggered the hangup so it should be skipped 
