@@ -90,7 +90,7 @@ public class RayoServlet extends AbstractRayoServlet implements Transport {
 
 
 	@Override
-	public void callEvent(String callId, String componentId, Element body) throws Exception {
+	public boolean callEvent(String callId, String componentId, Element body) throws Exception {
 
         JID jid = null;
         JID from = null;
@@ -103,6 +103,10 @@ public class RayoServlet extends AbstractRayoServlet implements Transport {
             if (body.getName().equals("offer")) {
                 URI to = new URI(body.attributeValue("to"));
                 JID callTo = getCallDestination(to);
+                if (callTo == null) {
+                	log.debug("Could not deliver event. Call id [%s] is not being managed by Rayo. Skipping event");
+                	return false;
+                }
                 jidRegistry.put(callId, callTo);
             }
             // Call Cleanup
@@ -123,16 +127,25 @@ public class RayoServlet extends AbstractRayoServlet implements Transport {
         from.setResource(componentId);
 
         // TODO: ouch
-        org.w3c.dom.Element documentElement = toDomElement(body);
-        PresenceMessage presence = getXmppFactory().createPresence(from, jid, null, documentElement); 
-        presence.send();
-        xmppMessageListenersGroup.onPresenceSent(presence);
-
+        try {
+	        org.w3c.dom.Element documentElement = toDomElement(body);
+	        PresenceMessage presence = getXmppFactory().createPresence(from, jid, null, documentElement); 
+	        presence.send();
+	        xmppMessageListenersGroup.onPresenceSent(presence);
+        } catch (ServletException e) {
+        	if (e.getMessage().startsWith("can't find corresponding client session") && 
+        		 body.getName().equals("offer")) {
+        		log.debug("Could not handle offer. No Rayo clients listening on XMPP.");
+        		jidRegistry.remove(callId);
+        		return false;
+        	}
+        }
+        return true;
 	}
 	
 	@Override
-	public void mixerEvent(String mixerId, Collection<String> participants, Element body) {
-	    
+	public boolean mixerEvent(String mixerId, Collection<String> participants, Element body) {
+
         JID from = getXmppFactory().createJID(mixerId + "@" + getLocalDomain());
 
         RayoAdminService adminService = (RayoAdminService) getAdminService();
@@ -146,8 +159,10 @@ public class RayoServlet extends AbstractRayoServlet implements Transport {
         if (gatewayDomain == null) {
             for (String callId : participants) {
                 JID jid = jidRegistry.getJID(callId);
-                if (!destinations.contains(jid)) {
-                    destinations.add(jid);
+                if (jid != null) {
+	                if (!destinations.contains(jid)) {
+	                    destinations.add(jid);
+	                }
                 }
             }
         }
@@ -173,6 +188,8 @@ public class RayoServlet extends AbstractRayoServlet implements Transport {
                 log.error("Failed to dispatch event [jid=%s, event=%s]", jid, body.asXML(), e);
             }
         }	    
+        
+        return true;
 	}
 
 

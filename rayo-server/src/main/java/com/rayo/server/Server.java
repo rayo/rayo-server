@@ -93,16 +93,21 @@ public class Server implements EventHandler, CommandHandler {
     	String callId = event.getCallId();
     	String componentId = (event instanceof VerbEvent) ? ((VerbEvent)event).getVerbId() : null;
 
-    	try {
-        	for(Transport transport : transports) {
-				transport.callEvent(callId, componentId, xml);
-        	}
-        }
-        catch (Exception e) {
+		boolean sent = false;
+		try {
+	    	for(Transport transport : transports) {
+				if (transport.callEvent(callId, componentId, xml)) {
+					sent = true;
+				}
+	    	}
+	    	if (!sent) {
+	            log.error("Failed to dispatch call event. [event=%s]", event);
+				findActor(callId).publish(new EndCommand(callId, EndEvent.Reason.ERROR));            
+	        }
+		} catch (Exception e) {
             log.error("Failed to dispatch call event. [event=%s]", event, e);
-			findActor(callId).publish(new EndCommand(callId, EndEvent.Reason.ERROR));            
-        }
-        
+			findActor(callId).publish(new EndCommand(callId, EndEvent.Reason.ERROR));            			
+		}
         rayoStatistics.callEventProcessed();
 
 	}

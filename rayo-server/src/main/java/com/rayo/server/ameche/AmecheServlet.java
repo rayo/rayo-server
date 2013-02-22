@@ -98,7 +98,7 @@ public class AmecheServlet extends HttpServlet implements Transport {
     }
 
     @Override
-    public void callEvent(String callId, String componentId, Element event) throws Exception {
+    public boolean callEvent(String callId, String componentId, Element event) throws Exception {
 
         AmecheCall machine = null;
         
@@ -107,11 +107,13 @@ public class AmecheServlet extends HttpServlet implements Transport {
             
             // Lookup App Instance Endpoints
             List<AppInstance> apps = appInstanceResolver.lookup(event);
-            
-            // Make and register a new ameche call handler 
-            machine = new AmecheCall(callId, apps);
-            calls.put(callId, machine);
-            
+            if (apps.size() != 0 ) {
+	            // Make and register a new ameche call handler 
+	            machine = new AmecheCall(callId, apps);
+	            calls.put(callId, machine);
+            } else {
+            	return false;
+            }
         }
         // Existing Call
         else {
@@ -127,12 +129,16 @@ public class AmecheServlet extends HttpServlet implements Transport {
 
         if (machine != null) {
         	machine.callEvent(callId, componentId, event);
-        }
+        	return true;
+        } else {
+        	return false;
+        }        
     }
     
     @Override
-    public void mixerEvent(String mixerId, Collection<String> participants, Element body) throws Exception {
+    public boolean mixerEvent(String mixerId, Collection<String> participants, Element body) throws Exception {
         
+    	return false;
     }
 
     @Override
