@@ -28,14 +28,6 @@ public class SignalEvent extends AbstractVerbEvent {
     	this.tone = tone;
     }
     
-
-    public SignalEvent(String callId, String type, String tone) {
-        
-    	this.type = type;
-    	this.tone = tone;
-    	setCallId(callId);
-    }
-    
 	public String getType() {
 		return type;
 	}

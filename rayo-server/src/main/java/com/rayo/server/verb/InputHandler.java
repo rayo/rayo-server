@@ -21,6 +21,7 @@ import com.voxeo.moho.State;
 import com.voxeo.moho.common.event.MohoCPAEvent;
 import com.voxeo.moho.event.CPAEvent;
 import com.voxeo.moho.event.CPAEvent.Type;
+import com.voxeo.moho.event.InputCompleteEvent.Cause;
 import com.voxeo.moho.event.InputDetectedEvent;
 import com.voxeo.moho.media.input.EnergyGrammar;
 import com.voxeo.moho.media.input.Grammar;
@@ -168,7 +169,7 @@ public class InputHandler extends AbstractLocalVerbHandler<Input, Participant> {
 						model.getCpaData());
 
 				grammars.add(new EnergyGrammar(true, false, false));
-				grammars.add(new EnergyGrammar(false, true, false));
+				grammars.add(new EnergyGrammar(false, true, model.getCpaData().isTerminate()));
 
 				for (String it : model.getCpaData().getSignals()) {
 					// We ignore DTMF signal at this layer. Moho will broadcast
@@ -311,7 +312,7 @@ public class InputHandler extends AbstractLocalVerbHandler<Input, Participant> {
 		if (event.getInput() != null) {
 			if (signals != null && signals.contains("dtmf")) {
 				SignalEvent signalEvent = new SignalEvent(
-					participant.getId(), "dtmf",event.getInput());
+					(Input)getModel(), "dtmf",event.getInput());
 				if (terminate) {
 					// This is for compatibility with CPA's terminate tag. Probalby not 
 					// much sense for DTMF detection as the same can be achieved via a 
@@ -332,10 +333,7 @@ public class InputHandler extends AbstractLocalVerbHandler<Input, Participant> {
 			if (event.isStartOfSpeech()) {
 				_lastStartOfSpeech = System.currentTimeMillis();
 			} else if (event.isEndOfSpeech()) {
-				_lastEndOfSpeech = System.currentTimeMillis();
-	
-				++_retries;
-				long duration = _lastEndOfSpeech - _lastStartOfSpeech;
+				long duration = calculateDuration();
 				Type type;
 				if (duration < voxeo_cpa_max_time) {
 					type = Type.HUMAN_DETECTED;
@@ -355,6 +353,14 @@ public class InputHandler extends AbstractLocalVerbHandler<Input, Participant> {
 		}		
 	}
 
+	private long calculateDuration() {
+		_lastEndOfSpeech = System.currentTimeMillis();
+
+		++_retries;
+		long duration = _lastEndOfSpeech - _lastStartOfSpeech;
+		return duration;
+	}
+
 	@State
 	public void onInputComplete(
 			com.voxeo.moho.event.InputCompleteEvent<Participant> event) {
@@ -368,6 +374,7 @@ public class InputHandler extends AbstractLocalVerbHandler<Input, Participant> {
 
 		switch (event.getCause()) {
 			case MATCH:
+			case END_OF_SPEECH:
 				completeEvent = new InputCompleteEvent(model, Reason.MATCH);
 				completeEvent.setConcept(event.getConcept());
 				completeEvent.setInterpretation(event.getInterpretation());
@@ -423,16 +430,37 @@ public class InputHandler extends AbstractLocalVerbHandler<Input, Participant> {
 			com.voxeo.moho.event.InputCompleteEvent<Participant> event,
 			InputCompleteEvent completeEvent) {
 		
+		String signal = null;
+		String source = null;
+		long duration = -1L;
 		if (event.getSignal() != null) {
-			if (signals != null
-					&& signals.contains(event.getSignal().toString().toLowerCase())) {
-				completeEvent.setSignalEvent(
-						new com.rayo.core.verb.SignalEvent(
-								(Input) getModel(), 
-								event.getSignal().toString().toLowerCase(), 
-								-1L,
-								null));
-			}				
+			signal = event.getSignal().toString().toLowerCase();
+		} else if (event.getCause() == Cause.END_OF_SPEECH) {
+			signal = "speech";
+			duration = calculateDuration();
+			source = guessSource(duration);
 		}
+		if (signal != null && signals != null && 
+			signals.contains(signal)) {
+			completeEvent.setSignalEvent(
+					new com.rayo.core.verb.SignalEvent(
+							(Input) getModel(), 
+							signal, 
+							duration,
+							source));
+		}
+	}
+
+	private String guessSource(long duration) {
+
+		if (duration == -1L) return null;
+		
+		String source;
+		if (duration < voxeo_cpa_max_time) {
+			source = "human";
+		} else {
+			source = "machine";
+		}
+		return source;
 	}
 }
