@@ -2,21 +2,19 @@ package com.rayo.core.verb;
 
 import java.util.List;
 
-import javax.validation.Valid;
 import javax.validation.constraints.AssertTrue;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.joda.time.Duration;
 
 import com.rayo.core.validation.Messages;
-import com.rayo.core.validation.ValidRecognizer;
+import com.rayo.core.validation.ValidCPA;
+import com.rayo.core.validation.ValidChoices;
 
+@ValidChoices
 public class Input extends BaseVerb {
 
-	@Valid
-	@NotEmpty(message = Messages.MISSING_CHOICES)
 	private List<Choices> grammars;
 
 	private String recognizer;
@@ -26,6 +24,9 @@ public class Input extends BaseVerb {
 	private Float sensitivity;
 	private Character terminator;
 	private InputMode mode = InputMode.ANY;
+	
+	@ValidCPA
+	private CpaData cpaData;
 
 	private Duration maxSilence;
 	
@@ -117,6 +118,14 @@ public class Input extends BaseVerb {
 		this.maxSilence = maxSilence;
 	}
 
+	public CpaData getCpaData() {
+		return cpaData;
+	}
+
+	public void setCpaData(CpaData cpaData) {
+		this.cpaData = cpaData;
+	}
+
 	@Override
 	public String toString() {
 
@@ -130,7 +139,7 @@ public class Input extends BaseVerb {
 				.append("sensitivity", getSensitivity())
 				.append("terminator", getTerminator())
 				.append("maxSilence", getMaxSilence())
-				.append("grammars", grammars).toString();
+				.append("grammars", grammars)
+				.append("cpaData", getCpaData()).toString();
 	}
-
 }

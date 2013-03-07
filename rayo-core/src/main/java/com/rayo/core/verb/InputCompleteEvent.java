@@ -17,6 +17,8 @@ public class InputCompleteEvent extends VerbCompleteEvent {
     private String tag;
     private float confidence;
     private InputMode mode;
+    
+    private SignalEvent signalEvent;
 
     public InputCompleteEvent() {}
     
@@ -89,7 +91,15 @@ public class InputCompleteEvent extends VerbCompleteEvent {
         return reason == Reason.MATCH;
     }
 
-    @Override
+    public SignalEvent getSignalEvent() {
+		return signalEvent;
+	}
+
+	public void setSignalEvent(SignalEvent signalEvent) {
+		this.signalEvent = signalEvent;
+	}
+
+	@Override
     public String toString() {
 
     	return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)    		
@@ -103,6 +113,7 @@ public class InputCompleteEvent extends VerbCompleteEvent {
     		.append("concept",concept)
     		.append("interpretation",interpretation)
     		.append("tag",tag)
+    		.append("signal", signalEvent)
     		.toString();
     }
 

@@ -398,6 +398,7 @@ public class AmecheServlet extends HttpServlet implements Transport {
     				InetAddress address = InetAddress.getByName(toSipUri.getHost());
     				if (isLocal(address)) {
     					// Offer was directed to this host, i.e. non from IMS. Skip dialing
+    					//TODO: Should we maybe end the call here?
     					return;
     				}
     			} catch (UnknownHostException e) {

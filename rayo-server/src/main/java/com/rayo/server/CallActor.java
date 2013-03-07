@@ -49,7 +49,6 @@ import com.voxeo.moho.Participant.JoinType;
 import com.voxeo.moho.common.event.AutowiredEventListener;
 import com.voxeo.moho.event.CallCompleteEvent;
 import com.voxeo.moho.event.HangupEvent;
-import com.voxeo.moho.event.InputDetectedEvent;
 import com.voxeo.moho.event.JoinCompleteEvent.Cause;
 import com.voxeo.moho.event.UnjoinCompleteEvent;
 import com.voxeo.moho.media.output.AudibleResource;
@@ -74,7 +73,6 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     // Also note that no further synchronization is needed as we are within an Actor
     private boolean initialJoinReceived = false;
     private Map<String, AnsweredEvent> pendingAnswer = new ConcurrentHashMap<String, AnsweredEvent>();
-    
     
     public CallActor(T call) {
     	super(call);
@@ -184,7 +182,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     	AudibleResource resource = resolveAudio(ssml);
     	OutputCommand command = new OutputCommand(resource);
     	participant.output(command);
-    	
+    	/*
     	if (message.getTones().length() == 1) {
     		fire(new DtmfEvent(participant.getId(), message.getTones()));    		
     	} else {
@@ -192,6 +190,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
         		fire(new DtmfEvent(participant.getId(), String.valueOf(message.getTones().charAt(i))));
     		}
     	}
+    	*/
     }
     
     @Message
@@ -517,12 +516,16 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
         }
     }
 
+    /*
     @com.voxeo.moho.State
     public void onDtmf(InputDetectedEvent<Call> event) throws Exception {
-        if(event.getSource().equals(participant)) {
-            fire(new DtmfEvent(getParticipantId(), event.getInput()));
+        if(event.getSource().equals(participant) && event.getInput() != null) {
+        	if (signals != null && signals.contains("dtmf")) {
+        		fire(new SignalEvent(getParticipantId(), "dtmf", event.getInput()));
+        	}
         }
     }
+    */
 
     @com.voxeo.moho.State
     public void onHangup(HangupEvent event) throws Exception {
@@ -579,5 +582,4 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 		
 		return new HashSet<Participant>(joinees);
 	}
-	
 }

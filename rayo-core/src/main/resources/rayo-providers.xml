@@ -90,6 +90,7 @@
 	    	<list>
 	    		<value>com.rayo.core.verb.Input</value>
 	    		<value>com.rayo.core.verb.InputCompleteEvent</value>
+  	    		<value>com.rayo.core.verb.SignalEvent</value>
 	    	</list>
 	    </property>					
 	</bean>

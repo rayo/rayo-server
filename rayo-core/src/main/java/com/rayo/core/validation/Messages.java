@@ -3,7 +3,7 @@ package com.rayo.core.validation;
 public class Messages {
 
 	public static final String MISSING_PROMPT_ITEMS = "You need to send at least an audio or SSML item.";
-	public static final String MISSING_CHOICES = "You need to provide at least a valid choice element.";
+	public static final String MISSING_CHOICES = "You need to provide at least a valid choice element or CPA data.";
 	public static final String MISSING_GRAMMARS = "You need to provide at least a valid grammar element.";
 	public static final String INVALID_RECOGNIZER = "Invalid recognizer.";
 	public static final String MISSING_TO = "Missing required attribute 'to'";
@@ -49,7 +49,8 @@ public class Messages {
     public static final String INVALID_BARGEIN_TYPE = "Invalid 'interrupt-on'.";
     public static final String INVALID_ENUM = "Unsupported value for '%s'";
     public static final String INVALID_DTMF_KEY = "Invalid DTMF key. Characters accepted are [0-9], [A,B,C,D], * or #.";
-
+    public static final String INVALID_SIGNAL = "Invalid signal: %s.";
+    		
 	public static final String UNKNOWN_NAMESPACE_ELEMENT = "Could not find the element on namespace.";
 
 }
