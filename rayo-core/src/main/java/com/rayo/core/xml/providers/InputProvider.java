@@ -153,25 +153,29 @@ public class InputProvider extends BaseProvider {
         List<Choices> grammars = new ArrayList<Choices>();
 		List<Element> grammarsElements = element.elements("grammar");
         for (Element choiceElement : grammarsElements) {
-        	String contentType = choiceElement.attributeValue("content-type");
-            String content = isEmpty(choiceElement.getText(), (String) null);
-        	if (contentType.equals("application/srgs+xml") && 
-        		content == null &&
-        		choiceElement.element("ruleref") != null &&        		
-        		choiceElement.element("ruleref").attributeValue("uri").contains("urn:xmpp:rayo:cpa")) {
-        		processCpaData(input, choiceElement);
+        	if (isCpaGrammar(choiceElement)) {
+        		processCpaData(input, choiceElement);        		
         	} else {
 	            Choices choice = new Choices();
+	        	String content = isEmpty(choiceElement.getText(), (String) null);
+	        	String contentType = choiceElement.attributeValue("content-type");
 	            choice.setContentType(contentType);
 	            if (choiceElement.attributeValue("url") != null) {
 	                choice.setUri(toURI(choiceElement.attributeValue("url")));
 	            } else {
 	                choice.setContent(content);
 	            }
-	            grammars.add(choice);
+	            grammars.add(choice);        		
         	}
         }
+        
         input.setGrammars(grammars);
+	}
+
+	private boolean isCpaGrammar(Element choiceElement) {
+
+    	return (choiceElement.element("ruleref") != null &&        		
+        	choiceElement.element("ruleref").attributeValue("uri").contains("urn:xmpp:rayo:cpa"));
 	}
 
 	@SuppressWarnings("unchecked")
