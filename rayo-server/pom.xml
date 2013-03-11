@@ -42,6 +42,10 @@
 		</dependency>
 		<dependency>
 			<groupId>com.voxeo.moho</groupId>
+			<artifactId>moho-common</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.voxeo.moho</groupId>
 			<artifactId>sipservlet-api</artifactId>
 		</dependency>
 		<dependency>

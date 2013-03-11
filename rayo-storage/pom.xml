@@ -22,7 +22,11 @@
 		<dependency>
 			<groupId>com.voxeo.moho</groupId>
 			<artifactId>moho-impl</artifactId>
-		</dependency>			
+		</dependency>	
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-core</artifactId>
+		</dependency>				
         <!-- Distributed cache -->
 	    <dependency>
 	        <groupId>org.scale7</groupId>
