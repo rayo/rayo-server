@@ -63,6 +63,7 @@
 		<property name="cdrManager" ref="cdrManager" />
 		<property name="callRegistry" ref="callRegistry" />
 		<property name="mixerManager" ref="mixerManager" />
+        <property name="callManager" ref="callManager" />
 	</bean>	
 
 	<!-- Call Manager: Responsible for maintaining the Call Registry and creating new CallActors -->
