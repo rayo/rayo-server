@@ -54,7 +54,6 @@ public class IncomingCallActor extends CallActor<IncomingCall> {
         
         CallDirection direction = resolveDirection(call);
         offer.setDirection(direction);
-        headers.put("direction", direction.toString().toLowerCase());
 
         Iterator<String> headerNames = call.getHeaderNames();
         for (String headerName : iterable(headerNames)) {
