@@ -260,8 +260,7 @@ public class AmecheServlet extends HttpServlet implements Transport {
                 this.offer = event;
                 this.appIterator = apps.values().iterator();
                 
-                // Add the <offer ameche:direction=""> attribute
-                offer.addAttribute(new QName("direction", AMECHE_NS), resolveCallDirection(offer));
+                offer.addAttribute("direction", resolveCallDirection(offer));
                 
                 this.offerRequest = buildRequest(offer, callId, null);
                                 
