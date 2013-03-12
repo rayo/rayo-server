@@ -12,41 +12,47 @@
   <properties>
       <spring.version>3.0.5.RELEASE</spring.version>
   </properties>
- 
-  <repositories>
-                <repository>
-                        <id>maven.voxeolabs.net</id>
-                        <name>Voxeo Labs</name>
-                        <releases>
-                                <enabled>true</enabled>
-                                <updatePolicy>never</updatePolicy>
-                                <checksumPolicy>fail</checksumPolicy>
-                        </releases>
-                        <snapshots>
-                                <enabled>true</enabled>
-                                <updatePolicy>always</updatePolicy>
-                                <checksumPolicy>fail</checksumPolicy>
-                        </snapshots>
-                        <url>http://maven.voxeolabs.net:8081/nexus/content/repositories/snapshots</url>
-                        <layout>default</layout>
-                </repository>
-                <repository>
-                        <id>public.maven.voxeolabs.net</id>
-                        <name>Voxeo Labs</name>
-                        <releases>
-                                <enabled>true</enabled>
-                                <updatePolicy>never</updatePolicy>
-                                <checksumPolicy>fail</checksumPolicy>
-                        </releases>
-                        <snapshots>
-                                <enabled>true</enabled>
-                                <updatePolicy>always</updatePolicy>
-                                <checksumPolicy>fail</checksumPolicy>
-                        </snapshots>
-                        <url>http://maven.voxeolabs.net:8081/nexus/content/groups/public/</url>
-                        <layout>default</layout>
-                </repository>
-  </repositories>  
+
+    <repositories>
+        <repository>
+            <id>maven.voxeolabs.net</id>
+            <name>Voxeo Labs</name>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+                <checksumPolicy>fail</checksumPolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+                <checksumPolicy>fail</checksumPolicy>
+            </snapshots>
+            <url>http://maven.voxeolabs.net:8081/nexus/content/repositories/snapshots</url>
+            <layout>default</layout>
+        </repository>
+        <repository>
+            <id>public.maven.voxeolabs.net</id>
+            <name>Voxeo Labs</name>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>never</updatePolicy>
+                <checksumPolicy>fail</checksumPolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+                <checksumPolicy>fail</checksumPolicy>
+            </snapshots>
+            <url>http://maven.voxeolabs.net:8081/nexus/content/groups/public/</url>
+            <layout>default</layout>
+        </repository>
+        <repository>
+            <id>jetlang</id>
+            <url>http://jetlang.googlecode.com/svn/repo/</url>
+            <layout>default</layout>
+        </repository>
+
+    </repositories>  
   
   <dependencyManagement>
     <dependencies>

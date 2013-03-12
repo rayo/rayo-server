@@ -19,7 +19,7 @@ public class JoinCommand extends AbstractCallCommand {
 	
 	private Direction direction = Direction.DUPLEX;
 
-	private JoinType media = JoinType.BRIDGE;
+	private JoinType media = JoinType.BRIDGE_SHARED;
 	
 	private Boolean force;
 

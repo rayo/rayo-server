@@ -1,15 +1,19 @@
 package com.rayo.server;
 
 import java.net.URI;
+import java.util.Map;
 
 import com.rayo.core.CallRef;
 import com.rayo.core.DialCommand;
 import com.rayo.core.JoinCommand;
+import com.rayo.server.admin.AdminService;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.ApplicationContext;
 import com.voxeo.moho.Call;
 import com.voxeo.moho.CallableEndpoint;
 import com.voxeo.moho.Endpoint;
+import com.voxeo.moho.IncomingCall;
+import com.voxeo.moho.event.AcceptableEvent.Reason;
 
 public class CallManager extends ReflectiveActor {
 
@@ -19,10 +23,13 @@ public class CallManager extends ReflectiveActor {
     private CallActorFactory callActorFactory;
     private ApplicationContext applicationContext;
     private CdrManager cdrManager;
+    private AdminService adminService;
+    private CallStatistics callStatistics;
     
     // Calls
     // ================================================================================
 
+    
     @Message
     public CallRef onDial(DialCommand command) throws Exception {
         
@@ -61,10 +68,8 @@ public class CallManager extends ReflectiveActor {
 	        }
         }
         
-        // Store the CDR
-        cdrManager.create(mohoCall);
-        
-        startCallActor(mohoCall);
+        CallActor<?> callActor = createCallActor(mohoCall);
+        callActor.publish(mohoCall);
         
     	if (log.isDebugEnabled()) {
     		log.debug("Call actor started for call [%s]", mohoCall.getId());
@@ -72,22 +77,55 @@ public class CallManager extends ReflectiveActor {
         
     	return new CallRef(mohoCall.getId());
     }
-
+    
     @Message
-    public void onIncomingCall(Call call) {
-        log.info("Incoming Call [%s]", call);
-        startCallActor(call);
+    public void onIncomingCall(IncomingCall mohoCall) {
+        
+        log.info("Incoming Call [%s]", mohoCall);
+        
+        if (adminService.isQuiesceMode()) {
+            log.warn("Quiesce Mode ON. Dropping incoming call: %s", mohoCall.getId());
+            callStatistics.callRejected();
+            callStatistics.callBusy();
+            mohoCall.reject(Reason.BUSY);
+            return;
+        }                       
+        
+        CallActor<?> callActor = createCallActor(mohoCall);
+        callActor.publish(mohoCall);
+
     }
 
-    private void startCallActor(final Call call) {
+    public CallActor<?> createCallActor(URI to, URI from, Map<String, String> headers) {
+        
+        CallableEndpoint toEndpoint = (CallableEndpoint) applicationContext.createEndpoint(to.toString());
+        
+        Endpoint fromEndpoint = null;
+        if(from != null) {
+            fromEndpoint = applicationContext.createEndpoint(from.toString());
+        }
+
+        log.debug("Creating call to [%s] from [%s]", toEndpoint, fromEndpoint);
+        
+        final Call mohoCall = toEndpoint.createCall(fromEndpoint, headers);
+        
+        return createCallActor(mohoCall);
+        
+        
+    }
+
+    public CallActor<?> createCallActor(final Call mohoCall) {
     	
+        // Store the CDR
+        cdrManager.create(mohoCall);
+
         if(getEventHandlers().isEmpty()) {
-            log.warn("If an INVITE arrives and noone's there to handle it; does it make a sound? [call=%s]", call);
-            call.disconnect();
+            log.warn("If an INVITE arrives and noone's there to handle it; does it make a sound? [call=%s]", mohoCall);
+            mohoCall.disconnect();
         }
         
         // Construct Actor
-        CallActor<?> callActor = callActorFactory.create(call);
+        CallActor<?> callActor = callActorFactory.create(mohoCall);
         callActor.start();
 
         // Wire up default call handlers
@@ -102,13 +140,12 @@ public class CallManager extends ReflectiveActor {
         callActor.link(new ActorLink() {
             @Override
             public void postStop() {
-                log.info("Call cleanup [call=%s]", call);
-                callRegistry.remove(call.getId());
+                log.info("Call cleanup [call=%s]", mohoCall);
+                callRegistry.remove(mohoCall.getId());
             }
         });
-
-        // Publish the Moho Call
-        callActor.publish(call);
+        
+        return callActor;
 
     }
     
@@ -142,5 +179,13 @@ public class CallManager extends ReflectiveActor {
 	public void setCdrManager(CdrManager cdrManager) {
 		this.cdrManager = cdrManager;
 	}
+
+    public void setAdminService(AdminService adminService) {
+        this.adminService = adminService;
+    }
+    
+    public void setCallStatistics(CallStatistics callStatistics) {
+        this.callStatistics = callStatistics;
+    }
 
 }
