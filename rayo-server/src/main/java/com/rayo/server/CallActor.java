@@ -67,6 +67,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     private CdrManager cdrManager;
     private CallRegistry callRegistry;
     private MixerManager mixerManager;
+    private CallManager callManager;
     
     // This is used to synchronize Answered event with media join as Moho may send you 
     // an answered event before the media is joined
@@ -85,6 +86,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     public void onCall(Call call) throws Exception {
         
     	try {
+    	    
         	if (log.isDebugEnabled()) {
         		log.debug("Received call event [%s]", call.getId());
         	}
@@ -107,6 +109,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
             		log.debug("Executing join operation. Call: [%s]. Join type: [%s]. Direction: [%s]. Participant: [%s].", participant.getId(), mediaType, direction, destination);
             	}	            
         		participant.join(destination, mediaType, force, direction);
+        		
             } else {
             	if (log.isDebugEnabled()) {
             		log.debug("Joining call [%s] to media mixer.", participant.getId());
@@ -579,7 +582,15 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 	}
 	
 	public Set<Participant> getJoinees() {
-		
 		return new HashSet<Participant>(joinees);
 	}
+
+    public CallManager getCallManager() {
+        return callManager;
+    }
+
+    public void setCallManager(CallManager callManager) {
+        this.callManager = callManager;
+    }
+	
 }

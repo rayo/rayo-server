@@ -1,6 +1,8 @@
 package com.rayo.core.xml.providers;
 
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -14,8 +16,10 @@ import org.dom4j.QName;
 import com.rayo.core.AcceptCommand;
 import com.rayo.core.AnswerCommand;
 import com.rayo.core.AnsweredEvent;
+import com.rayo.core.CallDirection;
 import com.rayo.core.CallRef;
 import com.rayo.core.CallRejectReason;
+import com.rayo.core.ConnectCommand;
 import com.rayo.core.DestroyMixerCommand;
 import com.rayo.core.DialCommand;
 import com.rayo.core.DtmfCommand;
@@ -55,6 +59,8 @@ public class RayoProvider extends BaseProvider {
         	return buildOfferEvent(element);
         } else if (elementName.equals("accept")) {
             return buildAcceptCommand(element);
+        } else if (elementName.equals("continue")) {
+            return buildConnectCommand(element);
         } else if (elementName.equals("hold")) {
             return buildHoldCommand(element);
         } else if (elementName.equals("unhold")) {
@@ -109,7 +115,7 @@ public class RayoProvider extends BaseProvider {
         return null;
 	}
 	
-	private Object buildCallRef(Element element) {
+    private Object buildCallRef(Element element) {
 		return new CallRef(element.attributeValue("id"));
 	}
 
@@ -177,6 +183,24 @@ public class RayoProvider extends BaseProvider {
     private Object buildAnsweredEvent(Element element) {
         return new AnsweredEvent(null, grabHeaders(element));
     }
+    
+    @SuppressWarnings("unchecked")
+    private Object buildConnectCommand(Element element) {
+        
+        ConnectCommand command = new ConnectCommand();
+        
+        List<Element> targetEls = element.elements("target");
+        if(!targetEls.isEmpty()) {
+            List<URI> targets = new ArrayList<URI>(targetEls.size());
+            for(Element el : targetEls) {
+                targets.add(toURI(el.getText()));
+            }
+            command.setTargets(targets);
+        }
+        
+        return command;
+    }
+
 
     private Object buildRingingEvent(Element element) {
         return new RingingEvent(null, grabHeaders(element));
@@ -187,6 +211,7 @@ public class RayoProvider extends BaseProvider {
         OfferEvent offer = new OfferEvent(element.attributeValue("callId"));
         offer.setFrom(toURI(element.attributeValue("from")));
         offer.setTo(toURI(element.attributeValue("to")));
+        offer.setDirection(toEnum(CallDirection.class, "direction", element));
         offer.setHeaders(grabHeaders(element));
 
         return offer;
@@ -366,6 +391,8 @@ public class RayoProvider extends BaseProvider {
             createOfferEvent(object, document);
         } else if (object instanceof EndEvent) {
             createEndEvent(object, document);
+        } else if (object instanceof ConnectCommand) {
+            createConnectCommand((ConnectCommand)object, document);
         } else if (object instanceof RingingEvent) {
             createRingEvent(object, document);
         } else if (object instanceof AnsweredEvent) {
@@ -414,6 +441,15 @@ public class RayoProvider extends BaseProvider {
         	createVerbRef((VerbRef)object, document);
         } else if (object instanceof CallRef) {
         	createCallRef((CallRef)object, document);
+        }
+    }
+
+    private void createConnectCommand(ConnectCommand command, Document document) {
+        Element root = document.addElement(new QName("connect", RAYO_NAMESPACE));
+        if(command.getTargets() != null) {
+            for(URI target : command.getTargets()) {
+                root.addElement("target").setText(target.toString());
+            }
         }
     }
 
@@ -646,7 +682,12 @@ public class RayoProvider extends BaseProvider {
         Element root = document.addElement(new QName("offer", RAYO_NAMESPACE));
         root.addAttribute("to", offer.getTo().toString());
         root.addAttribute("from", offer.getFrom().toString());
-
+        
+        CallDirection direction = offer.getDirection();
+        if(direction != null) {
+            root.addAttribute("direction", direction.toString().toLowerCase());
+        }
+        
         addHeaders(offer.getHeaders(), root);
 
         return document;

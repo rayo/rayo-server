@@ -94,7 +94,8 @@ public class MockMediaService implements MediaService<EventSource> {
 		return null;
 	}
 
-  public MediaGroup getMediaGroup(boolean create) {
-    return null;
-  }
+	public MediaGroup getMediaGroup(boolean create) {
+	    return null;
+	}
+	
 }

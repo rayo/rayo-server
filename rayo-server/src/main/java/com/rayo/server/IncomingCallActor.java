@@ -2,13 +2,21 @@ package com.rayo.server;
 
 import static com.voxeo.utils.Objects.iterable;
 
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
 import com.rayo.core.AcceptCommand;
 import com.rayo.core.AnswerCommand;
+import com.rayo.core.AnsweredEvent;
+import com.rayo.core.CallRef;
+import com.rayo.core.ConnectCommand;
+import com.rayo.core.EndCommand;
+import com.rayo.core.EndEvent;
 import com.rayo.core.EndEvent.Reason;
+import com.rayo.core.JoinCommand;
+import com.rayo.core.JoinDestinationType;
 import com.rayo.core.OfferEvent;
 import com.rayo.core.RedirectCommand;
 import com.rayo.core.RejectCommand;
@@ -17,6 +25,7 @@ import com.voxeo.moho.ApplicationContext;
 import com.voxeo.moho.Call;
 import com.voxeo.moho.Endpoint;
 import com.voxeo.moho.IncomingCall;
+import com.voxeo.moho.Participant.JoinType;
 import com.voxeo.moho.common.event.AutowiredEventListener;
 import com.voxeo.moho.event.AcceptableEvent;
 import com.voxeo.moho.sip.SIPCallImpl;
@@ -142,6 +151,67 @@ public class IncomingCallActor extends CallActor<IncomingCall> {
         default:
             throw new UnsupportedOperationException("Reason not handled: " + message.getReason());
         }
+    }
+    
+    @Message
+    public CallRef connect(ConnectCommand command) {
+
+        // FIXME: We only dial the first target at the moment
+        URI to = null;
+
+        if(command.getTargets().isEmpty()) {
+            to = participant.getInvitee().getURI();
+
+        }
+        else {
+            to = command.getTargets().get(0);
+        }
+        
+        // Extract IMS headers
+        Map<String,String> headers = new HashMap<String, String>();
+        headers.put("Route", participant.getHeader("Route"));
+        headers.put("P-Asserted-Identity", participant.getHeader("P-Asserted-Identity"));
+        headers.put("P-Served-User", participant.getHeader("P-Served-User"));
+        headers.put("P-Charging-Vector", participant.getHeader("P-Charging-Vector"));
+
+        URI from = participant.getInvitor().getURI();
+        
+        final CallActor<?> targetCallActor = getCallManager().createCallActor(to, from, headers);
+        
+        // WARNING - NOT 'ACTOR THREAD'
+        // This even handler will fire on the caller's thread.
+        targetCallActor.addEventHandler(new EventHandler() {
+            @Override
+            public void handle(Object event) throws Exception {
+                if(event instanceof AnsweredEvent) {
+                    JoinCommand join = new JoinCommand();
+                    join.setTo(targetCallActor.getCall().getId());
+                    join.setType(JoinDestinationType.CALL);
+                    join.setMedia(JoinType.BRIDGE_EXCLUSIVE);
+                    // Join to the B Leg
+                    publish(join);
+                }
+                else if(event instanceof EndEvent) {
+                    publish(new EndCommand(getCall().getId(), Reason.HANGUP));
+                }
+            }
+        });
+
+        // Hang up the peer call when this actor is destroyed
+        link(new ActorLink() {
+            @Override
+            public void postStop() {
+                targetCallActor.publish(new EndCommand(getCall().getId(), Reason.HANGUP));
+            }
+        });
+        
+        // Start dialing
+        targetCallActor.publish(targetCallActor.getCall());
+        
+        // Return a reference to the newly created peer call
+        return new CallRef(targetCallActor.getCall().getId());
+        
+        
     }
 
 }

@@ -33,13 +33,22 @@ public class Server implements EventHandler, CommandHandler {
 	private static final Loggerf log = Loggerf.getLogger(Server.class);
 	
 	private XmlProvider provider;
+	
 	private CallManager callManager;
 	private CallRegistry callRegistry;
+
 	private MixerRegistry mixerRegistry;
-	private RayoStatistics rayoStatistics;
+
 	private CdrManager cdrManager;
+	
+	private RayoAdminService adminService;
+	
+	// TODO: Delete
+	private RayoStatistics rayoStatistics;
+    
+    // TODO: Delete?
 	private FilterChain filtersChain;
-    private RayoAdminService adminService;
+    
 
 	private List<Transport> transports = new ArrayList<Transport>();
 	

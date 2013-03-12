@@ -8,8 +8,10 @@ import org.apache.commons.lang.builder.ToStringStyle;
 
 public class OfferEvent extends AbstractCallEvent {
 
+    
     private URI to;
     private URI from;
+    private CallDirection direction; 
     private Map<String, String> headers;
 
     public OfferEvent(String callId) {
@@ -32,6 +34,14 @@ public class OfferEvent extends AbstractCallEvent {
         this.from = from;
     }
 
+    public CallDirection getDirection() {
+        return direction;
+    }
+
+    public void setDirection(CallDirection direction) {
+        this.direction = direction;
+    }
+
     public Map<String, String> getHeaders() {
         return headers;
     }
@@ -46,7 +56,9 @@ public class OfferEvent extends AbstractCallEvent {
     	return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)    		
     		.append("from",from)
     		.append("to",to)
+            .append("direction",direction)
     		.append("headers",headers)
     		.toString();
     }
+
 }
