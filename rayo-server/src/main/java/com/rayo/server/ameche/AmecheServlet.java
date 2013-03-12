@@ -82,6 +82,7 @@ public class AmecheServlet extends HttpServlet implements Transport {
                 // Make and register a new ameche call handler 
                 machine = new AmecheCall(callId, event, apps);
                 calls.put(callId, machine);
+                return true;
             }
             else {
                 return false;
@@ -97,15 +98,14 @@ public class AmecheServlet extends HttpServlet implements Transport {
             if (event.getName().equals("end")) {
                 calls.remove(callId);
             }
+            
+            if (machine != null) {
+                machine.onEvent(event, callId, componentId);
+                return true;
+            }
         }
 
-        if (machine != null) {
-            machine.onEvent(event, callId, componentId);
-            return true;
-        }
-        else {
-            return false;
-        }
+        return false;
     }
     
     @Override

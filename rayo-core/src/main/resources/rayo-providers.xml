@@ -35,6 +35,7 @@
 	    		<value>com.rayo.core.AnsweredEvent</value>
 	    		<value>com.rayo.core.AcceptCommand</value>
 	    		<value>com.rayo.core.AnswerCommand</value>
+	    		<value>com.rayo.core.ConnectCommand</value>
 	    		<value>com.rayo.core.HangupCommand</value>
 	    		<value>com.rayo.core.RejectCommand</value>
 	    		<value>com.rayo.core.RedirectCommand</value>

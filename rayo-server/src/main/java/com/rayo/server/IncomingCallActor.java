@@ -12,6 +12,7 @@ import com.rayo.core.AnswerCommand;
 import com.rayo.core.AnsweredEvent;
 import com.rayo.core.CallRef;
 import com.rayo.core.ConnectCommand;
+import com.rayo.core.EndCommand;
 import com.rayo.core.EndEvent;
 import com.rayo.core.EndEvent.Reason;
 import com.rayo.core.JoinCommand;
@@ -191,7 +192,7 @@ public class IncomingCallActor extends CallActor<IncomingCall> {
                     publish(join);
                 }
                 else if(event instanceof EndEvent) {
-                    publish(new EndEvent(getCall().getId(), Reason.HANGUP, null));
+                    publish(new EndCommand(getCall().getId(), Reason.HANGUP));
                 }
             }
         });
@@ -200,7 +201,7 @@ public class IncomingCallActor extends CallActor<IncomingCall> {
         link(new ActorLink() {
             @Override
             public void postStop() {
-                targetCallActor.publish(new EndEvent(getCall().getId(), Reason.HANGUP, null));
+                targetCallActor.publish(new EndCommand(getCall().getId(), Reason.HANGUP));
             }
         });
         
