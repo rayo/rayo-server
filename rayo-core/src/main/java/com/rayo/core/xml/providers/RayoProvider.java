@@ -211,7 +211,9 @@ public class RayoProvider extends BaseProvider {
         OfferEvent offer = new OfferEvent(element.attributeValue("callId"));
         offer.setFrom(toURI(element.attributeValue("from")));
         offer.setTo(toURI(element.attributeValue("to")));
-        offer.setDirection(toEnum(CallDirection.class, "direction", element));
+        if (element.attributeValue("direction") != null) {
+        	offer.setDirection(toEnum(CallDirection.class, "direction", element));
+        }
         offer.setHeaders(grabHeaders(element));
 
         return offer;
