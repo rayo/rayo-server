@@ -59,8 +59,8 @@ public class AmecheServlet extends HttpServlet implements Transport {
         httpTransportContext.setConfigLocation("/WEB-INF/" + getServletName() + ".xml");
         httpTransportContext.refresh();
 
-        appInstanceEventDispatcher = (AppInstanceEventDispatcher) httpTransportContext.getBean("httpClient");
-        appInstanceResolver = (AppInstanceResolver) httpTransportContext.getBean("appInstanceEventDispatcher");
+        appInstanceEventDispatcher = (AppInstanceEventDispatcher) httpTransportContext.getBean("appInstanceEventDispatcher");
+        appInstanceResolver = (AppInstanceResolver) httpTransportContext.getBean("appInstanceResolver");
         
         Server server = (Server) httpTransportContext.getBean("rayoServer");
         server.addTransport(this);

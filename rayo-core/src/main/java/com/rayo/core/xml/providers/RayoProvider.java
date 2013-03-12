@@ -59,7 +59,7 @@ public class RayoProvider extends BaseProvider {
         	return buildOfferEvent(element);
         } else if (elementName.equals("accept")) {
             return buildAcceptCommand(element);
-        } else if (elementName.equals("accept")) {
+        } else if (elementName.equals("continue")) {
             return buildConnectCommand(element);
         } else if (elementName.equals("hold")) {
             return buildHoldCommand(element);
@@ -391,7 +391,7 @@ public class RayoProvider extends BaseProvider {
             createOfferEvent(object, document);
         } else if (object instanceof EndEvent) {
             createEndEvent(object, document);
-        } else if (object instanceof EndEvent) {
+        } else if (object instanceof ConnectCommand) {
             createConnectCommand((ConnectCommand)object, document);
         } else if (object instanceof RingingEvent) {
             createRingEvent(object, document);
