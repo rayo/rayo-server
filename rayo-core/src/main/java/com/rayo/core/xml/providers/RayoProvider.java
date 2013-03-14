@@ -61,7 +61,7 @@ public class RayoProvider extends BaseProvider {
         	return buildOfferEvent(element);
         } else if (elementName.equals("accept")) {
             return buildAcceptCommand(element);
-        } else if (elementName.equals("continue")) {
+        } else if (elementName.equals("connect")) {
             return buildConnectCommand(element);
         } else if (elementName.equals("hold")) {
             return buildHoldCommand(element);

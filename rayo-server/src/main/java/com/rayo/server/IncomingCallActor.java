@@ -10,6 +10,7 @@ import java.util.Map;
 import com.rayo.core.AcceptCommand;
 import com.rayo.core.AnswerCommand;
 import com.rayo.core.AnsweredEvent;
+import com.rayo.core.CallDirection;
 import com.rayo.core.CallRef;
 import com.rayo.core.ConnectCommand;
 import com.rayo.core.EndCommand;
@@ -21,6 +22,8 @@ import com.rayo.core.OfferEvent;
 import com.rayo.core.RedirectCommand;
 import com.rayo.core.RejectCommand;
 import com.rayo.core.exception.RecoverableException;
+import com.rayo.core.sip.SipURI;
+import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.ApplicationContext;
 import com.voxeo.moho.Call;
 import com.voxeo.moho.Endpoint;
@@ -32,6 +35,8 @@ import com.voxeo.moho.sip.SIPCallImpl;
 
 public class IncomingCallActor extends CallActor<IncomingCall> {
 
+	private static final Loggerf logger = Loggerf.getLogger(IncomingCallActor.class);
+	
     public IncomingCallActor(IncomingCall call) {
     	super(call);
     }
@@ -42,12 +47,15 @@ public class IncomingCallActor extends CallActor<IncomingCall> {
     @Message
     public void onCall(Call call) throws Exception {
 
+        Map<String, String> headers = new HashMap<String, String>();
         OfferEvent offer = new OfferEvent(getParticipantId());
         offer.setFrom(call.getInvitor().getURI());
         offer.setTo(call.getInvitee().getURI());
+        
+        CallDirection direction = resolveDirection(call);
+        offer.setDirection(direction);
 
         Iterator<String> headerNames = call.getHeaderNames();
-        Map<String, String> headers = new HashMap<String, String>();
         for (String headerName : iterable(headerNames)) {
           if (headerName.equalsIgnoreCase("route")) {
             StringBuffer value = new StringBuffer();
@@ -84,7 +92,27 @@ public class IncomingCallActor extends CallActor<IncomingCall> {
     // Call Commands
     // ================================================================================
 
-    @Message
+    private CallDirection resolveDirection(Call call) {
+
+    	CallDirection direction = CallDirection.TERM;
+    	String role = null;
+    	if (call.getInvitee().getURI().toString().startsWith("sip:")) {
+    		SipURI uri = new SipURI(call.getInvitee().getURI().toString());
+    		role = uri.getParameter("role");
+    	}
+    	if (role != null) {
+    		try {
+    			direction = CallDirection.valueOf(role);
+    		} catch (Exception e) {
+    			logger.error("Error resolving call direction: %s. Setting diretion to 'term'.", e);
+    			direction = CallDirection.TERM;
+    		}
+    	}
+    	
+    	return direction;
+	}
+
+	@Message
     public void accept(AcceptCommand message) {
 
     	switch (((SIPCallImpl)participant).getSIPCallState()) {
