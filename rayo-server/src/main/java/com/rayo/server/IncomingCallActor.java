@@ -197,10 +197,7 @@ public class IncomingCallActor extends CallActor<IncomingCall> {
         
         // Extract IMS headers
         Map<String,String> headers = new HashMap<String, String>();
-        headers.put("Route", participant.getHeader("Route"));
-        headers.put("P-Asserted-Identity", participant.getHeader("P-Asserted-Identity"));
-        headers.put("P-Served-User", participant.getHeader("P-Served-User"));
-        headers.put("P-Charging-Vector", participant.getHeader("P-Charging-Vector"));
+        addHeaders(headers, participant, "Route", "P-Asserted-Identity", "P-Served-User", "P-Charging-Vector");
 
         URI from = participant.getInvitor().getURI();
         
@@ -237,9 +234,16 @@ public class IncomingCallActor extends CallActor<IncomingCall> {
         targetCallActor.publish(targetCallActor.getCall());
         
         // Return a reference to the newly created peer call
-        return new CallRef(targetCallActor.getCall().getId());
-        
-        
+        return new CallRef(targetCallActor.getCall().getId());   
     }
-
+    
+    private void addHeaders(Map<String,String> headers, IncomingCall participant, String... keys) {
+    	
+    	for(String key: keys) {
+    		String header = participant.getHeader(key);
+    		if (header != null) {
+    			headers.put(key, header);
+    		}
+    	}
+    }
 }
