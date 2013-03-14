@@ -1,5 +1,7 @@
 package com.rayo.core.xml.providers;
 
+import static com.voxeo.utils.Strings.isEmpty;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -211,7 +213,10 @@ public class RayoProvider extends BaseProvider {
         OfferEvent offer = new OfferEvent(element.attributeValue("callId"));
         offer.setFrom(toURI(element.attributeValue("from")));
         offer.setTo(toURI(element.attributeValue("to")));
-        offer.setDirection(toEnum(CallDirection.class, "direction", element));
+        String dir = element.attributeValue("direction");
+        if (!isEmpty(dir)) {
+            offer.setDirection(toEnum(CallDirection.class, "direction", element));
+        }
         offer.setHeaders(grabHeaders(element));
 
         return offer;
