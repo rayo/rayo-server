@@ -96,8 +96,9 @@ public class IncomingCallActor extends CallActor<IncomingCall> {
 
     	CallDirection direction = CallDirection.TERM;
     	String role = null;
-    	if (call.getInvitee().getURI().toString().startsWith("sip:")) {
-    		SipURI uri = new SipURI(call.getInvitee().getURI().toString());
+    	URI inviteeUri = call.getInvitee().getURI();
+		if (inviteeUri != null && inviteeUri.toString().startsWith("sip:")) {
+    		SipURI uri = new SipURI(inviteeUri.toString());
     		role = uri.getParameter("role");
     	}
     	if (role != null) {
