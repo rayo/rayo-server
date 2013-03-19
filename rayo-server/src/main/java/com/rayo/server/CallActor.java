@@ -68,6 +68,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     private CallRegistry callRegistry;
     private MixerManager mixerManager;
     private CallManager callManager;
+    private DialingCoordinator dialingCoordinator;
     
     // This is used to synchronize Answered event with media join as Moho may send you 
     // an answered event before the media is joined
@@ -592,5 +593,12 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     public void setCallManager(CallManager callManager) {
         this.callManager = callManager;
     }
-	
+
+	public DialingCoordinator getDialingCoordinator() {
+		return dialingCoordinator;
+	}
+
+	public void setDialingCoordinator(DialingCoordinator dialingCoordinator) {
+		this.dialingCoordinator = dialingCoordinator;
+	}	
 }

@@ -54,6 +54,7 @@
 	    		<value>com.rayo.core.DestroyMixerCommand</value>
 				<value>com.rayo.core.CallRef</value>
 				<value>com.rayo.core.verb.VerbRef</value>
+				<value>com.rayo.core.JoiningEvent</value>
 	      	</list>
 	   	</property>		
 	</bean>

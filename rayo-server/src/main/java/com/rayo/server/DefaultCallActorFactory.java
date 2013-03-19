@@ -18,6 +18,7 @@ public class DefaultCallActorFactory implements CallActorFactory {
     private CallRegistry callRegistry;
     private MixerManager mixerManager;
     private CallManager callManager;
+    private DialingCoordinator dialingCoordinator;
 
     @Override
     public CallActor<?> create(Call call) {
@@ -40,6 +41,7 @@ public class DefaultCallActorFactory implements CallActorFactory {
         actor.setCallRegistry(callRegistry);
         actor.setMixerManager(mixerManager);
         actor.setCallManager(callManager);
+        actor.setDialingCoordinator(dialingCoordinator);
         return actor;
     }
 
@@ -86,5 +88,12 @@ public class DefaultCallActorFactory implements CallActorFactory {
     public void setCallManager(CallManager callManager) {
         this.callManager = callManager;
     }
-	
+
+	public DialingCoordinator getDialingCoordinator() {
+		return dialingCoordinator;
+	}
+
+	public void setDialingCoordinator(DialingCoordinator dialingCoordinator) {
+		this.dialingCoordinator = dialingCoordinator;
+	}	
 }

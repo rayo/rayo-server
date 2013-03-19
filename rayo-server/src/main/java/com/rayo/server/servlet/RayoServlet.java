@@ -129,9 +129,13 @@ public class RayoServlet extends AbstractRayoServlet implements Transport {
         // TODO: ouch
         try {
 	        org.w3c.dom.Element documentElement = toDomElement(body);
-	        PresenceMessage presence = getXmppFactory().createPresence(from, jid, null, documentElement); 
-	        presence.send();
-	        xmppMessageListenersGroup.onPresenceSent(presence);
+	        PresenceMessage presence = getXmppFactory().createPresence(from, jid, null, documentElement);
+	        if (presence != null) {
+		        presence.send();
+		        xmppMessageListenersGroup.onPresenceSent(presence);
+	        } else {
+	        	log.debug("Could not send Presence : %s. Is there a client listening for that call?", presence);
+	        }
         } catch (ServletException e) {
         	if (e.getMessage().startsWith("can't find corresponding client session") && 
         		 body.getName().equals("offer")) {

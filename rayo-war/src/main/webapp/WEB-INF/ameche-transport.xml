@@ -24,9 +24,7 @@
     </property>
   </bean>
   <bean id="appInstanceResolver" class="com.rayo.server.ameche.SimpleRegexpAppInstanceResolver">
-	  <property name="routingRules">
-	    <util:properties location="/WEB-INF/ameche-routing.properties"/>
-	  </property>
+	  <constructor-arg value="/WEB-INF/ameche-routing.properties"/> <!-- properties file -->
+	  <constructor-arg value="60000"/> <!-- reload interval in milliseconds -->
   </bean>
-  	
 </beans>

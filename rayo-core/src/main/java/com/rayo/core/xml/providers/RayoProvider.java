@@ -29,6 +29,7 @@ import com.rayo.core.HangupCommand;
 import com.rayo.core.JoinCommand;
 import com.rayo.core.JoinDestinationType;
 import com.rayo.core.JoinedEvent;
+import com.rayo.core.JoiningEvent;
 import com.rayo.core.OfferEvent;
 import com.rayo.core.RedirectCommand;
 import com.rayo.core.RejectCommand;
@@ -110,12 +111,14 @@ public class RayoProvider extends BaseProvider {
         	return buildDestroyIfEmptyCommand(element);
         } else if (element.getName().equals("ref")) {
         	return buildCallRef(element);
+        } else if (elementName.equals("joining")) {
+            return buildJoiningEvent(element);  
         }
         
         return null;
 	}
-	
-    private Object buildCallRef(Element element) {
+
+	private Object buildCallRef(Element element) {
 		return new CallRef(element.attributeValue("id"));
 	}
 
@@ -321,6 +324,13 @@ public class RayoProvider extends BaseProvider {
     		return new JoinedEvent(null,element.attributeValue("mixer-name"), JoinDestinationType.MIXER);
     	} else return new JoinedEvent(null,null,null);
     }
+    
+    private Object buildJoiningEvent(Element element) {
+
+    	if (element.attribute("call-id") != null) {
+    		return new JoiningEvent(null,element.attributeValue("call-id"));
+    	} else return new JoiningEvent(null,null);
+    }
 
     private Object buildUnjoinedEvent(Element element) {
 
@@ -443,6 +453,8 @@ public class RayoProvider extends BaseProvider {
         	createVerbRef((VerbRef)object, document);
         } else if (object instanceof CallRef) {
         	createCallRef((CallRef)object, document);
+        } else if (object instanceof JoiningEvent) {
+            createJoiningEvent(object, document);  
         }
     }
 
@@ -619,6 +631,19 @@ public class RayoProvider extends BaseProvider {
         		joined.addAttribute("call-id", event.getTo());
         	} else {
         		joined.addAttribute("mixer-name", event.getTo());        		
+        	}
+        }
+
+        return document;
+    }
+
+    private Document createJoiningEvent(Object object, Document document) {
+
+    	JoiningEvent event = (JoiningEvent)object;
+        Element joining = document.addElement(new QName("joining", RAYO_NAMESPACE));
+        if (event.getTo() != null) {
+        	if (event.getType() == JoinDestinationType.CALL) {
+        		joining.addAttribute("call-id", event.getTo());
         	}
         }
 

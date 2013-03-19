@@ -33,7 +33,7 @@ import com.rayo.server.Server;
 import com.rayo.server.Transport;
 import com.rayo.server.TransportCallback;
 import com.voxeo.logging.Loggerf;
-import com.voxeo.utils.SettableResultFuture;
+import com.voxeo.moho.common.util.SettableResultFuture;
 import com.voxeo.utils.Typesafe;
 
 public class AmecheServlet extends HttpServlet implements Transport {
@@ -235,9 +235,23 @@ public class AmecheServlet extends HttpServlet implements Transport {
                 }
                 
                 dispatchEvent(event, callId, componentId, appInstance);
-            }
-            // Blast event to all active instances
-            else {
+            } else {
+                if (event.getName().equals("joining")) {
+                    //TODO: Check if proper call ids are being used here
+                    // Register call with outer AmecheServlet's registry
+                    String peerCallId = event.attributeValue("call-id");
+                    calls.put(peerCallId, AmecheCall.this);
+                    
+                    // Notify apps of new leg.
+                    // Send <announce><joining call-id="PARENT_CALL_ID" /></announce/>
+                    Element announceElement = DocumentHelper.createElement("announce");
+                    //FIXME: no way to know the actual address that was dialed :-(
+                    announceElement.addAttribute("to", "foo");
+                    announceElement.add(event.createCopy());
+                    
+                    event = announceElement;
+                }
+            	// Blast event to all active instances
                 for(AppInstance appInstance : apps.values()) {
                     dispatchEvent(event, callId, componentId, appInstance);
                 }
@@ -248,28 +262,20 @@ public class AmecheServlet extends HttpServlet implements Transport {
         /**
          * Synchronous method that checks for any internal Ameche commands and forward the rest to the {@link Server} for processing
          */
-        public synchronized Future<Element> onCommand(final String appInstanceId, String callId, String componentId, Element command) {
+        public synchronized Future<Element> onCommand(
+        		final String appInstanceId, String callId, String componentId, final Element command) {
 
             final SettableResultFuture<Element> future = new SettableResultFuture<Element>();
 
             if(command.getName().equals("continue")) {
-                // Extract targets to ring when offer cycle is complete
-                offerTargets.clear();
-                for(Element targetElement : Typesafe.list(Element.class, command.elements("target"))) {
-                    try {
-                        offerTargets.add(new URI(targetElement.getText()));
-                    }
-                    catch (URISyntaxException e) {
-                        log.warn("Received an invalid connect target URI from client");
-                    }
-                }                
+                processOfferTargets(command);                
                 // FIXME: The caller will block until the next offer is dispatched
                 // Consider doing offers in a thread pool (JdC)
                 offer();
-                future.setResult(null);
-                
-            }
-            else {
+                future.setResult(null);                
+            } else if (command.getName().equals("connect")) {
+            	//TODO: CONNECT AND CONTINUE CONFUSION ARGGGGGHHH
+            	processOfferTargets(command);
                 // Send command to call's event machine
                 commandHandler.handleCommand(callId, componentId, command, new TransportCallback() {
                     public void handle(Element result, Exception err) {
@@ -277,6 +283,29 @@ public class AmecheServlet extends HttpServlet implements Transport {
                             future.setException((Exception)err);
                             return;
                         }
+                        if (result == null) {
+                        	
+                        }
+                        // If the command resulted in a new component being created we need
+                        // to assocociate it with the app that created it since that should 
+                        // be the only app to receive events
+                        if(result != null && result.getName().equals("ref")) {
+                            AppInstance appInstance = apps.get(appInstanceId);
+                            String newComponentId = result.attributeValue("id");
+                            componentToAppMapping.put(newComponentId, appInstance);
+                        }
+                        future.setResult(result);
+                    }
+                });            	
+            } else {
+                // Send command to call's event machine
+                commandHandler.handleCommand(callId, componentId, command, new TransportCallback() {
+                    public void handle(Element result, Exception err) {
+                        if(err != null) {
+                            future.setException((Exception)err);
+                            return;
+                        }
+                        
                         // If the command resulted in a new component being created we need
                         // to assocociate it with the app that created it since that should 
                         // be the only app to receive events
@@ -292,7 +321,20 @@ public class AmecheServlet extends HttpServlet implements Transport {
             
             return future;
             
-        }        
+        }
+
+		private void processOfferTargets(final Element command) {
+			// Extract targets to ring when offer cycle is complete
+			offerTargets.clear();
+			for(Element targetElement : Typesafe.list(Element.class, command.elements("target"))) {
+			    try {
+			        offerTargets.add(new URI(targetElement.getText()));
+			    }
+			    catch (URISyntaxException e) {
+			        log.warn("Received an invalid connect target URI from client");
+			    }
+			}
+		}        
 
         private void dispatchEvent(Element event, String callId, String componentId, AppInstance appInstance) {
             try {
@@ -322,7 +364,9 @@ public class AmecheServlet extends HttpServlet implements Transport {
             
             ConnectCommand command = new ConnectCommand(parentCallId);
             command.setTargets(offerTargets);
+            commandHandler.handleCommand(parentCallId, null, command, null);
             
+            /*
             commandHandler.handleCommand(parentCallId, null, command, new TransportCallback() {
                 
                 public void handle(Element result, Exception e) {
@@ -347,6 +391,7 @@ public class AmecheServlet extends HttpServlet implements Transport {
                     
                 }
             });
+            */
         }
 
     }
