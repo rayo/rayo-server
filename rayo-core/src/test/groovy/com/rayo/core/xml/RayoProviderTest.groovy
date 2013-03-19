@@ -93,7 +93,7 @@ import com.voxeo.moho.media.output.OutputCommand.BargeinType
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations=["/rayo-providers.xml"])
-public class RayoProviderTest {
+class RayoProviderTest {
 
 	@Autowired
     XmlProviderManager provider
@@ -315,7 +315,7 @@ public class RayoProviderTest {
 		def join = new JoinCommand();
 		command.join = join
 		
-		assertEquals("""<dial xmlns="urn:xmpp:rayo:1" to="tel:44477773333333" from="tel:34637710708"><join direction="duplex" media="bridge"/></dial>""", toXml(command));
+		assertEquals("""<dial xmlns="urn:xmpp:rayo:1" to="tel:44477773333333" from="tel:34637710708"><join direction="duplex" media="bridge_shared"/></dial>""", toXml(command));
 	}
 	
 	
@@ -366,7 +366,7 @@ public class RayoProviderTest {
 		])
 		assertProperties(dial.join, [
 			direction: Joinable.Direction.DUPLEX,
-			media: JoinType.BRIDGE,
+			media: JoinType.BRIDGE_SHARED,
 			to:"abcd",
 			type: JoinDestinationType.CALL
 		])
@@ -382,7 +382,7 @@ public class RayoProviderTest {
 		])
 		assertProperties(dial.join, [
 			direction: Joinable.Direction.DUPLEX,
-			media: JoinType.BRIDGE,
+			media: JoinType.BRIDGE_SHARED,
 			to:"abcd",
 			type: JoinDestinationType.MIXER
 		])
