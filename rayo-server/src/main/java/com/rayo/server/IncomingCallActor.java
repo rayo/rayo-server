@@ -129,7 +129,7 @@ public class IncomingCallActor extends CallActor<IncomingCall> {
 		
 		// 4th. Give up. Assume term
     	logger.debug("Could not resolve direction. Defaulting to 'term'.");
-		return CallDirection.TERM;
+		return CallDirection.IN;
 	}
 
 	private CallDirection extractDirectionFromParameter(SipURI uri, String p) {
@@ -137,10 +137,10 @@ public class IncomingCallActor extends CallActor<IncomingCall> {
     	String parameter = uri.getParameter(p);
 
     	if (parameter != null) {
-    		try {
-    			return CallDirection.valueOf(parameter.toUpperCase());
-    		} catch (Exception e) {
-    			logger.error("Error resolving call direction from parameter %s on uri [%s].", parameter, uri);
+    		if (parameter.toLowerCase().equalsIgnoreCase("term")) {
+    			return CallDirection.IN;    			
+    		} else if (parameter.toLowerCase().equalsIgnoreCase("orig")) {
+    			return CallDirection.OUT;
     		}
     	}
     	return null;
@@ -152,9 +152,9 @@ public class IncomingCallActor extends CallActor<IncomingCall> {
 		if (route == null) {
 			return null;
 		} else if (route.startsWith("sip:orig")) {
-			return CallDirection.ORIG;
+			return CallDirection.OUT;
 		} else if (route.startsWith("sip:term")) {
-			return CallDirection.TERM;
+			return CallDirection.IN;
 		} else if (route.startsWith("<sip:") || route.startsWith("sip:")) {
 			// strip down <> symbols
 	    	SipURI uri = new SipURI(route);

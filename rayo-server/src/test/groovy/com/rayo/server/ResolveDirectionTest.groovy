@@ -22,7 +22,7 @@ class ResolveDirectionTest {
 					getHeader:{null}] as Call
 		def actor = new IncomingCallActor(null);
 		
-		assertEquals actor.resolveDirection(call), CallDirection.TERM
+		assertEquals actor.resolveDirection(call), CallDirection.IN
 	}
 	
 	@Test
@@ -33,7 +33,7 @@ class ResolveDirectionTest {
 					getHeader:{null}] as Call
 		def actor = new IncomingCallActor(null);
 		
-		assertEquals actor.resolveDirection(call), CallDirection.ORIG
+		assertEquals actor.resolveDirection(call), CallDirection.OUT
 	}
 	
 	@Test
@@ -44,7 +44,7 @@ class ResolveDirectionTest {
 					getHeader:{null}] as Call
 		def actor = new IncomingCallActor(null);
 		
-		assertEquals actor.resolveDirection(call), CallDirection.ORIG
+		assertEquals actor.resolveDirection(call), CallDirection.OUT
 	}
 	
 	@Test
@@ -55,7 +55,7 @@ class ResolveDirectionTest {
 					getHeader:{null}] as Call
 		def actor = new IncomingCallActor(null);
 		
-		assertEquals actor.resolveDirection(call), CallDirection.ORIG
+		assertEquals actor.resolveDirection(call), CallDirection.OUT
 	}
 	
 	@Test
@@ -66,7 +66,7 @@ class ResolveDirectionTest {
 					getHeader:{null}] as Call
 		def actor = new IncomingCallActor(null);
 		
-		assertEquals actor.resolveDirection(call), CallDirection.ORIG
+		assertEquals actor.resolveDirection(call), CallDirection.OUT
 	}
 	
 	@Test
@@ -79,7 +79,7 @@ class ResolveDirectionTest {
 					getHeader:{null}] as Call
 		def actor = new IncomingCallActor(null);
 		
-		assertEquals actor.resolveDirection(call), CallDirection.ORIG
+		assertEquals actor.resolveDirection(call), CallDirection.OUT
 	}
 	
 	@Test
@@ -90,7 +90,7 @@ class ResolveDirectionTest {
 					getHeader:{"<sip:user@example.com>; sescase=orig; regstate=reg"}] as Call
 		def actor = new IncomingCallActor(null);
 		
-		assertEquals actor.resolveDirection(call), CallDirection.ORIG
+		assertEquals actor.resolveDirection(call), CallDirection.OUT
 	}
 	
 	@Test
@@ -105,7 +105,7 @@ class ResolveDirectionTest {
 					getHeader:{null}] as Call
 		def actor = new IncomingCallActor(null);
 		
-		assertEquals actor.resolveDirection(call), CallDirection.TERM
+		assertEquals actor.resolveDirection(call), CallDirection.IN
 	}
 	
 	@Test
@@ -121,7 +121,7 @@ class ResolveDirectionTest {
 					getHeader:{null}] as Call
 		def actor = new IncomingCallActor(null);
 		
-		assertEquals actor.resolveDirection(call), CallDirection.TERM
+		assertEquals actor.resolveDirection(call), CallDirection.IN
 	}
 	
 	@Test
@@ -136,7 +136,7 @@ class ResolveDirectionTest {
 					getHeader:{"<sip:user@example.com>; sescase=orig; regstate=reg"}] as Call
 		def actor = new IncomingCallActor(null);
 		
-		assertEquals actor.resolveDirection(call), CallDirection.TERM
+		assertEquals actor.resolveDirection(call), CallDirection.IN
 	}
 	
 	
@@ -148,6 +148,6 @@ class ResolveDirectionTest {
 					getHeader:{"<sip:user@example.com>; sescase=term; regstate=reg"}] as Call
 		def actor = new IncomingCallActor(null);
 		
-		assertEquals actor.resolveDirection(call), CallDirection.TERM
+		assertEquals actor.resolveDirection(call), CallDirection.IN
 	}
 }
