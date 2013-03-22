@@ -110,36 +110,12 @@ class AmecheCall {
 
         final SettableResultFuture<Element> future = new SettableResultFuture<Element>();
 
-        if(command.getName().equals("continue")) {
+        if(command.getName().equals("continue") || command.getName().equals("connect")) {
             processOfferTargets(command);                
             // FIXME: The caller will block until the next offer is dispatched
             // Consider doing offers in a thread pool (JdC)
             offer();
             future.setResult(null);                
-        } else if (command.getName().equals("connect")) {
-        	//TODO: CONNECT AND CONTINUE CONFUSION ARGGGGGHHH
-        	processOfferTargets(command);
-            // Send command to call's event machine
-            commandHandler.handleCommand(callId, componentId, command, new TransportCallback() {
-                public void handle(Element result, Exception err) {
-                    if(err != null) {
-                        future.setException((Exception)err);
-                        return;
-                    }
-                    if (result == null) {
-                    	
-                    }
-                    // If the command resulted in a new component being created we need
-                    // to assocociate it with the app that created it since that should 
-                    // be the only app to receive events
-                    if(result != null && result.getName().equals("ref")) {
-                        AppInstance appInstance = apps.get(appInstanceId);
-                        String newComponentId = result.attributeValue("id");
-                        componentToAppMapping.put(newComponentId, appInstance);
-                    }
-                    future.setResult(result);
-                }
-            });            	
         } else {
             // Send command to call's event machine
             commandHandler.handleCommand(callId, componentId, command, new TransportCallback() {
