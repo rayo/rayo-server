@@ -18,7 +18,6 @@ import org.apache.commons.lang.builder.ToStringStyle;
 
 import com.rayo.core.AnsweredEvent;
 import com.rayo.core.DtmfCommand;
-import com.rayo.core.DtmfEvent;
 import com.rayo.core.EndCommand;
 import com.rayo.core.EndEvent;
 import com.rayo.core.EndEvent.Reason;
@@ -580,6 +579,11 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 
 	public void setMixerManager(MixerManager mixerManager) {
 		this.mixerManager = mixerManager;
+	}
+	
+	public MixerManager getMixerManager() {
+		
+		return mixerManager;
 	}
 	
 	public Set<Participant> getJoinees() {

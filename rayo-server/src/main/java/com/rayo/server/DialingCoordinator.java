@@ -15,6 +15,8 @@ import com.rayo.core.JoinDestinationType;
 import com.rayo.core.JoiningEvent;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.Call;
+import com.voxeo.moho.Call.State;
+import com.voxeo.moho.Mixer;
 import com.voxeo.moho.Participant.JoinType;
 
 /**
@@ -114,16 +116,37 @@ public class DialingCoordinator {
 		dialingStatus.lock.lock();
 		try {
 			logger.debug("Received answered event on call leg [%s].", targetCallActor.getCall().getId());
+			
+			if (sourceCallActor.getCall().getCallState() == State.CONNECTED) {
+				logger.debug("Received a post-connection phase connect request.");
+				// call was already connected. Try to find the mixer first.
+				String mixerName = "mixer-" + sourceCallActor.getCall().getId();
+				Mixer mixer = sourceCallActor.getMixerManager().getMixer(mixerName);
+				if (mixer == null) {
+					logger.debug("Mixer [%s] not found. Moving calls into a conference.", mixerName);
+					// no mixer yet. We have to create the conference and join the three participants
+					mixer = sourceCallActor.getMixerManager().create(
+						sourceCallActor.getCall().getApplicationContext(), mixerName);
+					joinActorToMixer(targetCallActor, mixerName);
+					joinActorToMixer(sourceCallActor, mixerName);
+					String peerId = sourceCallActor.getCall().getParticipants()[0].getId();
+					CallActor<?> peer = sourceCallActor.getCallManager().getCallRegistry().get(peerId);
+					joinActorToMixer(peer, mixerName);
+				} else {
+					joinActorToMixer(targetCallActor, mixerName);
+				}				
+			} else {
 			logger.debug("Joining on BRIDGE_EXCLUSIVE mode call legs [%s] and [%s].", 
 					sourceCallActor.getCall().getId(), targetCallActor.getCall().getId());
 			
-		    JoinCommand join = new JoinCommand();
-		    join.setTo(targetCallActor.getCall().getId());
-		    join.setType(JoinDestinationType.CALL);
-		    join.setMedia(JoinType.BRIDGE_EXCLUSIVE);
-		    // Join to the B Leg
-		    sourceCallActor.publish(join);
-        	
+			    JoinCommand join = new JoinCommand();
+			    join.setTo(targetCallActor.getCall().getId());
+			    join.setType(JoinDestinationType.CALL);
+			    join.setMedia(JoinType.BRIDGE_SHARED);
+			    // Join to the B Leg
+			    sourceCallActor.publish(join);
+			}
+			
 			dialingStatus.status = Status.DONE;
 			dialingStatus.targetActor = targetCallActor;
 				
@@ -138,5 +161,19 @@ public class DialingCoordinator {
 		} finally {
 			dialingStatus.lock.unlock();
 		}
+	}
+
+	private void joinActorToMixer(CallActor<?> targetCallActor, String mixerName) {
+		
+		// join the new participant to the existing conference
+		logger.debug("Joining a new participant [%s] to conference [%s]", 
+			targetCallActor.getCall().getId(), mixerName);
+		JoinCommand join = new JoinCommand();
+		join.setTo(mixerName);
+		join.setType(JoinDestinationType.MIXER);		
+		join.setMedia(JoinType.BRIDGE_SHARED);
+		join.setForce(true);
+		// Join to the B Leg
+		targetCallActor.publish(join);
 	}
 }
