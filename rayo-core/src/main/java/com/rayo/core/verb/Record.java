@@ -27,6 +27,8 @@ public class Record extends BaseVerb {
 	
 	private Duration finalTimeout;
 	
+	private Boolean duplex;
+	
 	public URI getTo() {
 		return to;
 	}
@@ -91,6 +93,14 @@ public class Record extends BaseVerb {
 		this.stopBeep = stopBeep;
 	}
 
+	public Boolean getDuplex() {
+		return duplex;
+	}
+
+	public void setDuplex(Boolean duplex) {
+		this.duplex = duplex;
+	}
+
 	@Override
 	public String toString() {
 
@@ -103,7 +113,8 @@ public class Record extends BaseVerb {
 				.append("initial-timeout", getInitialTimeout())
 				.append("max-duration", getMaxDuration())
 				.append("start-beep", getStartBeep())
-				.append("start-pause-mode", getStartPaused())				
+				.append("start-pause-mode", getStartPaused())
+				.append("duplex", getDuplex())
 				.toString();
 
 	}

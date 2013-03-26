@@ -3,6 +3,7 @@ package com.rayo.server.verb;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.List;
 
 import javax.media.mscontrol.Value;
@@ -47,7 +48,17 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
 		if (model.getTo() == null) {
 			try {
 				tempFile = File.createTempFile("rayo", getExtensionFromFormat(model));
-				model.setTo(tempFile.toURI());
+				
+				if (model.getDuplex() != null && model.getDuplex()) {
+					// Hack to workaround a VCS issue with URIs ( call record has to be file:/// and normal record file:/
+					URI hackedURI = null;
+					try {
+						hackedURI = new URI("file://" + tempFile.getAbsolutePath());
+					} catch (URISyntaxException e) {}
+					model.setTo(hackedURI);
+				} else {
+					model.setTo(tempFile.toURI());
+				}
 			} catch (IOException e) {
 				log.error(e.getMessage(),e);
 			}
@@ -86,6 +97,11 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
         }
         
         command.setSilenceTerminationOn(false);
+        if (model.getDuplex() != null) {
+        	command.setDuplex(model.getDuplex());
+        } else {
+        	command.setDuplex(false);
+        }
         
 		recording = getMediaService().record(command);
 	}

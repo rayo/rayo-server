@@ -79,6 +79,9 @@ public class RecordProvider extends BaseProvider {
     	if (element.attribute("start-paused") !=  null) {
     		record.setStartPaused(toBoolean("start-paused", element));
     	}
+    	if (element.attribute("duplex") != null) {
+    		record.setDuplex(true);
+    	}
         return record;
     }
     
@@ -139,9 +142,10 @@ public class RecordProvider extends BaseProvider {
 			completeElement.addAttribute("uri", event.getUri().toString());
 			
 			completeElement.addAttribute("size", String.valueOf(event.getSize()));
-			completeElement.addAttribute("duration", Long.toString(event.getDuration().getMillis()));
+			if (event.getDuration() != null) {
+				completeElement.addAttribute("duration", Long.toString(event.getDuration().getMillis()));
+			}
 		}
-		
 	}
     
     private void createRecord(Record record, Document document) throws Exception {
@@ -170,6 +174,9 @@ public class RecordProvider extends BaseProvider {
         }
         if (record.getMaxDuration() != null) {
         	root.addAttribute("max-duration", String.valueOf(record.getMaxDuration().getMillis()));
+        }
+        if (record.getDuplex() != null) {
+        	root.addAttribute("duplex", String.valueOf(record.getDuplex()));
         }
     }
     
