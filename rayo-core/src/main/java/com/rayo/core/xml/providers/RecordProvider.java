@@ -80,7 +80,7 @@ public class RecordProvider extends BaseProvider {
     		record.setStartPaused(toBoolean("start-paused", element));
     	}
     	if (element.attribute("duplex") != null) {
-    		record.setDuplex(true);
+    		record.setDuplex(toBoolean("duplex", element));
     	}
         return record;
     }
