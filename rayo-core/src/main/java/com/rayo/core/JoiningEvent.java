@@ -10,13 +10,17 @@ import com.rayo.core.validation.Messages;
 public class JoiningEvent extends AbstractCallEvent {
 
 	@NotNull(message=Messages.MISSING_JOIN_ID)
+	private String peerCallId;
+
+	@NotNull(message=Messages.MISSING_TARGET_ADDRESS)
 	private String to;
 	
 	private JoinDestinationType type; 
 
-	public JoiningEvent(String callId, String to) {
+	public JoiningEvent(String callId, String peerCallId, String to) {
 		super(callId);
 		
+		this.peerCallId = peerCallId;
 		this.to = to;
 		this.type = JoinDestinationType.CALL;
 	}
@@ -35,6 +39,14 @@ public class JoiningEvent extends AbstractCallEvent {
 
 	public void setType(JoinDestinationType type) {
 		this.type = type;
+	}
+
+	public String getPeerCallId() {
+		return peerCallId;
+	}
+
+	public void setPeerCallId(String peerCallId) {
+		this.peerCallId = peerCallId;
 	}
 
 	@Override

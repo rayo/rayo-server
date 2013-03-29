@@ -330,9 +330,12 @@ public class RayoProvider extends BaseProvider {
     
     private Object buildJoiningEvent(Element element) {
 
-    	if (element.attribute("call-id") != null) {
-    		return new JoiningEvent(null,element.attributeValue("call-id"));
-    	} else return new JoiningEvent(null,null);
+    	JoiningEvent event = new JoiningEvent(null, null, null);
+    	
+    	event.setPeerCallId(element.attributeValue("call-id"));
+    	event.setTo(element.attributeValue("to"));
+    	
+    	return event;
     }
 
     private Object buildUnjoinedEvent(Element element) {
@@ -644,9 +647,14 @@ public class RayoProvider extends BaseProvider {
 
     	JoiningEvent event = (JoiningEvent)object;
         Element joining = document.addElement(new QName("joining", RAYO_NAMESPACE));
+        if (event.getPeerCallId() != null) {
+        	if (event.getType() == JoinDestinationType.CALL) {
+        		joining.addAttribute("call-id", event.getPeerCallId());
+        	}
+        }
         if (event.getTo() != null) {
         	if (event.getType() == JoinDestinationType.CALL) {
-        		joining.addAttribute("call-id", event.getTo());
+        		joining.addAttribute("to", event.getTo());
         	}
         }
 

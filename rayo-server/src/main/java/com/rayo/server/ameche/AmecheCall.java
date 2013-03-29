@@ -86,10 +86,7 @@ class AmecheCall {
                 amecheCallRegistry.registerCall(peerCallId, AmecheCall.this);
                 
                 // Notify apps of new leg.
-                // Send <announce><joining call-id="PARENT_CALL_ID" /></announce/>
                 Element announceElement = DocumentHelper.createElement("announce");
-                //FIXME: no way to know the actual address that was dialed :-(
-                announceElement.addAttribute("to", "foo");
                 announceElement.add(event.createCopy());
                 
                 event = announceElement;
