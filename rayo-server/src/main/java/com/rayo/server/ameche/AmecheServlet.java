@@ -68,8 +68,8 @@ public class AmecheServlet extends HttpServlet implements Transport {
             List<AppInstance> apps = appInstanceResolver.lookup(event);
             if (apps.size() != 0) {
                 // Make and register a new ameche call handler 
-                machine = processAmecheCall(callId, event, apps);
                 amecheCallRegistry.registerCall(callId, machine);
+                machine = processAmecheCall(callId, event, apps);
                 return true;
             }
             else {
