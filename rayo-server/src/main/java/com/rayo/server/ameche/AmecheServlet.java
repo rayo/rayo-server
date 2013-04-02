@@ -74,6 +74,7 @@ public class AmecheServlet extends HttpServlet implements Transport {
                 return true;
             }
             else {
+            	log.debug("There is no Ameche instances interested on call [%s]", callId);
                 return false;
             }
         }
@@ -90,6 +91,8 @@ public class AmecheServlet extends HttpServlet implements Transport {
             if (machine != null) {
                 machine.onEvent(event, callId, componentId);
                 return true;
+            } else {
+            	log.warn("Could not find an Ameche Call registered for callId %s", callId);
             }
         }
 

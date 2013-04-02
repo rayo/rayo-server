@@ -110,8 +110,7 @@ public class Server implements EventHandler, CommandHandler {
 				}
 	    	}
 	    	if (!sent) {
-	            log.error("Failed to dispatch call event. [event=%s]", event);
-				findActor(callId).publish(new EndCommand(callId, EndEvent.Reason.ERROR));            
+	            log.debug("There was no transports interested on event. [event=%s]", event);
 	        }
 		} catch (Exception e) {
             log.error("Failed to dispatch call event. [event=%s]", event, e);
