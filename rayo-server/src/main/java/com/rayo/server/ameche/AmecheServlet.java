@@ -19,9 +19,13 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 
+import com.rayo.core.CallDirection;
+import com.rayo.server.CallActor;
+import com.rayo.server.CallRegistry;
 import com.rayo.server.CommandHandler;
 import com.rayo.server.Server;
 import com.rayo.server.Transport;
+import com.rayo.server.util.IMSUtils;
 import com.voxeo.logging.Loggerf;
 
 @SuppressWarnings("serial")
@@ -34,6 +38,7 @@ public class AmecheServlet extends HttpServlet implements Transport {
     private AppInstanceResolver appInstanceResolver;
     private AppInstanceEventDispatcher appInstanceEventDispatcher;
     private AmecheCallRegistry amecheCallRegistry;
+    private CallRegistry callRegistry;
     
     @Override
     public void init() throws ServletException {
@@ -49,6 +54,7 @@ public class AmecheServlet extends HttpServlet implements Transport {
         appInstanceEventDispatcher = (AppInstanceEventDispatcher) httpTransportContext.getBean("appInstanceEventDispatcher");
         appInstanceResolver = (AppInstanceResolver) httpTransportContext.getBean("appInstanceResolver");
         amecheCallRegistry = (AmecheCallRegistry) httpTransportContext.getBean("amecheCallRegistry");
+        callRegistry = (CallRegistry) httpTransportContext.getBean("callRegistry");
         
         Server server = (Server) httpTransportContext.getBean("rayoServer");
         server.addTransport(this);
@@ -65,7 +71,7 @@ public class AmecheServlet extends HttpServlet implements Transport {
         if (event.getName().equals("offer")) {
 
             // Lookup App Instance Endpoints
-            List<AppInstance> apps = appInstanceResolver.lookup(event);
+            List<AppInstance> apps = appInstanceResolver.lookup(event, resolveDirection(callId));
             if (apps.size() != 0) {
                 // Make and register a new ameche call handler 
             	machine = createAmecheCall(callId, event, apps);
@@ -178,6 +184,17 @@ public class AmecheServlet extends HttpServlet implements Transport {
             resp.setStatus(500);
         }
         
+    }
+    
+    private CallDirection resolveDirection(String callId) {
+    	
+    	CallActor<?> actor = callRegistry.get(callId);
+    	if (actor != null) {
+    		return IMSUtils.resolveDirection(actor.getCall());
+    	} else {
+    		log.error("Could not resolve direction for call %s. Setting to term.", callId);
+    		return CallDirection.IN;
+    	}
     }
     
     public AppInstanceResolver getAppInstanceResolver() {

@@ -8,8 +8,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map.Entry;
-import java.util.Properties;
 import java.util.Scanner;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -20,6 +18,7 @@ import java.util.regex.Pattern;
 import org.dom4j.Element;
 import org.springframework.core.io.Resource;
 
+import com.rayo.core.CallDirection;
 import com.voxeo.logging.Loggerf;
 
 /**
@@ -68,7 +67,7 @@ public class SimpleRegexpAppInstanceResolver implements AppInstanceResolver {
 	}
 	
     @Override
-    public List<AppInstance> lookup(Element offer) {
+    public List<AppInstance> lookup(Element offer, CallDirection direction) {
     	
     	List<AppInstance> instances = new ArrayList<AppInstance>();
     	List<RoutingRule> rules = null;
@@ -82,7 +81,8 @@ public class SimpleRegexpAppInstanceResolver implements AppInstanceResolver {
     	String from = offer.attributeValue("from");
     	String to = offer.attributeValue("to");
     	for(RoutingRule rule: rules) {
-    		if (rule.pattern.matcher(to).matches() || rule.pattern.matcher(from).matches()) {
+    		if ((direction == CallDirection.OUT && rule.pattern.matcher(from).matches()) ||
+    			(direction == CallDirection.IN && rule.pattern.matcher(to).matches())) {
     			instances.add(rule.instance);
     		}
     	}
