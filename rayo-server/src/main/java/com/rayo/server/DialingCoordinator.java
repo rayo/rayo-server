@@ -35,7 +35,8 @@ public class DialingCoordinator {
 	
 	enum Status {
 		PENDING,
-		DONE
+		DONE,
+		END
 	}
 		
 	class DialingStatus {
@@ -80,15 +81,25 @@ public class DialingCoordinator {
 		                } else if(event instanceof EndEvent) {   		                	
 		                	DialingStatus status = dials.get(targetCallActor.getCall().getId());
 		                	if (status != null) {
-		                		if (status.targetActor == targetCallActor) {
+		                		// Cleanup
+		                		dials.remove(targetCallActor.getParticipantId()); 
+		                		status.interestedParties.remove(targetCallActor);
+		                		if (status.interestedParties.size() == 0 || status.targetActor == targetCallActor) {		                		
 									logger.debug("Received end event on call leg [%s]. Theoretically we should now be hanging up call leg [%s].", 
-											targetCallActor.getParticipantId(), call.getId());							
-					                	sourceCallActor.publish(new EndCommand(call.getId(), Reason.HANGUP));
+											targetCallActor.getParticipantId(), call.getId());		
+									if (status.targetActor == null) {
+										// No one took the call
+					                	sourceCallActor.publish(new EndCommand(call.getId(), Reason.REJECT));
+									} else {
+										// Everyone hung up
+					                	sourceCallActor.publish(new EndCommand(call.getId(), Reason.HANGUP));										
+									}
 					                // Cleanup
 					                for(CallActor<?> target: status.interestedParties) {
 					                	dials.remove(target.getParticipantId());
 					                }
-					                dials.remove(targetCallActor.getParticipantId());
+					                status.interestedParties.clear();
+					                status.status = Status.END;
 		                		}
 		                	}		                	
 		                }
@@ -142,7 +153,7 @@ public class DialingCoordinator {
 					joinActorToMixer(targetCallActor, mixerName);
 				}				
 			} else {
-			logger.debug("Joining on BRIDGE_EXCLUSIVE mode call legs [%s] and [%s].", 
+				logger.debug("Joining on BRIDGE_SHARED mode call legs [%s] and [%s].", 
 					sourceCallActor.getCall().getId(), targetCallActor.getCall().getId());
 			
 			    JoinCommand join = new JoinCommand();

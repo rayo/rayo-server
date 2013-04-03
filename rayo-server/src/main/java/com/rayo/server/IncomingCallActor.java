@@ -268,6 +268,10 @@ public class IncomingCallActor extends CallActor<IncomingCall> {
     	for(String key: keys) {
     		String header = participant.getHeader(key);
     		if (header != null) {
+    			if (participant.getHeader("IMS-Test-" + key) != null) {
+    				// Used only for testing purposes, to simulate IMS like forwards from a solo Prism instance
+    				header = participant.getHeader("IMS-Test-" + key);
+    			}
     			headers.put(key, header);
     		}
     	}
