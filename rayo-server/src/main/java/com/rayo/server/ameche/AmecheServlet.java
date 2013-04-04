@@ -181,9 +181,9 @@ public class AmecheServlet extends HttpServlet implements Transport {
         }
         catch (Exception e) {
             log.error("Failed to process command", e);
-            resp.setStatus(500);
+            resp.setHeader("rayo-error", e.getMessage());
+            resp.sendError(500, e.getMessage());
         }
-        
     }
     
     private CallDirection resolveDirection(String callId) {
