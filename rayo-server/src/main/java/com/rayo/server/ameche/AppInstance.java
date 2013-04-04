@@ -2,6 +2,9 @@ package com.rayo.server.ameche;
 
 import java.net.URI;
 
+import org.apache.commons.lang.builder.ToStringBuilder;
+import org.apache.commons.lang.builder.ToStringStyle;
+
 public class AppInstance {
 
     private String id;
@@ -28,4 +31,13 @@ public class AppInstance {
         this.endpoint = endpoint;
     }
 
+
+	@Override
+    public String toString() {
+
+    	return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)    		
+    		.append("id", getId())
+    		.append("endpoint", getEndpoint())
+    		.toString();
+    }
 }

@@ -127,8 +127,12 @@ class AmecheCall {
                     // be the only app to receive events
                     if(result != null && result.getName().equals("ref")) {
                         AppInstance appInstance = apps.get(appInstanceId);
-                        String newComponentId = result.attributeValue("id");
-                        componentToAppMapping.put(newComponentId, appInstance);
+                        if (appInstance != null) {
+	                        String newComponentId = result.attributeValue("id");
+	                        componentToAppMapping.put(newComponentId, appInstance);
+                        } else {
+                        	log.error("App Instance with id %s is not online any more", appInstanceId);
+                        }
                     }
                     future.setResult(result);
                 }
@@ -157,6 +161,8 @@ class AmecheCall {
             appInstanceEventDispatcher.send(event, callId, componentId, appInstance);
         }
         catch (Exception e) {
+        	log.debug("Error dispatching event %s to appInstance %s. Call id: [%s]. Component id: [%s].", 
+        			event, appInstance, callId, componentId);
             apps.remove(appInstance.getId());
         }
     }
