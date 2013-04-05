@@ -21,7 +21,8 @@ public class ConnectCommand extends AbstractCallCommand {
     }
 
     public void setTargets(List<URI> targets) {
-        this.targets = targets;
+    	
+    	this.targets = targets;
     }
 
     @Override

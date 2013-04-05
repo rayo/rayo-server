@@ -34,9 +34,10 @@ class AmecheCall {
     
     // Internal
     private Iterator<AppInstance> appIterator;
-    private List<URI> offerTargets = new ArrayList<URI>();;
+    private List<URI> offerTargets = new ArrayList<URI>();
     private Map<String, AppInstance> apps = new ConcurrentHashMap<String, AppInstance>();
     private Map<String, AppInstance> componentToAppMapping = new ConcurrentHashMap<String, AppInstance>();
+    private boolean offerPhaseEnded = false;
     
     // Constructor
     public AmecheCall(String callId, Element offer, List<AppInstance> appList) {
@@ -108,13 +109,19 @@ class AmecheCall {
         final SettableResultFuture<Element> future = new SettableResultFuture<Element>();
 
         if(command.getName().equals("continue") || command.getName().equals("connect")) {
-            processOfferTargets(command);                
-            // FIXME: The caller will block until the next offer is dispatched
-            // Consider doing offers in a thread pool (JdC)
-            offer();
+        	log.debug("This is the issue");
+        	if (!offerPhaseEnded) {
+	            processOfferTargets(command);                
+	            // FIXME: The caller will block until the next offer is dispatched
+	            // Consider doing offers in a thread pool (JdC)
+	            offer();
+        	} else {
+        		connect(extractTargets(command));
+        	}
             future.setResult(null);                
         } else {
             // Send command to call's event machine
+        	log.debug("Handling the command %s" + command);
             commandHandler.handleCommand(callId, componentId, command, new TransportCallback() {
                 public void handle(Element result, Exception err) {
                     if(err != null) {
@@ -146,15 +153,22 @@ class AmecheCall {
 	private void processOfferTargets(final Element command) {
 		// Extract targets to ring when offer cycle is complete
 		offerTargets.clear();
+		offerTargets.addAll(extractTargets(command));
+	}      
+	
+	private List<URI> extractTargets(final Element command) {
+		
+		List<URI> targets = new ArrayList<URI>();
 		for(Element targetElement : Typesafe.list(Element.class, command.elements("target"))) {
 		    try {
-		        offerTargets.add(new URI(targetElement.getText()));
+		        targets.add(new URI(targetElement.getText()));
 		    }
 		    catch (URISyntaxException e) {
 		        log.warn("Received an invalid connect target URI from client");
 		    }
 		}
-	}        
+		return targets;
+	}
 
     private void dispatchEvent(Element event, String callId, String componentId, AppInstance appInstance) {
         try {
@@ -177,14 +191,16 @@ class AmecheCall {
             dispatchEvent(offer, parentCallId, null, appInstance);
         }
         else {
-            connect();
+            connect(offerTargets);
+            offerPhaseEnded = true;
         }
     }    
 
-    private void connect() {
-        
+    private void connect(List<URI> targets) {
+    	
+        log.debug("connecting to %s", offerTargets);
         ConnectCommand command = new ConnectCommand(parentCallId);
-        command.setTargets(offerTargets);
+        command.setTargets(targets);
         commandHandler.handleCommand(parentCallId, null, command, null);
     }
 

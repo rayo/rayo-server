@@ -158,8 +158,9 @@ public class IncomingCallActor extends CallActor<IncomingCall> {
     @Message
     public void connect(ConnectCommand command) {
 
+    	logger.debug("Received command %s. Actor id %s. Hash: %s", command, getCall().getId(), command.hashCode());
     	DialingCoordinator dialingCoordinator = getDialingCoordinator();
-    	dialingCoordinator.prepare(participant.getId());
+    	String ringlistId = dialingCoordinator.prepareRinglist(participant.getId());
     	
     	List<URI> destinations = new ArrayList<URI>();
 
@@ -168,6 +169,8 @@ public class IncomingCallActor extends CallActor<IncomingCall> {
         } else {
         	destinations.addAll(command.getTargets());
         }
+        logger.debug("About to execute ringlist with id [%s] to destinations [%s]. Original targets [%s].", 
+        		ringlistId, destinations, command.getTargets());
                 
         // Extract IMS headers
         Map<String,String> headers = new HashMap<String, String>();
@@ -177,8 +180,9 @@ public class IncomingCallActor extends CallActor<IncomingCall> {
         
         for(URI destination : destinations) {        
         	final CallActor<?> targetCallActor = getCallManager().createCallActor(destination, from, headers);
-        	dialingCoordinator.dial(this, targetCallActor);
+        	dialingCoordinator.dial(this, targetCallActor, ringlistId);
         }          
+    	logger.debug("Ended command %s. Actor id %s.", command, getCall().getId());
     }
     
     private void addHeaders(Map<String,String> headers, IncomingCall participant, String... keys) {

@@ -3,6 +3,7 @@ package com.rayo.server;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -47,19 +48,24 @@ public class DialingCoordinator {
 		CallActor<?> targetActor;
 	}
 	
-	public void prepare(String callId) {
+	public String prepareRinglist(String callId) {
 		
-		dials.put(callId, new DialingStatus());
+		String ringlistId = UUID.randomUUID().toString();
+		dials.put(ringlistId, new DialingStatus());
+		
+		return ringlistId;
 	}
 	
-	public void dial(final CallActor<?> sourceCallActor, final CallActor<?> targetCallActor) {
+	public void dial(final CallActor<?> sourceCallActor, 
+					  final CallActor<?> targetCallActor, 
+					  final String ringlistId) {
 		
-		DialingStatus dialingStatus = dials.get(sourceCallActor.getCall().getId());
+		DialingStatus dialingStatus = dials.get(ringlistId);
 		dialingStatus.lock.lock();
 		try {
 			if (dialingStatus.status == Status.PENDING) {
 				dialingStatus.interestedParties.add(targetCallActor);
-				dials.put(targetCallActor.getCall().getId(), dialingStatus);
+				dials.put(ringlistId ,  dialingStatus);
 				
 				final Call call = sourceCallActor.getCall();
 		    	// Announce joining
@@ -77,14 +83,13 @@ public class DialingCoordinator {
 		            @Override
 		            public void handle(Object event) throws Exception {
 		                if(event instanceof AnsweredEvent) {
-		                    onAnswered(sourceCallActor, targetCallActor);
+		                    onAnswered(sourceCallActor, targetCallActor, ringlistId);
 		                } else if(event instanceof EndEvent) {   		                	
 		                	DialingStatus status = dials.get(targetCallActor.getCall().getId());
 		                	if (status != null) {
-		                		// Cleanup
-		                		dials.remove(targetCallActor.getParticipantId()); 
 		                		status.interestedParties.remove(targetCallActor);
-		                		if (status.interestedParties.size() == 0 || status.targetActor == targetCallActor) {		                		
+		                		if (status.interestedParties.size() == 0 || 
+		                			status.targetActor == targetCallActor) {		                		
 									logger.debug("Received end event on call leg [%s]. Theoretically we should now be hanging up call leg [%s].", 
 											targetCallActor.getParticipantId(), call.getId());		
 									if (status.targetActor == null) {
@@ -95,11 +100,9 @@ public class DialingCoordinator {
 					                	sourceCallActor.publish(new EndCommand(call.getId(), Reason.HANGUP));										
 									}
 					                // Cleanup
-					                for(CallActor<?> target: status.interestedParties) {
-					                	dials.remove(target.getParticipantId());
-					                }
 					                status.interestedParties.clear();
 					                status.status = Status.END;
+					                dials.remove(ringlistId);
 		                		}
 		                	}		                	
 		                }
@@ -127,9 +130,11 @@ public class DialingCoordinator {
 		return dials.get(callId) != null;
 	}
 	
-	private void onAnswered(CallActor<?> sourceCallActor, CallActor<?> targetCallActor) {
+	private void onAnswered(CallActor<?> sourceCallActor, 
+							 CallActor<?> targetCallActor,
+							 String ringlistId) {
 		
-		DialingStatus dialingStatus = dials.get(sourceCallActor.getCall().getId());
+		DialingStatus dialingStatus = dials.get(ringlistId);
 		dialingStatus.lock.lock();
 		try {
 			logger.debug("Received answered event on call leg [%s].", targetCallActor.getCall().getId());

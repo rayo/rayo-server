@@ -98,6 +98,7 @@ public class CallManager extends ReflectiveActor {
 
     public CallActor<?> createCallActor(URI to, URI from, Map<String, String> headers) {
         
+        log.debug("Creating call to [%s] from [%s]", to, from);
         CallableEndpoint toEndpoint = (CallableEndpoint) applicationContext.createEndpoint(to.toString());
         
         Endpoint fromEndpoint = null;
