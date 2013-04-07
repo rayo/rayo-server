@@ -85,7 +85,7 @@ public class DialingCoordinator {
 		                if(event instanceof AnsweredEvent) {
 		                    onAnswered(sourceCallActor, targetCallActor, ringlistId);
 		                } else if(event instanceof EndEvent) {   		                	
-		                	DialingStatus status = dials.get(targetCallActor.getCall().getId());
+		                	DialingStatus status = dials.get(ringlistId);
 		                	if (status != null) {
 		                		status.interestedParties.remove(targetCallActor);
 		                		if (status.interestedParties.size() == 0 || 
