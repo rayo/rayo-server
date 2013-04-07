@@ -121,7 +121,6 @@ class AmecheCall {
             future.setResult(null);                
         } else {
             // Send command to call's event machine
-        	log.debug("Handling the command %s" + command);
             commandHandler.handleCommand(callId, componentId, command, new TransportCallback() {
                 public void handle(Element result, Exception err) {
                     if(err != null) {
