@@ -176,7 +176,7 @@ public class Server implements EventHandler, CommandHandler {
 	private void handleCommand(final String callId, String componentId, Element xml, Object command, final TransportCallback callback) {
 		
     	try {
-
+    		log.debug("Handling command on server: " + command);
     	    rayoStatistics.commandReceived(command);
             
             // Special handling for <dial/> command
@@ -222,6 +222,8 @@ public class Server implements EventHandler, CommandHandler {
             }
 
             // Dispatch command to actor
+            log.debug("Dispatching command %s to actor with id %s. Hash: %s", 
+            		callCommand, ((CallActor)actor).getCall().getId(), callCommand.hashCode());
             actor.command(callCommand, new ResponseHandler() {
                 public void handle(Response commandResponse) throws Exception {
 
