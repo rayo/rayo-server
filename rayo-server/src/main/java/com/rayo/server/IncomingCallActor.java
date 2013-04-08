@@ -22,6 +22,7 @@ import com.rayo.server.util.IMSUtils;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.ApplicationContext;
 import com.voxeo.moho.Call;
+import com.voxeo.moho.Call.State;
 import com.voxeo.moho.Endpoint;
 import com.voxeo.moho.IncomingCall;
 import com.voxeo.moho.common.event.AutowiredEventListener;
@@ -174,7 +175,24 @@ public class IncomingCallActor extends CallActor<IncomingCall> {
                 
         // Extract IMS headers
         Map<String,String> headers = new HashMap<String, String>();
-        addHeaders(headers, participant, "Route", "P-Asserted-Identity", "P-Served-User", "P-Charging-Vector");
+        if (getCall().getCallState() == State.CONNECTED) {
+        	// Post offer phase. We have to forward the Offer to the I-CSCF to 
+        	// generate an Out-of-blue call
+        	if (getImsConfiguration() != null && 
+        		getImsConfiguration().getIcscfRoute() != null) {
+        		String icscfRoute = getImsConfiguration().getIcscfRoute();
+        		logger.debug("Routing new Offer through icscf [%s]", icscfRoute);
+        		headers.put("Route", icscfRoute);
+            	addHeaders(headers, participant, "P-Charging-Vector");
+        	} else {
+        		logger.warn("Could not find an IMS icscf route setting");
+            	addHeaders(headers, participant, "Route", "P-Asserted-Identity", "P-Served-User", "P-Charging-Vector");
+        	}
+        	
+        } else {
+        	// Offer phase, we just forward the original Offer headers.
+        	addHeaders(headers, participant, "Route", "P-Asserted-Identity", "P-Served-User", "P-Charging-Vector");
+        }
 
         URI from = participant.getInvitor().getURI();
         

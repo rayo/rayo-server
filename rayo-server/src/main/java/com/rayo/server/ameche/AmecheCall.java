@@ -109,7 +109,6 @@ class AmecheCall {
         final SettableResultFuture<Element> future = new SettableResultFuture<Element>();
 
         if(command.getName().equals("continue") || command.getName().equals("connect")) {
-        	log.debug("This is the issue");
         	if (!offerPhaseEnded) {
 	            processOfferTargets(command);                
 	            // FIXME: The caller will block until the next offer is dispatched

@@ -34,6 +34,7 @@ import com.rayo.core.verb.MuteCommand;
 import com.rayo.core.verb.Ssml;
 import com.rayo.core.verb.UnholdCommand;
 import com.rayo.core.verb.UnmuteCommand;
+import com.rayo.server.ameche.ImsConfiguration;
 import com.rayo.server.exception.RayoProtocolException;
 import com.rayo.server.exception.RayoProtocolException.Condition;
 import com.voxeo.exceptions.NotFoundException;
@@ -68,6 +69,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     private MixerManager mixerManager;
     private CallManager callManager;
     private DialingCoordinator dialingCoordinator;
+    private ImsConfiguration imsConfiguration;
     
     // This is used to synchronize Answered event with media join as Moho may send you 
     // an answered event before the media is joined
@@ -604,5 +606,13 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 
 	public void setDialingCoordinator(DialingCoordinator dialingCoordinator) {
 		this.dialingCoordinator = dialingCoordinator;
+	}
+
+	public ImsConfiguration getImsConfiguration() {
+		return imsConfiguration;
+	}
+
+	public void setImsConfiguration(ImsConfiguration imsConfiguration) {
+		this.imsConfiguration = imsConfiguration;
 	}	
 }

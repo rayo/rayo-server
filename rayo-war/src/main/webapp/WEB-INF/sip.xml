@@ -3,7 +3,7 @@
 <sip-app id="rayo">
 	<context-param>
 		<param-name>contextConfigLocation</param-name>
-		<param-value>classpath:rayo-context.xml</param-value>
+		<param-value>WEB-INF/rayo-context.xml</param-value>
 	</context-param>
 	<listener>
 		<listener-class>com.rayo.server.web.ContextLoaderListener</listener-class>
