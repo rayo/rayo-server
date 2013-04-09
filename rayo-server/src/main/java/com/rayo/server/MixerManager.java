@@ -40,6 +40,11 @@ public class MixerManager {
 	
 	public Mixer create(ApplicationContext ctx, String mixerName) {
 		
+		return create(ctx, mixerName, 0);
+	}
+	
+	public Mixer create(ApplicationContext ctx, String mixerName, Integer minParticipants) {
+		
 		Lock lock = globalLock.writeLock();
 		lock.lock();		
 		try {
@@ -56,6 +61,7 @@ public class MixerManager {
 			Map<Object, Object> parameters = new HashMap<Object, Object>();
 			parameters.put(MediaMixer.ENABLED_EVENTS, new EventType[]{MixerEvent.ACTIVE_INPUTS_CHANGED});    			
 			mixer = endpoint.create(mixerName, parameters);
+			mixer.setAttribute("minParticipants", minParticipants);
 			
 	        MixerActor actor = mixerActorFactory.create(mixer, mixerName);
 	        actor.setupMohoListeners(mixer);
@@ -149,10 +155,19 @@ public class MixerManager {
 		lock.lock();
 		try {
 
+			if (getMixer(mixer.getName()) == null) {
+				log.error("Mixer %s has already been disposed.", mixer.getName());
+				return;
+			}
+			
 			log.debug("Unjoining mixer %s which has %s participants", mixer, mixer.getParticipants().length);
 
-			if (mixer.getParticipants().length == 0) {
-				log.debug("Mixer %s has 0 participants. Disposing it", mixer);
+			Integer minParticipants = mixer.getAttribute("minParticipants");
+			if (mixer.getParticipants().length <= minParticipants) {
+				log.debug("Mixer %s has less than %s participants. Disposing it", mixer, minParticipants);
+				for(Participant p: mixer.getParticipants()) {
+					p.disconnect();
+				}
 				removeMixer((Mixer)mixer);
 			}
 		} finally {
