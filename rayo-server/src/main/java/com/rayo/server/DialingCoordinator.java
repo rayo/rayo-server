@@ -92,13 +92,18 @@ public class DialingCoordinator {
 		                			status.targetActor == targetCallActor) {		                		
 									logger.debug("Received end event on call leg [%s]. Theoretically we should now be hanging up call leg [%s].", 
 											targetCallActor.getParticipantId(), call.getId());		
-									if (status.targetActor == null) {
-										// No one took the call
-					                	sourceCallActor.publish(new EndCommand(call.getId(), Reason.REJECT));
-									} else {
-										// Everyone hung up
-					                	sourceCallActor.publish(new EndCommand(call.getId(), Reason.HANGUP));										
+									String mixerName = "mixer-" + sourceCallActor.getCall().getId();
+									Mixer mixer = sourceCallActor.getMixerManager().getMixer(mixerName);
+									if (mixer == null) {
+										if (status.targetActor == null) {
+											// No one took the call
+						                	sourceCallActor.publish(new EndCommand(call.getId(), Reason.REJECT));
+										} else {
+											// Everyone hung up
+						                	sourceCallActor.publish(new EndCommand(call.getId(), Reason.HANGUP));										
+										}
 									}
+									
 					                // Cleanup
 					                status.interestedParties.clear();
 					                status.status = Status.END;
