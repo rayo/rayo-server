@@ -1,7 +1,11 @@
 package com.rayo.server.ameche;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.StringReader;
+import java.net.FileNameMap;
+import java.net.URLConnection;
 import java.util.Collection;
 import java.util.List;
 
@@ -20,6 +24,7 @@ import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 
 import com.rayo.core.CallDirection;
+import com.rayo.core.recording.StorageService;
 import com.rayo.server.CallActor;
 import com.rayo.server.CallRegistry;
 import com.rayo.server.CommandHandler;
@@ -39,6 +44,7 @@ public class AmecheServlet extends HttpServlet implements Transport {
     private AppInstanceEventDispatcher appInstanceEventDispatcher;
     private AmecheCallRegistry amecheCallRegistry;
     private CallRegistry callRegistry;
+    private AmecheStorageService amecheStorageService;
     
     @Override
     public void init() throws ServletException {
@@ -55,6 +61,13 @@ public class AmecheServlet extends HttpServlet implements Transport {
         appInstanceResolver = (AppInstanceResolver) httpTransportContext.getBean("appInstanceResolver");
         amecheCallRegistry = (AmecheCallRegistry) httpTransportContext.getBean("amecheCallRegistry");
         callRegistry = (CallRegistry) httpTransportContext.getBean("callRegistry");
+        amecheStorageService = (AmecheStorageService)httpTransportContext.getBean("amecheStorageService");
+                
+        // Replace Rayo's default Storage service with Ameche's one
+        @SuppressWarnings("unchecked")
+		Collection<StorageService> storageServices = (Collection<StorageService>)httpTransportContext.getBean("storageServices");
+        storageServices.clear();
+        storageServices.add(amecheStorageService);
         
         Server server = (Server) httpTransportContext.getBean("rayoServer");
         server.addTransport(this);
@@ -186,7 +199,44 @@ public class AmecheServlet extends HttpServlet implements Transport {
         }
     }
     
-    private CallDirection resolveDirection(String callId) {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+    		throws ServletException, IOException {
+
+    	String uri = req.getRequestURI();
+    	int lastSlash = uri.lastIndexOf("/");
+    	if (lastSlash != -1 && lastSlash != uri.length()-1) {
+    		if (uri.substring(0, lastSlash).endsWith("/recordings")) {
+    			String key = uri.substring(lastSlash+1);
+        		File file = amecheStorageService.getFile(key);
+        		doStream(resp, file);    			
+    		}
+    	}
+    }
+    
+    private void doStream(HttpServletResponse resp, File file) throws IOException {
+    	
+    	FileInputStream in = null;
+    	try {
+    		in = new FileInputStream(file);
+	    	String mimeType = getMimeType(file.getAbsolutePath());
+	    	byte[] bytes = new byte[4096];
+	    	int bytesRead;
+	
+	    	resp.setContentType(mimeType);
+	
+	    	while ((bytesRead = in.read(bytes)) != -1) {
+	    	    resp.getOutputStream().write(bytes, 0, bytesRead);
+	    	}
+    	} finally {	    
+    		if (in != null) {
+    			in.close();
+    		}
+	    	resp.getOutputStream().close();
+    	}
+	}
+
+	private CallDirection resolveDirection(String callId) {
     	
     	CallActor<?> actor = callRegistry.get(callId);
     	if (actor != null) {
@@ -196,6 +246,14 @@ public class AmecheServlet extends HttpServlet implements Transport {
     		return CallDirection.IN;
     	}
     }
+	
+	public static String getMimeType(String fileUrl) throws java.io.IOException {
+
+		FileNameMap fileNameMap = URLConnection.getFileNameMap();
+		String type = fileNameMap.getContentTypeFor(fileUrl);
+
+		return type;
+	}
     
     public AppInstanceResolver getAppInstanceResolver() {
         return appInstanceResolver;

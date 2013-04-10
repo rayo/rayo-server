@@ -28,4 +28,7 @@
 	  <constructor-arg value="60000"/> <!-- reload interval in milliseconds -->
   </bean>
   <bean id="amecheCallRegistry" class="com.rayo.server.ameche.AmecheCallRegistry"/>
+  <bean id="amecheStorageService" class="com.rayo.server.ameche.AmecheStorageService">
+      <property name="baseUrl" value="http://localhost:8080/rayo/ameche/recordings"/>
+  </bean>
 </beans>
