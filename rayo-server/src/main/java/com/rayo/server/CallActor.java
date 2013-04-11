@@ -609,6 +609,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 	}
 
 	public ImsConfiguration getImsConfiguration() {
+		log.debug("Returning IMS Configuration: " + imsConfiguration);
 		return imsConfiguration;
 	}
 

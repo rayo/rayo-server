@@ -31,6 +31,13 @@ public class AppInstance {
         this.endpoint = endpoint;
     }
 
+    @Override
+    public boolean equals(Object obj) {
+
+    	if (!(obj instanceof AppInstance)) return false;
+    	
+    	return id.equals(((AppInstance)obj).id);
+    }
 
 	@Override
     public String toString() {

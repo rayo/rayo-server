@@ -15,7 +15,10 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Pattern;
 
+import org.dom4j.Document;
+import org.dom4j.DocumentFactory;
 import org.dom4j.Element;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 
 import com.rayo.core.CallDirection;
@@ -83,7 +86,9 @@ public class SimpleRegexpAppInstanceResolver implements AppInstanceResolver {
     	for(RoutingRule rule: rules) {
     		if ((direction == CallDirection.OUT && rule.pattern.matcher(from).matches()) ||
     			(direction == CallDirection.IN && rule.pattern.matcher(to).matches())) {
-    			instances.add(rule.instance);
+    			if (!instances.contains(rule.instance)) {
+    				instances.add(rule.instance);
+    			}
     		}
     	}
     	return instances;
@@ -111,11 +116,11 @@ public class SimpleRegexpAppInstanceResolver implements AppInstanceResolver {
 				} catch (IOException e) {
 					is = properties.getInputStream();
 				}
-				int id = 0;
 				Scanner scanner = new Scanner(is);
 				while(scanner.hasNextLine()) {
 					String line = scanner.nextLine();
 					if (line.trim().length() > 0 && !line.trim().startsWith("#")) {
+
 						String[] elements = line.trim().split("=");
 						if (!(elements.length == 2)) {
 							logger.error("Could not parse line %s", line);
@@ -123,10 +128,26 @@ public class SimpleRegexpAppInstanceResolver implements AppInstanceResolver {
 						}
 						String pattern = elements[0].trim();
 						String uri = elements[1].trim();
+						int colon = uri.indexOf(":");
+						if (colon == -1) {
+							logger.error("Could not parse line %s", line);
+							continue;							
+						}
+						int appInstanceId = 0;
+						try {
+							appInstanceId = Integer.parseInt(
+								uri.substring(0, colon));
+						} catch (NumberFormatException nfe) {
+							logger.error("Could not parse line %s", line);
+							continue;														
+						}
+						uri = uri.substring(colon+1);
+						
 						RoutingRule rule = new RoutingRule(); 			
 						rule.pattern = Pattern.compile(pattern);			
 						try {
-							rule.instance = new AppInstance(String.valueOf(++id), new URI(uri));
+							rule.instance = new AppInstance(String.valueOf(
+								appInstanceId), new URI(uri));
 							rules.add(rule);
 						} catch (URISyntaxException e) {
 							// TODO Auto-generated catch block
@@ -145,4 +166,18 @@ public class SimpleRegexpAppInstanceResolver implements AppInstanceResolver {
 		}			
 	}
 
+	
+	public static void main(String[] args) throws Exception {
+		
+		String properties = new String("sip:alice.*=http://ameche-t.tunnlr.com\njefe.*=http://jsgoecke.t.proxylocal.com");
+		ByteArrayResource resource = new ByteArrayResource(properties.getBytes());
+		
+		Document doc = DocumentFactory.getInstance().createDocument();
+		Element offer = doc.addElement("offer");
+		offer.addAttribute("from", "sip:bob@cipango.voip");
+        offer.addAttribute("to", "sip:alice@cipango.voip");
+		SimpleRegexpAppInstanceResolver resolver = new SimpleRegexpAppInstanceResolver(resource);
+		System.out.println("Rules: " + resolver.rules);
+		System.out.println(resolver.lookup(offer, CallDirection.IN));
+	}
 }
