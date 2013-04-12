@@ -25,7 +25,7 @@
   </servlet>
   <servlet-mapping>
     <servlet-name>ameche-transport</servlet-name>
-    <url-pattern>/ameche</url-pattern>
+    <url-pattern>/ameche/*</url-pattern>
   </servlet-mapping>
 
   <!-- Listens and forwards XMPP Messages to the debug console -->
