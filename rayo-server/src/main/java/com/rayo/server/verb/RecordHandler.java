@@ -131,12 +131,6 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
 	public void stop(boolean hangup) {
 
         recording.stop();
-        if(hangup) {
-            complete(new RecordCompleteEvent(model, VerbCompleteEvent.Reason.HANGUP));
-        } else {
-        	//complete(new RecordCompleteEvent(model, Reason.SUCCESS));
-        }
-
 	}
 	
     @Override
