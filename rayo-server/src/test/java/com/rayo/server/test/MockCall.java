@@ -595,4 +595,15 @@ public class MockCall implements IncomingCall {
       return null;
     }
 
+    @Override
+    public Joint join(JoinType type, boolean force, Direction direction, Map<String, String> headers,
+        boolean dtmfPassThrough, CallableEndpoint... others) {
+      return null;
+    }
+
+    @Override
+    public Joint join(JoinType type, boolean force, Direction direction, boolean dtmfPassThrough, Call... others) {
+      return null;
+    }
+
 }
