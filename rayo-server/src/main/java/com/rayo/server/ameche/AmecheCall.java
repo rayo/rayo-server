@@ -55,6 +55,11 @@ class AmecheCall {
         this.appIterator = this.apps.values().iterator();
     }
 
+    public void onMixerEvent(Element event, String componentId, String mixerName) {
+
+    	onEvent(event, parentCallId, componentId, mixerName);
+    }
+    
     /**
      * Do some pre-processing on the call event and then dispatch to the appropriate app instances
      *  
@@ -63,8 +68,13 @@ class AmecheCall {
      * @param event
      * @throws Exception
      */
-    public synchronized void onEvent(Element event, String callId, String componentId) {
-        
+    public void onEvent(Element event, String callId, String componentId) {
+
+    	onEvent(event, callId, componentId, null);
+    }
+    
+    private synchronized void onEvent(Element event, String callId, String componentId, String mixerName) {
+    	
         // Send event to the app instance that started the component
         if(componentId != null) {
             AppInstance appInstance = componentToAppMapping.get(componentId);
@@ -78,7 +88,7 @@ class AmecheCall {
                 return;
             }
             
-            dispatchEvent(event, callId, componentId, appInstance);
+            dispatchEvent(event, callId, componentId, mixerName, appInstance);
         } else {
             if (event.getName().equals("joining")) {
                 //TODO: Check if proper call ids are being used here
@@ -94,7 +104,7 @@ class AmecheCall {
             }
         	// Blast event to all active instances
             for(AppInstance appInstance : apps.values()) {
-                dispatchEvent(event, callId, componentId, appInstance);
+                dispatchEvent(event, callId, componentId, null, appInstance);
             }
         }
 
@@ -131,13 +141,8 @@ class AmecheCall {
                     // to assocociate it with the app that created it since that should 
                     // be the only app to receive events
                     if(result != null && result.getName().equals("ref")) {
-                        AppInstance appInstance = apps.get(appInstanceId);
-                        if (appInstance != null) {
-	                        String newComponentId = result.attributeValue("id");
-	                        componentToAppMapping.put(newComponentId, appInstance);
-                        } else {
-                        	log.error("App Instance with id %s is not online any more", appInstanceId);
-                        }
+                        String newComponentId = result.attributeValue("id");
+                        registerComponent(newComponentId, appInstanceId);
                     }
                     future.setResult(result);
                 }
@@ -145,7 +150,17 @@ class AmecheCall {
         }
         
         return future;
-        
+    }
+    
+    void registerComponent(String componentId, String appInstanceId) {
+
+        AppInstance appInstance = apps.get(appInstanceId);
+        if (appInstance != null) {
+            componentToAppMapping.put(componentId, appInstance);
+        } else {
+        	log.error("App Instance with id %s is not online any more", appInstanceId);
+        }
+
     }
 
 	private void processOfferTargets(final Element command) {
@@ -168,9 +183,10 @@ class AmecheCall {
 		return targets;
 	}
 
-    private void dispatchEvent(Element event, String callId, String componentId, AppInstance appInstance) {
+    void dispatchEvent(Element event, String callId, String componentId, String mixerName, AppInstance appInstance) {
+    	
         try {
-            appInstanceEventDispatcher.send(event, callId, componentId, appInstance);
+            appInstanceEventDispatcher.send(event, callId, componentId, mixerName, appInstance);
         }
         catch (Exception e) {
         	log.debug("Error dispatching event %s to appInstance %s. Call id: [%s]. Component id: [%s].", 
@@ -186,7 +202,7 @@ class AmecheCall {
     void offer() {
         if(appIterator.hasNext()) {
             AppInstance appInstance = appIterator.next();
-            dispatchEvent(offer, parentCallId, null, appInstance);
+            dispatchEvent(offer, parentCallId, null, null, appInstance);
         }
         else {
             connect(offerTargets);

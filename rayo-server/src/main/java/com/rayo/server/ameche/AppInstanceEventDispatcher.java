@@ -29,12 +29,15 @@ public class AppInstanceEventDispatcher {
      * @param request
      * @param appEndpoint
      */
-    public void send(Element event, String callId, String componentId, AppInstance appInstance) throws AppInstanceException {
+    public void send(Element event, String callId, String componentId, String mixerName, AppInstance appInstance) throws AppInstanceException {
 
         // Build HTTP request
         HttpPost request = new HttpPost(URI.create("http://dummy.com")); // A default uri is required
 
         request.setHeader("call-id", callId);
+        if (mixerName != null) {
+        	request.setHeader("mixer-name", mixerName);
+        }
 
         if (componentId != null) {
             request.setHeader("component-id", componentId);

@@ -43,6 +43,7 @@ public class AmecheServlet extends HttpServlet implements Transport {
     private AppInstanceResolver appInstanceResolver;
     private AppInstanceEventDispatcher appInstanceEventDispatcher;
     private AmecheCallRegistry amecheCallRegistry;
+    private AmecheMixerRegistry amecheMixerRegistry;
     private CallRegistry callRegistry;
     private AmecheStorageService amecheStorageService;
     
@@ -60,6 +61,7 @@ public class AmecheServlet extends HttpServlet implements Transport {
         appInstanceEventDispatcher = (AppInstanceEventDispatcher) httpTransportContext.getBean("appInstanceEventDispatcher");
         appInstanceResolver = (AppInstanceResolver) httpTransportContext.getBean("appInstanceResolver");
         amecheCallRegistry = (AmecheCallRegistry) httpTransportContext.getBean("amecheCallRegistry");
+        amecheMixerRegistry = (AmecheMixerRegistry) httpTransportContext.getBean("amecheMixerRegistry");
         callRegistry = (CallRegistry) httpTransportContext.getBean("callRegistry");
         amecheStorageService = (AmecheStorageService)httpTransportContext.getBean("amecheStorageService");
                 
@@ -100,18 +102,26 @@ public class AmecheServlet extends HttpServlet implements Transport {
         // Existing Call
         else {
 
-            // Lookup ameche call handler
-            machine = amecheCallRegistry.getCall(callId);
             // Clean up event machine when the call ends
             if (event.getName().equals("end")) {
                 amecheCallRegistry.unregisterCall(callId);
+                amecheMixerRegistry.unregisterMixerIfNecessary(callId);
             }
-            
-            if (machine != null) {
+
+            // Lookup ameche call handler
+            machine = amecheCallRegistry.getCall(callId);
+            if (machine != null) { 
                 machine.onEvent(event, callId, componentId);
                 return true;
             } else {
-            	log.warn("Could not find an Ameche Call registered for callId %s", callId);
+            	// is it a mixer?
+            	AmecheMixer mixer = amecheMixerRegistry.getMixer(callId);
+            	if (mixer != null) {
+            		mixer.onEvent(event, callId, componentId);
+            		return true;
+            	} else {
+            		log.warn("Could not find an Ameche Call registered for callId %s", callId);
+            	}
             }
         }
 
@@ -126,6 +136,15 @@ public class AmecheServlet extends HttpServlet implements Transport {
     	call.setCommandHandler(commandHandler);
     	return call;
 	}
+    
+    private AmecheMixer createAmecheMixer(String mixerName, String callId) {
+    
+		AmecheMixer mixer = new AmecheMixer(mixerName);
+		mixer = amecheMixerRegistry.registerMixer(callId, mixer);
+		mixer.setAmecheCallRegistry(amecheCallRegistry);
+		mixer.setCommandHandler(commandHandler);
+		return mixer;
+    }
     
 	@Override
     public boolean mixerEvent(String mixerId, Collection<String> participants, Element body) throws Exception {
@@ -151,6 +170,11 @@ public class AmecheServlet extends HttpServlet implements Transport {
             String callId = req.getHeader("call-id");
             String componentId = req.getHeader("component-id");
             String appInstanceId = req.getHeader("app-instance-id");
+            String mixerName = req.getHeader("mixer-name");
+            
+            if(mixerName != null) {
+            	log.debug(mixerName);
+            }
             
             if(callId == null) {
                 log.warn("Missing call-id header");
@@ -164,17 +188,26 @@ public class AmecheServlet extends HttpServlet implements Transport {
                 return;
             }
             
-            AmecheCall call = amecheCallRegistry.getCall(callId);
+            Element result = null;
+            if (mixerName == null) { 
+            	AmecheCall call = amecheCallRegistry.getCall(callId);
             
-            if(call == null) {
-                log.warn("Received command for unknown call: %s", command.asXML());
-                resp.setStatus(404);
-                return;
+	            if(call == null) {
+	                log.warn("Received command for unknown call: %s", command.asXML());
+	                resp.setStatus(404);
+	                return;
+	            }
+            
+	            // Send command to call's event machine
+	            result = call.onCommand(appInstanceId, callId, componentId, command).get();
+            } else {
+            	AmecheMixer mixer = amecheMixerRegistry.getMixer(mixerName);
+            	if (mixer == null) {
+            		mixer = createAmecheMixer(mixerName, callId);
+            	}
+            	result = mixer.onCommand(appInstanceId, mixerName, callId, componentId, command).get();
             }
-            
-            // Send command to call's event machine
-            Element result = call.onCommand(appInstanceId, callId, componentId, command).get();
-            
+	            
             resp.setContentType("application/xml; charset=utf-8");
             
             if(result != null) {

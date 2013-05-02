@@ -42,8 +42,16 @@ public class MixerManager {
 		
 		return create(ctx, mixerName, 0);
 	}
-	
+
 	public Mixer create(ApplicationContext ctx, String mixerName, Integer minParticipants) {
+
+		return create(ctx, mixerName, minParticipants, true);
+	}
+	
+	public Mixer create(ApplicationContext ctx, 
+					    String mixerName, 
+					    Integer minParticipants, 
+					    boolean enableActiveSpeakerEvents) {
 		
 		Lock lock = globalLock.writeLock();
 		lock.lock();		
@@ -59,7 +67,9 @@ public class MixerManager {
 			MixerEndpoint endpoint = (MixerEndpoint)ctx
 					.createEndpoint(MixerEndpoint.DEFAULT_MIXER_ENDPOINT);
 			Map<Object, Object> parameters = new HashMap<Object, Object>();
-			parameters.put(MediaMixer.ENABLED_EVENTS, new EventType[]{MixerEvent.ACTIVE_INPUTS_CHANGED});    			
+			if (enableActiveSpeakerEvents) {
+				parameters.put(MediaMixer.ENABLED_EVENTS, new EventType[]{MixerEvent.ACTIVE_INPUTS_CHANGED});
+			}
 			mixer = endpoint.create(mixerName, parameters);
 			mixer.setAttribute("minParticipants", minParticipants);
 			

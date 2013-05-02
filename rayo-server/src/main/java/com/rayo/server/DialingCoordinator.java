@@ -153,7 +153,7 @@ public class DialingCoordinator {
 					logger.debug("Mixer [%s] not found. Moving calls into a conference.", mixerName);
 					// no mixer yet. We have to create the conference and join the three participants
 					mixer = sourceCallActor.getMixerManager().create(
-						sourceCallActor.getCall().getApplicationContext(), mixerName, 1);
+						sourceCallActor.getCall().getApplicationContext(), mixerName, 1, false);
 					joinActorToMixer(targetCallActor, mixerName);
 					joinActorToMixer(sourceCallActor, mixerName);
 					String peerId = sourceCallActor.getCall().getParticipants()[0].getId();

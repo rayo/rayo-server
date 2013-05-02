@@ -145,38 +145,37 @@ public class Server implements EventHandler, CommandHandler {
 	}
 
 	@Override
-    public void handleCommand(final String callId, String componentId, Element xml, final TransportCallback callback) {
+    public void handleCommand(final String id, String componentId, Element xml, final TransportCallback callback) {
         try {
-            handleCommand(callId, componentId, xml, provider.fromXML(xml), callback);
+            handleCommand(id, componentId, xml, provider.fromXML(xml), callback);
         }
         catch (Exception e) {
             if(e instanceof ValidationException) {
                 rayoStatistics.validationError();
             }
-            log.error("Failed to parse incoming command [callId=%s, componentId=%s, xml=%s]", callId, componentId, xml, e);
+            log.error("Failed to parse incoming command [id=%s, componentId=%s, xml=%s]", id, componentId, xml, e);
             TransportCallback.handle(callback, null, e);
         }
 	}
 
     @Override
-    public void handleCommand(final String callId, String componentId, CallCommand command, final TransportCallback callback) {
+    public void handleCommand(final String id, String componentId, CallCommand command, final TransportCallback callback) {
         try {
-            handleCommand(callId, componentId, provider.toXML(command), command, callback);
+            handleCommand(id, componentId, provider.toXML(command), command, callback);
         }
         catch (Exception e) {
             if(e instanceof ValidationException) {
                 rayoStatistics.validationError();
             }
-            log.error("Failed to serialize incoming command [callId=%s, componentId=%s, command=%s]", callId, componentId, command, e);
+            log.error("Failed to serialize incoming command [id=%s, componentId=%s, command=%s]", id, componentId, command, e);
             TransportCallback.handle(callback, null, e);
         }
     }
 
 	
-	private void handleCommand(final String callId, String componentId, Element xml, Object command, final TransportCallback callback) {
+	private void handleCommand(final String id, String componentId, Element xml, Object command, final TransportCallback callback) {
 		
     	try {
-    		log.debug("Handling command on server: " + command);
     	    rayoStatistics.commandReceived(command);
             
             // Special handling for <dial/> command
@@ -186,12 +185,12 @@ public class Server implements EventHandler, CommandHandler {
             }
 
             assertion(command instanceof CallCommand, "Is this a valid call command?");
-            assertion(callId != null, "Call ID cannot be null");
+            assertion(id != null, "Call or Mixer ID cannot be null");
             
             CallCommand callCommand = (CallCommand) command;
 
             // Set the Call ID
-            callCommand.setCallId(callId);
+            callCommand.setCallId(id);
             
         	// Invoke filters
             callCommand = filtersChain.handleCommandRequest(callCommand);
@@ -201,11 +200,11 @@ public class Server implements EventHandler, CommandHandler {
     		}
             
             // Find the target actor
-            AbstractActor<?> actor = findActor(callId);
+            AbstractActor<?> actor = findActor(id);
             
             if (actor instanceof CallActor) {
-	            callCommand.setCallId(callId);
-	            cdrManager.append(callId, xml.asXML());
+	            callCommand.setCallId(id);
+	            cdrManager.append(id, xml.asXML());
             }
             
             // Resolve component properties 
@@ -222,8 +221,6 @@ public class Server implements EventHandler, CommandHandler {
             }
 
             // Dispatch command to actor
-            log.debug("Dispatching command %s to actor with id %s. Hash: %s", 
-            		callCommand, ((CallActor)actor).getCall().getId(), callCommand.hashCode());
             actor.command(callCommand, new ResponseHandler() {
                 public void handle(Response commandResponse) throws Exception {
 
@@ -243,14 +240,14 @@ public class Server implements EventHandler, CommandHandler {
                     }
                     else {
                     	Element responseXml = provider.toXML(response);
-                    	cdrManager.append(callId, responseXml.asXML());
+                    	cdrManager.append(id, responseXml.asXML());
                     	TransportCallback.handle(callback, responseXml, null);
                     }
                 }
             });
             
         } catch (Exception e) {
-            log.error("Failed to handle incoming command [callId=%s, componentId=%s, command=%s]", callId, componentId, command, e);
+            log.error("Failed to handle incoming command [id=%s, componentId=%s, command=%s]", id, componentId, command, e);
             TransportCallback.handle(callback, null, e);
         }
     	
