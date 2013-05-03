@@ -81,7 +81,8 @@ public class AmecheServlet extends HttpServlet implements Transport {
     public boolean callEvent(String callId, String componentId, Element event) throws Exception {
 
         AmecheCall machine = null;
-
+        boolean result = false;
+        
         // New Call
         if (event.getName().equals("offer")) {
 
@@ -92,40 +93,39 @@ public class AmecheServlet extends HttpServlet implements Transport {
             	machine = createAmecheCall(callId, event, apps);
                 amecheCallRegistry.registerCall(callId, machine);
                 machine.offer();
-                return true;
+                result = true;
             }
             else {
             	log.debug("There is no Ameche instances interested on call [%s]", callId);
-                return false;
             }
+        } else {
+            // Existing Call
+        	try {
+	            // Lookup ameche call handler
+	            machine = amecheCallRegistry.getCall(callId);
+	            if (machine != null) { 
+	                machine.onEvent(event, callId, componentId);
+	                result = true;
+	            } else {
+	            	// is it a mixer?
+	            	AmecheMixer mixer = amecheMixerRegistry.getMixer(callId);
+	            	if (mixer != null) {
+	            		mixer.onEvent(event, callId, componentId);
+	            		result = true;
+	            	} else {
+	            		log.warn("Could not find an Ameche Call registered for callId %s", callId);
+	            	}
+	            }
+        	} finally {
+	            // Clean up event machine when the call ends
+	            if (event.getName().equals("end")) {
+	                amecheCallRegistry.unregisterCall(callId);
+	                amecheMixerRegistry.unregisterMixerIfNecessary(callId);
+	            }
+        	}
         }
-        // Existing Call
-        else {
 
-            // Clean up event machine when the call ends
-            if (event.getName().equals("end")) {
-                amecheCallRegistry.unregisterCall(callId);
-                amecheMixerRegistry.unregisterMixerIfNecessary(callId);
-            }
-
-            // Lookup ameche call handler
-            machine = amecheCallRegistry.getCall(callId);
-            if (machine != null) { 
-                machine.onEvent(event, callId, componentId);
-                return true;
-            } else {
-            	// is it a mixer?
-            	AmecheMixer mixer = amecheMixerRegistry.getMixer(callId);
-            	if (mixer != null) {
-            		mixer.onEvent(event, callId, componentId);
-            		return true;
-            	} else {
-            		log.warn("Could not find an Ameche Call registered for callId %s", callId);
-            	}
-            }
-        }
-
-        return false;
+        return result;
     }
     
     private AmecheCall createAmecheCall(String callId, Element event, List<AppInstance> apps) {
