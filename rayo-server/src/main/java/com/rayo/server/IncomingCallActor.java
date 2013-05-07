@@ -183,7 +183,8 @@ public class IncomingCallActor extends CallActor<IncomingCall> {
         		String icscfRoute = getImsConfiguration().getIcscfRoute();
         		logger.debug("Routing new Offer through icscf [%s]", icscfRoute);
         		headers.put("Route", icscfRoute);
-            	addHeaders(headers, participant, "P-Charging-Vector");
+            	addHeaders(headers, participant, "P-Charging-Vector", "P-Served-User");
+            	headers.put("Ameche-continuation", "true");
         	} else {
         		logger.warn("Could not find an IMS icscf route setting");
             	addHeaders(headers, participant, "Route", "P-Asserted-Identity", "P-Served-User", "P-Charging-Vector");
