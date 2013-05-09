@@ -83,6 +83,7 @@ public class SimpleRegexpAppInstanceResolver implements AppInstanceResolver {
     	}
     	String from = offer.attributeValue("from");
     	String to = offer.attributeValue("to");
+    	logger.debug("Finding a match for[from:%s,  to:%s, direction:%s", from, to, direction);
     	for(RoutingRule rule: rules) {
     		if ((direction == CallDirection.OUT && rule.pattern.matcher(from).matches()) ||
     			(direction == CallDirection.IN && rule.pattern.matcher(to).matches())) {

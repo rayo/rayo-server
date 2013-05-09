@@ -104,6 +104,7 @@ public class Server implements EventHandler, CommandHandler {
 
 		boolean sent = false;
 		try {
+			log.debug("There is %s transports to handle the event.", transports.size());
 	    	for(Transport transport : transports) {
 				if (transport.callEvent(callId, componentId, xml)) {
 					sent = true;

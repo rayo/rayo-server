@@ -82,7 +82,7 @@ public class AmecheServlet extends HttpServlet implements Transport {
 
         AmecheCall machine = null;
         boolean result = false;
-        
+        log.debug("Handling event: %s", event.getName());
         // New Call
         if (event.getName().equals("offer")) {
 
