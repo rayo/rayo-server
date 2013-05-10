@@ -98,7 +98,7 @@ public class CallManager extends ReflectiveActor {
 
     }
 
-    public CallActor<?> createCallActor(URI to, URI from, Map<String, String> headers) {
+    public CallActor<?> createCallActor(URI to, URI from, Map<String, String> headers, Call source) {
         
         log.debug("Creating call to [%s] from [%s]", to, from);
         CallableEndpoint toEndpoint = (CallableEndpoint) applicationContext.createEndpoint(to.toString());
@@ -110,7 +110,7 @@ public class CallManager extends ReflectiveActor {
 
         log.debug("Creating call to [%s] from [%s]", toEndpoint, fromEndpoint);
         
-        final Call mohoCall = toEndpoint.createCall(fromEndpoint, headers);
+        final Call mohoCall = toEndpoint.createCall(fromEndpoint, headers, source);
         
         return createCallActor(mohoCall);        
     }

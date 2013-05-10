@@ -176,45 +176,16 @@ public class IncomingCallActor extends CallActor<IncomingCall> {
         // Extract IMS headers
         Map<String,String> headers = new HashMap<String, String>();
         if (getCall().getCallState() == State.CONNECTED) {
-        	// Post offer phase. We have to forward the Offer to the I-CSCF to 
-        	// generate an Out-of-blue call
-        	if (getImsConfiguration() != null && 
-        		getImsConfiguration().getIcscfRoute() != null) {
-        		String icscfRoute = getImsConfiguration().getIcscfRoute();
-        		logger.debug("Routing new Offer through icscf [%s]", icscfRoute);
-        		headers.put("Route", icscfRoute);
-            	addHeaders(headers, participant, "P-Charging-Vector", "P-Served-User");
-            	headers.put("Ameche-continuation", "true");
-        	} else {
-        		logger.warn("Could not find an IMS icscf route setting");
-            	addHeaders(headers, participant, "Route", "P-Asserted-Identity", "P-Served-User", "P-Charging-Vector");
-        	}
-        	
-        } else {
-        	// Offer phase, we just forward the original Offer headers.
-        	addHeaders(headers, participant, "Route", "P-Asserted-Identity", "P-Served-User", "P-Charging-Vector");
+        	headers.put("Ameche-continuation", "true");        	
         }
 
         URI from = participant.getInvitor().getURI();
         
         for(URI destination : destinations) {        
-        	final CallActor<?> targetCallActor = getCallManager().createCallActor(destination, from, headers);
+        	final CallActor<?> targetCallActor = 
+        		getCallManager().createCallActor(destination, from, headers, getCall());
         	dialingCoordinator.dial(this, targetCallActor, ringlistId);
         }          
     	logger.debug("Ended command %s. Actor id %s.", command, getCall().getId());
-    }
-    
-    private void addHeaders(Map<String,String> headers, IncomingCall participant, String... keys) {
-    	
-    	for(String key: keys) {
-    		String header = participant.getHeader(key);
-    		if (header != null) {
-    			if (participant.getHeader("IMS-Test-" + key) != null) {
-    				// Used only for testing purposes, to simulate IMS like forwards from a solo Prism instance
-    				header = participant.getHeader("IMS-Test-" + key);
-    			}
-    			headers.put(key, header);
-    		}
-    	}
     }
 }
