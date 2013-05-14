@@ -68,7 +68,6 @@
 		<property name="mixerManager" ref="mixerManager" />
         <property name="callManager" ref="callManager" />
         <property name="dialingCoordinator" ref="dialingCoordinator" />
-        <property name="imsConfiguration" ref="imsConfiguration"/>
 	</bean>	
 
 	<!-- Call Manager: Responsible for maintaining the Call Registry and creating new CallActors -->
@@ -357,10 +356,4 @@
 	<bean id="provisioningAgentLoader" class="com.rayo.provisioning.ProvisioningAgentLoader">
 		<property name="services" ref="spiProvisioning"/>
 	</bean>
-  
-  	<bean id="imsConfiguration" class="com.rayo.server.ameche.ImsConfiguration">
-   		<property name="icscfUser" value="icscf"/>
-   		<property name="icscfServer" value="i-cscf.cipango.voip"/>
-   		<property name="icscfPort" value="5070"/>
-  	</bean>
 </beans>
