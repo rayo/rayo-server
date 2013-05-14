@@ -28,6 +28,8 @@ public class CallManager extends ReflectiveActor {
     private CallStatistics callStatistics;
     private ImsConfiguration imsConfiguration;
     
+    private boolean removeUserPhoneParameter;
+    
     // Calls
     // ================================================================================
 
@@ -101,7 +103,12 @@ public class CallManager extends ReflectiveActor {
     public CallActor<?> createCallActor(URI to, URI from, Map<String, String> headers, Call source) {
         
         log.debug("Creating call to [%s] from [%s]", to, from);
-        CallableEndpoint toEndpoint = (CallableEndpoint) applicationContext.createEndpoint(to.toString());
+        String destination = to.toString();
+        if (removeUserPhoneParameter && destination.contains(";user=phone")) {
+        	log.debug("Removing user=phone from to's URI");
+        	destination = destination.replaceAll(";user=phone", "");
+        }
+        CallableEndpoint toEndpoint = (CallableEndpoint) applicationContext.createEndpoint(destination);
         
         Endpoint fromEndpoint = null;
         if(from != null) {
@@ -195,5 +202,9 @@ public class CallManager extends ReflectiveActor {
 
 	public void setImsConfiguration(ImsConfiguration imsConfiguration) {
 		this.imsConfiguration = imsConfiguration;
+	}
+
+	public void setRemoveUserPhoneParameter(boolean removeUserPhoneParameter) {
+		this.removeUserPhoneParameter = removeUserPhoneParameter;
 	}
 }
