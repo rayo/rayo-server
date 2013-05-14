@@ -78,6 +78,7 @@
 		<property name="cdrManager" ref="cdrManager" />
         <property name="adminService" ref="adminService" />
         <property name="callStatistics" ref="callStatistics" />
+        <property name="removeUserPhoneParameter" value="false"/>
 	</bean>
 
 	<!-- Mixer Actor Factory -->
