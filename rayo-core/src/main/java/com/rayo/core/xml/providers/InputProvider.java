@@ -163,7 +163,7 @@ public class InputProvider extends BaseProvider {
 	            if (choiceElement.attributeValue("url") != null) {
 	                choice.setUri(toURI(choiceElement.attributeValue("url")));
 	            } else {
-	            	if (content.startsWith("<![CDATA[")) {
+	            	if (content != null && content.startsWith("<![CDATA[")) {
 	            		content = content.substring(9, content.length()-3);
 	            	}
 	                choice.setContent(content);
