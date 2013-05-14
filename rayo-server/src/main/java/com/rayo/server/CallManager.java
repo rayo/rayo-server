@@ -7,7 +7,6 @@ import com.rayo.core.CallRef;
 import com.rayo.core.DialCommand;
 import com.rayo.core.JoinCommand;
 import com.rayo.server.admin.AdminService;
-import com.rayo.server.ameche.ImsConfiguration;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.ApplicationContext;
 import com.voxeo.moho.Call;
@@ -26,7 +25,6 @@ public class CallManager extends ReflectiveActor {
     private CdrManager cdrManager;
     private AdminService adminService;
     private CallStatistics callStatistics;
-    private ImsConfiguration imsConfiguration;
     
     private boolean removeUserPhoneParameter;
     
@@ -195,14 +193,6 @@ public class CallManager extends ReflectiveActor {
     public void setCallStatistics(CallStatistics callStatistics) {
         this.callStatistics = callStatistics;
     }
-
-	public ImsConfiguration getImsConfiguration() {
-		return imsConfiguration;
-	}
-
-	public void setImsConfiguration(ImsConfiguration imsConfiguration) {
-		this.imsConfiguration = imsConfiguration;
-	}
 
 	public void setRemoveUserPhoneParameter(boolean removeUserPhoneParameter) {
 		this.removeUserPhoneParameter = removeUserPhoneParameter;
