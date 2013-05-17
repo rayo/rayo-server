@@ -392,6 +392,10 @@ public class InputProvider extends BaseProvider {
                 }            	
             }
         }
+        else {
+        	addCompleteElement(document, event, COMPLETE_NAMESPACE);
+        }
+        
     }
     
     private void createSignalEvent(SignalEvent event, Document document) throws Exception {
