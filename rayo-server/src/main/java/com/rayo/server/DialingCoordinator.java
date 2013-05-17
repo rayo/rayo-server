@@ -10,6 +10,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import com.rayo.core.AnsweredEvent;
 import com.rayo.core.EndCommand;
 import com.rayo.core.EndEvent;
+import com.rayo.core.UnjoinCommand;
 import com.rayo.core.EndEvent.Reason;
 import com.rayo.core.JoinCommand;
 import com.rayo.core.JoinDestinationType;
@@ -157,6 +158,13 @@ public class DialingCoordinator {
 					String peerId = sourceCallActor.getCall().getParticipants()[0].getId();
 					CallActor<?> peer = sourceCallActor.getCallManager().getCallRegistry().get(peerId);
 					joinActorToMixer(peer, mixerName);
+					
+					// Unjoin original peer
+					UnjoinCommand unjoin = new UnjoinCommand();
+					unjoin.setFrom(peerId);
+					unjoin.setType(JoinDestinationType.CALL);
+					sourceCallActor.publish(unjoin);
+					
 				} else {
 					joinActorToMixer(targetCallActor, mixerName);
 				}				
