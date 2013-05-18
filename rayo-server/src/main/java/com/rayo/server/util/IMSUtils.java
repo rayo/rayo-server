@@ -42,12 +42,17 @@ public class IMSUtils {
 		// 3rd. Try to find it from sescase and p-served-user
 		String pHeader = call.getHeader("P-Served-User");
 		if (pHeader != null) {
-			pHeader = removeBrackets(pHeader);
-			SipURI uri = new SipURI(pHeader);
-			CallDirection direction = extractDirectionFromParameter(uri,"sescase");
-			if (direction != null) {
-		    	logger.debug("Found direction on P-Served-User header: [%s]", direction);
-				return direction;
+			try {
+				pHeader = removeBrackets(pHeader);
+				SipURI uri = new SipURI(pHeader);
+				CallDirection direction = extractDirectionFromParameter(uri,"sescase");
+				if (direction != null) {
+			    	logger.debug("Found direction on P-Served-User header: [%s]", direction);
+					return direction;
+				}
+			}
+			catch(RuntimeException e) {
+				logger.error(e);
 			}
 		}
 		
