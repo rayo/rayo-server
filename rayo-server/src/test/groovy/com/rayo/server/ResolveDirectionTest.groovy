@@ -151,4 +151,16 @@ class ResolveDirectionTest {
 		
 		assertEquals IMSUtils.resolveDirection(call), CallDirection.IN
 	}
+	
+	
+	@Test
+	public void resolveFromPHeaderWithName() {
+
+		def call = [getHeaders:{new ListIteratorWrapper([].iterator())},
+					getInvitee:{null},
+					getHeader:{'"A Name" <sip:user@example.com>; sescase=orig; regstate=reg'}] as Call
+		def actor = new IncomingCallActor(null);
+		
+		assertEquals IMSUtils.resolveDirection(call), CallDirection.OUT
+	}
 }

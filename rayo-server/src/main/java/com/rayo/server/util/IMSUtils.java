@@ -94,8 +94,13 @@ public class IMSUtils {
 
 	private static String removeBrackets(String route) {
 
-		route = route.replaceAll("<", "");
-		return route.replaceAll(">", "");
+		int bracket = route.indexOf("<");
+		if (bracket != -1) {
+			route = route.substring(bracket)
+				.replaceAll("<", "")
+				.replaceAll(">", "");
+		}
+		return route;
 	}
 	
 }
