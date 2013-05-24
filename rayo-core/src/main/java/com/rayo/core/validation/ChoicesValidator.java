@@ -18,8 +18,8 @@ public class ChoicesValidator implements ConstraintValidator<ValidChoices, Input
 
 		context.disableDefaultConstraintViolation();
 
-		if (!(value.getGrammars() != null && value.getGrammars().size() > 0) ||
-				value.getCpaData() != null) {
+		if (!((value.getGrammars() != null && value.getGrammars().size() > 0) ||
+				value.getCpaData() != null)) {
 			context.buildConstraintViolationWithTemplate( 
 					Messages.MISSING_CHOICES)
 					.addConstraintViolation();
