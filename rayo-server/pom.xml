@@ -71,6 +71,10 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
+			<artifactId>spring-jdbc</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
 		</dependency>
 		<dependency>
@@ -154,5 +158,16 @@
           <version>1.0.2</version>
           <scope>test</scope>
         </dependency>        
+		<dependency>
+  			<groupId>com.tropo</groupId>
+  			<artifactId>tropo-unit</artifactId>
+          	<scope>test</scope>
+  		</dependency>
+        <dependency>
+			<groupId>commons-dbutils</groupId>
+			<artifactId>commons-dbutils</artifactId>
+			<version>1.5</version>
+          	<scope>test</scope>
+		</dependency>
 	</dependencies>
 </project>
