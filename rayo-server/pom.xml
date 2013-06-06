@@ -157,6 +157,11 @@
           <artifactId>mysql-connector-java</artifactId>
           <version>5.1.19</version>
 		</dependency>
+		<dependency>
+		  <groupId>commons-dbcp</groupId>
+   		  <artifactId>commons-dbcp</artifactId>
+		  <version>1.4</version>
+		</dependency>
         <dependency>
           <groupId>com.harlap</groupId>
           <artifactId>mock-http-server</artifactId>
