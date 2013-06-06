@@ -60,6 +60,7 @@ class JdbcAppInstanceResolverTest {
 				assertThat instance.endpoint,is(URI.create(rows[rowIdx - 1][1]))				
 			} 
 			assertThat rs.next(),is(false)
+			return true
 		})
 		gmc.play {
 			def offer = toXML("""<offer to="$addy" from="tel:+15613504458"/>""")
