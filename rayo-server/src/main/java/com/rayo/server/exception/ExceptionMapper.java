@@ -62,17 +62,20 @@ public class ExceptionMapper {
 		} else if (e instanceof RayoProtocolException) {
 			RayoProtocolException re = (RayoProtocolException)e;
 			switch (re.getCondition()) {
-            case BAD_REQUEST:
-                errorCondition = Condition.BAD_REQUEST.toString();                
-                break;
-            case ITEM_NOT_FOUND:
-                errorCondition = Condition.ITEM_NOT_FOUND.toString();
-                break;
-            case SERVICE_UNAVAILABLE:
-                errorCondition = Condition.SERVICE_UNAVAILABLE.toString();
-                break;
-            default:
-                log.error("Cound not map RayoProtocolException to XMPP [condition=%s]", re.getCondition());
+	            case BAD_REQUEST:
+	                errorCondition = Condition.BAD_REQUEST.toString();                
+	                break;
+	            case ITEM_NOT_FOUND:
+	                errorCondition = Condition.ITEM_NOT_FOUND.toString();
+	                break;
+	            case SERVICE_UNAVAILABLE:
+	                errorCondition = Condition.SERVICE_UNAVAILABLE.toString();
+	                break;
+	            case CONFLICT:
+	                errorCondition = Condition.CONFLICT.toString();
+	                break;
+	            default:
+	                log.error("Cound not map RayoProtocolException to XMPP [condition=%s]", re.getCondition());
             }
 	        errorMessage = re.getMessage();
 			errorType = com.voxeo.servlet.xmpp.StanzaError.Type.CANCEL.toString();

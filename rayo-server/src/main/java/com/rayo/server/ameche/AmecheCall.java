@@ -129,13 +129,16 @@ class AmecheCall {
         	}
             future.setResult(null);                
         } else {
+        	log.debug("Processing command: %s", command);
             // Send command to call's event machine
             commandHandler.handleCommand(callId, componentId, command, new TransportCallback() {
                 public void handle(Element result, Exception err) {
                     if(err != null) {
+                    	log.debug("Error processing command: %s", err);
                         future.setException((Exception)err);
                         return;
                     }
+                    log.debug("Command processed successfully. Result: %s", result);
                     
                     // If the command resulted in a new component being created we need
                     // to assocociate it with the app that created it since that should 

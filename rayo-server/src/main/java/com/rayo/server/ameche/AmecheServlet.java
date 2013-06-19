@@ -160,6 +160,7 @@ public class AmecheServlet extends HttpServlet implements Transport {
         
         String body = IOUtils.toString(is);
         log.debug("(i) %s", body);
+        log.debug("Processing Ameche request");
         
         SAXReader reader = new SAXReader();
         
@@ -211,12 +212,15 @@ public class AmecheServlet extends HttpServlet implements Transport {
             resp.setContentType("application/xml; charset=utf-8");
             
             if(result != null) {
-                byte[] bytes = ((Element)result).asXML().getBytes("utf-8");
+            	String response = ((Element)result).asXML();
+            	log.debug("Sending response to Ameche: [%s]", response);
+                byte[] bytes = response.getBytes("utf-8");
                 resp.setStatus(200);
                 resp.setContentLength(bytes.length);
                 resp.getOutputStream().write(bytes);
             }
             else {
+            	log.debug("Sending 203 back to Ameche.");
                 resp.setStatus(203);
             }
             

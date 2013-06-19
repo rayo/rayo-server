@@ -18,10 +18,13 @@ import com.rayo.core.OfferEvent;
 import com.rayo.core.RedirectCommand;
 import com.rayo.core.RejectCommand;
 import com.rayo.core.exception.RecoverableException;
+import com.rayo.server.exception.RayoProtocolException;
+import com.rayo.server.exception.RayoProtocolException.Condition;
 import com.rayo.server.util.IMSUtils;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.ApplicationContext;
 import com.voxeo.moho.Call;
+import com.voxeo.moho.SignalException;
 import com.voxeo.moho.Call.State;
 import com.voxeo.moho.Endpoint;
 import com.voxeo.moho.IncomingCall;
@@ -106,7 +109,15 @@ public class IncomingCallActor extends CallActor<IncomingCall> {
 		}
         
     	Map<String, String> headers = message.getHeaders();
-        participant.accept(headers);
+    	if (message.isEarlyMedia()) {
+    		try {
+    			participant.acceptWithEarlyMedia(headers);
+    		} catch (SignalException se) {
+    			throw new RayoProtocolException(Condition.CONFLICT,"Call does not accept early media");
+    		}
+    	} else {
+    		participant.accept(headers);
+    	}
         getCallStatistics().callAccepted();
     }
     

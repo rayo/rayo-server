@@ -8,12 +8,13 @@ package com.rayo.server.exception;
  *
  */
 @SuppressWarnings("serial")
-public class RayoProtocolException extends Exception {
+public class RayoProtocolException extends RuntimeException {
 
 	public enum Condition {
 		BAD_REQUEST,
 		ITEM_NOT_FOUND,
-		SERVICE_UNAVAILABLE
+		SERVICE_UNAVAILABLE,
+		CONFLICT
 	}
 
 	private Condition condition;

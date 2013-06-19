@@ -253,6 +253,9 @@ public class RayoProvider extends BaseProvider {
 
         AcceptCommand accept = new AcceptCommand(null);
         accept.setHeaders(grabHeaders(element));
+        if (element.attributeValue("earlyMedia") != null) {
+        	accept.setEarlyMedia(toBoolean("earlyMedia", element));
+        }
 
         return accept;
     }
@@ -534,6 +537,9 @@ public class RayoProvider extends BaseProvider {
         AcceptCommand accept = (AcceptCommand) object;
         Element root = document.addElement(new QName("accept", RAYO_NAMESPACE));
         addHeaders(accept.getHeaders(), root);
+        if(accept.isEarlyMedia()) {
+        	root.addAttribute("earlyMedia", String.valueOf(accept.isEarlyMedia()));
+        }
 
         return document;
     }

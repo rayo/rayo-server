@@ -8,6 +8,7 @@ import org.apache.commons.lang.builder.ToStringStyle;
 public class AcceptCommand extends AbstractCallCommand {
 
     private Map<String, String> headers;
+    private boolean earlyMedia;
 
     public AcceptCommand() {}
 
@@ -27,12 +28,22 @@ public class AcceptCommand extends AbstractCallCommand {
     public Map<String, String> getHeaders() {
         return headers;
     }
-    @Override
+    
+    public boolean isEarlyMedia() {
+		return earlyMedia;
+	}
+
+	public void setEarlyMedia(boolean earlyMedia) {
+		this.earlyMedia = earlyMedia;
+	}
+
+	@Override
     public String toString() {
 
     	return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)    		
     		.append("callId", getCallId())
     		.append("headers",headers)
+    		.append("earlyMedia", earlyMedia)
     		.toString();
     }
 

@@ -14,6 +14,7 @@ import com.rayo.server.Actor;
 import com.rayo.server.validation.ValidHandlerState;
 import com.voxeo.moho.Call;
 import com.voxeo.moho.Call.State;
+import com.voxeo.moho.IncomingCall;
 import com.voxeo.moho.MediaService;
 import com.voxeo.moho.Mixer;
 import com.voxeo.moho.Participant;
@@ -141,7 +142,9 @@ public abstract class AbstractLocalVerbHandler<T extends Verb, S extends Partici
     	
     	if (participant instanceof Call) {
     		Call call = (Call)participant;
-    		if (call.getCallState() == State.ACCEPTED || call.getCallState() == State.CONNECTED) {
+    		if (call.getCallState() == State.ACCEPTED || 
+    			call.getCallState() == State.CONNECTED ||
+    			(call instanceof IncomingCall && ((IncomingCall)call).isAcceptedWithEarlyMedia())) {
     			return true;
     		}
     	} else if (participant instanceof Mixer) {

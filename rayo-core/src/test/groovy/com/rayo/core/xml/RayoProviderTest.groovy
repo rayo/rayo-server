@@ -436,7 +436,14 @@ class RayoProviderTest {
         ]);
         assertEquals("""<accept xmlns="urn:xmpp:rayo:1"><header name="test" value="atest"/></accept>""", toXml(accept));
     }
-    
+	
+	@Test
+	public void acceptWithEarlyMediaToXml() {
+		AcceptCommand accept = new AcceptCommand();
+		accept.setEarlyMedia(true);
+		assertEquals("""<accept xmlns="urn:xmpp:rayo:1" earlyMedia="true"/>""", toXml(accept));
+    }
+
     @Test
     public void acceptFromXml() {
         assertNotNull fromXml("""<accept xmlns="urn:xmpp:rayo:1"></accept>""")
@@ -448,7 +455,14 @@ class RayoProviderTest {
             headers: [test:"atest"]
         ])
     }
-    
+
+	@Test
+	public void acceptWithEarlyMediaFromXml() {
+		assertProperties(fromXml("""<accept xmlns="urn:xmpp:rayo:1" earlyMedia="true"></accept>"""), [
+			earlyMedia: true
+		])
+    }
+
     // Answer
     // ====================================================================================
     
