@@ -198,6 +198,18 @@ public class AmecheServlet extends HttpServlet implements Transport {
 	                resp.setStatus(404);
 	                return;
 	            }
+	            
+	            if (command.getName().equals("ping")) {
+	            	// was just pinging
+	                resp.setContentType("application/xml; charset=utf-8");
+	            	String response = "<ok/>";
+	            	log.debug("Sending response to Ameche: [%s]", response);
+	                byte[] bytes = response.getBytes("utf-8");
+	                resp.setStatus(200);
+	                resp.setContentLength(bytes.length);
+	                resp.getOutputStream().write(bytes);
+	            	return;
+	            }
             
 	            // Send command to call's event machine
 	            result = call.onCommand(appInstanceId, callId, componentId, command).get();
