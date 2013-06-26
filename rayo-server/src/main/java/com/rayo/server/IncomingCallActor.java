@@ -20,14 +20,13 @@ import com.rayo.core.RejectCommand;
 import com.rayo.core.exception.RecoverableException;
 import com.rayo.server.exception.RayoProtocolException;
 import com.rayo.server.exception.RayoProtocolException.Condition;
-import com.rayo.server.util.IMSUtils;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.ApplicationContext;
 import com.voxeo.moho.Call;
-import com.voxeo.moho.SignalException;
 import com.voxeo.moho.Call.State;
 import com.voxeo.moho.Endpoint;
 import com.voxeo.moho.IncomingCall;
+import com.voxeo.moho.SignalException;
 import com.voxeo.moho.common.event.AutowiredEventListener;
 import com.voxeo.moho.event.AcceptableEvent;
 import com.voxeo.moho.sip.SIPCallImpl;
@@ -51,7 +50,7 @@ public class IncomingCallActor extends CallActor<IncomingCall> {
         offer.setFrom(call.getInvitor().getURI());
         offer.setTo(call.getInvitee().getURI());
         
-        CallDirection direction = IMSUtils.resolveDirection(call);
+        CallDirection direction = getCallDirectionResolver().resolveDirection(call);
         offer.setDirection(direction);
 
         Iterator<String> headerNames = call.getHeaderNames();

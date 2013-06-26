@@ -30,7 +30,7 @@ import com.rayo.server.CallRegistry;
 import com.rayo.server.CommandHandler;
 import com.rayo.server.Server;
 import com.rayo.server.Transport;
-import com.rayo.server.util.IMSUtils;
+import com.rayo.server.ims.CallDirectionResolver;
 import com.voxeo.logging.Loggerf;
 
 @SuppressWarnings("serial")
@@ -46,6 +46,7 @@ public class AmecheServlet extends HttpServlet implements Transport {
     private AmecheMixerRegistry amecheMixerRegistry;
     private CallRegistry callRegistry;
     private AmecheStorageService amecheStorageService;
+    private CallDirectionResolver callDirectionResolver;
     
     @Override
     public void init() throws ServletException {
@@ -64,6 +65,7 @@ public class AmecheServlet extends HttpServlet implements Transport {
         amecheMixerRegistry = (AmecheMixerRegistry) httpTransportContext.getBean("amecheMixerRegistry");
         callRegistry = (CallRegistry) httpTransportContext.getBean("callRegistry");
         amecheStorageService = (AmecheStorageService)httpTransportContext.getBean("amecheStorageService");
+        callDirectionResolver = (CallDirectionResolver)httpTransportContext.getBean("callDirectionResolver");
                 
         // Replace Rayo's default Storage service with Ameche's one
         @SuppressWarnings("unchecked")
@@ -289,7 +291,7 @@ public class AmecheServlet extends HttpServlet implements Transport {
     	
     	CallActor<?> actor = callRegistry.get(callId);
     	if (actor != null) {
-    		return IMSUtils.resolveDirection(actor.getCall());
+    		return callDirectionResolver.resolveDirection(actor.getCall());
     	} else {
     		log.error("Could not resolve direction for call %s. Setting to term.", callId);
     		return CallDirection.IN;

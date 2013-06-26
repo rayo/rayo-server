@@ -36,6 +36,7 @@ import com.rayo.core.verb.UnholdCommand;
 import com.rayo.core.verb.UnmuteCommand;
 import com.rayo.server.exception.RayoProtocolException;
 import com.rayo.server.exception.RayoProtocolException.Condition;
+import com.rayo.server.ims.CallDirectionResolver;
 import com.voxeo.exceptions.NotFoundException;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.Call;
@@ -68,6 +69,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     private MixerManager mixerManager;
     private CallManager callManager;
     private DialingCoordinator dialingCoordinator;
+    private CallDirectionResolver callDirectionResolver;
     
     // This is used to synchronize Answered event with media join as Moho may send you 
     // an answered event before the media is joined
@@ -604,5 +606,13 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 
 	public void setDialingCoordinator(DialingCoordinator dialingCoordinator) {
 		this.dialingCoordinator = dialingCoordinator;
+	}
+
+	public void setCallDirectionResolver(CallDirectionResolver callDirectionResolver) {
+		this.callDirectionResolver = callDirectionResolver;
+	}
+
+	public CallDirectionResolver getCallDirectionResolver() {
+		return callDirectionResolver;
 	}
 }

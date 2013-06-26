@@ -1,4 +1,4 @@
-package com.rayo.server
+package com.rayo.server.ims
 
 import org.apache.commons.collections.iterators.ListIteratorWrapper;
 
@@ -6,7 +6,7 @@ import com.rayo.core.CallDirection;
 import com.voxeo.moho.Call
 import com.voxeo.moho.CallableEndpoint;
 import com.rayo.core.sip.SipURI
-import com.rayo.server.util.IMSUtils;
+import com.rayo.server.*
 
 import static org.junit.Assert.*;
 import org.junit.After;
@@ -15,6 +15,14 @@ import org.junit.Test;
 
 class ResolveDirectionTest {
 
+	def callDirectionResolver
+	
+	@Before
+	public void setup() {
+		
+		callDirectionResolver = new DefaultCallDirectionResolver()
+	}
+	
 	@Test
 	public void resolveDefaultsToTerm() {
 		
@@ -23,7 +31,7 @@ class ResolveDirectionTest {
 					getHeader:{null}] as Call
 		def actor = new IncomingCallActor(null);
 		
-		assertEquals IMSUtils.resolveDirection(call), CallDirection.IN
+		assertEquals callDirectionResolver.resolveDirection(call), CallDirection.IN
 	}
 	
 	@Test
@@ -34,7 +42,7 @@ class ResolveDirectionTest {
 					getHeader:{null}] as Call
 		def actor = new IncomingCallActor(null);
 		
-		assertEquals IMSUtils.resolveDirection(call), CallDirection.OUT
+		assertEquals callDirectionResolver.resolveDirection(call), CallDirection.OUT
 	}
 	
 	@Test
@@ -45,7 +53,7 @@ class ResolveDirectionTest {
 					getHeader:{null}] as Call
 		def actor = new IncomingCallActor(null);
 		
-		assertEquals IMSUtils.resolveDirection(call), CallDirection.OUT
+		assertEquals callDirectionResolver.resolveDirection(call), CallDirection.OUT
 	}
 	
 	@Test
@@ -56,7 +64,7 @@ class ResolveDirectionTest {
 					getHeader:{null}] as Call
 		def actor = new IncomingCallActor(null);
 		
-		assertEquals IMSUtils.resolveDirection(call), CallDirection.OUT
+		assertEquals callDirectionResolver.resolveDirection(call), CallDirection.OUT
 	}
 	
 	@Test
@@ -67,7 +75,7 @@ class ResolveDirectionTest {
 					getHeader:{null}] as Call
 		def actor = new IncomingCallActor(null);
 		
-		assertEquals IMSUtils.resolveDirection(call), CallDirection.OUT
+		assertEquals callDirectionResolver.resolveDirection(call), CallDirection.OUT
 	}
 	
 	@Test
@@ -80,7 +88,7 @@ class ResolveDirectionTest {
 					getHeader:{null}] as Call
 		def actor = new IncomingCallActor(null);
 		
-		assertEquals IMSUtils.resolveDirection(call), CallDirection.OUT
+		assertEquals callDirectionResolver.resolveDirection(call), CallDirection.OUT
 	}
 	
 	@Test
@@ -91,7 +99,7 @@ class ResolveDirectionTest {
 					getHeader:{"<sip:user@example.com>; sescase=orig; regstate=reg"}] as Call
 		def actor = new IncomingCallActor(null);
 		
-		assertEquals IMSUtils.resolveDirection(call), CallDirection.OUT
+		assertEquals callDirectionResolver.resolveDirection(call), CallDirection.OUT
 	}
 	
 	@Test
@@ -106,7 +114,7 @@ class ResolveDirectionTest {
 					getHeader:{null}] as Call
 		def actor = new IncomingCallActor(null);
 		
-		assertEquals IMSUtils.resolveDirection(call), CallDirection.IN
+		assertEquals callDirectionResolver.resolveDirection(call), CallDirection.IN
 	}
 	
 	@Test
@@ -122,7 +130,7 @@ class ResolveDirectionTest {
 					getHeader:{null}] as Call
 		def actor = new IncomingCallActor(null);
 		
-		assertEquals IMSUtils.resolveDirection(call), CallDirection.IN
+		assertEquals callDirectionResolver.resolveDirection(call), CallDirection.IN
 	}
 	
 	@Test
@@ -137,7 +145,7 @@ class ResolveDirectionTest {
 					getHeader:{"<sip:user@example.com>; sescase=orig; regstate=reg"}] as Call
 		def actor = new IncomingCallActor(null);
 		
-		assertEquals IMSUtils.resolveDirection(call), CallDirection.IN
+		assertEquals callDirectionResolver.resolveDirection(call), CallDirection.IN
 	}
 	
 	
@@ -149,7 +157,7 @@ class ResolveDirectionTest {
 					getHeader:{"<sip:user@example.com>; sescase=term; regstate=reg"}] as Call
 		def actor = new IncomingCallActor(null);
 		
-		assertEquals IMSUtils.resolveDirection(call), CallDirection.IN
+		assertEquals callDirectionResolver.resolveDirection(call), CallDirection.IN
 	}
 	
 	
@@ -161,6 +169,6 @@ class ResolveDirectionTest {
 					getHeader:{'"A Name" <sip:user@example.com>; sescase=orig; regstate=reg'}] as Call
 		def actor = new IncomingCallActor(null);
 		
-		assertEquals IMSUtils.resolveDirection(call), CallDirection.OUT
+		assertEquals callDirectionResolver.resolveDirection(call), CallDirection.OUT
 	}
 }
