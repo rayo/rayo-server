@@ -88,7 +88,7 @@ class AmecheCall {
                 return;
             }
             
-            dispatchEvent(event, callId, componentId, mixerName, appInstance);
+            blindDispatchEvent(event, callId, componentId, mixerName, appInstance);
         } else {
             if (event.getName().equals("joining")) {
                 //TODO: Check if proper call ids are being used here
@@ -104,7 +104,7 @@ class AmecheCall {
             }
         	// Blast event to all active instances
             for(AppInstance appInstance : apps.values()) {
-                dispatchEvent(event, callId, componentId, null, appInstance);
+            	blindDispatchEvent(event, callId, componentId, null, appInstance);
             }
         }
 
@@ -186,15 +186,32 @@ class AmecheCall {
 		return targets;
 	}
 
-    void dispatchEvent(Element event, String callId, String componentId, String mixerName, AppInstance appInstance) {
+    void blindDispatchEvent(Element event, 
+			   String callId, 
+			   String componentId, 
+			   String mixerName, 
+			   AppInstance appInstance) {
+    
+    	try {
+    		dispatchEvent(event, callId, componentId, mixerName, appInstance);    		
+    	} catch (AppInstanceException ae) {
+    		// ignore
+    	}
+    }
+    
+    void dispatchEvent(Element event, 
+    				   String callId, 
+    				   String componentId, 
+    				   String mixerName, 
+    				   AppInstance appInstance) throws AppInstanceException {
     	
         try {
             appInstanceEventDispatcher.send(event, callId, componentId, mixerName, appInstance);
-        }
-        catch (Exception e) {
+        } catch (AppInstanceException ae) {
         	log.debug("Error dispatching event %s to appInstance %s. Call id: [%s]. Component id: [%s].", 
         			event, appInstance, callId, componentId);
             apps.remove(appInstance.getId());
+            throw ae;
         }
     }
 
@@ -203,14 +220,23 @@ class AmecheCall {
      * or complete the call once it's been offered to all apps
      */
     void offer() {
-        if(appIterator.hasNext()) {
-            AppInstance appInstance = appIterator.next();
-            dispatchEvent(offer, parentCallId, null, null, appInstance);
-        }
-        else {
-            connect(offerTargets);
-            offerPhaseEnded = true;
-        }
+    	
+    	boolean offerSent = false;
+    	
+    	do {
+    		if(appIterator.hasNext()) {
+    			AppInstance appInstance = appIterator.next();
+    			try {
+    				dispatchEvent(offer, parentCallId, null, null, appInstance);
+    				offerSent = true;
+    			} catch (AppInstanceException ae) {
+    				// will process next iterator entry
+    			}
+	        } else {
+	            connect(offerTargets);
+	            offerPhaseEnded = true;
+	        }
+    	} while(!offerSent && !offerPhaseEnded);
     }    
 
     private void connect(List<URI> targets) {
