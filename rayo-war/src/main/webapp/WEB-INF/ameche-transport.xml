@@ -22,6 +22,9 @@
         </constructor-arg>
       </bean>
     </property>
+    <!-- If an application instance does not respond to an offer before this 
+         timeout then it will be excluded from the offer phase -->
+    <property name="offerTimeout" value="10000" />
   </bean>
   <bean id="appInstanceResolver" class="com.rayo.server.ameche.SimpleRegexpAppInstanceResolver">
 	  <constructor-arg value="/WEB-INF/ameche-routing.properties"/> <!-- properties file -->
@@ -32,4 +35,8 @@
   <bean id="amecheStorageService" class="com.rayo.server.ameche.AmecheStorageService">
       <property name="baseUrl" value="http://localhost:8080/rayo/ameche/recordings"/>
   </bean>
+  
+  <!-- Exception Mapper -->
+  <bean id="exceptionMapper" class="com.rayo.server.exception.ExceptionMapper"/>
+  
 </beans>
