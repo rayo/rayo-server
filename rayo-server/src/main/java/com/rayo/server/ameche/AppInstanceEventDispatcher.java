@@ -63,6 +63,10 @@ public class AppInstanceEventDispatcher {
 
         try {
             HttpHost target = new HttpHost(appEndpoint.getHost(), appEndpoint.getPort(), appEndpoint.getScheme());
+			log.debug(
+					"Dispatching event to app instance [scheme=%s host=%s port=%d]",
+					appEndpoint.getScheme(), appEndpoint.getHost(),
+					appEndpoint.getPort());
             HttpResponse response = http.execute(target, request);
 
             // We must consume the content to release the connection
@@ -71,6 +75,11 @@ public class AppInstanceEventDispatcher {
             // Check the status code
             int statusCode = response.getStatusLine().getStatusCode();
 
+			log.debug(
+					"Got response from app instance [status=%d scheme=%s host=%s port=%d]",
+					statusCode, appEndpoint.getScheme(), appEndpoint.getHost(),
+					appEndpoint.getPort());
+			
             if (statusCode != 203) {
                 log.error("Non-203 Status Code [appEndpoint=%s, status=%s]", appEndpoint, statusCode);
                 throw new AppInstanceException("HTTP request failed with status code " + statusCode);
