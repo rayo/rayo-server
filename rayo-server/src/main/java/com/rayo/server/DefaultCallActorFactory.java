@@ -2,6 +2,7 @@ package com.rayo.server;
 
 import org.jetlang.fibers.PoolFiberFactory;
 
+import com.rayo.server.ims.CallDirectionResolver;
 import com.rayo.server.verb.VerbManager;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.Call;
@@ -19,6 +20,7 @@ public class DefaultCallActorFactory implements CallActorFactory {
     private MixerManager mixerManager;
     private CallManager callManager;
     private DialingCoordinator dialingCoordinator;
+    private CallDirectionResolver callDirectionResolver;
 
     @Override
     public CallActor<?> create(Call call) {
@@ -42,6 +44,7 @@ public class DefaultCallActorFactory implements CallActorFactory {
         actor.setMixerManager(mixerManager);
         actor.setCallManager(callManager);
         actor.setDialingCoordinator(dialingCoordinator);
+        actor.setCallDirectionResolver(callDirectionResolver);
         return actor;
     }
 
@@ -95,5 +98,10 @@ public class DefaultCallActorFactory implements CallActorFactory {
 
 	public void setDialingCoordinator(DialingCoordinator dialingCoordinator) {
 		this.dialingCoordinator = dialingCoordinator;
+	}
+	
+	public void setCallDirectionResolver(CallDirectionResolver callDirectionResolver) {
+		
+		this.callDirectionResolver = callDirectionResolver;
 	}
 }

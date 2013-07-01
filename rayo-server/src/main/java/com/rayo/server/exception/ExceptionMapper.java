@@ -20,12 +20,14 @@ public class ExceptionMapper {
 		
 		String errorType = StanzaError.Type.CANCEL.toString();
 		String errorCondition = toString(StanzaError.Condition.INTERNAL_SERVER_ERROR);
+		Integer httpCode = 500;
 		String errorMessage = e.getMessage();
 		
 		if (e instanceof ValidationException) {
 			ConstraintViolation<?> violation = ((ValidationException)e).getFirstViolation();
 			errorType = StanzaError.Type.MODIFY.toString();
 			errorCondition = toString(StanzaError.Condition.BAD_REQUEST);
+			httpCode = 400;
 			if (violation != null) {				
 				if (violation.getConstraintDescriptor() != null &&
 					violation.getConstraintDescriptor().getAnnotation() instanceof ValidHandlerState) {
@@ -42,17 +44,20 @@ public class ExceptionMapper {
 				}
 			}
 			
-			return new ErrorMapping(errorType, errorCondition, errorMessage);
+			return new ErrorMapping(errorType, errorCondition, errorMessage, httpCode);
 		}
 		else if(e instanceof NotFoundException) {
 		    errorCondition = toString(StanzaError.Condition.ITEM_NOT_FOUND);
+		    httpCode = 404;
 		} else if (e instanceof IllegalArgumentException) {
 			errorCondition = toString(StanzaError.Condition.BAD_REQUEST);
+			httpCode = 400;
 		} else if (e instanceof MediaException) {
 			//TODO: Media Server needs to propagate proper response codes
 			if (e.getMessage().contains("Response code of 407")) {
 				// This is a grammar compilation issue
 				errorCondition = toString(StanzaError.Condition.BAD_REQUEST);
+				httpCode = 400;
 				errorMessage = "There is an error in the grammar. It could not be compiled.";
 			}
 		} else if (e instanceof BusyException) {
@@ -63,16 +68,20 @@ public class ExceptionMapper {
 			RayoProtocolException re = (RayoProtocolException)e;
 			switch (re.getCondition()) {
 	            case BAD_REQUEST:
-	                errorCondition = Condition.BAD_REQUEST.toString();                
+	                errorCondition = Condition.BAD_REQUEST.toString();       
+	                httpCode = 400;
 	                break;
 	            case ITEM_NOT_FOUND:
 	                errorCondition = Condition.ITEM_NOT_FOUND.toString();
+	                httpCode = 404;
 	                break;
 	            case SERVICE_UNAVAILABLE:
 	                errorCondition = Condition.SERVICE_UNAVAILABLE.toString();
+	                httpCode = 503;
 	                break;
 	            case CONFLICT:
 	                errorCondition = Condition.CONFLICT.toString();
+	                httpCode = 409;
 	                break;
 	            default:
 	                log.error("Cound not map RayoProtocolException to XMPP [condition=%s]", re.getCondition());
@@ -82,7 +91,7 @@ public class ExceptionMapper {
 		}
 		
 		log.debug("Mapping unknown exception [type=%s, message=%s]",e.getClass(), e.getMessage());
-		return new ErrorMapping(errorType, errorCondition, errorMessage);
+		return new ErrorMapping(errorType, errorCondition, errorMessage, httpCode);
 	}
 	
 	public static String toString(com.voxeo.servlet.xmpp.StanzaError.Condition condition) {

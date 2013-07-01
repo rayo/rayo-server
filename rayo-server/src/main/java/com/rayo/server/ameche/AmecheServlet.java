@@ -8,6 +8,7 @@ import java.net.FileNameMap;
 import java.net.URLConnection;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
@@ -30,7 +31,9 @@ import com.rayo.server.CallRegistry;
 import com.rayo.server.CommandHandler;
 import com.rayo.server.Server;
 import com.rayo.server.Transport;
-import com.rayo.server.util.IMSUtils;
+import com.rayo.server.exception.ErrorMapping;
+import com.rayo.server.exception.ExceptionMapper;
+import com.rayo.server.ims.CallDirectionResolver;
 import com.voxeo.logging.Loggerf;
 
 @SuppressWarnings("serial")
@@ -46,6 +49,8 @@ public class AmecheServlet extends HttpServlet implements Transport {
     private AmecheMixerRegistry amecheMixerRegistry;
     private CallRegistry callRegistry;
     private AmecheStorageService amecheStorageService;
+    private CallDirectionResolver callDirectionResolver;
+    private ExceptionMapper exceptionMapper;
     
     @Override
     public void init() throws ServletException {
@@ -64,6 +69,8 @@ public class AmecheServlet extends HttpServlet implements Transport {
         amecheMixerRegistry = (AmecheMixerRegistry) httpTransportContext.getBean("amecheMixerRegistry");
         callRegistry = (CallRegistry) httpTransportContext.getBean("callRegistry");
         amecheStorageService = (AmecheStorageService)httpTransportContext.getBean("amecheStorageService");
+        callDirectionResolver = (CallDirectionResolver)httpTransportContext.getBean("callDirectionResolver");
+        exceptionMapper = (ExceptionMapper)httpTransportContext.getBean("exceptionMapper");
                 
         // Replace Rayo's default Storage service with Ameche's one
         @SuppressWarnings("unchecked")
@@ -198,6 +205,18 @@ public class AmecheServlet extends HttpServlet implements Transport {
 	                resp.setStatus(404);
 	                return;
 	            }
+	            
+	            if (command.getName().equals("ping")) {
+	            	// was just pinging
+	                resp.setContentType("application/xml; charset=utf-8");
+	            	String response = "<ok/>";
+	            	log.debug("Sending response to Ameche: [%s]", response);
+	                byte[] bytes = response.getBytes("utf-8");
+	                resp.setStatus(200);
+	                resp.setContentLength(bytes.length);
+	                resp.getOutputStream().write(bytes);
+	            	return;
+	            }
             
 	            // Send command to call's event machine
 	            result = call.onCommand(appInstanceId, callId, componentId, command).get();
@@ -228,15 +247,19 @@ public class AmecheServlet extends HttpServlet implements Transport {
         catch (DocumentException e) {
             log.error("Failed to parse Rayo command", e);
             resp.setStatus(500);
-        }
-        catch (Exception e) {
+        } catch (ExecutionException ee) {
+            log.error("Failed to process command", ee);
+            ErrorMapping error = exceptionMapper.toXmppError((Exception)ee.getCause());
+            resp.setHeader("rayo-error", error.getText());
+            resp.sendError(error.getHttpCode(), error.getText());        	
+        } catch (Exception e) {
             log.error("Failed to process command", e);
             resp.setHeader("rayo-error", e.getMessage());
             resp.sendError(500, e.getMessage());
         }
     }
-    
-    @Override
+
+	@Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
     		throws ServletException, IOException {
 
@@ -277,7 +300,7 @@ public class AmecheServlet extends HttpServlet implements Transport {
     	
     	CallActor<?> actor = callRegistry.get(callId);
     	if (actor != null) {
-    		return IMSUtils.resolveDirection(actor.getCall());
+    		return callDirectionResolver.resolveDirection(actor.getCall());
     	} else {
     		log.error("Could not resolve direction for call %s. Setting to term.", callId);
     		return CallDirection.IN;

@@ -1,4 +1,4 @@
-package com.rayo.server.util;
+package com.rayo.server.ims;
 
 import java.net.URI;
 import java.util.ListIterator;
@@ -8,11 +8,11 @@ import com.rayo.core.sip.SipURI;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.Call;
 
-public class IMSUtils {
+public class DefaultCallDirectionResolver implements CallDirectionResolver {
 
-	private static Loggerf logger = Loggerf.getLogger(IMSUtils.class);
+	private static Loggerf logger = Loggerf.getLogger(DefaultCallDirectionResolver.class);
 	
-    public static CallDirection resolveDirection(Call call) {
+    public CallDirection resolveDirection(Call call) {
 
     	// 1st try to guess direction from route headers
     	ListIterator<String> routes = call.getHeaders("Route");
@@ -61,7 +61,7 @@ public class IMSUtils {
 		return CallDirection.IN;
 	}
 
-	private static CallDirection extractDirectionFromParameter(SipURI uri, String p) {
+	private CallDirection extractDirectionFromParameter(SipURI uri, String p) {
 		
     	String parameter = uri.getParameter(p);
 
@@ -75,7 +75,7 @@ public class IMSUtils {
     	return null;
 	}
 
-	private static CallDirection guessDirectionFromUri(String route) {
+	private CallDirection guessDirectionFromUri(String route) {
 
 		route = removeBrackets(route);
 		if (route == null) {
@@ -92,7 +92,7 @@ public class IMSUtils {
 		return null;
 	}
 
-	private static String removeBrackets(String route) {
+	private String removeBrackets(String route) {
 
 		int bracket = route.indexOf("<");
 		if (bracket != -1) {

@@ -22,6 +22,14 @@ public class AppInstanceEventDispatcher {
     private static final Loggerf log = Loggerf.getLogger(AppInstanceEventDispatcher.class);
 
     private HttpClient http;
+    
+    /*
+     * This timeout sets by default how much should Rayo wait for a <continue> response from 
+     * an offer before considering that the application instance is inactive. If the application 
+     * instance does not send a response to an offer event before this timeout it will be 
+     * considered as faulty and will be excluded from the offer phase.
+     */
+    private int offerTimeout = 10000;
 
     /**
      * Send HTTP request to a a set of app instances
@@ -100,4 +108,11 @@ public class AppInstanceEventDispatcher {
         this.http = http;
     }
 
+	public int getOfferTimeout() {
+		return offerTimeout;
+	}
+
+	public void setOfferTimeout(int offerTimeout) {
+		this.offerTimeout = offerTimeout;
+	}
 }
