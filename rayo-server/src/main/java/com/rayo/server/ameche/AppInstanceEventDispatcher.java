@@ -64,7 +64,8 @@ public class AppInstanceEventDispatcher {
         	request.setHeader("auth-token", authToken);
         }
 
-        request.setEntity(new StringEntity(event.asXML(), ContentType.APPLICATION_XML));
+        String xml = event.asXML();
+		request.setEntity(new StringEntity(xml, ContentType.APPLICATION_XML));
 
         // Request Properties
         HttpParams params = request.getParams();
@@ -84,6 +85,10 @@ public class AppInstanceEventDispatcher {
 
         try {
             HttpHost target = new HttpHost(appEndpoint.getHost(), appEndpoint.getPort(), appEndpoint.getScheme());
+			log.debug(
+					"Dispatching event to app instance [scheme=%s host=%s port=%d event=%s]",
+					appEndpoint.getScheme(), appEndpoint.getHost(),
+					appEndpoint.getPort(), xml);
             HttpResponse response = http.execute(target, request);
 
             // We must consume the content to release the connection
@@ -92,6 +97,11 @@ public class AppInstanceEventDispatcher {
             // Check the status code
             int statusCode = response.getStatusLine().getStatusCode();
 
+			log.debug(
+					"Got response from app instance [status=%d scheme=%s host=%s port=%d]",
+					statusCode, appEndpoint.getScheme(), appEndpoint.getHost(),
+					appEndpoint.getPort());
+			
             if (statusCode != 203) {
                 log.error("Non-203 Status Code [appEndpoint=%s, status=%s]", appEndpoint, statusCode);
                 throw new AppInstanceException("HTTP request failed with status code " + statusCode);
