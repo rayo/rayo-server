@@ -51,7 +51,8 @@ public class AppInstanceEventDispatcher {
             request.setHeader("component-id", componentId);
         }
 
-        request.setEntity(new StringEntity(event.asXML(), ContentType.APPLICATION_XML));
+        String xml = event.asXML();
+		request.setEntity(new StringEntity(xml, ContentType.APPLICATION_XML));
 
         // Request Properties
         HttpParams params = request.getParams();
@@ -72,9 +73,9 @@ public class AppInstanceEventDispatcher {
         try {
             HttpHost target = new HttpHost(appEndpoint.getHost(), appEndpoint.getPort(), appEndpoint.getScheme());
 			log.debug(
-					"Dispatching event to app instance [scheme=%s host=%s port=%d]",
+					"Dispatching event to app instance [scheme=%s host=%s port=%d event=%s]",
 					appEndpoint.getScheme(), appEndpoint.getHost(),
-					appEndpoint.getPort());
+					appEndpoint.getPort(), xml);
             HttpResponse response = http.execute(target, request);
 
             // We must consume the content to release the connection

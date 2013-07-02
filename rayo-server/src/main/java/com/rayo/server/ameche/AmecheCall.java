@@ -216,8 +216,9 @@ class AmecheCall {
     		AppInstance appInstance = apps.get(appInstanceId);
         	if (!offerPhaseEnded.get()) {
         		if (appInstance != null) {
-	        		log.debug("Received a <connect> command from app instance [%s].", appInstance);
-	        		if (getAppInstanceOfferState(appInstance) == OfferState.SENT) {
+	        		OfferState offerState = getAppInstanceOfferState(appInstance);
+	        		log.debug("Received a <connect> command from app instance [%s]. [offerState=%s]", appInstance, offerState);
+					if (offerState == OfferState.SENT) {
 	        			// i.e. hasn't timed out
 	        			log.debug("Processing <connect> command on app instance [%s].", appInstance);
 	        			processConnectEvent(command, appInstance);
@@ -367,9 +368,12 @@ class AmecheCall {
     		    	executor.schedule(new Runnable() {
     		    		@Override
     		    		public void run() {
-    		    			if (getAppInstanceOfferState(appInstance) != OfferState.CONNECT_RECEIVED) {
+    		    			OfferState state = getAppInstanceOfferState(appInstance);
+							if (state != OfferState.CONNECT_RECEIVED) {
     		    				setAppInstanceOfferState(appInstance, OfferState.TIMEOUT);
-    		        			log.debug("Offer timed out on app instance [%s]. Proceeding with the next one.", appInstance);
+										log.debug(
+												"Offer timed out on app instance [%s]. Proceeding with the next one. [state=%s]",
+												appInstance, state);
     		        			apps.remove(appInstance.getId());
     		    				offer();
     		    			}
@@ -379,6 +383,7 @@ class AmecheCall {
     			} catch (AppInstanceException ae) {
     				setAppInstanceOfferState(appInstance, OfferState.FAILED);
     				// will process next iterator entry
+    				log.warn("Exception dispatching offer to app instance [instance=%s]", appInstance, ae);
     			}
     		} else {
     			if (!offerPhaseEnded.getAndSet(true)) {
