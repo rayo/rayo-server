@@ -358,9 +358,9 @@ class AmecheCall {
     			final AppInstance appInstance = appIterator.next();
     			log.debug("Offering offer to app instance [%s]", appInstance);
     			try {
+				setAppInstanceOfferState(appInstance, OfferState.SENT);
     				dispatchEvent(offer, parentCallId, null, null, appInstance);
         			log.debug("Offer dispatched successfully.");
-    				setAppInstanceOfferState(appInstance, OfferState.SENT);
     				offerSent = true;
     		    	    				
     				ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
