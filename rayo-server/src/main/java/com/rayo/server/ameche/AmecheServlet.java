@@ -201,7 +201,7 @@ public class AmecheServlet extends HttpServlet implements Transport {
             	String authToken = req.getHeader("auth-token");
             	if (!amecheAuthenticationService.isValidToken(callId, authToken)) {
             		log.error("Invalid auth token: [%s] for call id [%s] ", authToken, callId);
-            		resp.setStatus(404, "Invalid auth token");
+            		resp.setStatus(403, "Invalid auth token");
             		return;
             	}
             }
