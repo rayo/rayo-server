@@ -22,6 +22,10 @@
     <servlet-name>ameche-transport</servlet-name>
     <servlet-class>com.rayo.server.ameche.AmecheServlet</servlet-class>
     <load-on-startup>1</load-on-startup>
+    <init-param>
+        <param-name>rayoUrl</param-name>
+        <param-value>http://localhost:8080/rayo/ameche</param-value>
+    </init-param>
   </servlet>
   <servlet-mapping>
     <servlet-name>ameche-transport</servlet-name>

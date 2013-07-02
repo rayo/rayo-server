@@ -47,6 +47,7 @@ public class AmecheServlet extends HttpServlet implements Transport {
     private AppInstanceEventDispatcher appInstanceEventDispatcher;
     private AmecheCallRegistry amecheCallRegistry;
     private AmecheMixerRegistry amecheMixerRegistry;
+    private AmecheAuthenticationService amecheAuthenticationService;
     private CallRegistry callRegistry;
     private AmecheStorageService amecheStorageService;
     private CallDirectionResolver callDirectionResolver;
@@ -67,6 +68,7 @@ public class AmecheServlet extends HttpServlet implements Transport {
         appInstanceResolver = (AppInstanceResolver) httpTransportContext.getBean("appInstanceResolver");
         amecheCallRegistry = (AmecheCallRegistry) httpTransportContext.getBean("amecheCallRegistry");
         amecheMixerRegistry = (AmecheMixerRegistry) httpTransportContext.getBean("amecheMixerRegistry");
+        amecheAuthenticationService = (AmecheAuthenticationService) httpTransportContext.getBean("amecheAuthenticationService");
         callRegistry = (CallRegistry) httpTransportContext.getBean("callRegistry");
         amecheStorageService = (AmecheStorageService)httpTransportContext.getBean("amecheStorageService");
         callDirectionResolver = (CallDirectionResolver)httpTransportContext.getBean("callDirectionResolver");
@@ -82,6 +84,8 @@ public class AmecheServlet extends HttpServlet implements Transport {
         server.addTransport(this);
         this.commandHandler = server;
         
+        String rayoUrl = getServletConfig().getInitParameter("rayoUrl");
+        appInstanceEventDispatcher.setRayoUrl(rayoUrl);
     }
 
     @Override
@@ -128,6 +132,7 @@ public class AmecheServlet extends HttpServlet implements Transport {
 	            if (event.getName().equals("end")) {
 	                amecheCallRegistry.unregisterCall(callId);
 	                amecheMixerRegistry.unregisterMixerIfNecessary(callId);
+	                amecheAuthenticationService.unregisterCall(callId);
 	            }
         	}
         }
@@ -137,8 +142,10 @@ public class AmecheServlet extends HttpServlet implements Transport {
     
     private AmecheCall createAmecheCall(String callId, Element event, List<AppInstance> apps) {
     	
-    	AmecheCall call = new AmecheCall(callId, event, apps);
+    	String token = amecheAuthenticationService.generateToken(callId);
+    	AmecheCall call = new AmecheCall(callId, token, event, apps);
     	call.setAmecheCallRegistry(amecheCallRegistry);
+    	call.setAmecheAuthenticationService(amecheAuthenticationService);
     	call.setAppInstanceEventDispatcher(appInstanceEventDispatcher);
     	call.setCommandHandler(commandHandler);
     	return call;
@@ -188,6 +195,15 @@ public class AmecheServlet extends HttpServlet implements Transport {
                 log.warn("Missing call-id header");
                 resp.setStatus(400, "Missing call-id header");
                 return;
+            }
+            
+            if (amecheAuthenticationService.isTokenAuthEnabled()) {
+            	String authToken = req.getHeader("auth-token");
+            	if (!amecheAuthenticationService.isValidToken(callId, authToken)) {
+            		log.error("Invalid auth token: [%s] for call id [%s] ", authToken, callId);
+            		resp.setStatus(404, "Invalid auth token");
+            		return;
+            	}
             }
             
             if(appInstanceId == null) {

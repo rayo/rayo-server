@@ -11,7 +11,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -37,10 +36,12 @@ class AmecheCall {
     private CommandHandler commandHandler;
     private AppInstanceEventDispatcher appInstanceEventDispatcher;
     private AmecheCallRegistry amecheCallRegistry;
+    private AmecheAuthenticationService amecheAuthenticationService;
 
     // Config
     private Element offer;
     private String parentCallId;
+    private String authToken;
     
     // Internal
     private Iterator<AppInstance> appIterator;
@@ -72,10 +73,14 @@ class AmecheCall {
     }
     
     // Constructor
-    public AmecheCall(String callId, Element offer, List<AppInstance> appList) {
+    public AmecheCall(String callId, 
+    				  String authToken, 
+    				  Element offer, 
+    				  List<AppInstance> appList) {
 
         this.offer = offer;
         this.parentCallId = callId;
+        this.authToken = authToken;
         
         // Create App Map. Used to track active apps. If an app misbehaves we pull
         // it out of this map so it won't receive any more events.
@@ -133,6 +138,7 @@ class AmecheCall {
                 // Register call with outer AmecheServlet's registry
                 String peerCallId = event.attributeValue("call-id");
                 amecheCallRegistry.registerCall(peerCallId, AmecheCall.this);
+                amecheAuthenticationService.assignToken(peerCallId, AmecheCall.this.authToken);
                 
                 // Notify apps of new leg.
                 Element announceElement = DocumentHelper.createElement("announce");
@@ -336,7 +342,8 @@ class AmecheCall {
     				   AppInstance appInstance) throws AppInstanceException {
     	
         try {
-            appInstanceEventDispatcher.send(event, callId, componentId, mixerName, appInstance);
+            appInstanceEventDispatcher.send(event, callId, componentId, 
+            		mixerName, authToken, appInstance);
         } catch (AppInstanceException ae) {
         	log.debug("Error dispatching event %s to appInstance %s. Call id: [%s]. Component id: [%s].", 
         			event, appInstance, callId, componentId);
@@ -446,4 +453,8 @@ class AmecheCall {
         return null;
     }
 
+	public void setAmecheAuthenticationService(
+			AmecheAuthenticationService amecheAuthenticationService) {
+		this.amecheAuthenticationService = amecheAuthenticationService;
+	}
 }
