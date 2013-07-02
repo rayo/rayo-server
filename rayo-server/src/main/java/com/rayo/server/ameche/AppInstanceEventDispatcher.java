@@ -22,6 +22,7 @@ public class AppInstanceEventDispatcher {
     private static final Loggerf log = Loggerf.getLogger(AppInstanceEventDispatcher.class);
 
     private HttpClient http;
+    private String rayoUrl;
     
     /*
      * This timeout sets by default how much should Rayo wait for a <continue> response from 
@@ -37,7 +38,12 @@ public class AppInstanceEventDispatcher {
      * @param request
      * @param appEndpoint
      */
-    public void send(Element event, String callId, String componentId, String mixerName, AppInstance appInstance) throws AppInstanceException {
+    public void send(Element event, 
+    				 String callId, 
+    				 String componentId, 
+    				 String mixerName, 
+    				 String authToken, 
+    				 AppInstance appInstance) throws AppInstanceException {
 
         // Build HTTP request
         HttpPost request = new HttpPost(URI.create("http://dummy.com")); // A default uri is required
@@ -49,6 +55,13 @@ public class AppInstanceEventDispatcher {
 
         if (componentId != null) {
             request.setHeader("component-id", componentId);
+        }
+        
+        if (rayoUrl != null) {
+        	request.setHeader("rayo-url", rayoUrl);
+        }
+        if (authToken != null) {
+        	request.setHeader("auth-token", authToken);
         }
 
         String xml = event.asXML();
@@ -115,5 +128,13 @@ public class AppInstanceEventDispatcher {
 
 	public void setOfferTimeout(int offerTimeout) {
 		this.offerTimeout = offerTimeout;
+	}
+
+	public String getRayoUrl() {
+		return rayoUrl;
+	}
+
+	public void setRayoUrl(String rayoUrl) {
+		this.rayoUrl = rayoUrl;
 	}
 }

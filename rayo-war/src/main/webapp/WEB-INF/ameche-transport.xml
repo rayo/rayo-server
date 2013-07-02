@@ -35,7 +35,9 @@
   <bean id="amecheStorageService" class="com.rayo.server.ameche.AmecheStorageService">
       <property name="baseUrl" value="http://localhost:8080/rayo/ameche/recordings"/>
   </bean>
-  
+  <bean id="amecheAuthenticationService" class="com.rayo.server.ameche.AmecheAuthenticationService">
+      <property name="tokenAuthEnabled"  value="true" />
+  </bean>  
   <!-- Exception Mapper -->
   <bean id="exceptionMapper" class="com.rayo.server.exception.ExceptionMapper"/>
   
