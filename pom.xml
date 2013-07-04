@@ -11,6 +11,7 @@
   
   <properties>
       <spring.version>3.0.5.RELEASE</spring.version>
+      <moho.version>trunk-SNAPSHOT</moho.version>
   </properties>
 
     <repositories>
@@ -110,18 +111,18 @@
   		<dependency>
   			<groupId>com.voxeo.moho</groupId>
   			<artifactId>moho-api</artifactId>
-  			<version>trunk-SNAPSHOT</version>
+  			<version>${moho.version}</version>
   		</dependency>
   		<dependency>
   			<groupId>com.voxeo.moho</groupId>
   			<artifactId>moho-impl</artifactId>
-  			<version>trunk-SNAPSHOT</version> 
+  			<version>${moho.version}</version> 
   		</dependency>
-                <dependency>
-                        <groupId>com.voxeo.moho</groupId>
-                        <artifactId>moho-common</artifactId>
-                        <version>trunk-SNAPSHOT</version>
-                </dependency>
+        <dependency>
+                <groupId>com.voxeo.moho</groupId>
+                <artifactId>moho-common</artifactId>
+                <version>${moho.version}</version>
+        </dependency>
   		<dependency>
   			<groupId>com.voxeo.moho</groupId>
   			<artifactId>sipservlet-api</artifactId>
