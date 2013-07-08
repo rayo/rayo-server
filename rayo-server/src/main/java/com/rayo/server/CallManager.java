@@ -3,6 +3,8 @@ package com.rayo.server;
 import java.net.URI;
 import java.util.Map;
 
+import org.apache.log4j.MDC;
+
 import com.rayo.core.CallRef;
 import com.rayo.core.DialCommand;
 import com.rayo.core.JoinCommand;
@@ -48,7 +50,10 @@ public class CallManager extends ReflectiveActor {
 		log.debug("Creating call to [%s] from [%s]", toEndpoint, fromEndpoint);
         
         final Call mohoCall = toEndpoint.createCall(fromEndpoint, command.getHeaders());
-        
+		
+        MDC.put("CallID", String.format("[%s]",mohoCall.getId()));
+		log.debug("Call to [%s] from [%s] created successfully", toEndpoint, fromEndpoint);
+
         if (command.getJoin() != null) {   
         	
             log.debug("Nested join operation detected. Setting join parameters [%s]", command.getJoin());
@@ -83,6 +88,7 @@ public class CallManager extends ReflectiveActor {
     @Message
     public void onIncomingCall(IncomingCall mohoCall) {
         
+		MDC.put("CallID", String.format("[%s]",mohoCall.getId()));
         log.info("Incoming Call [%s]", mohoCall);
         
         if (adminService.isQuiesceMode()) {

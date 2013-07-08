@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.apache.log4j.MDC;
 import org.dom4j.Element;
 
 import com.rayo.core.CallCommand;
