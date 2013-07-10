@@ -386,18 +386,32 @@
     <url>scm:git:git@github.com:rayo/rayo-server.git</url>
     <developerConnection>scm:git:git@github.com:rayo/rayo-server.git</developerConnection>
   </scm>
-  <modules>
-    <module>rayo-server</module>
-    <module>rayo-core</module>
-    <module>rayo-war</module>
-    <module>rayo-sbcrouter</module>
-    <module>rayo-storage</module>
-    <module>rayo-gateway</module>
-    <module>rayo-provisioning</module>
-    <module>rayo-provisioning-cassandra-agent</module>
-    <module>rayo-provisioning-properties-agent</module>
-  </modules>
   <profiles>
+    <profile>
+      <id>rayo-solo</id>
+        <activation>
+          <activeByDefault>true</activeByDefault>
+        </activation>
+        <modules>
+          <module>rayo-core</module>
+          <module>rayo-server</module>
+          <module>rayo-war</module>
+        </modules>
+    </profile>
+    <profile>
+      <id>rayo-gateway</id>
+      <modules>
+        <module>rayo-server</module>
+        <module>rayo-core</module>
+        <module>rayo-war</module>
+        <module>rayo-sbcrouter</module>
+        <module>rayo-storage</module>
+        <module>rayo-gateway</module>
+        <module>rayo-provisioning</module>
+        <module>rayo-provisioning-cassandra-agent</module>
+        <module>rayo-provisioning-properties-agent</module>
+      </modules>
+    </profile>
     <profile>
       <id>uml</id>
       <activation>
