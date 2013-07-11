@@ -21,6 +21,7 @@ import org.dom4j.Element;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 
+import com.ameche.repo.RuntimePermission;
 import com.rayo.core.CallDirection;
 import com.voxeo.logging.Loggerf;
 
@@ -148,7 +149,8 @@ public class SimpleRegexpAppInstanceResolver implements AppInstanceResolver {
 						rule.pattern = Pattern.compile(pattern);			
 						try {
 							rule.instance = new AppInstance(String.valueOf(
-								appInstanceId), new URI(uri));
+								appInstanceId), new URI(uri), 10, 
+								getAllAmechePermissions());
 							rules.add(rule);
 						} catch (URISyntaxException e) {
 							// TODO Auto-generated catch block
@@ -168,6 +170,15 @@ public class SimpleRegexpAppInstanceResolver implements AppInstanceResolver {
 	}
 
 	
+	private Integer getAllAmechePermissions() {
+		
+		Integer permissions = 0;		
+		for (RuntimePermission perm : RuntimePermission.values()) {
+			permissions |= (1 << perm.ordinal());
+		}
+		return permissions;
+	}
+
 	public static void main(String[] args) throws Exception {
 		
 		String properties = new String("sip:alice.*=http://ameche-t.tunnlr.com\njefe.*=http://jsgoecke.t.proxylocal.com");
