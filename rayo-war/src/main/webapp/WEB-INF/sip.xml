@@ -19,10 +19,6 @@
 			<param-name>mediaDialectClass</param-name>
 			<param-value>com.voxeo.prism.moho.PrismDialect</param-value>
 		</init-param>
-		<init-param>
-			<param-name>com.voxeolabs.moho.copyHeadersForContinueRouting</param-name>
-			<param-value>true</param-value>
-		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
 </sip-app>
