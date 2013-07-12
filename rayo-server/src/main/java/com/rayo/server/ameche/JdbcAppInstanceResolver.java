@@ -14,7 +14,7 @@ import com.rayo.core.CallDirection;
 import com.voxeo.logging.Loggerf;
 
 /**
- * <p>Resolves Ameche routing rules defined on a external file, typically WEB-INF/ameche-routing.properties. 
+ * <p>Resolves Ameche routing rules defined on a database. 
  * Routing rules will have into consideration both to/from fields. All instances matching the given offer will 
  * be dispatched.</p>
  * 
@@ -34,9 +34,11 @@ public class JdbcAppInstanceResolver implements AppInstanceResolver {
 				throws SQLException {
 			String id = rs.getString("appInstanceId");
 			String uri = rs.getString("url");
+			Integer priority = rs.getInt("priority");
+			Integer permissions = rs.getInt("permissions");
 			try {
 				logger.debug("Found app instance [id=%s url=%s]", id, uri);
-				return new AppInstance(id, new URI(uri));
+				return new AppInstance(id, new URI(uri), priority, permissions);
 			} catch (URISyntaxException ex) {
 				throw new IllegalStateException("Bad uri in database: " + uri.toString(), ex);
 			}
