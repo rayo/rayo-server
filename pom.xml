@@ -394,6 +394,7 @@
         </activation>
         <modules>
           <module>rayo-core</module>
+          <module>rayo-storage</module>
           <module>rayo-server</module>
           <module>rayo-war</module>
         </modules>
