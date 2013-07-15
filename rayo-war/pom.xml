@@ -38,7 +38,7 @@
         <dependency>
           <groupId>com.voxeo.moho</groupId>
           <artifactId>moho-remote</artifactId>
-          <version>trunk-SNAPSHOT</version>
+          <version>${moho.version}</version>
         </dependency>       
         <dependency>
             <groupId>com.voxeo.prism.moho</groupId>
