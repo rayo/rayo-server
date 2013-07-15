@@ -11,6 +11,9 @@
         <dependent-module archiveName="rayo-storage-2.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/rayo-storage/rayo-storage">
             <dependency-type>uses</dependency-type>
         </dependent-module>
+        <dependent-module archiveName="ameche-model-0.3-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/ameche-model/ameche-model">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
         <dependent-module archiveName="moho-api-trunk-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/moho-api/moho-api">
             <dependency-type>uses</dependency-type>
         </dependent-module>
