@@ -19,6 +19,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 
+import com.ameche.repo.RuntimePermission;
+import com.rayo.core.CallDirection;
 import com.rayo.core.ConnectCommand;
 import com.rayo.server.CommandHandler;
 import com.rayo.server.Server;
@@ -42,6 +44,7 @@ class AmecheCall {
     private Element offer;
     private String parentCallId;
     private String authToken;
+    private CallDirection direction;
     
     // Internal
     private Iterator<AppInstance> appIterator;
@@ -76,11 +79,13 @@ class AmecheCall {
     public AmecheCall(String callId, 
     				  String authToken, 
     				  Element offer, 
+    				  CallDirection direction,
     				  List<AppInstance> appList) {
 
         this.offer = offer;
         this.parentCallId = callId;
         this.authToken = authToken;
+        this.direction = direction;
         
         // Create App Map. Used to track active apps. If an app misbehaves we pull
         // it out of this map so it won't receive any more events.
@@ -343,6 +348,9 @@ class AmecheCall {
     				   AppInstance appInstance) throws AppInstanceException {
     	
         try {
+        	if (!appInstance.hasPermission(RuntimePermission.CALLER_ID)) {
+        		event = maskEventData(event);
+        	}
             appInstanceEventDispatcher.send(event, callId, componentId, 
             		mixerName, authToken, appInstance);
         } catch (AppInstanceException ae) {
@@ -353,7 +361,25 @@ class AmecheCall {
         }
     }
 
-    /**
+    @SuppressWarnings("unchecked")
+	private Element maskEventData(Element event) {
+
+    	if (direction == CallDirection.IN) {
+	    	if (event.attribute("from") != null) {
+	    		event.remove(event.attribute("from"));
+	    	}
+    	} else {
+	    	if (event.attribute("to") != null) {
+	    		event.remove(event.attribute("to"));
+	    	}
+    	}
+    	for (Element header: (List<Element>)event.elements("header")) {
+    		event.remove(header);
+    	}
+    	return event;
+	}
+
+	/**
      * Send offer to the next app instance in the apps list 
      * or complete the call once it's been offered to all apps
      */
@@ -363,34 +389,38 @@ class AmecheCall {
     	do {
     		if(appIterator.hasNext()) {
     			final AppInstance appInstance = appIterator.next();
-    			log.debug("Offering offer to app instance [%s]", appInstance);
-    			try {
-				setAppInstanceOfferState(appInstance, OfferState.SENT);
-    				dispatchEvent(offer, parentCallId, null, null, appInstance);
-        			log.debug("Offer dispatched successfully.");
-    				offerSent = true;
-    		    	    				
-    				ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-    				    			
-    		    	executor.schedule(new Runnable() {
-    		    		@Override
-    		    		public void run() {
-    		    			OfferState state = getAppInstanceOfferState(appInstance);
-							if (state != OfferState.CONNECT_RECEIVED) {
-    		    				setAppInstanceOfferState(appInstance, OfferState.TIMEOUT);
-										log.debug(
-												"Offer timed out on app instance [%s]. Proceeding with the next one. [state=%s]",
-												appInstance, state);
-    		        			apps.remove(appInstance.getId());
-    		    				offer();
-    		    			}
-    		    		}
-    		    	}, appInstanceEventDispatcher.getOfferTimeout(), TimeUnit.MILLISECONDS);
-    				
-    			} catch (AppInstanceException ae) {
-    				setAppInstanceOfferState(appInstance, OfferState.FAILED);
-    				// will process next iterator entry
-    				log.warn("Exception dispatching offer to app instance [instance=%s]", appInstance, ae);
+    			if (appInstance.hasPermission(RuntimePermission.CALL_OFFER)) {
+	    			log.debug("Offering offer to app instance [%s]", appInstance);
+	    			try {
+	    				setAppInstanceOfferState(appInstance, OfferState.SENT);
+	    				dispatchEvent(offer, parentCallId, null, null, appInstance);
+	        			log.debug("Offer dispatched successfully.");
+	    				offerSent = true;
+	    		    	    				
+	    				ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+	    				    			
+	    		    	executor.schedule(new Runnable() {
+	    		    		@Override
+	    		    		public void run() {
+	    		    			OfferState state = getAppInstanceOfferState(appInstance);
+								if (state != OfferState.CONNECT_RECEIVED) {
+	    		    				setAppInstanceOfferState(appInstance, OfferState.TIMEOUT);
+											log.debug(
+													"Offer timed out on app instance [%s]. Proceeding with the next one. [state=%s]",
+													appInstance, state);
+	    		        			apps.remove(appInstance.getId());
+	    		    				offer();
+	    		    			}
+	    		    		}
+	    		    	}, appInstanceEventDispatcher.getOfferTimeout(), TimeUnit.MILLISECONDS);
+	    				
+	    			} catch (AppInstanceException ae) {
+	    				setAppInstanceOfferState(appInstance, OfferState.FAILED);
+	    				// will process next iterator entry
+	    				log.warn("Exception dispatching offer to app instance [instance=%s]", appInstance, ae);
+	    			}
+    			} else {
+    				log.debug("App Instance [%s] does not have permission to handle Offers", appInstance);
     			}
     		} else {
     			if (!offerPhaseEnded.getAndSet(true)) {
@@ -456,6 +486,11 @@ class AmecheCall {
         	}
         }
         return null;
+    }
+    
+    public AppInstance getAppInstance(String id) {
+    	
+    	return apps.get(id);
     }
 
 	public void setAmecheAuthenticationService(

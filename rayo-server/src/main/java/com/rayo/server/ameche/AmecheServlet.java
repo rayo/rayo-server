@@ -24,6 +24,7 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 
+import com.ameche.repo.RuntimePermission;
 import com.rayo.core.CallDirection;
 import com.rayo.core.recording.StorageService;
 import com.rayo.server.CallActor;
@@ -98,13 +99,18 @@ public class AmecheServlet extends HttpServlet implements Transport {
         if (event.getName().equals("offer")) {
 
             // Lookup App Instance Endpoints
-            List<AppInstance> apps = appInstanceResolver.lookup(event, resolveDirection(callId));
+        	CallDirection direction = resolveDirection(callId);
+            List<AppInstance> apps = appInstanceResolver.lookup(event, direction);
             if (apps.size() != 0) {
-                // Make and register a new ameche call handler 
-            	machine = createAmecheCall(callId, event, apps);
-                amecheCallRegistry.registerCall(callId, machine);
-                machine.offer();
-                result = true;
+            	if (canHandleOffer(apps)) {
+	                // Make and register a new ameche call handler 
+	            	machine = createAmecheCall(callId, direction, event, apps);
+	                amecheCallRegistry.registerCall(callId, machine);
+	                machine.offer();
+	                result = true;
+            	} else {
+            		log.debug("No app instance has permission to handle the incoming offer");
+            	}
             }
             else {
             	log.debug("There is no Ameche instances interested on call [%s]", callId);
@@ -140,10 +146,21 @@ public class AmecheServlet extends HttpServlet implements Transport {
         return result;
     }
     
-    private AmecheCall createAmecheCall(String callId, Element event, List<AppInstance> apps) {
+    private boolean canHandleOffer(List<AppInstance> apps) {
+
+    	for (AppInstance ai: apps) {
+    		if (ai.hasPermission(RuntimePermission.CALL_OFFER)) {
+    			return true;
+    		}
+    	}
+    	return false;
+	}
+
+	private AmecheCall createAmecheCall(String callId, CallDirection direction, 
+			Element event, List<AppInstance> apps) {
     	
     	String token = amecheAuthenticationService.generateToken(callId);
-    	AmecheCall call = new AmecheCall(callId, token, event, apps);
+    	AmecheCall call = new AmecheCall(callId, token, event, direction, apps);
     	call.setAmecheCallRegistry(amecheCallRegistry);
     	call.setAmecheAuthenticationService(amecheAuthenticationService);
     	call.setAppInstanceEventDispatcher(appInstanceEventDispatcher);
@@ -222,6 +239,43 @@ public class AmecheServlet extends HttpServlet implements Transport {
 	                return;
 	            }
 	            
+	            AppInstance appInstance = call.getAppInstance(appInstanceId);
+	            if (command.getName().equals("record") && 
+	            	!appInstance.hasPermission(RuntimePermission.CALL_RECORD)) {
+	                log.error("App instance [%s] does not have CALL_RECORD permission", appInstance);
+	                String errorMessage = "App instance does not have CALL_RECORD permission.";	                
+	                resp.setHeader("rayo-error", errorMessage);
+	                resp.sendError(403, errorMessage);
+	                return;
+	            }
+	            
+	            if (command.getName().equals("connect") &&
+	            	command.element("target") != null && // explicit ringlist
+	            	!appInstance.hasPermission(RuntimePermission.CALL_RING_LIST)) {
+	                log.error("App instance [%s] does not have CALL_RING_LIST permission", appInstance);
+	                String errorMessage = "App instance does not have CALL_WHISPER permission.";
+	                resp.setHeader("rayo-error", errorMessage);
+	                resp.sendError(403, errorMessage);
+	                return;	            	
+	            }
+
+	            if (command.getName().equals("output") &&
+	            	!appInstance.hasPermission(RuntimePermission.CALL_WHISPER)) {
+	                log.error("App instance [%s] does not have CALL_WHISPER permission", appInstance);
+	                String errorMessage = "App instance does not have CALL_WHISPER permission.";
+	                resp.setHeader("rayo-error", errorMessage);
+	                resp.sendError(403, errorMessage);
+	                return;	            	
+	            }
+	            if (command.getName().equals("input") &&
+	            	!appInstance.hasPermission(RuntimePermission.CALL_ASK)) {
+	                log.error("App instance [%s] does not have CALL_ASK permission", appInstance);
+	                String errorMessage = "App instance does not have CALL_ASK permission.";
+	                resp.setHeader("rayo-error", errorMessage);
+	                resp.setStatus(403, errorMessage);
+	                return;	            	
+	            }
+
 	            if (command.getName().equals("ping")) {
 	            	// was just pinging
 	                resp.setContentType("application/xml; charset=utf-8");
