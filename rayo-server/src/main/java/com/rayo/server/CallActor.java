@@ -10,6 +10,7 @@ import java.util.concurrent.TimeoutException;
 
 import javax.jms.IllegalStateException;
 import javax.media.mscontrol.EventType;
+import javax.media.mscontrol.join.Joinable.Direction;
 import javax.media.mscontrol.mixer.MediaMixer;
 import javax.media.mscontrol.mixer.MixerEvent;
 
@@ -555,6 +556,27 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 
     public Call getCall() {
         return participant;
+    }
+    
+    public boolean isOnDirectMedia() {
+    	
+    	for (Participant participant: getCall().getParticipants()) {
+    		if (getCall().getJoinType(participant) != JoinType.DIRECT) {
+    			return false;
+    		}
+    	}
+    	return true;
+    }
+    
+    public void bridgeMedia() {
+    	
+    	for (Participant participant: getCall().getParticipants()) {
+    		if (getCall().getJoinType(participant) == JoinType.DIRECT) {
+    			//TODO: MOHO-60
+    			getCall().unjoin(participant);
+    			getCall().join(participant, JoinType.BRIDGE_EXCLUSIVE, true, Direction.DUPLEX);
+    		}
+    	}
     }
 
     @Override

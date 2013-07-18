@@ -35,6 +35,8 @@ public class DialingCoordinator {
 	
 	private Map<String, DialingStatus> dials = new ConcurrentHashMap<String, DialingStatus>();
 	
+	private JoinType joinType = JoinType.DIRECT;
+	
 	enum Status {
 		PENDING,
 		DONE,
@@ -169,13 +171,14 @@ public class DialingCoordinator {
 					joinActorToMixer(targetCallActor, mixerName);
 				}				
 			} else {
-				logger.debug("Joining on BRIDGE_SHARED mode call legs [%s] and [%s].", 
-					sourceCallActor.getCall().getId(), targetCallActor.getCall().getId());
+				logger.debug("Joining on %s mode call legs [%s] and [%s].", 
+					joinType, sourceCallActor.getCall().getId(), 
+					targetCallActor.getCall().getId());
 			
 			    JoinCommand join = new JoinCommand();
 			    join.setTo(targetCallActor.getCall().getId());
 			    join.setType(JoinDestinationType.CALL);
-			    join.setMedia(JoinType.BRIDGE_SHARED);
+			    join.setMedia(joinType);
 			    // Join to the B Leg
 			    sourceCallActor.publish(join);
 			}
@@ -208,5 +211,14 @@ public class DialingCoordinator {
 		join.setForce(true);
 		// Join to the B Leg
 		targetCallActor.publish(join);
+	}
+
+	public void setDialingMode(String dialingMode) {
+
+		try {
+			joinType = JoinType.valueOf(dialingMode);
+		} catch (Exception e) {
+			logger.error("Could not parse dialing mode %s. Would default to DIRECT.", dialingMode);
+		}
 	}
 }

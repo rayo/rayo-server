@@ -30,12 +30,15 @@ import com.rayo.core.recording.StorageService;
 import com.rayo.server.CallActor;
 import com.rayo.server.CallRegistry;
 import com.rayo.server.CommandHandler;
+import com.rayo.server.DialingCoordinator;
 import com.rayo.server.Server;
 import com.rayo.server.Transport;
 import com.rayo.server.exception.ErrorMapping;
 import com.rayo.server.exception.ExceptionMapper;
 import com.rayo.server.ims.CallDirectionResolver;
 import com.voxeo.logging.Loggerf;
+import com.voxeo.moho.Call;
+import com.voxeo.moho.Participant.JoinType;
 
 @SuppressWarnings("serial")
 public class AmecheServlet extends HttpServlet implements Transport {
@@ -275,6 +278,15 @@ public class AmecheServlet extends HttpServlet implements Transport {
 	                resp.setStatus(403, errorMessage);
 	                return;	            	
 	            }
+	            
+	        	CallActor<?> actor = callRegistry.get(callId);
+	        	if (command.getName().equals("output") ||
+	        		command.getName().equals("input") ||
+	        		command.getName().equals("record")) {	        		
+	        		if (actor.isOnDirectMedia()) {
+	        			actor.bridgeMedia();
+	        		}
+	        	}
 
 	            if (command.getName().equals("ping")) {
 	            	// was just pinging
@@ -384,7 +396,7 @@ public class AmecheServlet extends HttpServlet implements Transport {
 
 		return type;
 	}
-    
+	
     public AppInstanceResolver getAppInstanceResolver() {
         return appInstanceResolver;
     }

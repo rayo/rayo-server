@@ -606,4 +606,8 @@ public class MockCall implements IncomingCall {
       return null;
     }
 
+    @Override
+    public Direction getDirection(Participant participant) {
+    	return null;
+    }
 }
