@@ -31,7 +31,7 @@
         <dependency>
             <groupId>com.ameche</groupId>
             <artifactId>ameche-model</artifactId>
-            <version>0.3-SNAPSHOT</version>
+            <version>${ameche.version}</version>
             <exclusions>
 		       <exclusion>
 		          <groupId>*</groupId>
