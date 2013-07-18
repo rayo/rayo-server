@@ -570,10 +570,14 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     
     public void bridgeMedia() {
     	
+    	log.debug("About to bridge media");
     	for (Participant participant: getCall().getParticipants()) {
+    		log.debug("Checking media on participant [%s]", participant.getId());
     		if (getCall().getJoinType(participant) == JoinType.DIRECT) {
     			//TODO: MOHO-60
+        		log.debug("Unjoining participant [%s] from call", participant.getId());
     			getCall().unjoin(participant);
+        		log.debug("Joining participant [%s] to call in BRIDGE_EXCLUSIVE mode.", participant.getId());
     			getCall().join(participant, JoinType.BRIDGE_EXCLUSIVE, true, Direction.DUPLEX);
     		}
     	}
