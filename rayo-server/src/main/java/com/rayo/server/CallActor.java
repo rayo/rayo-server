@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -596,10 +597,14 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     		log.debug("Checking media on participant [%s]", participant.getId());
     		if (getCall().getJoinType(participant) == JoinType.DIRECT) {
     			//TODO: MOHO-60
-        		log.debug("Unjoining participant [%s] from call", participant.getId());
-    			getCall().unjoin(participant);
-        		log.debug("Joining participant [%s] to call in BRIDGE_EXCLUSIVE mode.", participant.getId());
-    			getCall().join(participant, JoinType.BRIDGE_EXCLUSIVE, true, Direction.DUPLEX);
+    			try {
+	        		log.debug("Unjoining participant [%s] from call", participant.getId());
+	    			getCall().unjoin(participant).get();
+	        		log.debug("Joining participant [%s] to call in BRIDGE_EXCLUSIVE mode.", participant.getId());
+	    			getCall().join(participant, JoinType.BRIDGE_EXCLUSIVE, true, Direction.DUPLEX).get();
+    			} catch (Exception e) {
+    				log.error(e.getMessage(), e);
+    			}
     		}
     	}
 
