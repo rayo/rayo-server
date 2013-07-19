@@ -24,6 +24,7 @@ import com.rayo.core.EndEvent;
 import com.rayo.core.EndEvent.Reason;
 import com.rayo.core.HangupCommand;
 import com.rayo.core.JoinCommand;
+import com.rayo.core.JoinCommand.JoinGroup;
 import com.rayo.core.JoinDestinationType;
 import com.rayo.core.JoinedEvent;
 import com.rayo.core.RingingEvent;
@@ -77,6 +78,9 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     // Also note that no further synchronization is needed as we are within an Actor
     private boolean initialJoinReceived = false;
     private Map<String, AnsweredEvent> pendingAnswer = new ConcurrentHashMap<String, AnsweredEvent>();
+    
+    //TODO: MOHO-61
+    private JoinGroup joinGroup;
     
     public CallActor(T call) {
     	super(call);
@@ -570,7 +574,24 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     
     public void bridgeMedia() {
     	
-    	log.debug("About to bridge media");
+    	if (joinGroup == null) {
+        	log.debug("About to regular media bridging.");
+    		doMediaBridging();
+    	} else {
+    		doSyncMediaBridging();
+    	}
+    }
+    
+    private void doSyncMediaBridging() {
+
+    	log.debug("About to do synchronized media bridging.");
+    	synchronized(joinGroup) {
+    		doMediaBridging();
+    	}
+    }
+    
+    private void doMediaBridging() {
+    	
     	for (Participant participant: getCall().getParticipants()) {
     		log.debug("Checking media on participant [%s]", participant.getId());
     		if (getCall().getJoinType(participant) == JoinType.DIRECT) {
@@ -581,6 +602,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     			getCall().join(participant, JoinType.BRIDGE_EXCLUSIVE, true, Direction.DUPLEX);
     		}
     	}
+
     }
 
     @Override
@@ -640,5 +662,13 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 
 	public CallDirectionResolver getCallDirectionResolver() {
 		return callDirectionResolver;
+	}
+
+	public JoinGroup getJoinGroup() {
+		return joinGroup;
+	}
+
+	public void setJoinGroup(JoinGroup joinGroup) {
+		this.joinGroup = joinGroup;
 	}
 }

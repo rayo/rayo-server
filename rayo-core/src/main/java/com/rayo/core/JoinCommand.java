@@ -10,6 +10,11 @@ import com.rayo.core.validation.Messages;
 import com.voxeo.moho.Participant.JoinType;
 
 public class JoinCommand extends AbstractCallCommand {
+
+	//TODO: MOHO-61
+	public class JoinGroup{
+		// dummy class used to synchronize complex tasks across the whole joint call
+	}
 	
 	public static final String MEDIA_TYPE = "MEDIA_TYPE";	
 	public static final String DIRECTION = "DIRECTION";
@@ -22,12 +27,19 @@ public class JoinCommand extends AbstractCallCommand {
 	private JoinType media = JoinType.BRIDGE_SHARED;
 	
 	private Boolean force;
-
+	
 	@NotNull(message=Messages.MISSING_JOIN_ID)
 	private String to;
 	
 	private JoinDestinationType type; 
 
+	private JoinGroup joinGroup;
+	
+	public JoinCommand() {
+		
+		this.joinGroup = new JoinGroup();
+	}
+	
 	public Direction getDirection() {
 		return direction;
 	}
@@ -79,4 +91,13 @@ public class JoinCommand extends AbstractCallCommand {
 				.append("type", type).toString();
 
 	}
+
+	public JoinGroup getJoinGroup() {
+		return joinGroup;
+	}
+
+	public void setJoinGroup(JoinGroup joinGroup) {
+		this.joinGroup = joinGroup;
+	}
 }
+

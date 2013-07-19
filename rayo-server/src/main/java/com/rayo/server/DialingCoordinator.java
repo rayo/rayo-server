@@ -179,6 +179,11 @@ public class DialingCoordinator {
 			    join.setTo(targetCallActor.getCall().getId());
 			    join.setType(JoinDestinationType.CALL);
 			    join.setMedia(joinType);
+			    
+			    //TODO: MOHO-60. Hack!!
+			    targetCallActor.setJoinGroup(join.getJoinGroup());
+			    sourceCallActor.setJoinGroup(join.getJoinGroup());
+			    
 			    // Join to the B Leg
 			    sourceCallActor.publish(join);
 			}
