@@ -73,9 +73,6 @@ public class DialingCoordinator {
 				final Call call = sourceCallActor.getCall();
 		    	// Announce joining
 				String peerAddress = targetCallActor.getCall().getAddress().getURI().toString(); 
-				if (peerAddress.indexOf(";") != -1) {
-					peerAddress = peerAddress.substring(0, peerAddress.indexOf(";"));
-				}
 		        sourceCallActor.fire(new JoiningEvent(call.getId(), 
 		        		targetCallActor.getParticipantId(),
 		        		peerAddress));
