@@ -95,10 +95,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
         
     	try {
     	    
-        	if (log.isDebugEnabled()) {
-        		log.debug("Received call event [%s]", call.getId());
-        	}
-        	
+        	log.debug("Received call event [%s]", call.getId());
             // Now we setup the moho handlers
             mohoListeners.add(new AutowiredEventListener(this));
             participant.addObserver(new ActorEventListener(this));
@@ -113,19 +110,37 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 	        		        	
 	            joinees.add(destination);
 
-            	if (log.isDebugEnabled()) {
-            		log.debug("Executing join operation. Call: [%s]. Join type: [%s]. Direction: [%s]. Participant: [%s].", participant.getId(), mediaType, direction, destination);
-            	}	            
+            	log.debug("Executing join operation. Call: [%s]. Join type: [%s]. Direction: [%s]. Participant: [%s].", participant.getId(), mediaType, direction, destination);
         		participant.join(destination, mediaType, force, direction);
         		
             } else {
-            	if (log.isDebugEnabled()) {
-            		log.debug("Joining call [%s] to media mixer.", participant.getId());
-            	}
+            	log.debug("Joining call [%s] to media mixer.", participant.getId());
             	participant.join();
             }
             
             callStatistics.outgoingCall();
+
+        } catch (Exception e) {
+        	log.error(e.getMessage());
+            end(Reason.ERROR, e.getMessage());
+        }
+    }
+
+    @Message
+    public void onMultipleCalls(Call[] calls) throws Exception {
+        
+    	try {
+        	log.debug("Received call event [%s]", calls.toString());
+        	
+            // Now we setup the moho handlers
+            mohoListeners.add(new AutowiredEventListener(this));
+            participant.addObserver(new ActorEventListener(this));
+
+            log.debug("Joining call to multiple participants in Direct mode.", participant.getId());
+            participant.join(JoinType.DIRECT, true, Direction.DUPLEX, true, calls);
+            for(int i=0;i<calls.length;i++) {
+            	callStatistics.outgoingCall();
+            }
 
         } catch (Exception e) {
         	log.error(e.getMessage());
@@ -669,6 +684,11 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 		return callDirectionResolver;
 	}
 
+	public CallActor<?> getCallActor(String id) {
+		
+		return callRegistry.get(id);
+	}
+	
 	public JoinGroup getJoinGroup() {
 		return joinGroup;
 	}
