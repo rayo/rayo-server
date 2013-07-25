@@ -5,6 +5,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.rayo.core.AnsweredEvent;
@@ -240,6 +243,11 @@ public class DialingCoordinator {
 				}
 								
 			} else {
+			    //TODO: MOHO-60. Hack!!
+			    JoinCommand join = new JoinCommand();
+			    targetCallActor.setJoinGroup(join.getJoinGroup());
+			    sourceCallActor.setJoinGroup(join.getJoinGroup());
+
 				/*
 				logger.debug("Joining on %s mode call legs [%s] and [%s].", 
 					joinType, sourceCallActor.getCall().getId(), 
@@ -301,14 +309,17 @@ public class DialingCoordinator {
 					CallActor<?> peer = sourceCallActor.getCallManager().getCallRegistry().get(peerId);
 
 					joinActorToMixer(targetCallActor, mixerName);
-					joinActorToMixer(sourceCallActor, mixerName);
-					joinActorToMixer(peer, mixerName);
 					
-					// Unjoin original peer
-					UnjoinCommand unjoin = new UnjoinCommand();
-					unjoin.setFrom(peerId);
-					unjoin.setType(JoinDestinationType.CALL);
-					sourceCallActor.publish(unjoin);
+					// As per Willie's instructions, unjoin needs to be sync
+					try {
+						sourceCallActor.getCall().unjoin(peer.getCall()).get(2000, TimeUnit.MILLISECONDS);
+					} catch (Exception e) {
+						// TODO: fail call?
+						logger.error(e.getMessage(),e);
+					}
+
+					joinActorToMixer(sourceCallActor, mixerName);					
+					joinActorToMixer(peer, mixerName);
 					
 				} else {
 					joinActorToMixer(targetCallActor, mixerName);

@@ -611,7 +611,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     	for (Participant participant: getCall().getParticipants()) {
     		log.debug("Checking media on participant [%s]", participant.getId());
     		if (getCall().getJoinType(participant) == JoinType.DIRECT) {
-    			//TODO: MOHO-60
+    			//TODO: MOHO-61
     			try {
 	        		log.debug("Unjoining participant [%s] from call", participant.getId());
 	    			getCall().unjoin(participant).get();
