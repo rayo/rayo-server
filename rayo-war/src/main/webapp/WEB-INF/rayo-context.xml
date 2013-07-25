@@ -56,9 +56,7 @@
 	<bean id="rayoStatistics" class="com.rayo.server.RayoStatistics"/>
 	
 	<!-- Ringlist coordinator -->
-	<bean id="dialingCoordinator" class="com.rayo.server.DialingCoordinator">
-	   <property name="dialingMode" value="DIRECT" />
-	</bean>
+	<bean id="dialingCoordinator" class="com.rayo.server.DialingCoordinator"/>
 	
 	<!-- IMS call direction resolver -->
 	<bean id="callDirectionResolver" class="com.rayo.server.ims.DefaultCallDirectionResolver" />

@@ -9,8 +9,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.media.mscontrol.join.Joinable.Direction;
-
 import com.rayo.core.AcceptCommand;
 import com.rayo.core.AnswerCommand;
 import com.rayo.core.CallDirection;
@@ -28,7 +26,6 @@ import com.voxeo.moho.Call;
 import com.voxeo.moho.Call.State;
 import com.voxeo.moho.Endpoint;
 import com.voxeo.moho.IncomingCall;
-import com.voxeo.moho.Participant.JoinType;
 import com.voxeo.moho.SignalException;
 import com.voxeo.moho.common.event.AutowiredEventListener;
 import com.voxeo.moho.event.AcceptableEvent;
@@ -192,33 +189,10 @@ public class IncomingCallActor extends CallActor<IncomingCall> {
         	headers.put("Ameche-continuation", "true");        	
         }
 
-        URI from = participant.getInvitor().getURI();
-        
         if (getCall().getParticipants().length == 0) {
-	        List<Call> calls = new ArrayList<Call>();
-	        for(URI destination : destinations) {        
-	        	final CallActor<?> targetCallActor = 
-	        		getCallManager().createCallActor(destination, from, headers, getCall());
-	        	targetCallActor.participant.addObserver(new ActorEventListener(targetCallActor));
-	        	targetCallActor.mohoListeners.add(new AutowiredEventListener(targetCallActor));
-	        	dialingCoordinator.dial(this, targetCallActor, ringlistId);
-	        	calls.add(targetCallActor.getCall());
-	        }
-	        // Start dialing
-	        //publish(calls.toArray(new Call[]{}));
-	        logger.debug("Joining call to multiple participants in Direct mode.", participant.getId());
-	        getCall().join(JoinType.DIRECT, true, Direction.DUPLEX, true, calls.toArray(new Call[]{}));
-	        /*
-	        for(int i=0;i<calls.length;i++) {
-	        	callStatistics.outgoingCall();
-	        }
-	        */
+        	dialingCoordinator.directDial(this, destinations, headers, ringlistId);
         } else {
-            for(URI destination : destinations) {        
-            	final CallActor<?> targetCallActor = 
-            		getCallManager().createCallActor(destination, from, headers, getCall());
-            	dialingCoordinator.oldDial(this, targetCallActor, ringlistId);
-            }                  	
+        	dialingCoordinator.bridgeDial(this, destinations, headers, ringlistId);
         }
     	logger.debug("Ended command %s. Actor id %s.", command, getCall().getId());
     }
