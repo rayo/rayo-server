@@ -88,7 +88,6 @@ public class CallManager extends ReflectiveActor {
     @Message
     public void onIncomingCall(IncomingCall mohoCall) {
         
-		MDC.put("CallID", mohoCall.getId());
         log.info("Incoming Call [%s]", mohoCall);
         
         if (adminService.isQuiesceMode()) {
@@ -122,6 +121,7 @@ public class CallManager extends ReflectiveActor {
         log.debug("Creating call to [%s] from [%s]", toEndpoint, fromEndpoint);
         
         final Call mohoCall = toEndpoint.createCall(fromEndpoint, headers, source);
+        MDC.put("CallID", mohoCall.getId());
         
         return createCallActor(mohoCall);        
     }

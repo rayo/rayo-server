@@ -1,5 +1,6 @@
 package com.rayo.server;
 
+import org.apache.log4j.MDC;
 import org.springframework.web.context.support.WebApplicationContextUtils;
 import org.springframework.web.context.support.XmlWebApplicationContext;
 
@@ -32,6 +33,8 @@ public class MohoDriver implements Application {
 
     @State
     public void onIncomingCall(final IncomingCall call) throws Exception {
+    	
+    	MDC.put("CallID", call.getId());
         callManager.publish(call);
     }
 }

@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.log4j.MDC;
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
@@ -216,6 +217,8 @@ public class AmecheServlet extends HttpServlet implements Transport {
                 resp.setStatus(400, "Missing call-id header");
                 return;
             }
+            
+            MDC.put("CallID", callId);
             
             if (amecheAuthenticationService.isTokenAuthEnabled()) {
             	String authToken = req.getHeader("auth-token");
