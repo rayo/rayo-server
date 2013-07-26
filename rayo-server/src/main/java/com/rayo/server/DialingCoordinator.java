@@ -98,9 +98,11 @@ public class DialingCoordinator {
         URI from = call.getInvitor().getURI();
 		
         for(URI destination : destinations) {        
+        	// The null parameter below instructs Moho that this is an OOB call
+        	// and not a continuation from an existing call. 
         	final CallActor<?> targetCallActor = 
         		sourceCallActor.getCallManager()
-        		.createCallActor(destination, from, headers, call);
+        		.createCallActor(destination, from, headers, null);
         	prepareDial(sourceCallActor, targetCallActor, ringlistId, true);
         }                  	
 	}
