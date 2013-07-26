@@ -192,8 +192,15 @@ public class IncomingCallActor extends CallActor<IncomingCall> {
         URI from = participant.getInvitor().getURI();
         
         for(URI destination : destinations) {        
+        	
+        	Call call = getCall();
+			if (call.getCallState() == State.CONNECTED) {
+				// Already connected. This is a post offer connect.
+				// So it should be OOB
+				call = null;
+			}
         	final CallActor<?> targetCallActor = 
-        		getCallManager().createCallActor(destination, from, headers, getCall());
+        		getCallManager().createCallActor(destination, from, headers, call);
         	dialingCoordinator.dial(this, targetCallActor, ringlistId);
         }          
     	logger.debug("Ended command %s. Actor id %s.", command, getCall().getId());
