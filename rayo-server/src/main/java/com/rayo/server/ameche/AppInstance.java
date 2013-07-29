@@ -15,12 +15,14 @@ public class AppInstance {
     private URI endpoint;
     private Integer priority;
     private Integer permissions;
+    private Boolean required;
 
-    public AppInstance(String id, URI endpoint, Integer priority, Integer permissions) {
+    public AppInstance(String id, URI endpoint, Integer priority, Integer permissions, Boolean required) {
         this.setId(id);
         this.setEndpoint(endpoint);
         this.setPriority(priority);
         this.setPermissions(permissions);
+        this.setRequired(required);
     }
 
     public String getId() {
@@ -81,6 +83,14 @@ public class AppInstance {
 		return ((permissions & (1 << permission.ordinal())) > 0);		
 	}
 	
+	public Boolean isRequired() {
+		return required;
+	}
+
+	public void setRequired(Boolean required) {
+		this.required = required;
+	}
+
 	@Override
     public String toString() {
 
@@ -89,6 +99,7 @@ public class AppInstance {
     		.append("endpoint", getEndpoint())
     		.append("priority", getPriority())
     		.append("permissions", getRuntimePermissions())
+    		.append("restricted", isRequired())
     		.toString();
     }
 }

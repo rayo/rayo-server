@@ -169,6 +169,7 @@ public class AmecheServlet extends HttpServlet implements Transport {
     	call.setAmecheAuthenticationService(amecheAuthenticationService);
     	call.setAppInstanceEventDispatcher(appInstanceEventDispatcher);
     	call.setCommandHandler(commandHandler);
+    	call.setCallRegistry(callRegistry);
     	return call;
 	}
     

@@ -36,9 +36,10 @@ public class JdbcAppInstanceResolver implements AppInstanceResolver {
 			String uri = rs.getString("url");
 			Integer priority = rs.getInt("priority");
 			Integer permissions = rs.getInt("permissions");
+			Boolean required = rs.getBoolean("required");
 			try {
 				logger.debug("Found app instance [id=%s url=%s]", id, uri);
-				return new AppInstance(id, new URI(uri), priority, permissions);
+				return new AppInstance(id, new URI(uri), priority, permissions, required);
 			} catch (URISyntaxException ex) {
 				throw new IllegalStateException("Bad uri in database: " + uri.toString(), ex);
 			}

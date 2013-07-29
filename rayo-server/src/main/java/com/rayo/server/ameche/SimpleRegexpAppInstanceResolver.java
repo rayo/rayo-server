@@ -150,7 +150,7 @@ public class SimpleRegexpAppInstanceResolver implements AppInstanceResolver {
 						try {
 							rule.instance = new AppInstance(String.valueOf(
 								appInstanceId), new URI(uri), 10, 
-								getAllAmechePermissions());
+								getAllAmechePermissions(), false);
 							rules.add(rule);
 						} catch (URISyntaxException e) {
 							// TODO Auto-generated catch block

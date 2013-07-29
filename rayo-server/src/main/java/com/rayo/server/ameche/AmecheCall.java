@@ -22,6 +22,10 @@ import org.dom4j.Element;
 import com.ameche.repo.RuntimePermission;
 import com.rayo.core.CallDirection;
 import com.rayo.core.ConnectCommand;
+import com.rayo.core.EndCommand;
+import com.rayo.core.EndEvent;
+import com.rayo.server.CallActor;
+import com.rayo.server.CallRegistry;
 import com.rayo.server.CommandHandler;
 import com.rayo.server.Server;
 import com.rayo.server.TransportCallback;
@@ -39,7 +43,8 @@ class AmecheCall {
     private AppInstanceEventDispatcher appInstanceEventDispatcher;
     private AmecheCallRegistry amecheCallRegistry;
     private AmecheAuthenticationService amecheAuthenticationService;
-
+    private CallRegistry callRegistry;
+    
     // Config
     private Element offer;
     private String parentCallId;
@@ -241,7 +246,11 @@ class AmecheCall {
         		}
 	            // FIXME: The caller will block until the next offer is dispatched
 	            // Consider doing offers in a thread pool (JdC)
-	            offer();
+    			try {
+    				offer();
+    			} catch (RequiredAppInstanceException e) {
+    				failCall();
+    			}
         	} else {
         		// Check if the instance timed out
         		if (appInstance != null) {
@@ -383,7 +392,7 @@ class AmecheCall {
      * Send offer to the next app instance in the apps list 
      * or complete the call once it's been offered to all apps
      */
-    void offer() {
+    void offer() throws RequiredAppInstanceException {
     	
     	boolean offerSent = false;
     	do {
@@ -402,14 +411,23 @@ class AmecheCall {
 	    		    	executor.schedule(new Runnable() {
 	    		    		@Override
 	    		    		public void run() {
-	    		    			OfferState state = getAppInstanceOfferState(appInstance);
-								if (state != OfferState.CONNECT_RECEIVED) {
-	    		    				setAppInstanceOfferState(appInstance, OfferState.TIMEOUT);
-											log.debug(
-													"Offer timed out on app instance [%s]. Proceeding with the next one. [state=%s]",
-													appInstance, state);
-	    		        			apps.remove(appInstance.getId());
-	    		    				offer();
+	    		    			if (appInstance.isRequired()) {
+	    		    				log.error("App instance [%s] is required but it has timed out. Call [%s] will be ended.", appInstance, parentCallId);
+	    		    				failCall();
+	    		    			} else {
+		    		    			OfferState state = getAppInstanceOfferState(appInstance);
+									if (state != OfferState.CONNECT_RECEIVED) {
+		    		    				setAppInstanceOfferState(appInstance, OfferState.TIMEOUT);
+												log.debug(
+														"Offer timed out on app instance [%s]. Proceeding with the next one. [state=%s]",
+														appInstance, state);
+		    		        			apps.remove(appInstance.getId());
+		    		        			try {
+		    		        				offer();
+		    		        			} catch (RequiredAppInstanceException e) {
+		    		        				failCall();
+		    		        			}
+		    		    			}
 	    		    			}
 	    		    		}
 	    		    	}, appInstanceEventDispatcher.getOfferTimeout(), TimeUnit.MILLISECONDS);
@@ -418,6 +436,10 @@ class AmecheCall {
 	    				setAppInstanceOfferState(appInstance, OfferState.FAILED);
 	    				// will process next iterator entry
 	    				log.warn("Exception dispatching offer to app instance [instance=%s]", appInstance, ae);
+	    				if (appInstance.isRequired()) {
+	    					log.error("AppInstance [%s] is required but has failed. The call [%s] will be terminated.", appInstance, parentCallId);
+	    					throw new RequiredAppInstanceException(appInstance, ae);
+	    				}
 	    			}
     			} else {
     				log.debug("App Instance [%s] does not have permission to handle Offers", appInstance);
@@ -488,6 +510,12 @@ class AmecheCall {
         return null;
     }
     
+    private void failCall() {
+
+    	CallActor<?> actor = callRegistry.get(parentCallId);
+		actor.publish(new EndCommand(parentCallId, EndEvent.Reason.ERROR));
+    }
+    
     public AppInstance getAppInstance(String id) {
     	
     	return apps.get(id);
@@ -496,5 +524,10 @@ class AmecheCall {
 	public void setAmecheAuthenticationService(
 			AmecheAuthenticationService amecheAuthenticationService) {
 		this.amecheAuthenticationService = amecheAuthenticationService;
+	}
+
+	public void setCallRegistry(CallRegistry callRegistry) {
+		
+		this.callRegistry = callRegistry;
 	}
 }
