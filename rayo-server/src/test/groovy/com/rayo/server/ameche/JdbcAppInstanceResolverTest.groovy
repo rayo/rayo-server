@@ -44,10 +44,10 @@ class JdbcAppInstanceResolverTest {
 	void mapper() {
 		def addy = 'foobar'
 		def args = [addy] as Object[]
-		def columns = ['appInstanceId', 'url', 'priority', 'permissions'] as String[]
+		def columns = ['appInstanceId', 'url', 'priority', 'permissions', 'required'] as String[]
 		def rows = [
-			[42, 'http://foo.bar:9999', 10, 4] as Object[],
-			[45, 'http://foo.bar:9998', 10, 4] as Object[],
+			[42, 'http://foo.bar:9999', 10, 4, true] as Object[],
+			[45, 'http://foo.bar:9998', 10, 4, true] as Object[],
 		] as Object[][]		
 		def rs = MockResultSet.create(MockResultSetMetaData.create(columns), rows)
 		jdbc.query(sql, args, match {RowMapper mapper->
@@ -60,6 +60,7 @@ class JdbcAppInstanceResolverTest {
 				assertThat instance.endpoint,is(URI.create(rows[rowIdx - 1][1]))
 				assertThat instance.priority, is(10)
 				assertThat instance.permissions, is(4)				
+				assertThat instance.required, is(true)				
 			} 
 			assertThat rs.next(),is(false)
 			return true
