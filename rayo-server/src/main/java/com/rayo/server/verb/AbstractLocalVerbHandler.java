@@ -17,6 +17,7 @@ import com.voxeo.moho.Call.State;
 import com.voxeo.moho.IncomingCall;
 import com.voxeo.moho.MediaService;
 import com.voxeo.moho.Mixer;
+import com.voxeo.moho.OutgoingCall;
 import com.voxeo.moho.Participant;
 import com.voxeo.moho.Participant.JoinType;
 import com.voxeo.moho.media.output.AudibleResource;
@@ -142,6 +143,11 @@ public abstract class AbstractLocalVerbHandler<T extends Verb, S extends Partici
     	
     	if (participant instanceof Call) {
     		Call call = (Call)participant;
+    		if (call instanceof OutgoingCall && call.getCallState() == State.INPROGRESS) {
+    			// RAYO-116 can't output to outbound call after early media is negotiated.
+    			// early media on outbound call
+    			return true;
+    		}
     		if (call.getCallState() == State.ACCEPTED || 
     			call.getCallState() == State.CONNECTED ||
     			(call instanceof IncomingCall && ((IncomingCall)call).isAcceptedWithEarlyMedia())) {
