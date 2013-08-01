@@ -411,16 +411,16 @@ class AmecheCall {
 	    		    	executor.schedule(new Runnable() {
 	    		    		@Override
 	    		    		public void run() {
-	    		    			if (appInstance.isRequired()) {
-	    		    				log.error("App instance [%s] is required but it has timed out. Call [%s] will be ended.", appInstance, parentCallId);
-	    		    				failCall();
-	    		    			} else {
-		    		    			OfferState state = getAppInstanceOfferState(appInstance);
-									if (state != OfferState.CONNECT_RECEIVED) {
-		    		    				setAppInstanceOfferState(appInstance, OfferState.TIMEOUT);
-												log.debug(
-														"Offer timed out on app instance [%s]. Proceeding with the next one. [state=%s]",
-														appInstance, state);
+	    		    			OfferState state = getAppInstanceOfferState(appInstance);
+								if (state != OfferState.CONNECT_RECEIVED) {
+	    		    				setAppInstanceOfferState(appInstance, OfferState.TIMEOUT);
+									log.debug(
+											"Offer timed out on app instance [%s]. Proceeding with the next one. [state=%s]",
+											appInstance, state);
+		    		    			if (appInstance.isRequired()) {
+		    		    				log.error("App instance [%s] is required but it has timed out. Call [%s] will be ended.", appInstance, parentCallId);
+		    		    				failCall();
+		    		    			} else {									
 		    		        			apps.remove(appInstance.getId());
 		    		        			try {
 		    		        				offer();
