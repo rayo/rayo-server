@@ -23,7 +23,6 @@ import com.rayo.server.exception.RayoProtocolException.Condition;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.ApplicationContext;
 import com.voxeo.moho.Call;
-import com.voxeo.moho.Call.State;
 import com.voxeo.moho.Endpoint;
 import com.voxeo.moho.IncomingCall;
 import com.voxeo.moho.SignalException;
@@ -185,9 +184,6 @@ public class IncomingCallActor extends CallActor<IncomingCall> {
                 
         // Extract IMS headers
         Map<String,String> headers = new HashMap<String, String>();
-        if (getCall().getCallState() == State.CONNECTED) {
-        	headers.put("Ameche-continuation", "true");        	
-        }
 
         if (getCall().getParticipants().length == 0) {
         	dialingCoordinator.directDial(this, destinations, headers, ringlistId);
