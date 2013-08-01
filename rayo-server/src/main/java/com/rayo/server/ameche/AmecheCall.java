@@ -237,7 +237,7 @@ class AmecheCall {
 					if (offerState == OfferState.SENT) {
 	        			// i.e. hasn't timed out
 	        			log.debug("Processing <connect> command on app instance [%s].", appInstance);
-	        			processConnectEvent(command, appInstance);
+	        			processConnectCommand(command, appInstance);
 	        		} else {
 	            		log.debug("App instance [%s] already timed out. Ignoring <connect> command.", appInstance);        			
 	        		}
@@ -291,7 +291,7 @@ class AmecheCall {
         return future;
     }
     
-    private void processConnectEvent(Element command, AppInstance appInstance) {
+    private void processConnectCommand(Element command, AppInstance appInstance) {
 
     	Lock lock = offerPhaseLock.writeLock();
     	try {
