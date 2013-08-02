@@ -220,16 +220,7 @@ public class AmecheServlet extends HttpServlet implements Transport {
             }
             
             MDC.put("CallID", callId);
-            
-            if (amecheAuthenticationService.isTokenAuthEnabled()) {
-            	String authToken = req.getHeader("auth-token");
-            	if (!amecheAuthenticationService.isValidToken(callId, authToken)) {
-            		log.error("Invalid auth token: [%s] for call id [%s] ", authToken, callId);
-            		resp.setStatus(403, "Invalid auth token");
-            		return;
-            	}
-            }
-            
+                        
             if(appInstanceId == null) {
                 log.warn("Missing app-instance-id header");
                 resp.setStatus(400, "Missing app-instance-id header");
@@ -244,6 +235,15 @@ public class AmecheServlet extends HttpServlet implements Transport {
 	                log.warn("Received command for unknown call: %s", command.asXML());
 	                resp.setStatus(404);
 	                return;
+	            }
+	            
+	            if (amecheAuthenticationService.isTokenAuthEnabled()) {
+	            	String authToken = req.getHeader("auth-token");
+	            	if (!amecheAuthenticationService.isValidToken(callId, authToken)) {
+	            		log.error("Invalid auth token: [%s] for call id [%s] ", authToken, callId);
+	            		resp.setStatus(403, "Invalid auth token");
+	            		return;
+	            	}
 	            }
 	            
 	            AppInstance appInstance = call.getAppInstance(appInstanceId);
