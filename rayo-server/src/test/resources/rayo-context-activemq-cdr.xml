@@ -326,7 +326,7 @@
 	<!-- Default filter chain -->
   	<bean id="filtersChain" class="com.rayo.server.filter.DefaultFilterChain"/> 
 	 
-	<bean id="datastore" class="com.rayo.storage.properties.PropertiesBasedDatastore">
+	<bean id="datastore" class="com.rayo.server.storage.PropertiesBasedDatastore">
 		<constructor-arg value="classpath:rayo-routing.properties"/> <!-- properties file -->
 		<constructor-arg value="60000"/> <!-- reload interval in milliseconds -->
 	</bean>
