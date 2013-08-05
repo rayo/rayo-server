@@ -14,12 +14,12 @@ import javax.servlet.sip.URI;
 
 import org.apache.log4j.Logger;
 
-import com.rayo.storage.DefaultGatewayStorageService;
+import com.rayo.server.storage.DefaultGatewayStorageService;
+import com.rayo.server.storage.model.Application;
+import com.rayo.server.storage.model.RayoNode;
 import com.rayo.storage.cassandra.CassandraDatastore;
 import com.rayo.storage.lb.BlacklistingLoadBalancer;
 import com.rayo.storage.lb.PriorityBasedLoadBalancer;
-import com.rayo.storage.model.Application;
-import com.rayo.storage.model.RayoNode;
 
 public class SBCRouterServlet extends SipServlet {
 
