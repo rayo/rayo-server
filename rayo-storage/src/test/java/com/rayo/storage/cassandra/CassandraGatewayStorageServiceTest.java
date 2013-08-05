@@ -3,8 +3,8 @@ package com.rayo.storage.cassandra;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
+import com.rayo.server.storage.DefaultGatewayStorageService;
 import com.rayo.storage.BaseGatewayStorageServiceTest;
-import com.rayo.storage.DefaultGatewayStorageService;
 import com.rayo.storage.lb.RoundRobinLoadBalancer;
 import com.rayo.storage.test.EmbeddedCassandraTestServer;
 

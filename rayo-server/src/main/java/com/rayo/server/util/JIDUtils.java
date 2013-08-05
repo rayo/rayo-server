@@ -1,4 +1,4 @@
-package com.rayo.storage.util;
+package com.rayo.server.util;
 
 public class JIDUtils {
 

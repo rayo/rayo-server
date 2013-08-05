@@ -12,7 +12,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.rayo.provisioning.rest.RestTestStore;
-import com.rayo.storage.GatewayDatastore;
+import com.rayo.server.storage.GatewayDatastore;
 import com.tropo.provisioning.jms.DefaultJmsNotificationService;
 import com.tropo.provisioning.model.Address;
 import com.tropo.provisioning.model.Application;
@@ -98,7 +98,7 @@ public abstract class DefaultProvisioningAgentTest extends BaseProvisioningAgent
 		Thread.sleep(1000);
 		
 		assertEquals(provisioningService.getMessagesProcessed(), messages+1);
-		com.rayo.storage.model.Application app = store.getApplication("test1@apps.tropo.com");
+		com.rayo.server.storage.model.Application app = store.getApplication("test1@apps.tropo.com");
 		assertNotNull(app);
 		assertEquals("test1@apps.tropo.com", app.getBareJid());
 		
@@ -132,7 +132,7 @@ public abstract class DefaultProvisioningAgentTest extends BaseProvisioningAgent
 		Thread.sleep(1000);
 		
 		assertEquals(provisioningService.getMessagesProcessed(), messages+1);
-		com.rayo.storage.model.Application app = store.getApplication("test1@apps.tropo.com");
+		com.rayo.server.storage.model.Application app = store.getApplication("test1@apps.tropo.com");
 		assertNotNull(app);
 		assertEquals("test1@apps.tropo.com", app.getBareJid());
 		
@@ -334,7 +334,7 @@ public abstract class DefaultProvisioningAgentTest extends BaseProvisioningAgent
 		jmsNotificationService.notifyApplicationUpdated(application);
 		Thread.sleep(1000);
 		
-		com.rayo.storage.model.Application app = store.getApplication("test1@apps.tropo.com");
+		com.rayo.server.storage.model.Application app = store.getApplication("test1@apps.tropo.com");
 		assertEquals(app.getPermissions(), "suc");
 		
 		addJsonToEndpoint("/users/1/features", 
@@ -360,7 +360,7 @@ public abstract class DefaultProvisioningAgentTest extends BaseProvisioningAgent
 		jmsNotificationService.notifyApplicationUpdated(application);
 		Thread.sleep(1000);
 		
-		com.rayo.storage.model.Application app = store.getApplication("test1@apps.tropo.com");
+		com.rayo.server.storage.model.Application app = store.getApplication("test1@apps.tropo.com");
 		assertEquals(app.getPermissions(), "suc");
 		
 		addJsonToEndpoint("/users/1/features", 
@@ -391,7 +391,7 @@ public abstract class DefaultProvisioningAgentTest extends BaseProvisioningAgent
 		jmsNotificationService.notifyApplicationUpdated(application);
 		Thread.sleep(1000);
 		
-		com.rayo.storage.model.Application app = store.getApplication("test1@apps.tropo.com");
+		com.rayo.server.storage.model.Application app = store.getApplication("test1@apps.tropo.com");
 		assertEquals(app.getPermissions(), "suc");
 		
 		removeJsonFromEndpoint("/users/1/features", 
@@ -417,7 +417,7 @@ public abstract class DefaultProvisioningAgentTest extends BaseProvisioningAgent
 		jmsNotificationService.notifyApplicationUpdated(application);
 		Thread.sleep(1000);
 		
-		com.rayo.storage.model.Application app = store.getApplication("test1@apps.tropo.com");
+		com.rayo.server.storage.model.Application app = store.getApplication("test1@apps.tropo.com");
 		assertEquals(app.getPermissions(), "suc");
 		
 		removeJsonFromEndpoint("/users/1/features", 
@@ -449,7 +449,7 @@ public abstract class DefaultProvisioningAgentTest extends BaseProvisioningAgent
 		jmsNotificationService.notifyApplicationUpdated(application);
 		Thread.sleep(1000);
 		
-		com.rayo.storage.model.Application app = store.getApplication("test1@apps.tropo.com");
+		com.rayo.server.storage.model.Application app = store.getApplication("test1@apps.tropo.com");
 		assertEquals(app.getPermissions(), "suc");
 
 		jmsNotificationService.notifyAccountUpdated(application.getAccount());

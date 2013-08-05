@@ -1,9 +1,9 @@
-package com.rayo.storage.properties;
+package com.rayo.server.storage;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.net.URI;
@@ -19,8 +19,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 
-import com.rayo.storage.BaseDatastoreTest;
-import com.rayo.storage.model.Application;
+import com.rayo.server.storage.model.Application;
 
 public class PropertiesBasedDatastoreTest extends BaseDatastoreTest {
 

@@ -396,7 +396,6 @@
         <modules>
           <module>rayo-core</module>
           <module>rayo-provisioning</module>
-          <module>rayo-storage</module>
           <module>rayo-server</module>
           <module>rayo-war</module>
         </modules>

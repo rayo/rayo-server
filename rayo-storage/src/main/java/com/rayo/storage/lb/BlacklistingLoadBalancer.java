@@ -4,9 +4,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 
-import com.rayo.storage.GatewayStorageService;
-import com.rayo.storage.exception.GatewayException;
-import com.rayo.storage.model.RayoNode;
+import com.rayo.server.storage.GatewayException;
+import com.rayo.server.storage.GatewayStorageService;
+import com.rayo.server.storage.model.RayoNode;
 import com.voxeo.logging.Loggerf;
 
 /**

@@ -1,4 +1,4 @@
-package com.rayo.storage.model;
+package com.rayo.server.storage.model;
 
 import java.io.Serializable;
 

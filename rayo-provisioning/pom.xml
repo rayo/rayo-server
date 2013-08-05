@@ -12,12 +12,6 @@
 	</parent>
 
 	<dependencies>
-		<!-- Distributed cache -->
-		<dependency>
-			<groupId>com.rayo</groupId>
-			<artifactId>rayo-storage</artifactId>
-			<version>${project.version}</version>
-		</dependency>
 		<dependency>
 			<groupId>com.rayo</groupId>
 			<artifactId>rayo-server</artifactId>

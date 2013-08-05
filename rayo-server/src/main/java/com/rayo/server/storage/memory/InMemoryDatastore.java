@@ -1,4 +1,4 @@
-package com.rayo.storage.memory;
+package com.rayo.server.storage.memory;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,19 +13,19 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import com.rayo.storage.GatewayDatastore;
-import com.rayo.storage.exception.ApplicationAlreadyExistsException;
-import com.rayo.storage.exception.ApplicationNotFoundException;
-import com.rayo.storage.exception.DatastoreException;
-import com.rayo.storage.exception.RayoNodeAlreadyExistsException;
-import com.rayo.storage.exception.RayoNodeNotFoundException;
-import com.rayo.storage.model.Application;
-import com.rayo.storage.model.GatewayCall;
-import com.rayo.storage.model.GatewayClient;
-import com.rayo.storage.model.GatewayMixer;
-import com.rayo.storage.model.GatewayVerb;
-import com.rayo.storage.model.RayoNode;
-import com.rayo.storage.util.JIDUtils;
+import com.rayo.server.storage.ApplicationAlreadyExistsException;
+import com.rayo.server.storage.ApplicationNotFoundException;
+import com.rayo.server.storage.DatastoreException;
+import com.rayo.server.storage.GatewayDatastore;
+import com.rayo.server.storage.RayoNodeAlreadyExistsException;
+import com.rayo.server.storage.RayoNodeNotFoundException;
+import com.rayo.server.storage.model.Application;
+import com.rayo.server.storage.model.GatewayCall;
+import com.rayo.server.storage.model.GatewayClient;
+import com.rayo.server.storage.model.GatewayMixer;
+import com.rayo.server.storage.model.GatewayVerb;
+import com.rayo.server.storage.model.RayoNode;
+import com.rayo.server.util.JIDUtils;
 
 /**
  * <p>Fully in-memory Map based implementation of the {@link GatewayDatastore} interface.</p> 

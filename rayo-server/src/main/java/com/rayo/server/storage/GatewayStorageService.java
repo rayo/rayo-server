@@ -1,16 +1,17 @@
-package com.rayo.storage;
+package com.rayo.server.storage;
 
 
 import java.util.Collection;
 import java.util.List;
 
-import com.rayo.storage.exception.DatastoreException;
-import com.rayo.storage.exception.GatewayException;
-import com.rayo.storage.model.Application;
-import com.rayo.storage.model.GatewayClient;
-import com.rayo.storage.model.GatewayMixer;
-import com.rayo.storage.model.GatewayVerb;
-import com.rayo.storage.model.RayoNode;
+import com.rayo.server.storage.DatastoreException;
+import com.rayo.server.storage.GatewayDatastore;
+import com.rayo.server.storage.GatewayException;
+import com.rayo.server.storage.model.Application;
+import com.rayo.server.storage.model.GatewayClient;
+import com.rayo.server.storage.model.GatewayMixer;
+import com.rayo.server.storage.model.GatewayVerb;
+import com.rayo.server.storage.model.RayoNode;
 import com.voxeo.servlet.xmpp.JID;
 
 /**

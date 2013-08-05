@@ -1,4 +1,4 @@
-package com.rayo.storage.exception;
+package com.rayo.server.storage;
 
 @SuppressWarnings("serial")
 public class RayoNodeAlreadyExistsException extends DatastoreException {

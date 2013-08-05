@@ -1,4 +1,4 @@
-package com.rayo.storage;
+package com.rayo.server.storage;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
@@ -9,16 +9,17 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.locks.ReentrantLock;
 
-import com.rayo.storage.exception.ApplicationNotFoundException;
-import com.rayo.storage.exception.DatastoreException;
-import com.rayo.storage.exception.GatewayException;
-import com.rayo.storage.exception.RayoNodeNotFoundException;
-import com.rayo.storage.model.Application;
-import com.rayo.storage.model.GatewayCall;
-import com.rayo.storage.model.GatewayClient;
-import com.rayo.storage.model.GatewayMixer;
-import com.rayo.storage.model.GatewayVerb;
-import com.rayo.storage.model.RayoNode;
+import com.rayo.server.storage.ApplicationNotFoundException;
+import com.rayo.server.storage.DatastoreException;
+import com.rayo.server.storage.GatewayDatastore;
+import com.rayo.server.storage.GatewayException;
+import com.rayo.server.storage.RayoNodeNotFoundException;
+import com.rayo.server.storage.model.Application;
+import com.rayo.server.storage.model.GatewayCall;
+import com.rayo.server.storage.model.GatewayClient;
+import com.rayo.server.storage.model.GatewayMixer;
+import com.rayo.server.storage.model.GatewayVerb;
+import com.rayo.server.storage.model.RayoNode;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.util.ParticipantIDParser;
 import com.voxeo.servlet.xmpp.JID;

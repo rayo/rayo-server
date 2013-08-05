@@ -9,10 +9,10 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 
-import com.rayo.storage.DefaultGatewayStorageService;
-import com.rayo.storage.GatewayDatastore;
-import com.rayo.storage.GatewayStorageService;
-import com.rayo.storage.properties.PropertiesBasedDatastore;
+import com.rayo.server.storage.DefaultGatewayStorageService;
+import com.rayo.server.storage.GatewayDatastore;
+import com.rayo.server.storage.GatewayStorageService;
+import com.rayo.server.storage.PropertiesBasedDatastore;
 import com.voxeo.logging.Loggerf;
 
 /**

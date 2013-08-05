@@ -9,7 +9,7 @@ import org.codehaus.jackson.annotate.JsonProperty;
 import com.basho.riak.client.RiakLink;
 import com.basho.riak.client.convert.RiakKey;
 import com.basho.riak.client.convert.RiakLinks;
-import com.rayo.storage.model.GatewayMixer;
+import com.rayo.server.storage.model.GatewayMixer;
 
 public class RiakMixer {
 

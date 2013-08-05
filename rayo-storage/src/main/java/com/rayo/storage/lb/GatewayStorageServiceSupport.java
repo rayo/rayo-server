@@ -1,6 +1,6 @@
 package com.rayo.storage.lb;
 
-import com.rayo.storage.GatewayStorageService;
+import com.rayo.server.storage.GatewayStorageService;
 
 /**
  * Marker interface for classes that need a gateway peresistence store. 

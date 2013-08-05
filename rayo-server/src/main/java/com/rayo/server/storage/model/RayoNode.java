@@ -1,4 +1,4 @@
-package com.rayo.storage.model;
+package com.rayo.server.storage.model;
 
 import java.io.Serializable;
 import java.util.HashSet;
@@ -6,8 +6,6 @@ import java.util.Set;
 
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
-
-import com.rayo.storage.lb.PriorityBasedLoadBalancer;
 
 /**
  * <p>This model object represent an instance of a Rayo Server.</p>

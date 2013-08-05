@@ -1,4 +1,4 @@
-package com.rayo.storage.properties;
+package com.rayo.server.storage;
 
 import java.util.regex.Pattern;
 

@@ -1,4 +1,4 @@
-package com.rayo.storage.properties;
+package com.rayo.server.storage;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -22,16 +22,13 @@ import java.util.regex.Matcher;
 
 import org.springframework.core.io.Resource;
 
-import com.rayo.storage.GatewayDatastore;
-import com.rayo.storage.cassandra.CassandraDatastore;
-import com.rayo.storage.exception.DatastoreException;
-import com.rayo.storage.memory.InMemoryDatastore;
-import com.rayo.storage.model.Application;
-import com.rayo.storage.model.GatewayCall;
-import com.rayo.storage.model.GatewayClient;
-import com.rayo.storage.model.GatewayMixer;
-import com.rayo.storage.model.GatewayVerb;
-import com.rayo.storage.model.RayoNode;
+import com.rayo.server.storage.memory.InMemoryDatastore;
+import com.rayo.server.storage.model.Application;
+import com.rayo.server.storage.model.GatewayCall;
+import com.rayo.server.storage.model.GatewayClient;
+import com.rayo.server.storage.model.GatewayMixer;
+import com.rayo.server.storage.model.GatewayVerb;
+import com.rayo.server.storage.model.RayoNode;
 import com.voxeo.logging.Loggerf;
 
 /**

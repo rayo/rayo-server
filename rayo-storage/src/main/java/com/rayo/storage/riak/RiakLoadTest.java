@@ -6,7 +6,7 @@ import java.util.List;
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.math.RandomUtils;
 
-import com.rayo.storage.model.Application;
+import com.rayo.server.storage.model.Application;
 
 public class RiakLoadTest {
 

@@ -2,8 +2,8 @@ package com.rayo.storage;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Arrays;
@@ -12,11 +12,12 @@ import java.util.List;
 
 import org.junit.Test;
 
-import com.rayo.storage.exception.ApplicationNotFoundException;
-import com.rayo.storage.exception.RayoNodeNotFoundException;
+import com.rayo.server.storage.ApplicationNotFoundException;
+import com.rayo.server.storage.DefaultGatewayStorageService;
+import com.rayo.server.storage.RayoNodeNotFoundException;
+import com.rayo.server.storage.model.Application;
+import com.rayo.server.storage.model.RayoNode;
 import com.rayo.storage.lb.RoundRobinLoadBalancer;
-import com.rayo.storage.model.Application;
-import com.rayo.storage.model.RayoNode;
 import com.rayo.storage.util.JIDImpl;
 import com.voxeo.moho.util.ParticipantIDParser;
 import com.voxeo.servlet.xmpp.JID;

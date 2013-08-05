@@ -11,7 +11,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
 
-import com.rayo.storage.model.RayoNode;
+import com.rayo.server.storage.model.RayoNode;
 
 public class NodeSet {
 

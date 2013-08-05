@@ -14,7 +14,7 @@ import com.google.gson.GsonBuilder;
 import com.rayo.provisioning.model.AddressNotification;
 import com.rayo.provisioning.model.UpdateNotification;
 import com.rayo.provisioning.storage.StorageServiceClient;
-import com.rayo.storage.model.Application;
+import com.rayo.server.storage.model.Application;
 import com.voxeo.logging.Loggerf;
 
 /**

@@ -1,8 +1,8 @@
-package com.rayo.storage.memory;
+package com.rayo.server.storage.memory;
 
 import org.junit.Before;
 
-import com.rayo.storage.BaseDatastoreTest;
+import com.rayo.server.storage.BaseDatastoreTest;
 
 public class InMemoryDatastoreTest extends BaseDatastoreTest {
 

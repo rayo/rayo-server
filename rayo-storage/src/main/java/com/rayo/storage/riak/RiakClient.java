@@ -8,7 +8,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import com.basho.riak.client.convert.RiakKey;
-import com.rayo.storage.model.GatewayClient;
+import com.rayo.server.storage.model.GatewayClient;
 
 public class RiakClient {
 

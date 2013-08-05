@@ -7,7 +7,7 @@ import com.rayo.storage.cassandra.CassandraDatastore;
 import com.rayo.storage.cassandra.CassandraDatastoreTest;
 import com.rayo.storage.test.EmbeddedCassandraTestServer;
 
-public class CassandraRoundRobinLoadBalancerTest extends RoundRobinLoadBalancerTest {
+public class CassandraRoundRobinLoadBalancerTest extends RoundRobinLoadBalancerTestBase {
 	
     @BeforeClass
     public static void startCassandraServer() throws Exception {

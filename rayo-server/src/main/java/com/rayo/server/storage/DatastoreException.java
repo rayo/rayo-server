@@ -1,6 +1,5 @@
-package com.rayo.storage.exception;
+package com.rayo.server.storage;
 
-import com.rayo.storage.GatewayDatastore;
 
 /**
  * <p>This special type of {@link GatewayException} signals than an error 

@@ -10,7 +10,7 @@ import org.scale7.cassandra.pelops.Cluster;
 import org.scale7.cassandra.pelops.KeyspaceManager;
 import org.scale7.cassandra.pelops.Pelops;
 
-import com.rayo.storage.BaseDatastoreTest;
+import com.rayo.server.storage.BaseDatastoreTest;
 import com.rayo.storage.test.EmbeddedCassandraTestServer;
 
 public class CassandraDatastoreTest extends BaseDatastoreTest {

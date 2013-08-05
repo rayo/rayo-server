@@ -4,7 +4,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 
-import com.rayo.storage.BaseDatastoreTest;
+import com.rayo.server.storage.BaseDatastoreTest;
 
 @Ignore
 public class RiakDatastoreTest extends BaseDatastoreTest {

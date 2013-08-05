@@ -7,7 +7,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.core.io.FileSystemResource;
-import com.rayo.storage.properties.PropertiesBasedDatastore
+import com.rayo.server.storage.PropertiesBasedDatastore
 
 import com.rayo.core.OfferEvent;
 

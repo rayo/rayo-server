@@ -11,7 +11,7 @@
 		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd"
     default-autowire="byName">
 	
-	<bean id="datastore" class="com.rayo.storage.properties.PropertiesBasedDatastore">
+	<bean id="datastore" class="com.rayo.server.storage.PropertiesBasedDatastore">
 		<constructor-arg value="classpath:rayo-routing.properties"/> <!-- properties file -->
 		<constructor-arg value="60000"/> <!-- reload interval in milliseconds -->
 	</bean>

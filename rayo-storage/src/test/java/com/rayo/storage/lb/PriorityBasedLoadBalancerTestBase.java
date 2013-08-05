@@ -5,10 +5,10 @@ import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 
-import com.rayo.storage.BaseDatastoreTest;
-import com.rayo.storage.model.RayoNode;
+import com.rayo.server.storage.BaseDatastoreTest;
+import com.rayo.server.storage.model.RayoNode;
 
-public abstract class PriorityBasedLoadBalancerTest extends LoadBalancingTest {
+public abstract class PriorityBasedLoadBalancerTestBase extends LoadBalancingTest {
 
 	@Override
 	GatewayLoadBalancingStrategy getLoadBalancer() {

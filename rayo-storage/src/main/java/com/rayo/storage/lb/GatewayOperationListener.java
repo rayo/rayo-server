@@ -1,6 +1,6 @@
 package com.rayo.storage.lb;
 
-import com.rayo.storage.model.RayoNode;
+import com.rayo.server.storage.model.RayoNode;
 
 /**
  * Callback interface for operations on rayo nodes and client resources.

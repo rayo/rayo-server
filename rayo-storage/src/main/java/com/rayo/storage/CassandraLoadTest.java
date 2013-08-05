@@ -5,12 +5,10 @@ import java.util.List;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.math.RandomUtils;
-import org.apache.commons.lang.time.DateFormatUtils;
-import org.apache.commons.lang.time.DateUtils;
 
+import com.rayo.server.storage.model.Application;
 import com.rayo.storage.cassandra.CassandraDatastore;
 import com.rayo.storage.cassandra.DefaultCassandraPrimer;
-import com.rayo.storage.model.Application;
 
 public class CassandraLoadTest {
 

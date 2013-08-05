@@ -7,7 +7,7 @@ import com.rayo.storage.cassandra.CassandraDatastore;
 import com.rayo.storage.cassandra.CassandraDatastoreTest;
 import com.rayo.storage.test.EmbeddedCassandraTestServer;
 
-public class CassandraPriorityBasedLoadBalancerTest extends PriorityBasedLoadBalancerTest {
+public class CassandraPriorityBasedLoadBalancerTest extends PriorityBasedLoadBalancerTestBase {
 	
     @BeforeClass
     public static void startCassandraServer() throws Exception {

@@ -7,7 +7,7 @@ import org.springframework.core.io.Resource;
 
 import com.rayo.core.OfferEvent;
 import com.rayo.server.exception.RayoProtocolException;
-import com.rayo.storage.properties.PropertiesBasedDatastore;
+import com.rayo.server.storage.PropertiesBasedDatastore;
 import com.voxeo.logging.Loggerf;
 
 /**

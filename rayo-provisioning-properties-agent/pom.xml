@@ -23,6 +23,11 @@
 	        <type>test-jar</type>
       		<scope>test</scope>		
 	    </dependency>
+        <dependency>
+            <groupId>com.rayo</groupId>
+            <artifactId>rayo-storage</artifactId>
+            <version>${project.version}</version>
+        </dependency>	    
 	    <dependency>
 	        <groupId>com.tropo</groupId>
 	        <artifactId>rest-persistence</artifactId>

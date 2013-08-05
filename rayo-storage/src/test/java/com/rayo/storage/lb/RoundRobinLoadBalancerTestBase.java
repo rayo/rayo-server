@@ -5,12 +5,12 @@ import static org.junit.Assert.assertNull;
 
 import org.junit.Test;
 
-import com.rayo.storage.BaseDatastoreTest;
-import com.rayo.storage.model.Application;
+import com.rayo.server.storage.BaseDatastoreTest;
+import com.rayo.server.storage.model.Application;
 import com.rayo.storage.util.JIDImpl;
 
 
-public abstract class RoundRobinLoadBalancerTest extends LoadBalancingTest {
+public abstract class RoundRobinLoadBalancerTestBase extends LoadBalancingTest {
 
 	@Override
 	GatewayLoadBalancingStrategy getLoadBalancer() {

@@ -3,8 +3,7 @@ package com.rayo.storage.cassandra;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.rayo.storage.cassandra.CassandraDatastore;
-import com.rayo.storage.model.Application;
+import com.rayo.server.storage.model.Application;
 
 /**
  * This class primes Cassandra with applications and mappings needed by the load tests and 

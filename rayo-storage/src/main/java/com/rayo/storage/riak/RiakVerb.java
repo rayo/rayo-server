@@ -5,7 +5,7 @@ import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import com.basho.riak.client.convert.RiakKey;
-import com.rayo.storage.model.GatewayVerb;
+import com.rayo.server.storage.model.GatewayVerb;
 
 public class RiakVerb {
 

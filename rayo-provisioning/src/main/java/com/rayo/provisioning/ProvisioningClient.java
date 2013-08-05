@@ -8,7 +8,7 @@ import com.rayo.provisioning.model.AddressDto;
 import com.rayo.provisioning.model.ApplicationDto;
 import com.rayo.provisioning.model.UserFeatureDto;
 import com.rayo.provisioning.model.VstackVersionDto;
-import com.rayo.storage.model.Application;
+import com.rayo.server.storage.model.Application;
 import com.voxeo.logging.Loggerf;
 
 /**

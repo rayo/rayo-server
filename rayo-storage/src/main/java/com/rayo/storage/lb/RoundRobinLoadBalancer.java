@@ -8,8 +8,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.rayo.storage.GatewayStorageService;
-import com.rayo.storage.model.RayoNode;
+import com.rayo.server.storage.GatewayStorageService;
+import com.rayo.server.storage.model.RayoNode;
 import com.voxeo.logging.Loggerf;
 
 /**

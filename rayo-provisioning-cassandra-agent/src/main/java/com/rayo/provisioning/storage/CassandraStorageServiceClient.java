@@ -6,9 +6,9 @@ import org.springframework.beans.factory.BeanDefinitionStoreException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
-import com.rayo.storage.DefaultGatewayStorageService;
-import com.rayo.storage.GatewayDatastore;
-import com.rayo.storage.GatewayStorageService;
+import com.rayo.server.storage.DefaultGatewayStorageService;
+import com.rayo.server.storage.GatewayDatastore;
+import com.rayo.server.storage.GatewayStorageService;
 import com.rayo.storage.cassandra.CassandraDatastore;
 import com.voxeo.logging.Loggerf;
 

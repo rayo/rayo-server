@@ -5,11 +5,10 @@ import java.util.Properties;
 
 import org.springframework.context.ApplicationContext;
 
-import com.rayo.storage.GatewayDatastore;
-import com.rayo.storage.GatewayStorageService;
-import com.rayo.storage.exception.ApplicationNotFoundException;
-import com.rayo.storage.exception.DatastoreException;
-import com.rayo.storage.model.Application;
+import com.rayo.server.storage.ApplicationNotFoundException;
+import com.rayo.server.storage.DatastoreException;
+import com.rayo.server.storage.GatewayDatastore;
+import com.rayo.server.storage.model.Application;
 
 /**
  * Defines an interface to interact with a {@link GatewayStorageService}. Implmentors of this interface

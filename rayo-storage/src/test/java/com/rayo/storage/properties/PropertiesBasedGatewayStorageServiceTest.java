@@ -3,8 +3,9 @@ package com.rayo.storage.properties;
 import org.junit.Before;
 import org.springframework.core.io.ByteArrayResource;
 
+import com.rayo.server.storage.DefaultGatewayStorageService;
+import com.rayo.server.storage.PropertiesBasedDatastore;
 import com.rayo.storage.BaseGatewayStorageServiceTest;
-import com.rayo.storage.DefaultGatewayStorageService;
 import com.rayo.storage.lb.RoundRobinLoadBalancer;
 
 public class PropertiesBasedGatewayStorageServiceTest extends BaseGatewayStorageServiceTest {

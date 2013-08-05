@@ -2,9 +2,9 @@ package com.rayo.storage.lb;
 
 import org.junit.Before;
 
-import com.rayo.storage.memory.InMemoryDatastore;
+import com.rayo.server.storage.memory.InMemoryDatastore;
 
-public class InMemoryRoundRobinLoadBalancerTest extends RoundRobinLoadBalancerTest {
+public class InMemoryRoundRobinLoadBalancerTest extends RoundRobinLoadBalancerTestBase {
 	
 	@Before
 	public void setup() throws Exception {

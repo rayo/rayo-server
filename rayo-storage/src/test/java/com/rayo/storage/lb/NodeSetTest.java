@@ -12,7 +12,7 @@ import java.util.Set;
 
 import org.junit.Test;
 
-import com.rayo.storage.model.RayoNode;
+import com.rayo.server.storage.model.RayoNode;
 
 public class NodeSetTest {
 

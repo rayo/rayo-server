@@ -9,10 +9,10 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import com.rayo.storage.BaseDatastoreTest;
-import com.rayo.storage.DefaultGatewayStorageService;
-import com.rayo.storage.model.Application;
-import com.rayo.storage.model.RayoNode;
+import com.rayo.server.storage.BaseDatastoreTest;
+import com.rayo.server.storage.DefaultGatewayStorageService;
+import com.rayo.server.storage.model.Application;
+import com.rayo.server.storage.model.RayoNode;
 import com.rayo.storage.util.JIDImpl;
 
 public abstract class LoadBalancingTest {
