@@ -7,7 +7,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
-import com.rayo.storage.GatewayStorageService;
+import com.rayo.server.storage.GatewayStorageService;
 import com.voxeo.servlet.xmpp.JID;
 
 @ManagedResource(objectName="com.rayo.gateway:Type=GatewayStatistics", description="Gateway Statistics")

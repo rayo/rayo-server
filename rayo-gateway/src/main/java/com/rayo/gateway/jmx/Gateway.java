@@ -12,11 +12,11 @@ import org.springframework.jmx.export.annotation.ManagedAttribute;
 import org.springframework.jmx.export.annotation.ManagedOperation;
 import org.springframework.jmx.export.annotation.ManagedResource;
 
-import com.rayo.storage.GatewayStorageService;
-import com.rayo.storage.model.Application;
-import com.rayo.storage.model.GatewayMixer;
-import com.rayo.storage.model.GatewayVerb;
-import com.rayo.storage.model.RayoNode;
+import com.rayo.server.storage.GatewayStorageService;
+import com.rayo.server.storage.model.Application;
+import com.rayo.server.storage.model.GatewayMixer;
+import com.rayo.server.storage.model.GatewayVerb;
+import com.rayo.server.storage.model.RayoNode;
 import com.voxeo.logging.Loggerf;
 
 /**

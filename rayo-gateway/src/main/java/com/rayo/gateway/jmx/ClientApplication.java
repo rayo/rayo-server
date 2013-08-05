@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.springframework.jmx.export.annotation.ManagedResource;
 
-import com.rayo.storage.model.Application;
+import com.rayo.server.storage.model.Application;
 
 /**
  * <p>This MBean represents a client application connected to the gateway.</p>

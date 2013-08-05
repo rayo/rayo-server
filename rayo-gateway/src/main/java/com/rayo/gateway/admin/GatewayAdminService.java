@@ -5,10 +5,10 @@ import java.util.List;
 import java.util.Set;
 
 import com.rayo.server.admin.AdminService;
-import com.rayo.storage.GatewayStorageService;
-import com.rayo.storage.exception.GatewayException;
-import com.rayo.storage.model.Application;
-import com.rayo.storage.model.RayoNode;
+import com.rayo.server.storage.GatewayException;
+import com.rayo.server.storage.GatewayStorageService;
+import com.rayo.server.storage.model.Application;
+import com.rayo.server.storage.model.RayoNode;
 import com.voxeo.logging.Loggerf;
 
 public class GatewayAdminService extends AdminService {

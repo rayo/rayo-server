@@ -5,8 +5,8 @@ import java.util.List;
 
 import org.springframework.jmx.export.annotation.ManagedResource;
 
-import com.rayo.storage.GatewayStorageService;
-import com.rayo.storage.model.RayoNode;
+import com.rayo.server.storage.GatewayStorageService;
+import com.rayo.server.storage.model.RayoNode;
 
 /**
  * <p>This MBean represents each of the Rayo Nodes.</p>

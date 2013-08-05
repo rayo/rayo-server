@@ -1,6 +1,6 @@
 package com.rayo.gateway.jmx;
 
-import com.rayo.storage.exception.GatewayException;
+import com.rayo.server.storage.GatewayException;
 
 public interface AdminMXBean {
 
