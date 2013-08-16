@@ -621,7 +621,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     			}
     		}
     	}
-
+    	log.debug("Done media bridging");
     }
 
     @Override
