@@ -587,21 +587,20 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     	return true;
     }
     
-    public void bridgeMedia() {
+    public void bridgeMediaIfNecessary() {
     	
     	if (joinGroup == null) {
-        	log.debug("About to regular media bridging.");
-    		doMediaBridging();
+    		if (isOnDirectMedia()) {
+	        	log.debug("About to regular media bridging.");
+	    		doMediaBridging();
+    		}
     	} else {
-    		doSyncMediaBridging();
-    	}
-    }
-    
-    private void doSyncMediaBridging() {
-
-    	log.debug("About to do synchronized media bridging.");
-    	synchronized(joinGroup) {
-    		doMediaBridging();
+    		synchronized(joinGroup) {
+    			if (isOnDirectMedia()) {
+    		    	log.debug("About to do synchronized media bridging.");
+    	    		doMediaBridging();    				
+    			}
+    		}
     	}
     }
     
