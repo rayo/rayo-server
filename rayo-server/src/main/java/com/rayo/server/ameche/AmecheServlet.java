@@ -287,9 +287,7 @@ public class AmecheServlet extends HttpServlet implements Transport {
 	        	if (command.getName().equals("output") ||
 	        		command.getName().equals("input") ||
 	        		command.getName().equals("record")) {	        		
-	        		if (actor.isOnDirectMedia()) {
-	        			actor.bridgeMediaIfNecessary();
-	        		}
+	        		actor.bridgeMediaIfNecessary();
 	        	}
 
 	            if (command.getName().equals("ping")) {
