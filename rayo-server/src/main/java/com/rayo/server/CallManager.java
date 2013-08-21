@@ -118,7 +118,7 @@ public class CallManager extends ReflectiveActor {
             fromEndpoint = applicationContext.createEndpoint(from.toString());
         }
 
-        log.debug("Creating call to [%s] from [%s]", toEndpoint, fromEndpoint);
+        log.debug("Creating moho call to [%s] from [%s]", toEndpoint, fromEndpoint);
         
         final Call mohoCall = toEndpoint.createCall(fromEndpoint, headers, source);
         MDC.put("CallID", mohoCall.getId());
