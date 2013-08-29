@@ -12,7 +12,7 @@
   <properties>
   	  <ameche.version>0.5-SNAPSHOT</ameche.version>
       <spring.version>3.0.5.RELEASE</spring.version>
-      <moho.version>trunk-SNAPSHOT</moho.version>
+      <moho.version>1.2.0</moho.version>
   </properties>
 
     <repositories>
