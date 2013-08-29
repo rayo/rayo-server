@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
@@ -38,7 +39,9 @@ import com.voxeo.utils.Typesafe;
 class AmecheCall {
 
     private static final Loggerf log = Loggerf.getLogger(AmecheCall.class);
-    
+
+	private static ScheduledExecutorService executor = Executors.newScheduledThreadPool(10);
+
     private CommandHandler commandHandler;
     private AppInstanceEventDispatcher appInstanceEventDispatcher;
     private AmecheCallRegistry amecheCallRegistry;
@@ -405,9 +408,7 @@ class AmecheCall {
 	    				dispatchEvent(offer, parentCallId, null, null, appInstance);
 	        			log.debug("Offer dispatched successfully.");
 	    				offerSent = true;
-	    		    	    				
-	    				ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-	    				    			
+	    		    	    			
 	    		    	executor.schedule(new Runnable() {
 	    		    		@Override
 	    		    		public void run() {
