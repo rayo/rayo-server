@@ -9,6 +9,7 @@ import java.net.URLConnection;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ScheduledExecutorService;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
@@ -31,15 +32,12 @@ import com.rayo.core.recording.StorageService;
 import com.rayo.server.CallActor;
 import com.rayo.server.CallRegistry;
 import com.rayo.server.CommandHandler;
-import com.rayo.server.DialingCoordinator;
 import com.rayo.server.Server;
 import com.rayo.server.Transport;
 import com.rayo.server.exception.ErrorMapping;
 import com.rayo.server.exception.ExceptionMapper;
 import com.rayo.server.ims.CallDirectionResolver;
 import com.voxeo.logging.Loggerf;
-import com.voxeo.moho.Call;
-import com.voxeo.moho.Participant.JoinType;
 
 @SuppressWarnings("serial")
 public class AmecheServlet extends HttpServlet implements Transport {
@@ -57,6 +55,7 @@ public class AmecheServlet extends HttpServlet implements Transport {
     private AmecheStorageService amecheStorageService;
     private CallDirectionResolver callDirectionResolver;
     private ExceptionMapper exceptionMapper;
+    private ScheduledExecutorService scheduledExecutor;
     
     @Override
     public void init() throws ServletException {
@@ -78,6 +77,7 @@ public class AmecheServlet extends HttpServlet implements Transport {
         amecheStorageService = (AmecheStorageService)httpTransportContext.getBean("amecheStorageService");
         callDirectionResolver = (CallDirectionResolver)httpTransportContext.getBean("callDirectionResolver");
         exceptionMapper = (ExceptionMapper)httpTransportContext.getBean("exceptionMapper");
+        scheduledExecutor = (ScheduledExecutorService)httpTransportContext.getBean("scheduledExecutor");
                 
         // Replace Rayo's default Storage service with Ameche's one
         @SuppressWarnings("unchecked")
@@ -170,6 +170,7 @@ public class AmecheServlet extends HttpServlet implements Transport {
     	call.setAppInstanceEventDispatcher(appInstanceEventDispatcher);
     	call.setCommandHandler(commandHandler);
     	call.setCallRegistry(callRegistry);
+    	call.setSchedulerExecutor(scheduledExecutor);
     	return call;
 	}
     
