@@ -90,8 +90,12 @@ public class SimpleRegexpAppInstanceResolver extends AppInstanceResolverS
 		} finally {
 			lock.unlock();
 		}
-		String from = offer.attributeValue("from");
-		String to = offer.attributeValue("to");
+		String fromAddress = offer.attributeValue("from");
+		String toAddress = offer.attributeValue("to");
+
+		String from = this.normalizeAddress(fromAddress);
+		String to = this.normalizeAddress(toAddress);
+
 		logger.debug("Finding a match for[from:%s,  to:%s, direction:%s", from,
 				to, direction);
 		for (RoutingRule rule : rules) {
