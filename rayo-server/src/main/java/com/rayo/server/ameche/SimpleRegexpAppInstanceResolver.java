@@ -36,7 +36,8 @@ import com.voxeo.logging.Loggerf;
  * @author martin
  * 
  */
-public class SimpleRegexpAppInstanceResolver implements AppInstanceResolver {
+public class SimpleRegexpAppInstanceResolver extends AppInstanceResolverS
+		implements AppInstanceResolver {
 
 	private static final Loggerf logger = Loggerf
 			.getLogger(SimpleRegexpAppInstanceResolver.class);

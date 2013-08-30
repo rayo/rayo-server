@@ -23,7 +23,8 @@ import com.voxeo.logging.Loggerf;
  * @author martin
  * 
  */
-public class JdbcAppInstanceResolver implements AppInstanceResolver {
+public class JdbcAppInstanceResolver extends AppInstanceResolverS implements
+		AppInstanceResolver {
 
 	private static final Loggerf logger = Loggerf
 			.getLogger(JdbcAppInstanceResolver.class);
