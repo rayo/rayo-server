@@ -13,6 +13,11 @@
 
 	<!-- Actor Thread Pool -->
 	<bean id="executor" class="java.util.concurrent.Executors" factory-method="newCachedThreadPool" />
+
+    <!-- Ameche task timeout handling thread pool -->
+    <bean id="scheduledExecutor" class="java.util.concurrent.Executors" factory-method="newScheduledThreadPool">
+        <constructor-arg value="10" />
+    </bean>
 	
 	<!-- Jetlang Fiber Factory -->
 	<bean id="fiberFactory" class="org.jetlang.fibers.PoolFiberFactory">
