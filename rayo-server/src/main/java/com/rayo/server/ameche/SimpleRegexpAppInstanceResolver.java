@@ -53,7 +53,7 @@ public class SimpleRegexpAppInstanceResolver extends AppInstanceResolverS
 
 	public SimpleRegexpAppInstanceResolver(final Resource properties)
 			throws IOException {
-
+		
 		this(properties, 60000);
 	}
 
@@ -213,6 +213,9 @@ public class SimpleRegexpAppInstanceResolver extends AppInstanceResolverS
 		SimpleRegexpAppInstanceResolver resolver = new SimpleRegexpAppInstanceResolver(
 				resource);
 		System.out.println("Rules: " + resolver.rules);
-		System.out.println(resolver.lookup(offer, CallDirection.IN));
+		List<AppInstance> lai = resolver.lookup(offer, CallDirection.IN);
+		System.out.println("Number App Instance: " + lai.size());
+		System.out.println("App Instances: "
+				+ resolver.lookup(offer, CallDirection.IN));
 	}
 }
