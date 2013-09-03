@@ -238,6 +238,9 @@ public class DialingCoordinator {
 					// As per Willie's instructions, unjoin needs to be sync
 					try {
 						sourceCallActor.getCall().unjoin(peer.getCall()).get(2000, TimeUnit.MILLISECONDS);
+						
+						// As per Willie instructions. Moho's 1.2.1 patch is not reliable
+						peer.getCall().unjoin(sourceCallActor.getCall()).get(2000, TimeUnit.MILLISECONDS);
 					} catch (Exception e) {
 						// TODO: fail call?
 						logger.error(e.getMessage(),e);
