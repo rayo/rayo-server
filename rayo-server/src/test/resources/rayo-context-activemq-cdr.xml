@@ -14,7 +14,7 @@
 	<!-- Actor Thread Pool -->
 	<bean id="executor" class="java.util.concurrent.Executors" factory-method="newCachedThreadPool" />
 
-    <!-- Ameche task timeout handling thread pool -->
+    <!-- Default scheduler executor -->
     <bean id="scheduledExecutor" class="java.util.concurrent.Executors" factory-method="newScheduledThreadPool">
         <constructor-arg value="10" />
     </bean>
@@ -235,6 +235,11 @@
 		</property>
 	</bean>
 
+    <!-- Local store -->
+    <bean id="localStore" class="com.rayo.server.recording.LocalTemporaryStore" init-method="init">
+        <property name="scheduledExecutor" ref="scheduledExecutor"/>
+    </bean>
+
 	<!-- Storage Service implementations -->
 	<bean id="storageServices"
 	      class="org.springframework.beans.factory.serviceloader.ServiceListFactoryBean"
@@ -248,6 +253,7 @@
 	<bean id="inputHandler" class="com.rayo.server.verb.InputHandler" scope="prototype" />
 	<bean id="recordHandler" class="com.rayo.server.verb.RecordHandler" scope="prototype">
 		<property name="storageServices" ref="storageServices"/>
+        <property name="localStore" ref="localStore" />
 	</bean>
 
 
