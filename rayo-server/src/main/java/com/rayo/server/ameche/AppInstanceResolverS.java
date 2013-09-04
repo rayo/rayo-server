@@ -4,6 +4,8 @@ import com.voxeo.logging.Loggerf;
 
 public class AppInstanceResolverS {
 
+	protected static final String P_SERVED_USER = "P-Served-User";
+
 	private static final Loggerf logger = Loggerf
 			.getLogger(JdbcAppInstanceResolver.class);
 

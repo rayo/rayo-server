@@ -53,15 +53,29 @@ public class JdbcAppInstanceResolver extends AppInstanceResolverS implements
 
 	@Override
 	public List<AppInstance> lookup(Element offer, CallDirection direction) {
+
 		String fromAddress = offer.attributeValue("from");
 		String toAddress = offer.attributeValue("to");
+		String pServedUserAddress = offer.attributeValue(P_SERVED_USER);
 
 		String from = this.normalizeAddress(fromAddress);
 		String to = this.normalizeAddress(toAddress);
+		String pServedUser = null;
+		if (!pServedUserAddress.equals(null) && !pServedUserAddress.equals("")) {
+			pServedUser = this.normalizeAddress(pServedUserAddress);
+		}
 
-		logger.debug("Finding a match for [from:%s,  to:%s, direction:%s]",
-				from, to, direction);
-		String address = ((direction == CallDirection.OUT) ? from : to);
+		String address;
+		if (pServedUser != null) {
+			logger.debug("Finding a match for [from:%s,  to:%s, "
+					+ "direction:%s, P-Served_user:%s]", from, to, direction,
+					pServedUser);
+			address = pServedUser;
+		} else {
+			logger.debug("Finding a match for [from:%s,  to:%s, "
+					+ "direction:%s]", from, to, direction);
+			address = ((direction == CallDirection.OUT) ? from : to);
+		}
 		return jdbc.query(lookupSql, new Object[] { address }, rowMapper);
 	}
 
