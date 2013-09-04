@@ -61,7 +61,7 @@ public class JdbcAppInstanceResolver extends AppInstanceResolverS implements
 		String from = this.normalizeAddress(fromAddress);
 		String to = this.normalizeAddress(toAddress);
 		String pServedUser = null;
-		if (!pServedUserAddress.equals(null) && !pServedUserAddress.equals("")) {
+		if (pServedUserAddress != null && !pServedUserAddress.equals("")) {
 			pServedUser = this.normalizeAddress(pServedUserAddress);
 		}
 
