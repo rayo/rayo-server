@@ -26,7 +26,7 @@
             </releases>
             <snapshots>
                 <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
+                <updatePolicy>always</updatePolicy>
                 <checksumPolicy>fail</checksumPolicy>
             </snapshots>
             <url>http://maven.voxeolabs.net:8081/nexus/content/repositories/snapshots</url>
@@ -42,7 +42,7 @@
             </releases>
             <snapshots>
                 <enabled>true</enabled>
-                <updatePolicy>daily</updatePolicy>
+                <updatePolicy>always</updatePolicy>
                 <checksumPolicy>fail</checksumPolicy>
             </snapshots>
             <url>http://maven.voxeolabs.net:8081/nexus/content/groups/public/</url>
