@@ -1,5 +1,10 @@
 package com.rayo.server.ameche;
 
+import java.util.List;
+
+import org.dom4j.Element;
+
+import com.rayo.core.CallDirection;
 import com.voxeo.logging.Loggerf;
 
 public class AppInstanceResolverS {
@@ -33,5 +38,17 @@ public class AppInstanceResolverS {
 		logger.info("Normalized Address: " + normalizedAddress);
 
 		return normalizedAddress;
+	}
+
+	public String getNormalizedFromAddress(Element offer) {
+		String fromAddress = offer.attributeValue("from");
+		String from = this.normalizeAddress(fromAddress);
+		return from;
+	}
+
+	public String getNormalizedToAddress(Element offer) {
+		String toAddress = offer.attributeValue("to");
+		String to = this.normalizeAddress(toAddress);
+		return to;
 	}
 }

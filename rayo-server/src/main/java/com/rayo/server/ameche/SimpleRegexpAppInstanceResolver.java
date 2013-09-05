@@ -90,12 +90,11 @@ public class SimpleRegexpAppInstanceResolver extends AppInstanceResolverS
 		} finally {
 			lock.unlock();
 		}
-		String fromAddress = offer.attributeValue("from");
-		String toAddress = offer.attributeValue("to");
-		String pServedUserAddress = offer.attributeValue(P_SERVED_USER);
 
-		String from = this.normalizeAddress(fromAddress);
-		String to = this.normalizeAddress(toAddress);
+		String from = this.getNormalizedFromAddress(offer);
+		String to = this.getNormalizedToAddress(offer);
+
+		String pServedUserAddress = offer.attributeValue(P_SERVED_USER);
 		String pServedUser = null;
 		if (pServedUserAddress != null && !pServedUserAddress.equals("")) {
 			pServedUser = this.normalizeAddress(pServedUserAddress);
