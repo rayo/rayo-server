@@ -6,6 +6,7 @@ import java.util.List;
 import org.dom4j.Element;
 
 import com.rayo.core.sip.SipURI;
+import com.rayo.core.tel.TelURI;
 import com.voxeo.logging.Loggerf;
 
 public class AppInstanceResolverS {
@@ -36,12 +37,8 @@ public class AppInstanceResolverS {
 			normalizedAddress = su.getBaseAddress();
 		} catch (IllegalArgumentException e) {
 			// not a sip address, so try a tel number
-
-			// code to be replaced:
-			Integer indexOfSemiColon = address.indexOf(";");
-			if (indexOfSemiColon >= 0) {
-				normalizedAddress = address.substring(0, indexOfSemiColon);
-			}
+			TelURI tu = new TelURI(address);
+			normalizedAddress = tu.getBasePhoneNumber();
 		}
 
 		logger.info("Normalized Address: " + normalizedAddress);
