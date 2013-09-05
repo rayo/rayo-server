@@ -31,30 +31,17 @@ public class AppInstanceResolverS {
 		// is looked up as ...
 		// sip:jdecastro@att.net
 
-		// parameter start after the first ';' and need to be
-		// dropped, including the ';'
-
-		Integer indexOfSemiColon = address.indexOf(";");
-		if (indexOfSemiColon >= 0) {
-			normalizedAddress = address.substring(0, indexOfSemiColon);
-		}
-
 		try {
-			// logger.info("Address: " + address);
 			SipURI su = new SipURI(address);
-			// logger.info(address);
-			// logger.info(su.getHost());
-			// logger.info(su.getMAddrParam());
-			// logger.info(su.getMethodParam());
-			// // logger.info(su.getPort());
-			// logger.info(su.getScheme());
-			// logger.info(su.getTransportParam());
-			// // logger.info(su.getTTLParam());
-			// logger.info(su.getUser());
-			// logger.info(su.getUserParam());
-			normalizedAddress = su.getScheme() + ":" + su.getUser() + "@"
-					+ su.getHost();
+			normalizedAddress = su.getBaseAddress();
 		} catch (IllegalArgumentException e) {
+			// not a sip address, so try a tel number
+
+			// code to be replaced:
+			Integer indexOfSemiColon = address.indexOf(";");
+			if (indexOfSemiColon >= 0) {
+				normalizedAddress = address.substring(0, indexOfSemiColon);
+			}
 		}
 
 		logger.info("Normalized Address: " + normalizedAddress);
