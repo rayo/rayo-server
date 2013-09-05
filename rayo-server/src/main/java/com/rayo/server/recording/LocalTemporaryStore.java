@@ -31,7 +31,7 @@ import com.voxeo.logging.Loggerf;
 public class LocalTemporaryStore implements LocalStore {
 
 	private final static Loggerf log = Loggerf.getLogger(LocalTemporaryStore.class);
-	private final static SimpleDateFormat formatter = new SimpleDateFormat("yyMMdd/hh/mm/");
+	private final static SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd/hh/mm/");
 	
 	private long deleteAfter = 60*60*24*1000; // By default, delete files after one day
 	private String baseFolder = "/tmp/recordings"; // By deafult store recordings in /tmp/recordings

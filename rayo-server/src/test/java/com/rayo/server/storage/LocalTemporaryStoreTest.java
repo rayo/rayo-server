@@ -8,8 +8,6 @@ import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import javax.media.mscontrol.mediagroup.FileFormatConstants;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +21,7 @@ import com.rayo.server.recording.LocalTemporaryStore;
 @ContextConfiguration(locations="/rayo-context-activemq-cdr.xml")
 public class LocalTemporaryStoreTest {
 	
-	private final static SimpleDateFormat formatter = new SimpleDateFormat("yyMMdd/hh/mm/");
+	private final static SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd/hh/mm/");
 
     @Autowired
     private LocalTemporaryStore store;
