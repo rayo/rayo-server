@@ -93,12 +93,7 @@ public class SimpleRegexpAppInstanceResolver extends AppInstanceResolverS
 
 		String from = this.getNormalizedFromAddress(offer);
 		String to = this.getNormalizedToAddress(offer);
-
-		String pServedUserAddress = offer.attributeValue(P_SERVED_USER);
-		String pServedUser = null;
-		if (pServedUserAddress != null && !pServedUserAddress.equals("")) {
-			pServedUser = this.normalizeAddress(pServedUserAddress);
-		}
+		String pServedUser = this.getPServedUser(offer);
 
 		if (pServedUser != null) {
 			logger.debug("Finding a match for[from:%s,  to:%s, "

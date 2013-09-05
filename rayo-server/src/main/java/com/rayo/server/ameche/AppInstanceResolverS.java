@@ -1,15 +1,13 @@
 package com.rayo.server.ameche;
 
+import java.util.Iterator;
 import java.util.List;
 
 import org.dom4j.Element;
 
-import com.rayo.core.CallDirection;
 import com.voxeo.logging.Loggerf;
 
 public class AppInstanceResolverS {
-
-	protected static final String P_SERVED_USER = "P-Served-User";
 
 	private static final Loggerf logger = Loggerf
 			.getLogger(JdbcAppInstanceResolver.class);
@@ -40,15 +38,39 @@ public class AppInstanceResolverS {
 		return normalizedAddress;
 	}
 
-	public String getNormalizedFromAddress(Element offer) {
+	protected String getNormalizedFromAddress(Element offer) {
 		String fromAddress = offer.attributeValue("from");
 		String from = this.normalizeAddress(fromAddress);
 		return from;
 	}
 
-	public String getNormalizedToAddress(Element offer) {
+	protected String getNormalizedToAddress(Element offer) {
 		String toAddress = offer.attributeValue("to");
 		String to = this.normalizeAddress(toAddress);
 		return to;
+	}
+
+	@SuppressWarnings("unchecked")
+	protected String getPServedUser(Element offer) {
+		String pServedUserAddress = null;
+		String pServedUser = null;
+		List<Element> headers = offer.elements("header");
+		for (Iterator<Element> iterator = headers.iterator(); iterator
+				.hasNext();) {
+			Element header = iterator.next();
+			if (header.attributeValue("name").equalsIgnoreCase("P-Served-User")) {
+				pServedUserAddress = header.attributeValue("value");
+				break;
+			}
+		}
+		if (pServedUserAddress != null) {
+			pServedUser = this.normalizeAddress(pServedUserAddress);
+			if (pServedUser.startsWith("<")) {
+				pServedUser = pServedUser
+						.substring(1, pServedUser.length() - 1);
+			}
+		}
+
+		return pServedUser;
 	}
 }
