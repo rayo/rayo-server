@@ -6,7 +6,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
-import javax.media.mscontrol.Value;
 import javax.media.mscontrol.mediagroup.CodecConstants;
 import javax.media.mscontrol.mediagroup.FileFormatConstants;
 import javax.validation.ConstraintValidatorContext;
@@ -24,6 +23,7 @@ import com.rayo.core.verb.VerbCommand;
 import com.rayo.core.verb.VerbCompleteEvent;
 import com.rayo.core.verb.VerbCompleteReason;
 import com.rayo.server.exception.ExceptionMapper;
+import com.rayo.server.recording.LocalStore;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.MediaException;
 import com.voxeo.moho.Participant;
@@ -39,25 +39,26 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
 	private Recording<Participant> recording;
 	
 	private List<StorageService> storageServices;
+	private LocalStore localStore;
 
-	private File tempFile;
+	private File file;
 	
 	@Override
 	public void start() {
 
 		if (model.getTo() == null) {
 			try {
-				tempFile = File.createTempFile("rayo", getExtensionFromFormat(model));
+				file = localStore.createRecording(model);
 				
 				if (model.getDuplex() != null && model.getDuplex()) {
 					// Hack to workaround a VCS issue with URIs ( call record has to be file:/// and normal record file:/
 					URI hackedURI = null;
 					try {
-						hackedURI = new URI("file://" + tempFile.getAbsolutePath());
+						hackedURI = new URI("file://" + file.getAbsolutePath());
 					} catch (URISyntaxException e) {}
 					model.setTo(hackedURI);
 				} else {
-					model.setTo(tempFile.toURI());
+					model.setTo(file.toURI());
 				}
 			} catch (IOException e) {
 				log.error(e.getMessage(),e);
@@ -106,26 +107,7 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
 		recording = getMediaService().record(command);
 	}
 
-	private String getExtensionFromFormat(Record model) {
 
-		if (model.getFormat() != null) {
-			Value format = Output.toFileFormat(model.getFormat());
-			if (format.equals(FileFormatConstants.FORMAT_3G2)) {
-				return ".3g2";
-			} else if (format.equals(FileFormatConstants.FORMAT_3GP)) {
-				return ".3gp";
-			} else if (format.equals(FileFormatConstants.GSM)) {
-				return ".gsm";
-			} else if (format.equals(FileFormatConstants.INFERRED)) {
-				return ".mp3";
-			} else if (format.equals(FileFormatConstants.RAW)) {
-				return ".raw";
-			} else if (format.equals(FileFormatConstants.WAV)) {
-				return ".wav";
-			}
-		}
-		return ".wav";
-	}
 
 	@Override
 	public void stop(boolean hangup) {
@@ -222,20 +204,20 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
 		
 		// When temp file is null the user has provided a to URL (right now an undocumented feature). In such cases
 		// no storage service policies will be applied.
-		if (tempFile != null) {
+		if (file != null) {
 			
 			try {
-				size = tempFile.length();
+				size = file.length();
 			} catch (Exception e) {
 				log.error(e.getMessage(),e);
 			}
 			
-			URI fileUri = tempFile.toURI();
+			URI fileUri = file.toURI();
 			//TODO: Should we change this and add multiple URIs? Right now only the last URI will make it to the xml
 			for (Object storageService: storageServices) {
 				StorageService ss = (StorageService)storageService;
 				try {
-					URI result = ss.store(tempFile, getParticipant());
+					URI result = ss.store(file, getParticipant());
 					if (!result.equals(fileUri)) {
 						log.debug("Setting record's URI to %s", result);
 						model.setTo(result);
@@ -270,4 +252,8 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
 	public void setStorageServices(List<StorageService> storageServices) {
 		this.storageServices = storageServices;
 	}
+
+	public void setLocalStore(LocalStore localStore) {
+		this.localStore = localStore;
+	}	
 }
