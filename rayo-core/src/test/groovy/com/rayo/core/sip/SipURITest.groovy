@@ -26,4 +26,12 @@ class SipURITest {
 		assertEquals("att.net", su.getHost());
 		assertEquals(1234, su.getPort());
 	}
+
+	@Test
+	public void minBaseAddress() {
+		String minAddress = "sip:jdecastro@att.net:1234;foo=bar;bling=baz"
+		SipURI su = new SipURI(minAddress);
+
+		assertEquals("sip:jdecastro@att.net:1234", su.getBaseAddress());
+	}
 }
