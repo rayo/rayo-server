@@ -409,8 +409,8 @@ class JdbcAppInstanceResolverTest {
 	}
 
 	@Test
-	void mapperPServedUserLowerNoLtGt() {
-		def addy = 'tel:+12152065077'
+	void mapperPServedUserLowerSip1() {
+		def addy = 'sip:jdecastro@att.net'
 		def args = [addy] as Object[]
 		def columns = [
 			'appInstanceId',
@@ -449,7 +449,53 @@ class JdbcAppInstanceResolverTest {
 			return true
 		})
 		gmc.play {
-			def offer = toXML("""<offer to="abc" from="def"> <header name="p-served-user" value="tel:+12152065077;sescase=term;regstate=reg"/><header name="P-Asserted-Identity" value="&lt;sip:bob@foo.bar&gt;"/></offer>""")
+			def offer = toXML("""<offer to="abc" from="def"> <header name="p-served-user" value="sip:jdecastro@att.net;foo=bar;bling=baz"/><header name="P-Asserted-Identity" value="&lt;sip:bob@foo.bar&gt;"/></offer>""")
+			subject.lookup(offer, CallDirection.IN)
+		}
+	}
+
+	@Test
+	void mapperPServedUserLowerSip2() {
+		def addy = 'sip:jdecastro@att.net'
+		def args = [addy] as Object[]
+		def columns = [
+			'appInstanceId',
+			'url',
+			'priority',
+			'permissions',
+			'required'] as String[]
+		def rows = [
+			[
+				42,
+				'http://foo.bar:9999',
+				10,
+				4,
+				true] as Object[],
+			[
+				45,
+				'http://foo.bar:9998',
+				10,
+				4,
+				true] as Object[],
+		] as Object[][]
+		def rs = MockResultSet.create(MockResultSetMetaData.create(columns), rows)
+		jdbc.query(sql, args, match {RowMapper mapper->
+			(1..rows.length).each {rowIdx->
+				rs.next()
+				AppInstance instance = mapper.mapRow(rs, rowIdx)
+				println instance
+				assertThat instance,is(notNullValue())
+				assertThat instance.id,is(rows[rowIdx - 1][0].toString())
+				assertThat instance.endpoint,is(URI.create(rows[rowIdx - 1][1]))
+				assertThat instance.priority, is(10)
+				assertThat instance.permissions, is(4)
+				assertThat instance.required, is(true)
+			}
+			assertThat rs.next(),is(false)
+			return true
+		})
+		gmc.play {
+			def offer = toXML("""<offer to="abc" from="def"> <header name="p-served-user" value="sip:jdecastro@att.net;foo=bar;bling=baz"/><header name="P-Asserted-Identity" value="&lt;sip:bob@foo.bar&gt;"/></offer>""")
 			subject.lookup(offer, CallDirection.IN)
 		}
 	}

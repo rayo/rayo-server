@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.dom4j.Element;
 
+import com.rayo.core.sip.SipURI;
 import com.voxeo.logging.Loggerf;
 
 public class AppInstanceResolverS {
@@ -19,11 +20,16 @@ public class AppInstanceResolverS {
 
 		// Examples:
 		// sip:+12152065077@104.65.174.101;user=phone
-		// is looked up as...
+		// is looked up as ...
 		// sip:+12152065077@104.65.174.101
+		//
 		// tel:+12152065077;sescase=term;regstate=reg
-		// is looked up as...
+		// is looked up as ...
 		// tel:+12152065077
+		//
+		// Jose de Castro <sip:jdecastro@att.net;foo=bar>;bling=baz
+		// is looked up as ...
+		// sip:jdecastro@att.net
 
 		// parameter start after the first ';' and need to be
 		// dropped, including the ';'
@@ -31,6 +37,24 @@ public class AppInstanceResolverS {
 		Integer indexOfSemiColon = address.indexOf(";");
 		if (indexOfSemiColon >= 0) {
 			normalizedAddress = address.substring(0, indexOfSemiColon);
+		}
+
+		try {
+			// logger.info("Address: " + address);
+			SipURI su = new SipURI(address);
+			// logger.info(address);
+			// logger.info(su.getHost());
+			// logger.info(su.getMAddrParam());
+			// logger.info(su.getMethodParam());
+			// // logger.info(su.getPort());
+			// logger.info(su.getScheme());
+			// logger.info(su.getTransportParam());
+			// // logger.info(su.getTTLParam());
+			// logger.info(su.getUser());
+			// logger.info(su.getUserParam());
+			normalizedAddress = su.getScheme() + ":" + su.getUser() + "@"
+					+ su.getHost();
+		} catch (IllegalArgumentException e) {
 		}
 
 		logger.info("Normalized Address: " + normalizedAddress);
