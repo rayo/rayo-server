@@ -32,6 +32,6 @@ class SipURITest {
 		String minAddress = "sip:jdecastro@att.net:1234;foo=bar;bling=baz"
 		SipURI su = new SipURI(minAddress);
 
-		assertEquals("sip:jdecastro@att.net:1234", su.getBaseAddress());
+		assertEquals("jdecastro@att.net", su.getBaseAddress());
 	}
 }

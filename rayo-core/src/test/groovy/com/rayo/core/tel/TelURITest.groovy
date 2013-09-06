@@ -32,6 +32,6 @@ class TelURITest {
 		String minTel = "tel:+12152065077;sescase=term;regstate=reg"
 		TelURI tu = new TelURI(minTel);
 
-		assertEquals("tel:+12152065077", tu.getBasePhoneNumber());
+		assertEquals("+12152065077", tu.getBasePhoneNumber());
 	}
 }

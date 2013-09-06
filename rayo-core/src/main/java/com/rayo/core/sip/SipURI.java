@@ -221,8 +221,6 @@ public class SipURI extends BaseURI {
 	public String getBaseAddress() {
 		StringBuffer sb = new StringBuffer(64);
 
-		sb.append(_scheme);
-		sb.append(':');
 		if (_user != null) {
 			sb.append(SipGrammar.escape(_user, SipGrammar.__user));
 			if (_password != null) {
@@ -232,10 +230,7 @@ public class SipURI extends BaseURI {
 			sb.append('@');
 		}
 		sb.append(_host);
-		if (_port > -1) {
-			sb.append(':');
-			sb.append(_port);
-		}
+
 		return sb.toString();
 	}
 

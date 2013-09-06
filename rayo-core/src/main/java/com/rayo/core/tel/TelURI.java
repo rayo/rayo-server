@@ -74,12 +74,8 @@ public class TelURI {
 	}
 
 	public String getBasePhoneNumber() {
-		StringBuffer sb = new StringBuffer();
-		sb.append(_scheme);
-		sb.append(':');
-		sb.append(_number);
 
-		return sb.toString();
+		return _number;
 	}
 
 	public boolean isSipURI() {
