@@ -3,11 +3,12 @@ package com.rayo.core.sip;
 import javax.annotation.Resource;
 import javax.servlet.sip.Address;
 import javax.servlet.sip.ServletParseException;
+import javax.servlet.sip.SipFactory;
 
 public class SipAddress {
 
 	@Resource
-	private javax.servlet.sip.SipFactory sip;
+	private SipFactory sip;
 
 	private Address _address;
 
