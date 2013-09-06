@@ -8,8 +8,6 @@ import javax.servlet.sip.SipFactory;
 import org.dom4j.Element;
 
 import com.rayo.core.sip.SipAddress;
-import com.rayo.core.sip.SipURI;
-import com.rayo.core.tel.TelURI;
 import com.rayo.server.CallManager;
 import com.voxeo.logging.Loggerf;
 
@@ -20,32 +18,27 @@ public class AppInstanceResolverS {
 
 	protected CallManager callManager;
 
+	// Examples:
+	// sip:+12152065077@104.65.174.101;user=phone
+	// is looked up as ...
+	// sip:+12152065077@104.65.174.101
+	//
+	// tel:+12152065077;sescase=term;regstate=reg
+	// is looked up as ...
+	// tel:+12152065077
+	//
+	// Jose de Castro <sip:jdecastro@att.net;foo=bar>;bling=baz
+	// is looked up as ...
+	// sip:jdecastro@att.net
+
 	protected String normalizeUri(String uri) {
 		String normalizedUri = uri;
 
 		logger.info("Original Sip URI: " + uri);
 
-		// Examples:
-		// sip:+12152065077@104.65.174.101;user=phone
-		// is looked up as ...
-		// sip:+12152065077@104.65.174.101
-		//
-		// tel:+12152065077;sescase=term;regstate=reg
-		// is looked up as ...
-		// tel:+12152065077
-		//
-		// Jose de Castro <sip:jdecastro@att.net;foo=bar>;bling=baz
-		// is looked up as ...
-		// sip:jdecastro@att.net
-
-		try {
-			SipURI su = new SipURI(uri);
-			normalizedUri = su.getBaseAddress();
-		} catch (IllegalArgumentException e) {
-			// not a sip address, so try a tel number
-			TelURI tu = new TelURI(uri);
-			normalizedUri = tu.getBasePhoneNumber();
-		}
+		SipAddress sa = new SipAddress(this.getSipFactory());
+		sa.setUri(uri);
+		normalizedUri = sa.getBaseAddress();
 
 		logger.info("Normalized Sip URI: " + normalizedUri);
 
@@ -64,14 +57,6 @@ public class AppInstanceResolverS {
 		return to;
 	}
 
-	protected String extractUri(String address) {
-		SipAddress sa = new SipAddress(this.getSipFactory(), address);
-		String extractedUri = sa.getUri();
-		logger.info("Extracted URI: " + extractedUri + " from Address: "
-				+ address);
-		return extractedUri;
-	}
-
 	@SuppressWarnings("unchecked")
 	protected String getPServedUser(Element offer) {
 		String pServedUserAddress = null;
@@ -85,12 +70,15 @@ public class AppInstanceResolverS {
 				break;
 			}
 		}
+
 		if (pServedUserAddress != null) {
-			pServedUserUri = this.normalizeUri(extractUri(pServedUserAddress));
-			if (pServedUserUri.startsWith("<")) {
-				pServedUserUri = pServedUserUri.substring(1,
-						pServedUserUri.length() - 1);
-			}
+			logger.info("Original Sip Address: " + pServedUserAddress);
+
+			SipAddress sa = new SipAddress(this.getSipFactory());
+			sa.setAddress(pServedUserAddress);
+			pServedUserUri = sa.getBaseAddress();
+
+			logger.info("Normalized Sip Address: " + pServedUserUri);
 		}
 
 		return pServedUserUri;
