@@ -3,17 +3,22 @@ package com.rayo.server.ameche;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.servlet.sip.SipFactory;
+
 import org.dom4j.Element;
 
 import com.rayo.core.sip.SipAddress;
 import com.rayo.core.sip.SipURI;
 import com.rayo.core.tel.TelURI;
+import com.rayo.server.CallManager;
 import com.voxeo.logging.Loggerf;
 
 public class AppInstanceResolverS {
 
 	private static final Loggerf logger = Loggerf
 			.getLogger(JdbcAppInstanceResolver.class);
+
+	protected CallManager callManager;
 
 	protected String normalizeUri(String uri) {
 		String normalizedUri = uri;
@@ -60,7 +65,7 @@ public class AppInstanceResolverS {
 	}
 
 	protected String extractUri(String address) {
-		SipAddress sa = new SipAddress(address);
+		SipAddress sa = new SipAddress(this.getSipFactory(), address);
 		String extractedUri = sa.getUri();
 		logger.info("Extracted URI: " + extractedUri + " from Address: "
 				+ address);
@@ -89,5 +94,17 @@ public class AppInstanceResolverS {
 		}
 
 		return pServedUserUri;
+	}
+
+	private SipFactory getSipFactory() {
+		return this.getCallManager().getApplicationContext().getSipFactory();
+	}
+
+	public CallManager getCallManager() {
+		return callManager;
+	}
+
+	public void setCallManager(CallManager callManager) {
+		this.callManager = callManager;
 	}
 }
