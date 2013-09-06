@@ -3,6 +3,8 @@ package com.rayo.server.ims;
 import java.net.URI;
 import java.util.ListIterator;
 
+import javax.servlet.sip.TelURL;
+
 import com.rayo.core.CallDirection;
 import com.rayo.core.sip.SipURI;
 import com.voxeo.logging.Loggerf;
@@ -44,7 +46,13 @@ public class DefaultCallDirectionResolver implements CallDirectionResolver {
 		if (pHeader != null) {
 			try {
 				pHeader = removeBrackets(pHeader);
-				SipURI uri = new SipURI(pHeader);
+				SipURI uri;
+				if (pHeader.contains("sip:")) {
+					uri = new SipURI(pHeader);
+				} else {
+					uri = toFakeSipUri(pHeader);
+				}
+				
 				CallDirection direction = extractDirectionFromParameter(uri,"sescase");
 				if (direction != null) {
 			    	logger.debug("Found direction on P-Served-User header: [%s]", direction);
@@ -88,8 +96,27 @@ public class DefaultCallDirectionResolver implements CallDirectionResolver {
 			// strip down <> symbols
 	    	SipURI uri = new SipURI(route);
 	    	return extractDirectionFromParameter(uri, "role");
+		} else if (route.startsWith("<tel:") || route.startsWith("tel:")) {
+			SipURI fakeUri = toFakeSipUri(route);
+			return extractDirectionFromParameter(fakeUri, "role");
 		}
 		return null;
+	}
+
+	private SipURI toFakeSipUri(String route) {
+
+		route = route.trim();
+		route = route.replaceAll("tel:", "sip:");
+		int semicolon = route.indexOf(";");
+		if (semicolon == -1) {
+			route = route + "@localhost";
+		} else {
+			String address = route.substring(0, semicolon);
+			address = address.trim() + "@localhost";
+			route = address + route.substring(semicolon);
+		}
+		
+		return new SipURI(route);
 	}
 
 	private String removeBrackets(String route) {

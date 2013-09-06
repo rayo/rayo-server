@@ -68,6 +68,17 @@ class ResolveDirectionTest {
 	}
 	
 	@Test
+	public void resolveOrigFromSingleRouteHeaderAndRoleParameterTelUri() {
+		
+		def call = [getHeaders:{new ListIteratorWrapper(["<tel:+10516667778390; role=orig; lr>"].iterator())},
+					getInvitee:{null},
+					getHeader:{null}] as Call
+		def actor = new IncomingCallActor(null);
+		
+		assertEquals callDirectionResolver.resolveDirection(call), CallDirection.OUT
+	}
+
+	@Test
 	public void resolveOrigFromMultipleRouteHeadersAndRoleParameter() {
 		def call = [getHeaders:{new ListIteratorWrapper(["<sip:pcscf.open-ims.test:4060>",
 														  "<sip:scsfs@scscf.open-ims.test:6060; role=orig; lr>"].iterator())},
@@ -78,6 +89,17 @@ class ResolveDirectionTest {
 		assertEquals callDirectionResolver.resolveDirection(call), CallDirection.OUT
 	}
 	
+	@Test
+	public void resolveOrigFromMultipleRouteHeadersAndRoleParameterTelUri() {
+		def call = [getHeaders:{new ListIteratorWrapper(["<sip:pcscf.open-ims.test:4060>",
+														  "<tel:+10516667778390; role=orig; lr>"].iterator())},
+					getInvitee:{null},
+					getHeader:{null}] as Call
+		def actor = new IncomingCallActor(null);
+		
+		assertEquals callDirectionResolver.resolveDirection(call), CallDirection.OUT
+	}
+
 	@Test
 	public void resolveOrigFromInvitee() {
 		
@@ -92,6 +114,19 @@ class ResolveDirectionTest {
 	}
 	
 	@Test
+	public void resolveOrigFromInviteeTelUri() {
+		
+		def uri = new URI("tel:+10476668809876;role=orig;lr")
+		def callableEndpoint = [getURI:{uri}] as CallableEndpoint
+		def call = [getHeaders:{new ListIteratorWrapper([].iterator())},
+					getInvitee:{callableEndpoint},
+					getHeader:{null}] as Call
+		def actor = new IncomingCallActor(null);
+		
+		assertEquals callDirectionResolver.resolveDirection(call), CallDirection.OUT
+	}
+
+	@Test
 	public void resolveOrigFromPHeader() {
 
 		def call = [getHeaders:{new ListIteratorWrapper([].iterator())},
@@ -102,6 +137,17 @@ class ResolveDirectionTest {
 		assertEquals callDirectionResolver.resolveDirection(call), CallDirection.OUT
 	}
 	
+	@Test
+	public void resolveOrigFromPHeaderTelUri() {
+
+		def call = [getHeaders:{new ListIteratorWrapper([].iterator())},
+					getInvitee:{null},
+					getHeader:{"<sip:10466678123456>; sescase=orig; regstate=reg"}] as Call
+		def actor = new IncomingCallActor(null);
+		
+		assertEquals callDirectionResolver.resolveDirection(call), CallDirection.OUT
+	}
+
 	@Test
 	public void resolveTermFromSingleRouteHeader() {
 		
@@ -132,7 +178,7 @@ class ResolveDirectionTest {
 		
 		assertEquals callDirectionResolver.resolveDirection(call), CallDirection.IN
 	}
-	
+
 	@Test
 	public void resolveTermFromInvitee() {
 		
@@ -148,6 +194,20 @@ class ResolveDirectionTest {
 		assertEquals callDirectionResolver.resolveDirection(call), CallDirection.IN
 	}
 	
+	@Test
+	public void resolveTermFromInviteeTelUri() {
+		
+		// We add an orig on p-served-user so this also tests rule precedence
+		
+		def uri = new URI("tel:+1234567890;role=term;lr")
+		def callableEndpoint = [getURI:{uri}] as CallableEndpoint
+		def call = [getHeaders:{new ListIteratorWrapper([].iterator())},
+					getInvitee:{callableEndpoint},
+					getHeader:{"<sip:user@example.com>; sescase=orig; regstate=reg"}] as Call
+		def actor = new IncomingCallActor(null);
+		
+		assertEquals callDirectionResolver.resolveDirection(call), CallDirection.IN
+	}
 	
 	@Test
 	public void resolveTermFromPHeader() {
@@ -160,6 +220,16 @@ class ResolveDirectionTest {
 		assertEquals callDirectionResolver.resolveDirection(call), CallDirection.IN
 	}
 	
+	@Test
+	public void resolveTermFromPHeaderTelUri() {
+
+		def call = [getHeaders:{new ListIteratorWrapper([].iterator())},
+					getInvitee:{null},
+					getHeader:{"<tel:+1234567890>; sescase=term; regstate=reg"}] as Call
+		def actor = new IncomingCallActor(null);
+		
+		assertEquals callDirectionResolver.resolveDirection(call), CallDirection.IN
+	}
 	
 	@Test
 	public void resolveFromPHeaderWithName() {
@@ -171,4 +241,16 @@ class ResolveDirectionTest {
 		
 		assertEquals callDirectionResolver.resolveDirection(call), CallDirection.OUT
 	}
+	
+	@Test
+	public void resolveFromPHeaderWithNameTelUri() {
+
+		def call = [getHeaders:{new ListIteratorWrapper([].iterator())},
+					getInvitee:{null},
+					getHeader:{'"A Name" <tel:+1234567890>; sescase=orig; regstate=reg'}] as Call
+		def actor = new IncomingCallActor(null);
+		
+		assertEquals callDirectionResolver.resolveDirection(call), CallDirection.OUT
+	}
+
 }
