@@ -55,8 +55,8 @@ public class JdbcAppInstanceResolver extends AppInstanceResolverS implements
 	public List<AppInstance> lookup(Element offer, CallDirection direction) {
 
 		String address;
-		String from = this.getNormalizedFromSipUri(offer);
-		String to = this.getNormalizedToSipUri(offer);
+		String from = this.getNormalizedFromUri(offer);
+		String to = this.getNormalizedToUri(offer);
 		String pServedUser = this.getPServedUser(offer);
 
 		if (pServedUser != null) {

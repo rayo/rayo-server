@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.dom4j.Element;
 
+import com.rayo.core.sip.SipAddress;
 import com.rayo.core.sip.SipURI;
 import com.rayo.core.tel.TelURI;
 import com.voxeo.logging.Loggerf;
@@ -14,10 +15,10 @@ public class AppInstanceResolverS {
 	private static final Loggerf logger = Loggerf
 			.getLogger(JdbcAppInstanceResolver.class);
 
-	protected String normalizeSipUri(String address) {
-		String normalizedAddress = address;
+	protected String normalizeUri(String uri) {
+		String normalizedUri = uri;
 
-		logger.info("Original Address: " + address);
+		logger.info("Original Sip URI: " + uri);
 
 		// Examples:
 		// sip:+12152065077@104.65.174.101;user=phone
@@ -33,35 +34,43 @@ public class AppInstanceResolverS {
 		// sip:jdecastro@att.net
 
 		try {
-			SipURI su = new SipURI(address);
-			normalizedAddress = su.getBaseAddress();
+			SipURI su = new SipURI(uri);
+			normalizedUri = su.getBaseAddress();
 		} catch (IllegalArgumentException e) {
 			// not a sip address, so try a tel number
-			TelURI tu = new TelURI(address);
-			normalizedAddress = tu.getBasePhoneNumber();
+			TelURI tu = new TelURI(uri);
+			normalizedUri = tu.getBasePhoneNumber();
 		}
 
-		logger.info("Normalized Address: " + normalizedAddress);
+		logger.info("Normalized Sip URI: " + normalizedUri);
 
-		return normalizedAddress;
+		return normalizedUri;
 	}
 
-	protected String getNormalizedFromSipUri(Element offer) {
-		String fromAddress = offer.attributeValue("from");
-		String from = this.normalizeSipUri(fromAddress);
+	protected String getNormalizedFromUri(Element offer) {
+		String fromUri = offer.attributeValue("from");
+		String from = this.normalizeUri(fromUri);
 		return from;
 	}
 
-	protected String getNormalizedToSipUri(Element offer) {
-		String toAddress = offer.attributeValue("to");
-		String to = this.normalizeSipUri(toAddress);
+	protected String getNormalizedToUri(Element offer) {
+		String toUri = offer.attributeValue("to");
+		String to = this.normalizeUri(toUri);
 		return to;
+	}
+
+	protected String extractUri(String address) {
+		SipAddress sa = new SipAddress(address);
+		String extractedUri = sa.getUri();
+		logger.info("Extracted URI: " + extractedUri + " from Address: "
+				+ address);
+		return extractedUri;
 	}
 
 	@SuppressWarnings("unchecked")
 	protected String getPServedUser(Element offer) {
 		String pServedUserAddress = null;
-		String pServedUser = null;
+		String pServedUserUri = null;
 		List<Element> headers = offer.elements("header");
 		for (Iterator<Element> iterator = headers.iterator(); iterator
 				.hasNext();) {
@@ -72,13 +81,13 @@ public class AppInstanceResolverS {
 			}
 		}
 		if (pServedUserAddress != null) {
-			pServedUser = this.normalizeSipUri(pServedUserAddress);
-			if (pServedUser.startsWith("<")) {
-				pServedUser = pServedUser
-						.substring(1, pServedUser.length() - 1);
+			pServedUserUri = this.normalizeUri(extractUri(pServedUserAddress));
+			if (pServedUserUri.startsWith("<")) {
+				pServedUserUri = pServedUserUri.substring(1,
+						pServedUserUri.length() - 1);
 			}
 		}
 
-		return pServedUser;
+		return pServedUserUri;
 	}
 }
