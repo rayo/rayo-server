@@ -111,7 +111,7 @@ public class Server implements EventHandler, CommandHandler {
 				}
 	    	}
 	    	if (!sent) {
-	            log.debug("There was no transports interested on event. [event=%s]", event);
+	            log.warn("There was no transports interested on event. [event=%s]", event);
 	        }
 		} catch (Exception e) {
             log.error("Failed to dispatch call event. [event=%s]", event, e);
@@ -265,7 +265,7 @@ public class Server implements EventHandler, CommandHandler {
 		    
 		// Outbound Disabled
 		} else if (!adminService.isOutgoingCallsAllowed()) {
-		    log.debug("Outbound calls disabled. Rejecting <dial/> command [command=%s]]", command);
+		    log.warn("Outbound calls disabled. Rejecting <dial/> command [command=%s]]", command);
 		    if(callback != null) {
 		        TransportCallback.handle(callback, null, new RayoProtocolException(
 		    		Condition.SERVICE_UNAVAILABLE, "This node is not allowing outbound calls"
