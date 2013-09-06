@@ -5,31 +5,11 @@
         <wb-resource deploy-path="/WEB-INF/classes" source-path="/src/main/resources"/>
         <wb-resource deploy-path="/" source-path="/target/m2e-wtp/web-resources"/>
         <wb-resource deploy-path="/" source-path="/src/main/webapp" tag="defaultRootSource"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/target/generated-sources/annotations"/>
         <dependent-module archiveName="rayo-server-2.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/rayo-server/rayo-server">
             <dependency-type>uses</dependency-type>
         </dependent-module>
-        <dependent-module archiveName="rayo-storage-2.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/rayo-storage/rayo-storage">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-        <dependent-module archiveName="ameche-model-0.5-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/ameche-model/ameche-model">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-        <dependent-module archiveName="moho-api-trunk-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/moho-api/moho-api">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-        <dependent-module archiveName="moho-impl-trunk-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/moho-impl/moho-impl">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-        <dependent-module archiveName="moho-common-trunk-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/moho-common/moho-common">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
         <dependent-module archiveName="rayo-core-2.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/rayo-core/rayo-core">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-        <dependent-module archiveName="rayo-provisioning-2.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/rayo-provisioning/rayo-provisioning">
-            <dependency-type>uses</dependency-type>
-        </dependent-module>
-        <dependent-module archiveName="moho-remote-trunk-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/moho-remote/moho-remote">
             <dependency-type>uses</dependency-type>
         </dependent-module>
         <property name="java-output-path" value="/tropo-war/target/classes"/>
