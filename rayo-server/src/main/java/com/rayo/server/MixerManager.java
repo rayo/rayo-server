@@ -62,7 +62,7 @@ public class MixerManager {
 				return mixer; 
 			}
 			
-			log.debug("Creating mixer %s", mixerName);
+			log.info("Creating mixer %s", mixerName);
 			// mixer creation
 			MixerEndpoint endpoint = (MixerEndpoint)ctx
 					.createEndpoint(MixerEndpoint.DEFAULT_MIXER_ENDPOINT);
@@ -84,7 +84,7 @@ public class MixerManager {
 	        mixerRegistry.add(actor);
 	        mixerStatistics.mixerCreated();
 	        
-			log.debug("Mixer %s created successfully", mixerName);
+			log.info("Mixer %s created successfully", mixerName);
 	
 	        return mixer;
 		} finally {
@@ -118,7 +118,7 @@ public class MixerManager {
 				return;
 			}
 			
-			log.debug("Removing mixer: %s", mixer);
+			log.info("Removing mixer: %s", mixer);
 			MixerActor actor = mixerRegistry.remove(mixer.getName());
 			
 			if (actor != null) {
@@ -159,7 +159,7 @@ public class MixerManager {
 	
 	public void handleCallDisconnect(Mixer mixer, Participant participant) {
 		
-		log.debug("Participant %s is disconnecting from mixer %s", participant, mixer);
+		log.info("Participant %s is disconnecting from mixer %s", participant, mixer);
 		
 		Lock lock = getWriteLock(mixer.getName());
 		lock.lock();

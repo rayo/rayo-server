@@ -70,7 +70,7 @@ public class MixerActor extends AbstractActor<Mixer> {
 
     	synchronized(participant) {
 	    	if (participant.getParticipants().length == 0) {
-	        	log.debug("Destroying mixer %s", participant);
+	        	log.info("Destroying mixer %s", participant);
 	    		mixerManager.removeMixer((Mixer)participant);
 	    	}
     	}
@@ -79,10 +79,7 @@ public class MixerActor extends AbstractActor<Mixer> {
     @State
     public void onActiveSpeaker(ActiveSpeakerEvent event) throws Exception {
 
-    	if (log.isDebugEnabled()) {
-    		log.debug("Received active speaker event. Active speakers: %s", event.getActiveSpeakers().length);
-    	}
-
+    	log.debug("Received active speaker event. Active speakers: %s", event.getActiveSpeakers().length);
     	for (Participant speaker: event.getActiveSpeakers()) {
     		
     		if (!activeSpeakers.contains(speaker.getId())) {

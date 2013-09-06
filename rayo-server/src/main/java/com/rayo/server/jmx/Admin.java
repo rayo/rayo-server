@@ -74,7 +74,7 @@ public class Admin implements AdminMXBean {
 
 		Logger logger = Logger.getLogger(loggerName);
 		if (logger != null) {
-			log.debug("Updating Logger %s with log level %s", loggerName, level);
+			log.info("Updating Logger %s with log level %s", loggerName, level);
 			if ("debug".equalsIgnoreCase(level)) {
 				Logger.getLogger(loggerName).setLevel(Level.DEBUG);
 			} else if ("info".equalsIgnoreCase(level)) {

@@ -104,7 +104,7 @@ public class RayoServlet extends AbstractRayoServlet implements Transport {
                 URI to = new URI(body.attributeValue("to"));
                 JID callTo = getCallDestination(to);
                 if (callTo == null) {
-                	log.debug("Could not deliver event. Call id [%s] is not being managed by Rayo. Skipping event");
+                	log.error("Could not deliver event. Call id [%s] is not being managed by Rayo. Skipping event");
                 	return false;
                 }
                 jidRegistry.put(callId, callTo);
@@ -134,12 +134,12 @@ public class RayoServlet extends AbstractRayoServlet implements Transport {
 		        presence.send();
 		        xmppMessageListenersGroup.onPresenceSent(presence);
 	        } else {
-	        	log.debug("Could not send Presence : %s. Is there a client listening for that call?", presence);
+	        	log.warn("Could not send Presence : %s. Is there a client listening for that call?", presence);
 	        }
         } catch (ServletException e) {
         	if (e.getMessage().startsWith("can't find corresponding client session") && 
         		 body.getName().equals("offer")) {
-        		log.debug("Could not handle offer. No Rayo clients listening on XMPP.");
+        		log.warn("Could not handle offer. No Rayo clients listening on XMPP.");
         		jidRegistry.remove(callId);
         		return false;
         	}

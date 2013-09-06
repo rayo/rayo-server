@@ -15,27 +15,21 @@ public class DefaultCallRegistry implements CallRegistry {
     @Override
     public void add(CallActor<?> actor) {
     	
-    	if (log.isDebugEnabled()) {
-    		log.debug("Adding call [%s] to registry: [%s]", actor.getCall().getId(), this);
-    	}
+    	log.debug("Adding call [%s] to registry: [%s]", actor.getCall().getId(), this);
         calls.put(actor.getCall().getId(), actor);
     }
 
     @Override
     public void remove(String id) {
 
-    	if (log.isDebugEnabled()) {
-    		log.debug("Removing call [%s] from registry [%s]", id, this);
-    	}
+    	log.debug("Removing call [%s] from registry [%s]", id, this);
     	calls.remove(id);
     }
 
     @Override
     public CallActor<?> get(String id) {
     	
-    	if (log.isDebugEnabled()) {
-    		log.debug("Looking up call [%s] in registry: [%s]", id, this);
-    	}    	
+    	log.debug("Looking up call [%s] in registry: [%s]", id, this);
         return calls.get(id);
     }
     

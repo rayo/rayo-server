@@ -74,7 +74,7 @@ public abstract class AdminService {
 		Lock lock = adminLock.writeLock();
 		lock.lock();
 		try {
-			log.debug("Quiesce Mode has been DISABLED");
+			log.info("Quiesce Mode has been DISABLED");
 			quiesceMode.set(false);
 			for (AdminListener listener: getAdminListeners()) {
 				listener.onQuiesceModeExited();
@@ -95,7 +95,7 @@ public abstract class AdminService {
 		Lock lock = adminLock.writeLock();
 		lock.lock();
 		try {
-			log.debug("Quiesce Mode has been ENABLED");
+			log.info("Quiesce Mode has been ENABLED");
 			quiesceMode.set(true);
 			for (AdminListener listener: getAdminListeners()) {
 				listener.onQuiesceModeEntered();

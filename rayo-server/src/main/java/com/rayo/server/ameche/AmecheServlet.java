@@ -98,7 +98,7 @@ public class AmecheServlet extends HttpServlet implements Transport {
 
         AmecheCall machine = null;
         boolean result = false;
-        log.debug("Handling event: %s", event.getName());
+        log.info("Handling event: %s", event.getName());
         // New Call
         if (event.getName().equals("offer")) {
 
@@ -113,11 +113,11 @@ public class AmecheServlet extends HttpServlet implements Transport {
 	                machine.offer();
 	                result = true;
             	} else {
-            		log.debug("No app instance has permission to handle the incoming offer");
+            		log.warn("No app instance has permission to handle the incoming offer");
             	}
             }
             else {
-            	log.debug("There is no Ameche instances interested on call [%s]", callId);
+            	log.info("There is no Ameche instances interested on call [%s]", callId);
             }
         } else {
             // Existing Call
@@ -197,7 +197,6 @@ public class AmecheServlet extends HttpServlet implements Transport {
         
         String body = IOUtils.toString(is);
         log.debug("(i) %s", body);
-        log.debug("Processing Ameche request");
         
         SAXReader reader = new SAXReader();
         
@@ -209,10 +208,6 @@ public class AmecheServlet extends HttpServlet implements Transport {
             String componentId = req.getHeader("component-id");
             String appInstanceId = req.getHeader("app-instance-id");
             String mixerName = req.getHeader("mixer-name");
-            
-            if(mixerName != null) {
-            	log.debug(mixerName);
-            }
             
             if(callId == null) {
                 log.warn("Missing call-id header");

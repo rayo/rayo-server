@@ -244,9 +244,7 @@ public class TransferHandler extends AbstractLocalVerbHandler<Transfer, Call> im
     private void dial(CallableEndpoint to) {
     	
     	Endpoint from = resolveFrom();
-    	if (log.isDebugEnabled()) {
-    		log.debug("Dialing endpoint. To: [%s]. From: [%s]. Headers: [%s]",to,from,model.getHeaders());
-    	}
+    	log.info("Dialing endpoint. To: [%s]. From: [%s]. Headers: [%s]",to,from,model.getHeaders());
     	
         Call destination = to.createCall(from, model.getHeaders());
         destination.addObserver(new ActorEventListener(actor));

@@ -219,7 +219,7 @@ public class RecordHandler extends AbstractLocalVerbHandler<Record, Participant>
 				try {
 					URI result = ss.store(file, getParticipant());
 					if (!result.equals(fileUri)) {
-						log.debug("Setting record's URI to %s", result);
+						log.info("A new recording file is available in: %s", result);
 						model.setTo(result);
 					}
 				} catch (IOException ioe) {

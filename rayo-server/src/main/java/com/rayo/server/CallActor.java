@@ -94,7 +94,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
         
     	try {
     	    
-        	log.debug("Received call event [%s]", call.getId());
+        	log.info("Received call event [%s]", call.getId());
             // Now we setup the moho handlers
             mohoListeners.add(new AutowiredEventListener(this));
             participant.addObserver(new ActorEventListener(this));
@@ -109,11 +109,11 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
 	        		        	
 	            joinees.add(destination);
 
-            	log.debug("Executing join operation. Call: [%s]. Join type: [%s]. Direction: [%s]. Participant: [%s].", participant.getId(), mediaType, direction, destination);
+            	log.info("Executing join operation. Call: [%s]. Join type: [%s]. Direction: [%s]. Participant: [%s].", participant.getId(), mediaType, direction, destination);
         		participant.join(destination, mediaType, force, direction);
         		
             } else {
-            	log.debug("Joining call [%s] to media mixer.", participant.getId());
+            	log.info("Joining call [%s] to media mixer.", participant.getId());
             	participant.join();
             }
             
@@ -129,13 +129,13 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     public void onMultipleCalls(Call[] calls) throws Exception {
         
     	try {
-        	log.debug("Received call event [%s]", calls.toString());
+        	log.info("Received call event [%s]", calls.toString());
         	
             // Now we setup the moho handlers
             mohoListeners.add(new AutowiredEventListener(this));
             participant.addObserver(new ActorEventListener(this));
 
-            log.debug("Joining call to multiple participants in Direct mode.", participant.getId());
+            log.info("Joining call to multiple participants in Direct mode.", participant.getId());
             participant.join(JoinType.DIRECT, true, Direction.DUPLEX, true, calls);
             for(int i=0;i<calls.length;i++) {
             	callStatistics.outgoingCall();
@@ -357,18 +357,12 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     @com.voxeo.moho.State
     public void onJoinComplete(com.voxeo.moho.event.JoinCompleteEvent event) {
     	
-    	if (log.isDebugEnabled()) {
-    		log.debug("Received Join Complete Event. Is initiator: [%s]", event.isInitiator());
-    	}    	
+    	log.debug("Received Join Complete Event. Is initiator: [%s]", event.isInitiator());
         if(event.getSource().equals(participant)) {
             Participant peer = event.getParticipant();
-        	if (log.isDebugEnabled()) {
-        		log.debug("Join Complete Event source: [%s]. Peer: [%s]", participant, peer);
-        	}
+        	log.debug("Join Complete Event source: [%s]. Peer: [%s]", participant, peer);
         	if (event.getCause() == Cause.JOINED) {
-            	if (log.isDebugEnabled()) {
-            		log.debug("Validating media on join");
-            	}
+            	log.debug("Validating media on join");
         		validateMediaOnJoin(peer);
         	}
             // If the join was successful and either:
@@ -395,9 +389,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
                     }
                     
                     joinees.add(peer);
-                	if (log.isDebugEnabled()) {
-                		log.debug("Firing Joined event. Participant id: [%s]. Peer id: [%s]. Join type: [%s]", participant.getId(), peer.getId(), type);
-                	}
+                	log.debug("Firing Joined event. Participant id: [%s]. Peer id: [%s]. Join type: [%s]", participant.getId(), peer.getId(), type);
                     fire(new JoinedEvent(participant.getId(), destination, type));
                     if (type == JoinDestinationType.MIXER) {
                     	// If mixer, we send a participant notification as per Rayo Mixer's spec
@@ -405,9 +397,7 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
                     }
                 }
             } else {
-            	if (log.isDebugEnabled()) {
-            		log.debug("Joined Event not fired. Join cause [%s]. Joinees: [%s]", event.getCause(), joinees);
-            	}
+            	log.debug("Joined Event not fired. Join cause [%s]. Joinees: [%s]", event.getCause(), joinees);
             }
         }
     }
@@ -611,9 +601,9 @@ public class CallActor <T extends Call> extends AbstractActor<T> {
     		if (getCall().getJoinType(participant) == JoinType.DIRECT) {
     			//TODO: MOHO-61
     			try {
-	        		log.debug("Unjoining participant [%s] from call", participant.getId());
+	        		log.info("Unjoining participant [%s] from call", participant.getId());
 	    			getCall().unjoin(participant).get();
-	        		log.debug("Joining participant [%s] to call in BRIDGE_EXCLUSIVE mode.", participant.getId());
+	        		log.info("Joining participant [%s] to call in BRIDGE_EXCLUSIVE mode.", participant.getId());
 	    			getCall().join(participant, JoinType.BRIDGE_EXCLUSIVE, true, Direction.DUPLEX).get();
     			} catch (Exception e) {
     				log.error(e.getMessage(), e);

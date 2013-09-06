@@ -233,16 +233,16 @@ class AmecheCall {
         	if (!offerPhaseEnded.get()) {
         		if (appInstance != null) {
 	        		OfferState offerState = getAppInstanceOfferState(appInstance);
-	        		log.debug("Received a <connect> command from app instance [%s]. [offerState=%s]", appInstance, offerState);
+	        		log.info("Received a <connect> command from app instance [%s]. [offerState=%s]", appInstance, offerState);
 					if (offerState == OfferState.SENT) {
 	        			// i.e. hasn't timed out
 	        			log.debug("Processing <connect> command on app instance [%s].", appInstance);
 	        			processConnectCommand(command, appInstance);
 	        		} else {
-	            		log.debug("App instance [%s] already timed out. Ignoring <connect> command.", appInstance);        			
+	            		log.warn("App instance [%s] already timed out. Ignoring <connect> command.", appInstance);        			
 	        		}
         		} else {
-        			log.debug("App instance with id [%s] does not exist on this call. It could have been evicted due to app instance errors", appInstanceId);
+        			log.warn("App instance with id [%s] does not exist on this call. It could have been evicted due to app instance errors", appInstanceId);
         		}
 	            // FIXME: The caller will block until the next offer is dispatched
 	            // Consider doing offers in a thread pool (JdC)
@@ -265,12 +265,12 @@ class AmecheCall {
         	}
             future.setResult(null);                
         } else {
-        	log.debug("Processing command: %s", command);
+        	log.info("Processing command: %s", command);
             // Send command to call's event machine
             commandHandler.handleCommand(callId, componentId, command, new TransportCallback() {
                 public void handle(Element result, Exception err) {
                     if(err != null) {
-                    	log.debug("Error processing command: %s", err);
+                    	log.error("Error processing command: %s", err);
                         future.setException((Exception)err);
                         return;
                     }
@@ -319,7 +319,7 @@ class AmecheCall {
 		// Extract targets to ring when offer cycle is complete
 		offerTargets.clear();
 		List<URI> uris = extractTargets(command);
-		log.debug("Setting current offer target to [%s]", uris);
+		log.info("Setting current offer target to [%s]", uris);
 		offerTargets.addAll(uris);
 	}      
 	
@@ -363,7 +363,7 @@ class AmecheCall {
             appInstanceEventDispatcher.send(event, callId, componentId, 
             		mixerName, authToken, appInstance);
         } catch (AppInstanceException ae) {
-        	log.debug("Error dispatching event %s to appInstance %s. Call id: [%s]. Component id: [%s].", 
+        	log.error("Error dispatching event %s to appInstance %s. Call id: [%s]. Component id: [%s].", 
         			event, appInstance, callId, componentId);
             apps.remove(appInstance.getId());
             throw ae;
@@ -399,11 +399,11 @@ class AmecheCall {
     		if(appIterator.hasNext()) {
     			final AppInstance appInstance = appIterator.next();
     			if (appInstance.hasPermission(RuntimePermission.CALL_OFFER)) {
-	    			log.debug("Offering offer to app instance [%s]", appInstance);
+	    			log.info("Offering offer to app instance [%s]", appInstance);
 	    			try {
 	    				setAppInstanceOfferState(appInstance, OfferState.SENT);
 	    				dispatchEvent(offer, parentCallId, null, null, appInstance);
-	        			log.debug("Offer dispatched successfully.");
+	        			log.info("Offer dispatched successfully.");
 	    				offerSent = true;
 	    		    	    			
 	    		    	scheduledExecutor.schedule(new Runnable() {
@@ -412,7 +412,7 @@ class AmecheCall {
 	    		    			OfferState state = getAppInstanceOfferState(appInstance);
 								if (state != OfferState.CONNECT_RECEIVED) {
 	    		    				setAppInstanceOfferState(appInstance, OfferState.TIMEOUT);
-									log.debug(
+									log.error(
 											"Offer timed out on app instance [%s]. Proceeding with the next one. [state=%s]",
 											appInstance, state);
 		    		    			if (appInstance.isRequired()) {
@@ -440,7 +440,7 @@ class AmecheCall {
 	    				}
 	    			}
     			} else {
-    				log.debug("App Instance [%s] does not have permission to handle Offers", appInstance);
+    				log.warn("App Instance [%s] does not have permission to handle Offers", appInstance);
     			}
     		} else {
     			if (!offerPhaseEnded.getAndSet(true)) {
@@ -475,7 +475,7 @@ class AmecheCall {
     
     private void connect(List<URI> targets) {
     	
-        log.debug("connecting to %s", offerTargets);
+        log.info("connecting to %s", offerTargets);
         ConnectCommand command = new ConnectCommand(parentCallId);
         command.setTargets(targets);
         commandHandler.handleCommand(parentCallId, null, command, null);

@@ -57,7 +57,7 @@ public class LocalTemporaryStore implements LocalStore {
 	
 	private void cleanup() {
 	
-		log.debug("Cleaning up task started.");
+		log.info("Cleaning up task started.");
 		File root = new File(baseFolder);
 		checkToClean(root, System.currentTimeMillis());
 	}

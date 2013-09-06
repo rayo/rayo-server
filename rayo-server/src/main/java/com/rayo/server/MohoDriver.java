@@ -20,9 +20,7 @@ public class MohoDriver implements Application {
 
     public void init(final ApplicationContext context) {
         
-    	if (log.isDebugEnabled()) {
-    		log.debug("Initializing Moho Driver");
-    	}
+    	log.info("Initializing Moho Driver");
         XmlWebApplicationContext wac = (XmlWebApplicationContext)WebApplicationContextUtils
             .getRequiredWebApplicationContext(context.getServletContext());
         

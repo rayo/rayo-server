@@ -90,7 +90,7 @@ public class ExceptionMapper {
 			errorType = com.voxeo.servlet.xmpp.StanzaError.Type.CANCEL.toString();
 		}
 		
-		log.debug("Mapping unknown exception [type=%s, message=%s]",e.getClass(), e.getMessage());
+		log.warn("Mapping unknown exception [type=%s, message=%s]",e.getClass(), e.getMessage());
 		return new ErrorMapping(errorType, errorCondition, errorMessage, httpCode);
 	}
 	

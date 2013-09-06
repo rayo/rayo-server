@@ -37,7 +37,7 @@ public class CallManager extends ReflectiveActor {
     @Message
     public CallRef onDial(DialCommand command) throws Exception {
         
-        log.debug("Creating endpoint to [%s]", command.getTo());
+        log.info("Dialing [%s]", command.getTo());
 
         CallableEndpoint toEndpoint = (CallableEndpoint) applicationContext.createEndpoint(command.getTo().toString());
         
@@ -78,9 +78,7 @@ public class CallManager extends ReflectiveActor {
         CallActor<?> callActor = createCallActor(mohoCall);
         callActor.publish(mohoCall);
         
-    	if (log.isDebugEnabled()) {
-    		log.debug("Call actor started for call [%s]", mohoCall.getId());
-    	}
+    	log.debug("Call actor started for call [%s]", mohoCall.getId());
         
     	return new CallRef(mohoCall.getId());
     }
@@ -105,7 +103,7 @@ public class CallManager extends ReflectiveActor {
 
     public CallActor<?> createCallActor(URI to, URI from, Map<String, String> headers, Call source) {
         
-        log.debug("Creating call to [%s] from [%s]", to, from);
+        log.info("Creating call to [%s] from [%s]", to, from);
         String destination = to.toString();
         if (removeUserPhoneParameter && destination.contains(";user=phone")) {
         	log.debug("Removing user=phone from to's URI");
