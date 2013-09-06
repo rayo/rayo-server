@@ -11,10 +11,12 @@ import javax.servlet.sip.URI;
 
 public class MockSIPFactoryImpl implements SipFactory {
 
+	private Address _address = null;
+
 	@Override
-	public Address createAddress(String arg0)  {
+	public Address createAddress(String arg0) {
 		// TODO Auto-generated method stub
-		return null;
+		return _address;
 	}
 
 	@Override
@@ -87,9 +89,12 @@ public class MockSIPFactoryImpl implements SipFactory {
 	}
 
 	@Override
-	public URI createURI(String arg0)  {
-		
+	public URI createURI(String arg0) {
+
 		return null;
 	}
 
+	public void setAddress(Address address) {
+		_address = address;
+	}
 }

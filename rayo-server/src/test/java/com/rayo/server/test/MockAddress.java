@@ -19,100 +19,122 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.servlet.sip.Address;
+import javax.servlet.sip.SipURI;
+import javax.servlet.sip.TelURL;
 import javax.servlet.sip.URI;
 
 public class MockAddress implements Address {
 
-  @Override
-  public String getDisplayName() {
+	private SipURI _suri = null;
+	private TelURL _turi = null;
 
-    return null;
-  }
+	@Override
+	public String getDisplayName() {
 
-  @Override
-  public int getExpires() {
+		return null;
+	}
 
-    return 0;
-  }
+	@Override
+	public int getExpires() {
 
-  @Override
-  public float getQ() {
+		return 0;
+	}
 
-    return 0;
-  }
+	@Override
+	public float getQ() {
 
-  @Override
-  final public URI getURI() {
-    return new MockSipURI();
-  }
+		return 0;
+	}
 
-  @Override
-  public boolean isWildcard() {
+	@Override
+	final public URI getURI() {
+		URI result = new MockSipURI();
+		
+		if (_suri != null) {
+			result = _suri;
+		}
+		if (_turi != null) {
+			result = _turi;
+		}
+		return result;
+	}
 
-    return false;
-  }
+	@Override
+	public boolean isWildcard() {
 
-  @Override
-  public void setDisplayName(String s) {
+		return false;
+	}
 
-  }
+	@Override
+	public void setDisplayName(String s) {
 
-  @Override
-  public void setExpires(int i) {
+	}
 
-  }
+	@Override
+	public void setExpires(int i) {
 
-  @Override
-  public void setQ(float f) {
+	}
 
-  }
+	@Override
+	public void setQ(float f) {
 
-  @Override
-  public void setURI(URI uri) {
+	}
 
-  }
+	@Override
+	public void setURI(URI uri) {
 
-  @Override
-  public String getParameter(String s) {
+	}
 
-    return null;
-  }
+	@Override
+	public String getParameter(String s) {
 
-  @Override
-  public Iterator<String> getParameterNames() {
+		return null;
+	}
 
-    return null;
-  }
+	@Override
+	public Iterator<String> getParameterNames() {
 
-  @Override
-  public Set<Entry<String, String>> getParameters() {
+		return null;
+	}
 
-    return null;
-  }
+	@Override
+	public Set<Entry<String, String>> getParameters() {
 
-  @Override
-  public String getValue() {
+		return null;
+	}
 
-    return null;
-  }
+	@Override
+	public String getValue() {
 
-  @Override
-  public void removeParameter(String s) {
+		return null;
+	}
 
-  }
+	@Override
+	public void removeParameter(String s) {
 
-  @Override
-  public void setParameter(String s, String s1) {
+	}
 
-  }
+	@Override
+	public void setParameter(String s, String s1) {
 
-  @Override
-  public void setValue(String s) {
+	}
 
-  }
+	@Override
+	public void setValue(String s) {
 
-  public Object clone() {
-    return null;
-  }
+	}
 
+	public Object clone() {
+		return null;
+	}
+
+	public void setSipUri(SipURI suri) {
+		_suri = suri;
+		_turi = null;
+	}
+
+	public void setTelUrl(TelURL turi) {
+		_turi = turi;
+		_suri = null;
+	}
 }
