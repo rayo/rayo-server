@@ -91,8 +91,8 @@ public class SimpleRegexpAppInstanceResolver extends AppInstanceResolverS
 			lock.unlock();
 		}
 
-		String from = this.getNormalizedFromAddress(offer);
-		String to = this.getNormalizedToAddress(offer);
+		String from = this.getNormalizedFromSipUri(offer);
+		String to = this.getNormalizedToSipUri(offer);
 		String pServedUser = this.getPServedUser(offer);
 
 		if (pServedUser != null) {

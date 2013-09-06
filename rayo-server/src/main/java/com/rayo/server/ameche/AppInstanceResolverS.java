@@ -14,7 +14,7 @@ public class AppInstanceResolverS {
 	private static final Loggerf logger = Loggerf
 			.getLogger(JdbcAppInstanceResolver.class);
 
-	protected String normalizeAddress(String address) {
+	protected String normalizeSipUri(String address) {
 		String normalizedAddress = address;
 
 		logger.info("Original Address: " + address);
@@ -46,15 +46,15 @@ public class AppInstanceResolverS {
 		return normalizedAddress;
 	}
 
-	protected String getNormalizedFromAddress(Element offer) {
+	protected String getNormalizedFromSipUri(Element offer) {
 		String fromAddress = offer.attributeValue("from");
-		String from = this.normalizeAddress(fromAddress);
+		String from = this.normalizeSipUri(fromAddress);
 		return from;
 	}
 
-	protected String getNormalizedToAddress(Element offer) {
+	protected String getNormalizedToSipUri(Element offer) {
 		String toAddress = offer.attributeValue("to");
-		String to = this.normalizeAddress(toAddress);
+		String to = this.normalizeSipUri(toAddress);
 		return to;
 	}
 
@@ -72,7 +72,7 @@ public class AppInstanceResolverS {
 			}
 		}
 		if (pServedUserAddress != null) {
-			pServedUser = this.normalizeAddress(pServedUserAddress);
+			pServedUser = this.normalizeSipUri(pServedUserAddress);
 			if (pServedUser.startsWith("<")) {
 				pServedUser = pServedUser
 						.substring(1, pServedUser.length() - 1);
