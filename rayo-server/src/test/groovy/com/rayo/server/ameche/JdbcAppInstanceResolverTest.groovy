@@ -175,7 +175,7 @@ class JdbcAppInstanceResolverTest {
 
 	@Test
 	void mapperOutAt() {
-		def addy = 'sip:foobar@104.65.174.100'
+		def addy = 'foobar@104.65.174.100'
 		def args = [addy] as Object[]
 		def columns = [
 			'appInstanceId',
@@ -214,7 +214,7 @@ class JdbcAppInstanceResolverTest {
 			return true
 		})
 		gmc.play {
-			def offer = toXML("""<offer to="tel:+15613504458;user=phone" from="$addy"/>""")
+			def offer = toXML("""<offer to="tel:+15613504458;user=phone" from="sip:$addy"/>""")
 			subject.lookup(offer, CallDirection.OUT)
 		}
 	}
