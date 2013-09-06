@@ -1,24 +1,19 @@
 package com.rayo.server.ameche
 
-import org.junit.Before;
-
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.jdbc.core.JdbcOperations;
-import org.springframework.jdbc.core.RowMapper;
-
-import com.rayo.core.CallDirection;
-import com.tropo.test.AwesomeTestRunner;
-import com.tropo.test.Database;
-import com.tropo.test.MockResultSet;
-import com.tropo.test.MockResultSetMetaData;
-
-import org.dom4j.DocumentHelper;
-import org.gmock.*
-
 import static com.tropo.test.Assert.*
 import static com.tropo.test.Matchers.*
 import static org.gmock.GMock.*
+
+import org.dom4j.DocumentHelper
+import org.gmock.*
+import org.junit.Before
+import org.junit.Test
+import org.springframework.jdbc.core.JdbcOperations
+import org.springframework.jdbc.core.RowMapper
+
+import com.rayo.core.CallDirection
+import com.tropo.test.MockResultSet
+import com.tropo.test.MockResultSetMetaData
 
 class JdbcAppInstanceResolverTest {
 
@@ -42,7 +37,7 @@ class JdbcAppInstanceResolverTest {
 
 	@Test
 	void mapperIn() {
-		def addy = 'tel:foobar'
+		def addy = '+15613504458'
 		def args = [addy] as Object[]
 		def columns = [
 			'appInstanceId',
@@ -81,14 +76,14 @@ class JdbcAppInstanceResolverTest {
 			return true
 		})
 		gmc.play {
-			def offer = toXML("""<offer to="$addy" from="tel:+15613504458"/>""")
+			def offer = toXML("""<offer to="tel:$addy" from="tel:+15613504458"/>""")
 			subject.lookup(offer, CallDirection.IN)
 		}
 	}
 
 	@Test
 	void mapperOut() {
-		def addy = 'tel:foobar'
+		def addy = '+15613504458'
 		def args = [addy] as Object[]
 		def columns = [
 			'appInstanceId',
@@ -127,14 +122,14 @@ class JdbcAppInstanceResolverTest {
 			return true
 		})
 		gmc.play {
-			def offer = toXML("""<offer to="tel:+15613504458" from="$addy"/>""")
+			def offer = toXML("""<offer to="tel:+15613504458" from="tel:$addy"/>""")
 			subject.lookup(offer, CallDirection.OUT)
 		}
 	}
 
 	@Test
 	void mapperInAt() {
-		def addy = 'sip:foobar@104.65.174.101'
+		def addy = 'foobar@104.65.174.101'
 		def args = [addy] as Object[]
 		def columns = [
 			'appInstanceId',
@@ -173,7 +168,7 @@ class JdbcAppInstanceResolverTest {
 			return true
 		})
 		gmc.play {
-			def offer = toXML("""<offer to="$addy" from="tel:+15613504458;user=phone"/>""")
+			def offer = toXML("""<offer to="sip:$addy" from="tel:+15613504458;user=phone"/>""")
 			subject.lookup(offer, CallDirection.IN)
 		}
 	}
@@ -226,7 +221,7 @@ class JdbcAppInstanceResolverTest {
 
 	@Test
 	void mapperInParam() {
-		def addy = 'tel:+12152065077'
+		def addy = '+12152065077'
 		def args = [addy] as Object[]
 		def columns = [
 			'appInstanceId',
@@ -265,14 +260,14 @@ class JdbcAppInstanceResolverTest {
 			return true
 		})
 		gmc.play {
-			def offer = toXML("""<offer to="$addy" from="tel:+12152065077;sescase=term;regstate=reg"/>""")
+			def offer = toXML("""<offer to="tel:$addy" from="tel:+12152065077;sescase=term;regstate=reg"/>""")
 			subject.lookup(offer, CallDirection.IN)
 		}
 	}
 
 	@Test
 	void mapperOutParam() {
-		def addy = 'tel:+12152065077'
+		def addy = '+12152065077'
 		def args = [addy] as Object[]
 		def columns = [
 			'appInstanceId',
@@ -311,14 +306,14 @@ class JdbcAppInstanceResolverTest {
 			return true
 		})
 		gmc.play {
-			def offer = toXML("""<offer to="tel:+12152065077;sescase=term;regstate=reg" from="$addy"/>""")
+			def offer = toXML("""<offer to="tel:+12152065077;sescase=term;regstate=reg" from="tel:$addy"/>""")
 			subject.lookup(offer, CallDirection.OUT)
 		}
 	}
 
 	@Test
 	void mapperPServedUserUpper() {
-		def addy = 'tel:+12152065077'
+		def addy = '+12152065077'
 		def args = [addy] as Object[]
 		def columns = [
 			'appInstanceId',
@@ -357,14 +352,14 @@ class JdbcAppInstanceResolverTest {
 			return true
 		})
 		gmc.play {
-			def offer = toXML("""<offer to="sip:abc" from="sip:def"> <header name="P-Served-User" value="tel:+12152065077;sescase=term;regstate=reg"/><header name="P-Asserted-Identity" value="&lt;sip:bob@foo.bar&gt;"/></offer>""")
+			def offer = toXML("""<offer to="sip:abc@abc" from="sip:def@def"> <header name="P-Served-User" value="tel:+12152065077;sescase=term;regstate=reg"/><header name="P-Asserted-Identity" value="&lt;sip:bob@foo.bar&gt;"/></offer>""")
 			subject.lookup(offer, CallDirection.IN)
 		}
 	}
 
 	@Test
 	void mapperPServedUserLower() {
-		def addy = 'tel:+12152065077'
+		def addy = '+12152065077'
 		def args = [addy] as Object[]
 		def columns = [
 			'appInstanceId',
@@ -403,14 +398,14 @@ class JdbcAppInstanceResolverTest {
 			return true
 		})
 		gmc.play {
-			def offer = toXML("""<offer to="sip:abc" from="sip:def"> <header name="p-served-user" value="tel:+12152065077;sescase=term;regstate=reg"/><header name="P-Asserted-Identity" value="&lt;sip:bob@foo.bar&gt;"/></offer>""")
+			def offer = toXML("""<offer to="sip:abc@abc" from="sip:def@abc"> <header name="p-served-user" value="tel:+12152065077;sescase=term;regstate=reg"/><header name="P-Asserted-Identity" value="&lt;sip:bob@foo.bar&gt;"/></offer>""")
 			subject.lookup(offer, CallDirection.IN)
 		}
 	}
 
 	@Test
 	void mapperPServedUserLowerSip1() {
-		def addy = 'sip:jdecastro@att.net'
+		def addy = 'jdecastro@att.net'
 		def args = [addy] as Object[]
 		def columns = [
 			'appInstanceId',
@@ -449,14 +444,14 @@ class JdbcAppInstanceResolverTest {
 			return true
 		})
 		gmc.play {
-			def offer = toXML("""<offer to="sip:abc" from="sip:def"> <header name="p-served-user" value="sip:jdecastro@att.net;foo=bar;bling=baz"/><header name="P-Asserted-Identity" value="&lt;sip:bob@foo.bar&gt;"/></offer>""")
+			def offer = toXML("""<offer to="sip:abc@abc" from="sip:def@def"> <header name="p-served-user" value="sip:jdecastro@att.net;foo=bar;bling=baz"/><header name="P-Asserted-Identity" value="&lt;sip:bob@foo.bar&gt;"/></offer>""")
 			subject.lookup(offer, CallDirection.IN)
 		}
 	}
 
 	@Test
 	void mapperPServedUserLowerSip2() {
-		def addy = 'sip:jdecastro@att.net'
+		def addy = 'jdecastro@att.net'
 		def args = [addy] as Object[]
 		def columns = [
 			'appInstanceId',
@@ -495,7 +490,7 @@ class JdbcAppInstanceResolverTest {
 			return true
 		})
 		gmc.play {
-			def offer = toXML("""<offer to="sip:abc" from="sip:def"> <header name="p-served-user" value="sip:jdecastro@att.net;foo=bar;bling=baz"/><header name="P-Asserted-Identity" value="&lt;sip:bob@foo.bar&gt;"/></offer>""")
+			def offer = toXML("""<offer to="sip:abc@abc" from="sip:def@def"> <header name="p-served-user" value="sip:jdecastro@att.net;foo=bar;bling=baz"/><header name="P-Asserted-Identity" value="&lt;sip:bob@foo.bar&gt;"/></offer>""")
 			subject.lookup(offer, CallDirection.IN)
 		}
 	}
