@@ -204,6 +204,8 @@
     <!-- Local store -->
     <bean id="localStore" class="com.rayo.server.recording.LocalTemporaryStore" init-method="init">
         <property name="scheduledExecutor" ref="scheduledExecutor"/>
+        <property name="baseFolder" value="/tmp/recordings" />
+        <property name="deleteAfter" value="86400" /> <!-- By default, keep recordings for a day. Value in seconds -->
     </bean>
     
 	<!-- Storage Service implementations -->
@@ -276,7 +278,7 @@
   	<bean id="fileCdrStorageStrategy" class="com.rayo.server.cdr.FileCdrStorageStrategy" 
   		  init-method="init"
   		  destroy-method="shutdown">
-  		<property name="path" value="/tmp/test.log"/>
+  		<property name="baseFolder" value="/tmp"/>
   	</bean>
   	
   	<!--  Uncomment to enable the JMS CDR Storage
