@@ -311,6 +311,7 @@ class JdbcAppInstanceResolverTest {
 		}
 	}
 
+	/*
 	@Test
 	void mapperPServedUserUpper() {
 		def addy = '+12152065077'
@@ -494,7 +495,7 @@ class JdbcAppInstanceResolverTest {
 			subject.lookup(offer, CallDirection.IN)
 		}
 	}
-
+*/
 	private static toXML(s) {
 		DocumentHelper.parseText(s).rootElement
 	}
