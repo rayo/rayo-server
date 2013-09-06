@@ -29,6 +29,7 @@
   <bean id="appInstanceResolver" class="com.rayo.server.ameche.SimpleRegexpAppInstanceResolver">
 	  <constructor-arg value="/WEB-INF/ameche-routing.properties"/> <!-- properties file -->
 	  <constructor-arg value="60000"/> <!-- reload interval in milliseconds -->
+	  <property name="callManager" ref="callManager" />
   </bean>
   <bean id="amecheCallRegistry" class="com.rayo.server.ameche.AmecheCallRegistry"/>
   <bean id="amecheMixerRegistry" class="com.rayo.server.ameche.AmecheMixerRegistry"/>
