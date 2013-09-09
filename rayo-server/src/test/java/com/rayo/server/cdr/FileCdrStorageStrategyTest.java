@@ -83,7 +83,8 @@ public class FileCdrStorageStrategyTest {
 		storage.store(cdr);
 		expectedFile = sdf.format(tomorrow) + ".xml"; 
 		assertEquals(folder.listFiles().length, 2);
-		assertTrue(folder.listFiles()[1].getName().endsWith(expectedFile));
+		assertTrue(folder.listFiles()[0].getName().endsWith(expectedFile) ||
+				   folder.listFiles()[1].getName().endsWith(expectedFile));
 	}
 	
 	@Test
