@@ -12,8 +12,11 @@ import org.springframework.jdbc.core.JdbcOperations
 import org.springframework.jdbc.core.RowMapper
 
 import com.rayo.core.CallDirection
+import com.rayo.server.CallManager
+import com.rayo.server.test.MockSIPFactoryImpl
 import com.tropo.test.MockResultSet
 import com.tropo.test.MockResultSetMetaData
+import com.voxeo.moho.ApplicationContext
 
 class JdbcAppInstanceResolverTest {
 
@@ -24,8 +27,18 @@ class JdbcAppInstanceResolverTest {
 
 	@Before
 	void init() {
+		def sipFactory = new MockSIPFactoryImpl()
+		def applicationContext = [
+			getSipFactory : { return sipFactory }
+		] as ApplicationContext
+
+		def callManager = [
+			getApplicationContext : { return applicationContext }
+		] as CallManager
+
 		gmc = new GMockController()
 		subject = new JdbcAppInstanceResolver()
+		subject.setCallManager(callManager)
 		jdbc = subject.jdbcTemplate = gmc.mock(JdbcOperations)
 		subject.lookupSql = sql
 	}
@@ -37,6 +50,10 @@ class JdbcAppInstanceResolverTest {
 
 	@Test
 	void mapperIn() {
+		// create a MockTelURL
+		// create a MockAddress and give it the MockTelURL
+		// give the MockAddress to the sipFactory
+
 		def addy = '+15613504458'
 		def args = [addy] as Object[]
 		def columns = [
