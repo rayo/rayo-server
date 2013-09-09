@@ -372,6 +372,11 @@ class AmecheServletTest {
 		assertAppRequests()
 	}
 
+	// TODO additional test cases?
+	// See [AMECHE-326], use of P-Served-User for app instance
+	// resolving. Add test case (one or more) that uses
+	// P-Served-User.
+	
 	@Test
 	public void rejectOffer() {
 

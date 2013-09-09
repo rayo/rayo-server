@@ -14,27 +14,24 @@ import com.rayo.core.CallDirection;
 import com.voxeo.logging.Loggerf;
 
 /**
- * <p>
- * Resolves Ameche routing rules defined on a database. Routing rules will have
- * into consideration both to/from fields. All instances matching the given
- * offer will be dispatched.
- * </p>
+ * <p>Resolves Ameche routing rules defined on a database. 
+ * Routing rules will have into consideration both to/from fields. All instances matching the given offer will 
+ * be dispatched.</p>
  * 
  * @author martin
- * 
+ *
  */
-public class JdbcAppInstanceResolver extends AppInstanceResolverS implements
-		AppInstanceResolver {
+public class JdbcAppInstanceResolver implements AppInstanceResolver {
 
-	private static final Loggerf logger = Loggerf
-			.getLogger(JdbcAppInstanceResolver.class);
+	private static final Loggerf logger = Loggerf.getLogger(JdbcAppInstanceResolver.class);
 
 	private String lookupSql;
 	private JdbcOperations jdbc;
-
+	
 	private RowMapper<AppInstance> rowMapper = new RowMapper<AppInstance>() {
 		@Override
-		public AppInstance mapRow(ResultSet rs, int rowNum) throws SQLException {
+		public AppInstance mapRow(ResultSet rs, int rowNum)
+				throws SQLException {
 			String id = rs.getString("appInstanceId");
 			String uri = rs.getString("url");
 			Integer priority = rs.getInt("priority");
@@ -42,34 +39,29 @@ public class JdbcAppInstanceResolver extends AppInstanceResolverS implements
 			Boolean required = rs.getBoolean("required");
 			try {
 				logger.debug("Found app instance [id=%s url=%s]", id, uri);
-				return new AppInstance(id, new URI(uri), priority, permissions,
-						required);
+				return new AppInstance(id, new URI(uri), priority, permissions, required);
 			} catch (URISyntaxException ex) {
-				throw new IllegalStateException("Bad uri in database: "
-						+ uri.toString(), ex);
+				throw new IllegalStateException("Bad uri in database: " + uri.toString(), ex);
 			}
-		}
+		} 
 	};
-
-	@Override
-	public List<AppInstance> lookup(Element offer, CallDirection direction) {
-		String fromAddress = offer.attributeValue("from");
-		String toAddress = offer.attributeValue("to");
-
-		String from = this.normalizeAddress(fromAddress);
-		String to = this.normalizeAddress(toAddress);
-
-		logger.debug("Finding a match for [from:%s,  to:%s, direction:%s]",
-				from, to, direction);
-		String address = ((direction == CallDirection.OUT) ? from : to);
-		return jdbc.query(lookupSql, new Object[] { address }, rowMapper);
-	}
-
-	public void setJdbcTemplate(JdbcOperations jdbc) {
-		this.jdbc = jdbc;
-	}
-
-	public void setLookupSql(String sql) {
-		this.lookupSql = sql;
-	}
+	
+	
+    @Override
+    public List<AppInstance> lookup(Element offer, CallDirection direction) {
+    	String from = offer.attributeValue("from");
+    	String to = offer.attributeValue("to");
+    	
+    	logger.debug("Finding a match for [from:%s,  to:%s, direction:%s]", from, to, direction);
+    	String address = ((direction == CallDirection.OUT) ? from : to);
+    	return jdbc.query(lookupSql, new Object[] { address }, rowMapper);
+    }
+    
+    public void setJdbcTemplate(JdbcOperations jdbc) {
+    	this.jdbc = jdbc;
+    }
+    
+    public void setLookupSql(String sql) {
+    	this.lookupSql = sql;
+    }
 }

@@ -122,6 +122,16 @@ public class FileCdrStorageStrategy implements CdrStorageStrategy, FileCdrMXBean
 		return out;
 		
 	}
+	
+	String getCurrentFilePath() {
+		
+		if (baseFolder != null) {
+			String path = sdf.format(new Date());
+			return baseFolder + "/" + path + ".xml";
+		} else {
+			return path;
+		}
+	}
 
 	@Override
 	@ManagedOperation(description = "Change CDRs audit file")

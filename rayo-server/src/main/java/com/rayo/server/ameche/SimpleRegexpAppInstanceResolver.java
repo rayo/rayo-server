@@ -53,7 +53,7 @@ public class SimpleRegexpAppInstanceResolver extends AppInstanceResolverS
 
 	public SimpleRegexpAppInstanceResolver(final Resource properties)
 			throws IOException {
-		
+
 		this(properties, 60000);
 	}
 
@@ -90,21 +90,33 @@ public class SimpleRegexpAppInstanceResolver extends AppInstanceResolverS
 		} finally {
 			lock.unlock();
 		}
-		String fromAddress = offer.attributeValue("from");
-		String toAddress = offer.attributeValue("to");
 
-		String from = this.normalizeAddress(fromAddress);
-		String to = this.normalizeAddress(toAddress);
+		String from = this.getNormalizedFromUri(offer);
+		String to = this.getNormalizedToUri(offer);
+		String pServedUser = this.getPServedUser(offer);
 
-		logger.debug("Finding a match for[from:%s,  to:%s, direction:%s", from,
-				to, direction);
-		for (RoutingRule rule : rules) {
-			if ((direction == CallDirection.OUT && rule.pattern.matcher(from)
-					.matches())
-					|| (direction == CallDirection.IN && rule.pattern.matcher(
-							to).matches())) {
-				if (!instances.contains(rule.instance)) {
-					instances.add(rule.instance);
+		if (pServedUser != null) {
+			logger.debug("Finding a match for[from:%s,  to:%s, "
+					+ "direction:%s, P-Served-User:%s]", from, to, direction,
+					pServedUser);
+			for (RoutingRule rule : rules) {
+				if (rule.pattern.matcher(pServedUser).matches()) {
+					if (!instances.contains(rule.instance)) {
+						instances.add(rule.instance);
+					}
+				}
+			}
+		} else {
+			logger.debug("Finding a match for[from:%s,  to:%s, "
+					+ "direction:%s]", from, to, direction);
+			for (RoutingRule rule : rules) {
+				if ((direction == CallDirection.OUT && rule.pattern.matcher(
+						from).matches())
+						|| (direction == CallDirection.IN && rule.pattern
+								.matcher(to).matches())) {
+					if (!instances.contains(rule.instance)) {
+						instances.add(rule.instance);
+					}
 				}
 			}
 		}

@@ -233,7 +233,7 @@ public class CdrTest {
 
 	def loadCdrsFromFile = {
 				
-		def file = new File(fileCdrStorageStrategy.path)
+		def file = new File(fileCdrStorageStrategy.currentFilePath)
 		def count = 0
 		file.eachLine { count++ }
 	}
