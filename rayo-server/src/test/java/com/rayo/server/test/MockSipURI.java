@@ -21,6 +21,9 @@ import javax.servlet.sip.URI;
 
 public class MockSipURI implements SipURI {
 
+	private String _user;
+	private String _host;
+
 	final public URI clone() {
 		return this;
 	}
@@ -37,7 +40,7 @@ public class MockSipURI implements SipURI {
 
 	@Override
 	public String getHost() {
-		return null;
+		return _host;
 	}
 
 	@Override
@@ -78,8 +81,7 @@ public class MockSipURI implements SipURI {
 
 	@Override
 	public String getUser() {
-
-		return null;
+		return _user;
 	}
 
 	@Override
@@ -112,7 +114,7 @@ public class MockSipURI implements SipURI {
 
 	@Override
 	public void setHost(String arg0) {
-
+		_host = arg0;
 	}
 
 	@Override
@@ -152,7 +154,7 @@ public class MockSipURI implements SipURI {
 
 	@Override
 	public void setUser(String arg0) {
-
+		_user = arg0;
 	}
 
 	@Override
@@ -186,7 +188,7 @@ public class MockSipURI implements SipURI {
 	@Override
 	public boolean isSipURI() {
 
-		return false;
+		return true;
 	}
 
 	@Override
@@ -198,5 +200,4 @@ public class MockSipURI implements SipURI {
 	public void setParameter(String arg0, String arg1) {
 
 	}
-
 }

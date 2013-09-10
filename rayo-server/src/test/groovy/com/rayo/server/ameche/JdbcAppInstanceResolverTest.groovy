@@ -15,6 +15,7 @@ import com.rayo.core.CallDirection
 import com.rayo.server.CallManager
 import com.rayo.server.test.MockAddress
 import com.rayo.server.test.MockSIPFactoryImpl
+import com.rayo.server.test.MockSipURI
 import com.rayo.server.test.MockTelURL
 import com.tropo.test.MockResultSet
 import com.tropo.test.MockResultSetMetaData
@@ -114,6 +115,17 @@ class JdbcAppInstanceResolverTest {
 
 	@Test
 	void mapperOut() {
+		// create a MockTelURL
+		def mockTelUrl = new MockTelURL();
+		mockTelUrl.setPhoneNumber("+15613504458");
+
+		// create a MockAddress and give it the MockTelURL
+		def mockAddress = new MockAddress();
+		mockAddress.setTelUrl(mockTelUrl);
+
+		// give the MockAddress to the sipFactory
+		sipFactory.setAddress(mockAddress);
+
 		def addy = '+15613504458'
 		def args = [addy] as Object[]
 		def columns = [
@@ -160,6 +172,18 @@ class JdbcAppInstanceResolverTest {
 
 	@Test
 	void mapperInAt() {
+		// create a MockSipURI
+		def mockSipUri = new MockSipURI();
+		mockSipUri.setUser("foobar");
+		mockSipUri.setHost("104.65.174.101");
+
+		// create a MockAddress and give it the MockSipURI
+		def mockAddress = new MockAddress();
+		mockAddress.setSipUri(mockSipUri);
+
+		// give the MockAddress to the sipFactory
+		sipFactory.setAddress(mockAddress);
+
 		def addy = 'foobar@104.65.174.101'
 		def args = [addy] as Object[]
 		def columns = [
@@ -206,6 +230,18 @@ class JdbcAppInstanceResolverTest {
 
 	@Test
 	void mapperOutAt() {
+		// create a MockSipURI
+		def mockSipUri = new MockSipURI();
+		mockSipUri.setUser("foobar");
+		mockSipUri.setHost("104.65.174.100");
+
+		// create a MockAddress and give it the MockSipURI
+		def mockAddress = new MockAddress();
+		mockAddress.setSipUri(mockSipUri);
+
+		// give the MockAddress to the sipFactory
+		sipFactory.setAddress(mockAddress);
+
 		def addy = 'foobar@104.65.174.100'
 		def args = [addy] as Object[]
 		def columns = [
@@ -252,6 +288,17 @@ class JdbcAppInstanceResolverTest {
 
 	@Test
 	void mapperInParam() {
+		// create a MockTelURL
+		def mockTelUrl = new MockTelURL();
+		mockTelUrl.setPhoneNumber("+12152065077");
+
+		// create a MockAddress and give it the MockTelURL
+		def mockAddress = new MockAddress();
+		mockAddress.setTelUrl(mockTelUrl);
+
+		// give the MockAddress to the sipFactory
+		sipFactory.setAddress(mockAddress);
+
 		def addy = '+12152065077'
 		def args = [addy] as Object[]
 		def columns = [
@@ -298,6 +345,17 @@ class JdbcAppInstanceResolverTest {
 
 	@Test
 	void mapperOutParam() {
+		// create a MockTelURL
+		def mockTelUrl = new MockTelURL();
+		mockTelUrl.setPhoneNumber("+12152065077");
+
+		// create a MockAddress and give it the MockTelURL
+		def mockAddress = new MockAddress();
+		mockAddress.setTelUrl(mockTelUrl);
+
+		// give the MockAddress to the sipFactory
+		sipFactory.setAddress(mockAddress);
+
 		def addy = '+12152065077'
 		def args = [addy] as Object[]
 		def columns = [
@@ -342,188 +400,233 @@ class JdbcAppInstanceResolverTest {
 		}
 	}
 
-	/*
-	 @Test
-	 void mapperPServedUserUpper() {
-	 def addy = '+12152065077'
-	 def args = [addy] as Object[]
-	 def columns = [
-	 'appInstanceId',
-	 'url',
-	 'priority',
-	 'permissions',
-	 'required'] as String[]
-	 def rows = [
-	 [
-	 42,
-	 'http://foo.bar:9999',
-	 10,
-	 4,
-	 true] as Object[],
-	 [
-	 45,
-	 'http://foo.bar:9998',
-	 10,
-	 4,
-	 true] as Object[],
-	 ] as Object[][]
-	 def rs = MockResultSet.create(MockResultSetMetaData.create(columns), rows)
-	 jdbc.query(sql, args, match {RowMapper mapper->
-	 (1..rows.length).each {rowIdx->
-	 rs.next()
-	 AppInstance instance = mapper.mapRow(rs, rowIdx)
-	 println instance
-	 assertThat instance,is(notNullValue())
-	 assertThat instance.id,is(rows[rowIdx - 1][0].toString())
-	 assertThat instance.endpoint,is(URI.create(rows[rowIdx - 1][1]))
-	 assertThat instance.priority, is(10)
-	 assertThat instance.permissions, is(4)
-	 assertThat instance.required, is(true)
-	 }
-	 assertThat rs.next(),is(false)
-	 return true
-	 })
-	 gmc.play {
-	 def offer = toXML("""<offer to="sip:abc@abc" from="sip:def@def"> <header name="P-Served-User" value="tel:+12152065077;sescase=term;regstate=reg"/><header name="P-Asserted-Identity" value="&lt;sip:bob@foo.bar&gt;"/></offer>""")
-	 subject.lookup(offer, CallDirection.IN)
-	 }
-	 }
-	 @Test
-	 void mapperPServedUserLower() {
-	 def addy = '+12152065077'
-	 def args = [addy] as Object[]
-	 def columns = [
-	 'appInstanceId',
-	 'url',
-	 'priority',
-	 'permissions',
-	 'required'] as String[]
-	 def rows = [
-	 [
-	 42,
-	 'http://foo.bar:9999',
-	 10,
-	 4,
-	 true] as Object[],
-	 [
-	 45,
-	 'http://foo.bar:9998',
-	 10,
-	 4,
-	 true] as Object[],
-	 ] as Object[][]
-	 def rs = MockResultSet.create(MockResultSetMetaData.create(columns), rows)
-	 jdbc.query(sql, args, match {RowMapper mapper->
-	 (1..rows.length).each {rowIdx->
-	 rs.next()
-	 AppInstance instance = mapper.mapRow(rs, rowIdx)
-	 println instance
-	 assertThat instance,is(notNullValue())
-	 assertThat instance.id,is(rows[rowIdx - 1][0].toString())
-	 assertThat instance.endpoint,is(URI.create(rows[rowIdx - 1][1]))
-	 assertThat instance.priority, is(10)
-	 assertThat instance.permissions, is(4)
-	 assertThat instance.required, is(true)
-	 }
-	 assertThat rs.next(),is(false)
-	 return true
-	 })
-	 gmc.play {
-	 def offer = toXML("""<offer to="sip:abc@abc" from="sip:def@abc"> <header name="p-served-user" value="tel:+12152065077;sescase=term;regstate=reg"/><header name="P-Asserted-Identity" value="&lt;sip:bob@foo.bar&gt;"/></offer>""")
-	 subject.lookup(offer, CallDirection.IN)
-	 }
-	 }
-	 @Test
-	 void mapperPServedUserLowerSip1() {
-	 def addy = 'jdecastro@att.net'
-	 def args = [addy] as Object[]
-	 def columns = [
-	 'appInstanceId',
-	 'url',
-	 'priority',
-	 'permissions',
-	 'required'] as String[]
-	 def rows = [
-	 [
-	 42,
-	 'http://foo.bar:9999',
-	 10,
-	 4,
-	 true] as Object[],
-	 [
-	 45,
-	 'http://foo.bar:9998',
-	 10,
-	 4,
-	 true] as Object[],
-	 ] as Object[][]
-	 def rs = MockResultSet.create(MockResultSetMetaData.create(columns), rows)
-	 jdbc.query(sql, args, match {RowMapper mapper->
-	 (1..rows.length).each {rowIdx->
-	 rs.next()
-	 AppInstance instance = mapper.mapRow(rs, rowIdx)
-	 println instance
-	 assertThat instance,is(notNullValue())
-	 assertThat instance.id,is(rows[rowIdx - 1][0].toString())
-	 assertThat instance.endpoint,is(URI.create(rows[rowIdx - 1][1]))
-	 assertThat instance.priority, is(10)
-	 assertThat instance.permissions, is(4)
-	 assertThat instance.required, is(true)
-	 }
-	 assertThat rs.next(),is(false)
-	 return true
-	 })
-	 gmc.play {
-	 def offer = toXML("""<offer to="sip:abc@abc" from="sip:def@def"> <header name="p-served-user" value="sip:jdecastro@att.net;foo=bar;bling=baz"/><header name="P-Asserted-Identity" value="&lt;sip:bob@foo.bar&gt;"/></offer>""")
-	 subject.lookup(offer, CallDirection.IN)
-	 }
-	 }
-	 @Test
-	 void mapperPServedUserLowerSip2() {
-	 def addy = 'jdecastro@att.net'
-	 def args = [addy] as Object[]
-	 def columns = [
-	 'appInstanceId',
-	 'url',
-	 'priority',
-	 'permissions',
-	 'required'] as String[]
-	 def rows = [
-	 [
-	 42,
-	 'http://foo.bar:9999',
-	 10,
-	 4,
-	 true] as Object[],
-	 [
-	 45,
-	 'http://foo.bar:9998',
-	 10,
-	 4,
-	 true] as Object[],
-	 ] as Object[][]
-	 def rs = MockResultSet.create(MockResultSetMetaData.create(columns), rows)
-	 jdbc.query(sql, args, match {RowMapper mapper->
-	 (1..rows.length).each {rowIdx->
-	 rs.next()
-	 AppInstance instance = mapper.mapRow(rs, rowIdx)
-	 println instance
-	 assertThat instance,is(notNullValue())
-	 assertThat instance.id,is(rows[rowIdx - 1][0].toString())
-	 assertThat instance.endpoint,is(URI.create(rows[rowIdx - 1][1]))
-	 assertThat instance.priority, is(10)
-	 assertThat instance.permissions, is(4)
-	 assertThat instance.required, is(true)
-	 }
-	 assertThat rs.next(),is(false)
-	 return true
-	 })
-	 gmc.play {
-	 def offer = toXML("""<offer to="sip:abc@abc" from="sip:def@def"> <header name="p-served-user" value="sip:jdecastro@att.net;foo=bar;bling=baz"/><header name="P-Asserted-Identity" value="&lt;sip:bob@foo.bar&gt;"/></offer>""")
-	 subject.lookup(offer, CallDirection.IN)
-	 }
-	 }
-	 */
+	@Test
+	void mapperPServedUserUpper() {
+		// create a MockTelURL
+		def mockTelUrl = new MockTelURL();
+		mockTelUrl.setPhoneNumber("+12152065077");
+
+		// create a MockAddress and give it the MockTelURL
+		def mockAddress = new MockAddress();
+		mockAddress.setTelUrl(mockTelUrl);
+
+		// give the MockAddress to the sipFactory
+		sipFactory.setAddress(mockAddress);
+
+		def addy = '+12152065077'
+		def args = [addy] as Object[]
+		def columns = [
+			'appInstanceId',
+			'url',
+			'priority',
+			'permissions',
+			'required'] as String[]
+		def rows = [
+			[
+				42,
+				'http://foo.bar:9999',
+				10,
+				4,
+				true] as Object[],
+			[
+				45,
+				'http://foo.bar:9998',
+				10,
+				4,
+				true] as Object[],
+		] as Object[][]
+		def rs = MockResultSet.create(MockResultSetMetaData.create(columns), rows)
+		jdbc.query(sql, args, match {RowMapper mapper->
+			(1..rows.length).each {rowIdx->
+				rs.next()
+				AppInstance instance = mapper.mapRow(rs, rowIdx)
+				println instance
+				assertThat instance,is(notNullValue())
+				assertThat instance.id,is(rows[rowIdx - 1][0].toString())
+				assertThat instance.endpoint,is(URI.create(rows[rowIdx - 1][1]))
+				assertThat instance.priority, is(10)
+				assertThat instance.permissions, is(4)
+				assertThat instance.required, is(true)
+			}
+			assertThat rs.next(),is(false)
+			return true
+		})
+		gmc.play {
+			def offer = toXML("""<offer to="sip:abc@abc" from="sip:def@def"> <header name="P-Served-User" value="tel:+12152065077;sescase=term;regstate=reg"/><header name="P-Asserted-Identity" value="&lt;sip:bob@foo.bar&gt;"/></offer>""")
+			subject.lookup(offer, CallDirection.IN)
+		}
+	}
+	@Test
+	void mapperPServedUserLower() {
+		// create a MockTelURL
+		def mockTelUrl = new MockTelURL();
+		mockTelUrl.setPhoneNumber("+12152065077");
+
+		// create a MockAddress and give it the MockTelURL
+		def mockAddress = new MockAddress();
+		mockAddress.setTelUrl(mockTelUrl);
+
+		// give the MockAddress to the sipFactory
+		sipFactory.setAddress(mockAddress);
+
+		def addy = '+12152065077'
+		def args = [addy] as Object[]
+		def columns = [
+			'appInstanceId',
+			'url',
+			'priority',
+			'permissions',
+			'required'] as String[]
+		def rows = [
+			[
+				42,
+				'http://foo.bar:9999',
+				10,
+				4,
+				true] as Object[],
+			[
+				45,
+				'http://foo.bar:9998',
+				10,
+				4,
+				true] as Object[],
+		] as Object[][]
+		def rs = MockResultSet.create(MockResultSetMetaData.create(columns), rows)
+		jdbc.query(sql, args, match {RowMapper mapper->
+			(1..rows.length).each {rowIdx->
+				rs.next()
+				AppInstance instance = mapper.mapRow(rs, rowIdx)
+				println instance
+				assertThat instance,is(notNullValue())
+				assertThat instance.id,is(rows[rowIdx - 1][0].toString())
+				assertThat instance.endpoint,is(URI.create(rows[rowIdx - 1][1]))
+				assertThat instance.priority, is(10)
+				assertThat instance.permissions, is(4)
+				assertThat instance.required, is(true)
+			}
+			assertThat rs.next(),is(false)
+			return true
+		})
+		gmc.play {
+			def offer = toXML("""<offer to="sip:abc@abc" from="sip:def@abc"> <header name="p-served-user" value="tel:+12152065077;sescase=term;regstate=reg"/><header name="P-Asserted-Identity" value="&lt;sip:bob@foo.bar&gt;"/></offer>""")
+			subject.lookup(offer, CallDirection.IN)
+		}
+	}
+	@Test
+	void mapperPServedUserLowerSip1() {
+		// create a MockSipURI
+		def mockSipUri = new MockSipURI();
+		mockSipUri.setUser("jdecastro");
+		mockSipUri.setHost("att.net");
+
+		// create a MockAddress and give it the MockSipURI
+		def mockAddress = new MockAddress();
+		mockAddress.setSipUri(mockSipUri);
+
+		// give the MockAddress to the sipFactory
+		sipFactory.setAddress(mockAddress);
+
+		def addy = 'jdecastro@att.net'
+		def args = [addy] as Object[]
+		def columns = [
+			'appInstanceId',
+			'url',
+			'priority',
+			'permissions',
+			'required'] as String[]
+		def rows = [
+			[
+				42,
+				'http://foo.bar:9999',
+				10,
+				4,
+				true] as Object[],
+			[
+				45,
+				'http://foo.bar:9998',
+				10,
+				4,
+				true] as Object[],
+		] as Object[][]
+		def rs = MockResultSet.create(MockResultSetMetaData.create(columns), rows)
+		jdbc.query(sql, args, match {RowMapper mapper->
+			(1..rows.length).each {rowIdx->
+				rs.next()
+				AppInstance instance = mapper.mapRow(rs, rowIdx)
+				println instance
+				assertThat instance,is(notNullValue())
+				assertThat instance.id,is(rows[rowIdx - 1][0].toString())
+				assertThat instance.endpoint,is(URI.create(rows[rowIdx - 1][1]))
+				assertThat instance.priority, is(10)
+				assertThat instance.permissions, is(4)
+				assertThat instance.required, is(true)
+			}
+			assertThat rs.next(),is(false)
+			return true
+		})
+		gmc.play {
+			def offer = toXML("""<offer to="sip:abc@abc" from="sip:def@def"> <header name="p-served-user" value="sip:jdecastro@att.net;foo=bar;bling=baz"/><header name="P-Asserted-Identity" value="&lt;sip:bob@foo.bar&gt;"/></offer>""")
+			subject.lookup(offer, CallDirection.IN)
+		}
+	}
+	@Test
+	void mapperPServedUserLowerSip2() {
+		// create a MockSipURI
+		def mockSipUri = new MockSipURI();
+		mockSipUri.setUser("jdecastro");
+		mockSipUri.setHost("att.net");
+
+		// create a MockAddress and give it the MockSipURI
+		def mockAddress = new MockAddress();
+		mockAddress.setSipUri(mockSipUri);
+
+		// give the MockAddress to the sipFactory
+		sipFactory.setAddress(mockAddress);
+
+		def addy = 'jdecastro@att.net'
+		def args = [addy] as Object[]
+		def columns = [
+			'appInstanceId',
+			'url',
+			'priority',
+			'permissions',
+			'required'] as String[]
+		def rows = [
+			[
+				42,
+				'http://foo.bar:9999',
+				10,
+				4,
+				true] as Object[],
+			[
+				45,
+				'http://foo.bar:9998',
+				10,
+				4,
+				true] as Object[],
+		] as Object[][]
+		def rs = MockResultSet.create(MockResultSetMetaData.create(columns), rows)
+		jdbc.query(sql, args, match {RowMapper mapper->
+			(1..rows.length).each {rowIdx->
+				rs.next()
+				AppInstance instance = mapper.mapRow(rs, rowIdx)
+				println instance
+				assertThat instance,is(notNullValue())
+				assertThat instance.id,is(rows[rowIdx - 1][0].toString())
+				assertThat instance.endpoint,is(URI.create(rows[rowIdx - 1][1]))
+				assertThat instance.priority, is(10)
+				assertThat instance.permissions, is(4)
+				assertThat instance.required, is(true)
+			}
+			assertThat rs.next(),is(false)
+			return true
+		})
+		gmc.play {
+			def offer = toXML("""<offer to="sip:abc@abc" from="sip:def@def"> <header name="p-served-user" value="sip:jdecastro@att.net;foo=bar;bling=baz"/><header name="P-Asserted-Identity" value="&lt;sip:bob@foo.bar&gt;"/></offer>""")
+			subject.lookup(offer, CallDirection.IN)
+		}
+	}
+
 	private static toXML(s) {
 		DocumentHelper.parseText(s).rootElement
 	}
