@@ -3,9 +3,12 @@ package com.rayo.server.ims;
 import java.net.URI;
 import java.util.ListIterator;
 
+import javax.servlet.sip.SipFactory;
 import javax.servlet.sip.SipURI;
 
 import com.rayo.core.CallDirection;
+import com.rayo.core.sip.SipAddress;
+import com.rayo.server.CallManager;
 import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.Call;
 
@@ -13,6 +16,8 @@ public class DefaultCallDirectionResolver implements CallDirectionResolver {
 
 	private static Loggerf logger = Loggerf
 			.getLogger(DefaultCallDirectionResolver.class);
+
+	protected CallManager callManager;
 
 	public CallDirection resolveDirection(Call call) {
 
@@ -51,7 +56,9 @@ public class DefaultCallDirectionResolver implements CallDirectionResolver {
 				pHeader = removeBrackets(pHeader);
 				SipURI uri;
 				if (pHeader.contains("sip:")) {
-					uri = new SipURI(pHeader);
+					SipAddress sa = new SipAddress(this.getSipFactory());
+					sa.setUri(pHeader);
+					uri = sa.getSipURI();
 				} else {
 					uri = toFakeSipUri(pHeader);
 				}
@@ -99,7 +106,9 @@ public class DefaultCallDirectionResolver implements CallDirectionResolver {
 			return CallDirection.IN;
 		} else if (route.startsWith("<sip:") || route.startsWith("sip:")) {
 			// strip down <> symbols
-			SipURI uri = new SipURI(route);
+			SipAddress sa = new SipAddress(this.getSipFactory());
+			sa.setUri(route);
+			SipURI uri = sa.getSipURI();
 			return extractDirectionFromParameter(uri, "role");
 		} else if (route.startsWith("<tel:") || route.startsWith("tel:")) {
 			SipURI fakeUri = toFakeSipUri(route);
@@ -121,7 +130,10 @@ public class DefaultCallDirectionResolver implements CallDirectionResolver {
 			route = address + route.substring(semicolon);
 		}
 
-		return new SipURI(route);
+		SipAddress sa = new SipAddress(this.getSipFactory());
+		sa.setUri(route);
+
+		return sa.getSipURI();
 	}
 
 	private String removeBrackets(String route) {
@@ -132,6 +144,18 @@ public class DefaultCallDirectionResolver implements CallDirectionResolver {
 					.replaceAll(">", "");
 		}
 		return route;
+	}
+
+	private SipFactory getSipFactory() {
+		return this.getCallManager().getApplicationContext().getSipFactory();
+	}
+
+	public CallManager getCallManager() {
+		return callManager;
+	}
+
+	public void setCallManager(CallManager callManager) {
+		this.callManager = callManager;
 	}
 
 }
