@@ -49,4 +49,14 @@ public class SipAddress {
 
 		return baseAddress;
 	}
+
+	public SipURI getSipURI() {
+		SipURI suri = null;
+		URI uri = _address.getURI();
+
+		if (uri.isSipURI()) {
+			suri = (SipURI) uri;
+		}
+		return suri;
+	}
 }
