@@ -30,9 +30,12 @@ import com.rayo.core.verb.SayCompleteEvent
 import com.rayo.core.verb.Ssml
 import com.rayo.core.verb.StopCommand
 import com.rayo.core.verb.VerbCompleteEvent
+import com.rayo.server.ims.DefaultCallDirectionResolver
 import com.rayo.server.test.MockCall
 import com.rayo.server.test.MockMediaService
+import com.rayo.server.test.MockSIPFactoryImpl
 import com.voxeo.exceptions.NotFoundException
+import com.voxeo.moho.ApplicationContext
 import com.voxeo.moho.Call
 import com.voxeo.moho.MediaService
 import com.voxeo.moho.common.event.MohoCallCompleteEvent
@@ -63,12 +66,20 @@ public class IntegrationTest {
 
 	private OfferEvent offer
 	private Call mohoCall
+	private DefaultCallDirectionResolver dcdr = new DefaultCallDirectionResolver();
+
 	private CallActor callActor
 	private BlockingQueue<Object> messageQueue = new LinkedBlockingQueue<Object>()
 
 	@Before
 	public void setup() {
+		def sipFactory = new MockSIPFactoryImpl()
 
+		def applicationContext = [
+			getSipFactory : { return sipFactory }
+		] as ApplicationContext
+
+		callManager.setApplicationContext(applicationContext);
 		callManager.start()
 
 		messageQueue.clear();
@@ -86,6 +97,9 @@ public class IntegrationTest {
 		offer = poll()
 
 		callActor = callRegistry.get(mohoCall.id)
+
+		dcdr.setCallManager(callManager);
+		callActor.setCallDirectionResolver(dcdr);
 	}
 
 	@After
