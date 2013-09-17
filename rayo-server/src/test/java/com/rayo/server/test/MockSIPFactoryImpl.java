@@ -21,7 +21,12 @@ public class MockSIPFactoryImpl implements SipFactory {
 	public Address createAddress(String arg0) {
 		logger.debug("Creating Address with URI: " + arg0);
 		MockAddress ma = new MockAddress();
-		ma.setURI(new MockSipURI(arg0));
+		if (arg0.contains("sip:")) {
+			ma.setURI(new MockSipURI(arg0));
+		}
+		if (arg0.contains("tel:")) {
+			ma.setURI(new MockTelURL(arg0));
+		}
 		_address = ma;
 		return ma;
 	}

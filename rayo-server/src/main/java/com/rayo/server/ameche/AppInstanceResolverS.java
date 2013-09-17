@@ -14,7 +14,7 @@ import com.voxeo.logging.Loggerf;
 public class AppInstanceResolverS {
 
 	private static final Loggerf logger = Loggerf
-			.getLogger(JdbcAppInstanceResolver.class);
+			.getLogger(AppInstanceResolverS.class);
 
 	protected CallManager callManager;
 

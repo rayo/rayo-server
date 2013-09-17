@@ -47,9 +47,11 @@ public class SipAddress {
 		if (uri.isSipURI()) {
 			suri = (SipURI) uri;
 			baseAddress = suri.getUser() + "@" + suri.getHost();
+			logger.debug("SIP BaseAddress: " + baseAddress);
 		} else {
 			turl = (TelURL) uri;
 			baseAddress = turl.getPhoneNumber();
+			logger.debug("TEL BaseAddress: " + baseAddress);
 		}
 
 		return baseAddress;

@@ -35,8 +35,10 @@ public class MockSipURI implements SipURI {
 	private HashMap<String, String> _headers = new HashMap<String, String>();
 
 	public MockSipURI(String uri) {
-		_uri = uri;
-		parse();
+		if (uri != null) {
+			_uri = uri;
+			parse();
+		}
 	}
 
 	final public URI clone() {
