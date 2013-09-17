@@ -8,17 +8,33 @@ import org.junit.Test
 
 import com.rayo.core.CallDirection
 import com.rayo.server.*
+import com.rayo.server.test.MockSIPFactoryImpl
+import com.voxeo.moho.ApplicationContext
 import com.voxeo.moho.Call
 import com.voxeo.moho.CallableEndpoint
 
 class ResolveDirectionTest {
 
+	def sipFactory;
+	def applicationContext;
+	def callManager;
 	def callDirectionResolver
 
 	@Before
 	public void setup() {
 
+		sipFactory = new MockSIPFactoryImpl()
+
+		applicationContext = [
+			getSipFactory : { return sipFactory }
+		] as ApplicationContext
+
+		callManager = [
+			getApplicationContext : { return applicationContext }
+		] as CallManager
+
 		callDirectionResolver = new DefaultCallDirectionResolver()
+		callDirectionResolver.setCallManager(callManager);
 	}
 
 	@Test

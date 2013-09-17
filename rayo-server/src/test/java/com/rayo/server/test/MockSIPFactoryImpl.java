@@ -9,20 +9,30 @@ import javax.servlet.sip.SipServletRequest;
 import javax.servlet.sip.SipURI;
 import javax.servlet.sip.URI;
 
+import com.voxeo.logging.Loggerf;
+
 public class MockSIPFactoryImpl implements SipFactory {
+
+	private static Loggerf logger = Loggerf.getLogger(MockSIPFactoryImpl.class);
 
 	private Address _address = null;
 
 	@Override
 	public Address createAddress(String arg0) {
-		// TODO Auto-generated method stub
-		return _address;
+		logger.debug("Creating Address with URI: " + arg0);
+		MockAddress ma = new MockAddress();
+		ma.setURI(new MockSipURI(arg0));
+		_address = ma;
+		return ma;
 	}
 
 	@Override
 	public Address createAddress(URI arg0) {
-		// TODO Auto-generated method stub
-		return null;
+		logger.debug("Creating Address with URI: " + arg0);
+		MockAddress ma = new MockAddress();
+		ma.setURI(arg0);
+		_address = ma;
+		return ma;
 	}
 
 	@Override

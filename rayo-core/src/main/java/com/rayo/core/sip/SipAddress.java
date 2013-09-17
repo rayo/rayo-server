@@ -7,7 +7,11 @@ import javax.servlet.sip.SipURI;
 import javax.servlet.sip.TelURL;
 import javax.servlet.sip.URI;
 
+import com.voxeo.logging.Loggerf;
+
 public class SipAddress {
+
+	private static Loggerf logger = Loggerf.getLogger(SipAddress.class);
 
 	private Address _address;
 	private SipFactory _sipF;
@@ -26,6 +30,7 @@ public class SipAddress {
 
 	public void setUri(String uri) {
 		try {
+			logger.debug("URI set is: " + uri);
 			_address = _sipF.createAddress(uri);
 		} catch (ServletParseException e) {
 			throw new IllegalArgumentException(e.getMessage());
