@@ -12,6 +12,9 @@
         <dependent-module archiveName="rayo-core-2.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/rayo-core/rayo-core">
             <dependency-type>uses</dependency-type>
         </dependent-module>
+        <dependent-module archiveName="rayo-provisioning-2.0-SNAPSHOT.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/rayo-provisioning/rayo-provisioning">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
         <property name="java-output-path" value="/tropo-war/target/classes"/>
         <property name="context-root" value="rayo"/>
     </wb-module>
