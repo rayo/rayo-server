@@ -1,8 +1,7 @@
 package com.rayo.server;
 
-import java.util.concurrent.TimeUnit;
-
 import com.voxeo.moho.common.util.SettableResultFuture;
+import com.voxeo.moho.event.AcceptableEvent;
 import com.voxeo.moho.event.Event;
 import com.voxeo.moho.event.EventSource;
 import com.voxeo.moho.utils.EventListener;
@@ -27,7 +26,10 @@ public class ActorEventListener implements EventListener<Event<EventSource>> {
         
         actor.publish(request);
         
-        future.get(30, TimeUnit.SECONDS);
-        
+        if (event instanceof AcceptableEvent) {
+            // MOHO-83 : Skip contention by setting async on moho level
+        	((AcceptableEvent)event).setAsync(true);        	
+        }
     }
 }
+
