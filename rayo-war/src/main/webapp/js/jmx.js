@@ -45,7 +45,7 @@ $(document).ready(function() {
 });
 
 function JmxChartsFactory(keepHistorySec, pollInterval, columnsCount) {
-	var jolokia = new Jolokia("jmx");
+	var jolokia = new Jolokia("jolokia");
 	var series = [];
 	var monitoredMbeans = [];
 	var chartsCount = 0;
