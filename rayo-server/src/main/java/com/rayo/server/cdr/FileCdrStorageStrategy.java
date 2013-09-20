@@ -116,6 +116,15 @@ public class FileCdrStorageStrategy implements CdrStorageStrategy, FileCdrMXBean
 					logger.error(ioe.getMessage(), ioe);
 					out = oldOut;
 				}
+			} else {
+				if (out == null) {
+					try {
+						out = new BufferedOutputStream(new FileOutputStream(f));
+					} catch (IOException ioe) {
+						logger.error(ioe.getMessage(), ioe);
+						out = oldOut;
+					}					
+				}
 			}
 		} 
 		lastUsedPath = path;
