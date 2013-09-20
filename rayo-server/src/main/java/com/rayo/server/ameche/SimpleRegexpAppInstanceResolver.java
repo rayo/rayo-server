@@ -15,6 +15,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang.math.NumberUtils;
 import org.dom4j.Document;
 import org.dom4j.DocumentFactory;
 import org.dom4j.Element;
@@ -77,8 +78,7 @@ public class SimpleRegexpAppInstanceResolver extends AppInstanceResolverS
 		new Timer().schedule(readTask, delay, delay);
 	}
 
-	@Override
-	public List<AppInstance> lookup(Element offer, CallDirection direction) {
+	public List<AppInstance> lookupOLD(Element offer, CallDirection direction) {
 
 		List<AppInstance> instances = new ArrayList<AppInstance>();
 		List<RoutingRule> rules = null;
@@ -108,6 +108,52 @@ public class SimpleRegexpAppInstanceResolver extends AppInstanceResolverS
 			}
 		} else {
 			logger.debug("Finding a match for[from:%s,  to:%s, "
+					+ "direction:%s]", from, to, direction);
+			for (RoutingRule rule : rules) {
+				if ((direction == CallDirection.OUT && rule.pattern.matcher(
+						from).matches())
+						|| (direction == CallDirection.IN && rule.pattern
+								.matcher(to).matches())) {
+					if (!instances.contains(rule.instance)) {
+						instances.add(rule.instance);
+					}
+				}
+			}
+		}
+		return instances;
+	}
+
+	@Override
+	public List<AppInstance> lookup(Element offer, CallDirection direction) {
+
+		List<AppInstance> instances = new ArrayList<AppInstance>();
+		List<RoutingRule> rules = null;
+		Lock lock = SimpleRegexpAppInstanceResolver.this.lock.readLock();
+		try {
+			lock.lock();
+			rules = new ArrayList<SimpleRegexpAppInstanceResolver.RoutingRule>(
+					this.rules);
+		} finally {
+			lock.unlock();
+		}
+
+		String from = this.getNormalizedFromUri(offer);
+		String to = this.getNormalizedToUri(offer);
+		String pServedUser = this.getPServedUserUri(offer);
+
+		if (pServedUser != null) {
+			logger.debug("Finding a match for[from:%s, to:%s, "
+					+ "direction:%s, P-Served-User:%s]", from, to, direction,
+					pServedUser);
+			for (RoutingRule rule : rules) {
+				if (rule.pattern.matcher(pServedUser).matches()) {
+					if (!instances.contains(rule.instance)) {
+						instances.add(rule.instance);
+					}
+				}
+			}
+		} else {
+			logger.debug("Finding a match for[from:%s, to:%s, "
 					+ "direction:%s]", from, to, direction);
 			for (RoutingRule rule : rules) {
 				if ((direction == CallDirection.OUT && rule.pattern.matcher(
@@ -174,6 +220,19 @@ public class SimpleRegexpAppInstanceResolver extends AppInstanceResolverS
 							continue;
 						}
 						uri = uri.substring(colon + 1);
+						boolean required = false;
+						colon = uri.lastIndexOf(":");
+						if (colon != -1) {
+							String lastOption = uri.substring(colon + 1).trim();
+							if (!NumberUtils.isDigits(lastOption)) {
+								uri = uri.substring(0, colon);
+								try {
+									required = Boolean.parseBoolean(lastOption);
+								} catch (Exception e) {
+									logger.error(e.getMessage(), e);
+								}
+							}
+						}
 
 						RoutingRule rule = new RoutingRule();
 						rule.pattern = Pattern.compile(pattern);
@@ -181,7 +240,7 @@ public class SimpleRegexpAppInstanceResolver extends AppInstanceResolverS
 							rule.instance = new AppInstance(
 									String.valueOf(appInstanceId),
 									new URI(uri), 10,
-									getAllAmechePermissions(), false);
+									getAllAmechePermissions(), required);
 							rules.add(rule);
 						} catch (URISyntaxException e) {
 							// TODO Auto-generated catch block
@@ -225,9 +284,6 @@ public class SimpleRegexpAppInstanceResolver extends AppInstanceResolverS
 		SimpleRegexpAppInstanceResolver resolver = new SimpleRegexpAppInstanceResolver(
 				resource);
 		System.out.println("Rules: " + resolver.rules);
-		List<AppInstance> lai = resolver.lookup(offer, CallDirection.IN);
-		System.out.println("Number App Instance: " + lai.size());
-		System.out.println("App Instances: "
-				+ resolver.lookup(offer, CallDirection.IN));
+		System.out.println(resolver.lookup(offer, CallDirection.IN));
 	}
 }

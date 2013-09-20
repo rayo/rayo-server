@@ -7,6 +7,8 @@ import java.util.Date;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.media.mscontrol.Value;
 import javax.media.mscontrol.mediagroup.FileFormatConstants;
@@ -40,6 +42,8 @@ public class LocalTemporaryStore implements LocalStore {
 	
 	private ScheduledExecutorService scheduledExecutor;
 	private ScheduledFuture<?> future;
+	
+	private Lock parentFolder = new ReentrantLock();
 	
 	public void init() {
 		
@@ -96,8 +100,13 @@ public class LocalTemporaryStore implements LocalStore {
 					") to create recording exceeded.");
 		}
 		if (!f.getParentFile().exists()) {
-			if (!f.getParentFile().mkdirs()) {
-				throw new IOException("Could not create directory structure for " + f.getAbsolutePath());
+			parentFolder.lock();
+			try {
+				if (!f.getParentFile().mkdirs()) {
+					throw new IOException("Could not create directory structure for " + f.getAbsolutePath());
+				}
+			} finally {
+				parentFolder.unlock();
 			}
 		}
 		if (!f.createNewFile()) {

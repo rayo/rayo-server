@@ -343,6 +343,23 @@ public class AmecheServlet extends HttpServlet implements Transport {
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
     		throws ServletException, IOException {
 
+        String callId = req.getHeader("call-id");
+        if(callId == null) {
+            log.warn("Missing call-id header");
+            resp.setStatus(400, "Missing call-id header");
+            return;
+        }        
+        MDC.put("CallID", callId);
+                    
+        if (amecheAuthenticationService.isTokenAuthEnabled()) {
+        	String authToken = req.getHeader("auth-token");
+        	if (!amecheAuthenticationService.isValidToken(callId, authToken)) {
+        		log.error("Invalid auth token: [%s] for call id [%s] ", authToken, callId);
+        		resp.setStatus(403, "Invalid auth token");
+        		return;
+        	}
+        }
+
     	String uri = req.getRequestURI();
     	int lastSlash = uri.lastIndexOf("/");
     	if (lastSlash != -1 && lastSlash != uri.length()-1) {
