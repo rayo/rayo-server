@@ -76,4 +76,26 @@ class SimpleRegexpAppInstanceResolverTest {
 				"http://127.0.0.1:4444"));
 		assertTrue(instances.get(0).isRequired());
 	}
+
+	@Test
+	void resolveRequiredAppInstanceWParameter() throws Exception {
+
+		Resource routes = new ByteArrayResource(
+				".*=1:http://127.0.0.1:4444:true".getBytes());
+		SimpleRegexpAppInstanceResolver resolver = new SimpleRegexpAppInstanceResolver(
+				routes);
+		resolver.setCallManager(callManager);
+
+		Element offerElement = DocumentHelper.parseText(
+				"<offer to=\"tel:+13055195825;biz=baz\" from=\"tel:+15613504458;bling=blang\"/>")
+				.getRootElement();
+		List<AppInstance> instances = resolver.lookup(offerElement,
+				CallDirection.IN);
+
+		assertNotNull(instances);
+		assertEquals(instances.size(), 1);
+		assertEquals(instances.get(0).getEndpoint(), new URI(
+				"http://127.0.0.1:4444"));
+		assertTrue(instances.get(0).isRequired());
+	}
 }
