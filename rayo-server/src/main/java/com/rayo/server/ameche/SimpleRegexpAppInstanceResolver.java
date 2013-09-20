@@ -78,51 +78,6 @@ public class SimpleRegexpAppInstanceResolver extends AppInstanceResolverS
 		new Timer().schedule(readTask, delay, delay);
 	}
 
-	public List<AppInstance> lookupOLD(Element offer, CallDirection direction) {
-
-		List<AppInstance> instances = new ArrayList<AppInstance>();
-		List<RoutingRule> rules = null;
-		Lock lock = SimpleRegexpAppInstanceResolver.this.lock.readLock();
-		try {
-			lock.lock();
-			rules = new ArrayList<SimpleRegexpAppInstanceResolver.RoutingRule>(
-					this.rules);
-		} finally {
-			lock.unlock();
-		}
-
-		String from = this.getNormalizedFromUri(offer);
-		String to = this.getNormalizedToUri(offer);
-		String pServedUser = this.getPServedUserUri(offer);
-
-		if (pServedUser != null) {
-			logger.debug("Finding a match for[from:%s,  to:%s, "
-					+ "direction:%s, P-Served-User:%s]", from, to, direction,
-					pServedUser);
-			for (RoutingRule rule : rules) {
-				if (rule.pattern.matcher(pServedUser).matches()) {
-					if (!instances.contains(rule.instance)) {
-						instances.add(rule.instance);
-					}
-				}
-			}
-		} else {
-			logger.debug("Finding a match for[from:%s,  to:%s, "
-					+ "direction:%s]", from, to, direction);
-			for (RoutingRule rule : rules) {
-				if ((direction == CallDirection.OUT && rule.pattern.matcher(
-						from).matches())
-						|| (direction == CallDirection.IN && rule.pattern
-								.matcher(to).matches())) {
-					if (!instances.contains(rule.instance)) {
-						instances.add(rule.instance);
-					}
-				}
-			}
-		}
-		return instances;
-	}
-
 	@Override
 	public List<AppInstance> lookup(Element offer, CallDirection direction) {
 
