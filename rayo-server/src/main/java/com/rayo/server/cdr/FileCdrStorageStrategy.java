@@ -110,6 +110,7 @@ public class FileCdrStorageStrategy implements CdrStorageStrategy, FileCdrMXBean
 						logger.error(ioe.getMessage(), ioe);
 					}
 				}
+				logger.debug("Will store CDR at %s", f.getAbsolutePath());
 				try {
 					out = new BufferedOutputStream(new FileOutputStream(f));
 				} catch (IOException ioe) {
@@ -117,6 +118,7 @@ public class FileCdrStorageStrategy implements CdrStorageStrategy, FileCdrMXBean
 					out = oldOut;
 				}
 			} else {
+				logger.debug("Will store CDR at %s", f.getAbsolutePath());
 				if (out == null) {
 					try {
 						out = new BufferedOutputStream(new FileOutputStream(f));
