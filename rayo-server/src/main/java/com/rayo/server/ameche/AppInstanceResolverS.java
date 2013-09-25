@@ -14,7 +14,7 @@ import com.voxeo.logging.Loggerf;
 public class AppInstanceResolverS {
 
 	private static final Loggerf logger = Loggerf
-			.getLogger(JdbcAppInstanceResolver.class);
+			.getLogger(AppInstanceResolverS.class);
 
 	protected CallManager callManager;
 
@@ -58,7 +58,7 @@ public class AppInstanceResolverS {
 	}
 
 	@SuppressWarnings("unchecked")
-	protected String getPServedUser(Element offer) {
+	protected String getPServedUserUri(Element offer) {
 		String pServedUserAddress = null;
 		String pServedUserUri = null;
 		List<Element> headers = offer.elements("header");
@@ -72,13 +72,14 @@ public class AppInstanceResolverS {
 		}
 
 		if (pServedUserAddress != null) {
-			logger.info("Original Sip Address: " + pServedUserAddress);
+			logger.info("Original P-Served-User Sip Address: "
+					+ pServedUserAddress);
 
 			SipAddress sa = new SipAddress(this.getSipFactory());
 			sa.setAddress(pServedUserAddress);
 			pServedUserUri = sa.getBaseAddress();
 
-			logger.info("Normalized Sip Address: " + pServedUserUri);
+			logger.info("Normalized P-Served-User Sip Uri: " + pServedUserUri);
 		}
 
 		return pServedUserUri;

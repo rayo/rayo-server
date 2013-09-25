@@ -23,7 +23,11 @@ import javax.servlet.sip.SipURI;
 import javax.servlet.sip.TelURL;
 import javax.servlet.sip.URI;
 
+import com.voxeo.logging.Loggerf;
+
 public class MockAddress implements Address {
+
+	private static Loggerf logger = Loggerf.getLogger(MockAddress.class);
 
 	private SipURI _suri = null;
 	private TelURL _turi = null;
@@ -48,12 +52,14 @@ public class MockAddress implements Address {
 
 	@Override
 	final public URI getURI() {
-		URI result = new MockSipURI();
-		
+		URI result = null;
+
 		if (_suri != null) {
+			logger.debug("SipURI returned: " + _suri.toString());
 			result = _suri;
 		}
 		if (_turi != null) {
+			logger.debug("TelURL returned: " + _turi.toString());
 			result = _turi;
 		}
 		return result;
@@ -82,7 +88,13 @@ public class MockAddress implements Address {
 
 	@Override
 	public void setURI(URI uri) {
-
+		if (uri.isSipURI()) {
+			logger.debug("SipURI found: " + uri);
+			this.setSipUri((SipURI) uri);
+		} else {
+			logger.debug("TelURL found: " + uri);
+			this.setTelUrl((TelURL) uri);
+		}
 	}
 
 	@Override
