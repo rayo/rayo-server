@@ -79,16 +79,18 @@
 			<artifactId>spring-web</artifactId>
 		</dependency>
 		<!-- For the BTrace script -->
-        <dependency>
-            <groupId>com.sun.tools.btrace</groupId>
-            <artifactId>btrace-agent</artifactId>
-            <version>1.2.3</version>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.tools.btrace</groupId>
-            <artifactId>btrace-boot</artifactId>
-            <version>1.2.3</version>
-        </dependency>
+		<dependency>
+			<groupId>com.sun.tools.btrace</groupId>
+			<artifactId>btrace-agent</artifactId>
+			<version>1.2.3</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.sun.tools.btrace</groupId>
+			<artifactId>btrace-boot</artifactId>
+			<version>1.2.3</version>
+			<scope>provided</scope>
+		</dependency>
 		<dependency>
 			<groupId>com.sun.tools.btrace</groupId>
 			<artifactId>btrace-client</artifactId>
@@ -160,11 +162,43 @@
 						<argument>-classpath</argument>
 						<classpath />
 						<argument>com.sun.btrace.compiler.Compiler</argument>
-                        <argument>-d</argument>
-                        <argument>${basedir}/target/classes</argument>
+						<argument>-d</argument>
+						<argument>${basedir}/target/classes</argument>
 						<argument>tools/BTraceRayoAgent.java</argument>
 					</arguments>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>com.sun.tools.btrace</groupId>
+									<artifactId>btrace-agent</artifactId>
+									<version>1.2.3</version>
+									<type>jar</type>
+									<outputDirectory>${project.build.directory}/rayo/WEB-INF/lib</outputDirectory>
+									<destFileName>btrace-agent.jar</destFileName>
+								</artifactItem>
+								<artifactItem>
+									<groupId>com.sun.tools.btrace</groupId>
+									<artifactId>btrace-boot</artifactId>
+									<version>1.2.3</version>
+									<type>jar</type>
+									<outputDirectory>${project.build.directory}/rayo/WEB-INF/lib</outputDirectory>
+									<destFileName>btrace-boot.jar</destFileName>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
