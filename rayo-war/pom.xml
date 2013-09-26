@@ -1,9 +1,10 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<artifactId>rayo-war</artifactId>
 	<packaging>war</packaging>
 
-  <name>Rayo WAR (Deployable Artifact)</name>
+	<name>Rayo WAR (Deployable Artifact)</name>
 
 	<parent>
 		<groupId>com.rayo</groupId>
@@ -16,39 +17,39 @@
 			<groupId>com.rayo</groupId>
 			<artifactId>rayo-server</artifactId>
 			<version>${project.version}</version>
-          <exclusions>
-          	<exclusion>
-          		<groupId>commons-codec</groupId>
-          		<artifactId>commons-codec</artifactId>
-        	</exclusion>
-          </exclusions>			
+			<exclusions>
+				<exclusion>
+					<groupId>commons-codec</groupId>
+					<artifactId>commons-codec</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
-			<groupId>com.rayo</groupId> 
+			<groupId>com.rayo</groupId>
 			<artifactId>rayo-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.rayo</groupId> 
+			<groupId>com.rayo</groupId>
 			<artifactId>rayo-provisioning</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		
+
 		<!-- Moho Remote / Used for test installation -->
-        <dependency>
-          <groupId>com.voxeo.moho</groupId>
-          <artifactId>moho-remote</artifactId>
-          <version>${moho.version}</version>
-        </dependency>       
-        <dependency>
-            <groupId>com.voxeo.prism.moho</groupId>
-            <artifactId>moho-prism-dialect</artifactId>
-        </dependency>          
+		<dependency>
+			<groupId>com.voxeo.moho</groupId>
+			<artifactId>moho-remote</artifactId>
+			<version>${moho.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.voxeo.prism.moho</groupId>
+			<artifactId>moho-prism-dialect</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>com.voxeo.xmpp</groupId>
 			<artifactId>xmppservlet-api</artifactId>
 			<version>2.0-SNAPSHOT</version>
-		</dependency>				
+		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>servlet-api</artifactId>
@@ -73,42 +74,88 @@
 			<scope>provided</scope>
 		</dependency>
 		<!-- Access to spring beans -->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-web</artifactId>
-		</dependency>		
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+		</dependency>
+		<!-- For the BTrace script -->
+		<dependency>
+			<groupId>com.sun.tools.btrace</groupId>
+			<artifactId>btrace-client</artifactId>
+			<scope>system</scope>
+			<systemPath>${basedir}/tools/btrace-client.jar</systemPath>
+			<version>1.2.3</version>
+		</dependency>
+		<dependency>
+			<groupId>com.sun</groupId>
+			<artifactId>tools</artifactId>
+			<scope>system</scope>
+			<systemPath>${java.home}/../lib/tools.jar</systemPath>
+			<version>1.7</version>
+		</dependency>
+
 	</dependencies>
-    <profiles>
-	  <profile> 
-	     <id>hudson</id> 
-	     <activation> 
-	        <property><name>BUILD_NUMBER</name></property> 
-	     </activation> 
-	     <build> 
-	       <finalName>rayo_b${BUILD_NUMBER}</finalName> 
-	       <!-- any plugin configuration --> 
-	        <plugins>
-	            <plugin>
-	                <artifactId>maven-war-plugin</artifactId>
-	                <configuration>
-	                    <manifest>
-	                        <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-	                    </manifest>
-	                    <archive>
-	                        <manifestEntries>
-	                            <Specification-Title>${project.name}</Specification-Title>
-	                            <Specification-Version>${project.version}</Specification-Version>
-	                            <Implementation-Version>${BUILD_TAG}</Implementation-Version>
-	                            <Build-Id>${BUILD_ID}</Build-Id>
-	                        </manifestEntries>
-	                    </archive>
-	                </configuration>
-	            </plugin>
-	        </plugins>	       
-	     </build> 
-	  </profile>     
-    </profiles>	
+
+	<profiles>
+		<profile>
+			<id>hudson</id>
+			<activation>
+				<property>
+					<name>BUILD_NUMBER</name>
+				</property>
+			</activation>
+			<build>
+				<finalName>rayo_b${BUILD_NUMBER}</finalName>
+				<!-- any plugin configuration -->
+				<plugins>
+					<plugin>
+						<artifactId>maven-war-plugin</artifactId>
+						<configuration>
+							<manifest>
+								<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+							</manifest>
+							<archive>
+								<manifestEntries>
+									<Specification-Title>${project.name}</Specification-Title>
+									<Specification-Version>${project.version}</Specification-Version>
+									<Implementation-Version>${BUILD_TAG}</Implementation-Version>
+									<Build-Id>${BUILD_ID}</Build-Id>
+								</manifestEntries>
+							</archive>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 	<build>
-	  <finalName>rayo</finalName>
+		<finalName>rayo</finalName>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>1.2.1</version>
+				<executions>
+					<execution>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>exec</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<executable>java</executable>
+					<classpathScope>system</classpathScope>
+					<arguments>
+						<argument>-classpath</argument>
+						<classpath />
+						<argument>com.sun.btrace.compiler.Compiler</argument>
+                        <argument>-d</argument>
+                        <argument>${basedir}/target/classes</argument>
+						<argument>tools/BTraceRayoAgent.java</argument>
+					</arguments>
+				</configuration>
+			</plugin>
+		</plugins>
 	</build>
 </project>
