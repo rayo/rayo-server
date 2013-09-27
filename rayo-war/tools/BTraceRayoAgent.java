@@ -23,6 +23,22 @@ public class BTraceRayoAgent {
                         Atomic.incrementAndGet(ai);
                 }
         }
+        
+        @OnMethod(
+                clazz="/com\\.voxeo\\.moho\\..*/",
+                method="/.*/"
+        )
+        public static void moho(@ProbeClassName String probeClass, @ProbeMethodName String probeMethod) {
+
+                String key = strcat(probeClass, strcat(".",probeMethod));
+                AtomicInteger ai = Collections.get(histo, key);
+                if (ai == null) {
+                        ai = Atomic.newAtomicInteger(1);
+                        Collections.put(histo, key, ai);
+                } else {
+                        Atomic.incrementAndGet(ai);
+                }
+        }
 
         @OnTimer(4000)
         public static void print() {
