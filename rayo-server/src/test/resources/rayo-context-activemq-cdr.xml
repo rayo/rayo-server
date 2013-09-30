@@ -39,11 +39,6 @@
 	<!-- Rayo Statistics Service -->
 	<bean id="rayoStatistics" class="com.rayo.server.RayoStatistics"/>
 
-    <!-- IMS call direction resolver -->
-    <bean id="callDirectionResolver" class="com.rayo.server.ims.DefaultCallDirectionResolver" >
-    	<property name="callManager" ref="callManager" />
-    </bean>
-
 	<!-- Call Actor Factory -->
 	<bean id="callActorFactory" class="com.rayo.server.DefaultCallActorFactory">
 		<property name="fiberFactory" ref="fiberFactory" />
@@ -51,7 +46,6 @@
 		<property name="callStatistics" ref="callStatistics" />
 		<property name="cdrManager" ref="cdrManager" />
 		<property name="callRegistry" ref="callRegistry" />
-		<property name="callDirectionResolver" ref="callDirectionResolver" />
 	</bean>	
 
 	<!-- Call Manager: Responsible for maintaining the Call Registry and creating new CallActors -->
