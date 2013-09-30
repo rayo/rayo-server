@@ -1,7 +1,5 @@
 package com.rayo.core.xml.providers;
 
-import static com.voxeo.utils.Strings.isEmpty;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -18,7 +16,6 @@ import org.dom4j.QName;
 import com.rayo.core.AcceptCommand;
 import com.rayo.core.AnswerCommand;
 import com.rayo.core.AnsweredEvent;
-import com.rayo.core.CallDirection;
 import com.rayo.core.CallRef;
 import com.rayo.core.CallRejectReason;
 import com.rayo.core.ConnectCommand;
@@ -217,9 +214,6 @@ public class RayoProvider extends BaseProvider {
         offer.setFrom(toURI(element.attributeValue("from")));
         offer.setTo(toURI(element.attributeValue("to")));
         String dir = element.attributeValue("direction");
-        if (!isEmpty(dir)) {
-            offer.setDirection(toEnum(CallDirection.class, "direction", element));
-        }
         offer.setHeaders(grabHeaders(element));
 
         return offer;
@@ -726,11 +720,6 @@ public class RayoProvider extends BaseProvider {
         Element root = document.addElement(new QName("offer", RAYO_NAMESPACE));
         root.addAttribute("to", offer.getTo().toString());
         root.addAttribute("from", offer.getFrom().toString());
-        
-        CallDirection direction = offer.getDirection();
-        if(direction != null) {
-            root.addAttribute("direction", direction.toString().toLowerCase());
-        }
         
         addHeaders(offer.getHeaders(), root);
 

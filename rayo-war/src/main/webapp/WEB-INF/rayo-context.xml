@@ -59,13 +59,7 @@
 
 	<!-- Rayo Statistics Service -->
 	<bean id="rayoStatistics" class="com.rayo.server.RayoStatistics"/>
-	
-	<!-- Ringlist coordinator -->
-	<bean id="dialingCoordinator" class="com.rayo.server.DialingCoordinator"/>
-	
-	<!-- IMS call direction resolver -->
-	<bean id="callDirectionResolver" class="com.rayo.server.ims.DefaultCallDirectionResolver" />
-
+		
 	<!-- Call Actor Factory -->
 	<bean id="callActorFactory" class="com.rayo.server.DefaultCallActorFactory">
 		<property name="fiberFactory" ref="fiberFactory" />
@@ -75,8 +69,6 @@
 		<property name="callRegistry" ref="callRegistry" />
 		<property name="mixerManager" ref="mixerManager" />
         <property name="callManager" ref="callManager" />
-        <property name="dialingCoordinator" ref="dialingCoordinator" />
-        <property name="callDirectionResolver" ref="callDirectionResolver"/>
 	</bean>	
 
 	<!-- Call Manager: Responsible for maintaining the Call Registry and creating new CallActors -->

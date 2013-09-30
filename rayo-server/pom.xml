@@ -19,17 +19,6 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.ameche</groupId>
-			<artifactId>ameche-model</artifactId>
-			<version>${ameche.version}</version>
-			<exclusions>
-				<exclusion>
-					<groupId>*</groupId>
-					<artifactId>*</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
 			<groupId>com.voxeo</groupId>
 			<artifactId>vlib-core</artifactId>
 		</dependency>

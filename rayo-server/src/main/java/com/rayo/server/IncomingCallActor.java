@@ -2,17 +2,12 @@ package com.rayo.server;
 
 import static com.voxeo.utils.Objects.iterable;
 
-import java.net.URI;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import com.rayo.core.AcceptCommand;
 import com.rayo.core.AnswerCommand;
-import com.rayo.core.CallDirection;
-import com.rayo.core.ConnectCommand;
 import com.rayo.core.EndEvent.Reason;
 import com.rayo.core.OfferEvent;
 import com.rayo.core.RedirectCommand;
@@ -20,7 +15,6 @@ import com.rayo.core.RejectCommand;
 import com.rayo.core.exception.RecoverableException;
 import com.rayo.server.exception.RayoProtocolException;
 import com.rayo.server.exception.RayoProtocolException.Condition;
-import com.voxeo.logging.Loggerf;
 import com.voxeo.moho.ApplicationContext;
 import com.voxeo.moho.Call;
 import com.voxeo.moho.Endpoint;
@@ -32,8 +26,6 @@ import com.voxeo.moho.sip.SIPCallImpl;
 
 public class IncomingCallActor extends CallActor<IncomingCall> {
 
-	private static final Loggerf logger = Loggerf.getLogger(IncomingCallActor.class);
-	
     public IncomingCallActor(IncomingCall call) {
     	super(call);
     }
@@ -49,9 +41,6 @@ public class IncomingCallActor extends CallActor<IncomingCall> {
         offer.setFrom(call.getInvitor().getURI());
         offer.setTo(call.getInvitee().getURI());
         
-        CallDirection direction = getCallDirectionResolver().resolveDirection(call);
-        offer.setDirection(direction);
-
         Iterator<String> headerNames = call.getHeaderNames();
         for (String headerName : iterable(headerNames)) {
           if (headerName.equalsIgnoreCase("route")) {
@@ -163,33 +152,5 @@ public class IncomingCallActor extends CallActor<IncomingCall> {
         default:
             throw new UnsupportedOperationException("Reason not handled: " + message.getReason());
         }
-    }
-    
-    @Message
-    public void connect(ConnectCommand command) {
-
-    	logger.debug("Received command %s. Actor id %s. Hash: %s", command, getCall().getId(), command.hashCode());
-    	DialingCoordinator dialingCoordinator = getDialingCoordinator();
-    	String ringlistId = dialingCoordinator.prepareRinglist(participant.getId());
-    	
-    	List<URI> destinations = new ArrayList<URI>();
-
-        if(command.getTargets().isEmpty()) {
-            destinations.add(participant.getInvitee().getURI());
-        } else {
-        	destinations.addAll(command.getTargets());
-        }
-        logger.debug("About to execute ringlist with id [%s] to destinations [%s]. Original targets [%s].", 
-        		ringlistId, destinations, command.getTargets());
-                
-        // Extract IMS headers
-        Map<String,String> headers = new HashMap<String, String>();
-
-        if (getCall().getParticipants().length == 0) {
-        	dialingCoordinator.directDial(this, destinations, headers, ringlistId);
-        } else {
-        	dialingCoordinator.bridgeDial(this, destinations, headers, ringlistId);
-        }
-    	logger.debug("Ended command %s. Actor id %s.", command, getCall().getId());
     }
 }

@@ -30,7 +30,6 @@ import com.rayo.core.verb.SayCompleteEvent
 import com.rayo.core.verb.Ssml
 import com.rayo.core.verb.StopCommand
 import com.rayo.core.verb.VerbCompleteEvent
-import com.rayo.server.ims.DefaultCallDirectionResolver
 import com.rayo.server.test.MockCall
 import com.rayo.server.test.MockMediaService
 import com.rayo.server.test.MockSIPFactoryImpl
@@ -66,7 +65,6 @@ public class IntegrationTest {
 
 	private OfferEvent offer
 	private Call mohoCall
-	private DefaultCallDirectionResolver dcdr = new DefaultCallDirectionResolver();
 
 	private CallActor callActor
 	private BlockingQueue<Object> messageQueue = new LinkedBlockingQueue<Object>()
@@ -97,9 +95,6 @@ public class IntegrationTest {
 		offer = poll()
 
 		callActor = callRegistry.get(mohoCall.id)
-
-		dcdr.setCallManager(callManager);
-		callActor.setCallDirectionResolver(dcdr);
 	}
 
 	@After
